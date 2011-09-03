@@ -4,4 +4,6 @@ buoy/build
 *.o
 *.a
 .sconsign*
+*.elf
+*.hex
 
