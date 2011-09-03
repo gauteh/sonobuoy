@@ -1,5 +1,7 @@
-/* Author: Gaute Hope <eg@gaute.vetsj.com>
+/* Author:  Gaute Hope <eg@gaute.vetsj.com>
+ * Date:    2011-09-03
  *
+ * Buoy controller.
  *
  */
 
@@ -9,15 +11,19 @@
 void setup ()
 {
   /* Setting up serial link to computer */
-  delay(3000);
+  delay(1000);
   Serial.begin (9600);
-  delay(2000);
+  delay(10);
   Serial.println ("Buoy ( version " VERSION " ) starting up..");
   Serial.println ("Gaute Hope <eg@gaute.vetsj.com> / 2011");
   
-  delay (1000);
   ad_setup ();
-  delay (1000);
+
+  delay(10);
+  sample_performance_test ();
+
+  sample_performance_test ();
+
 }
 
 void loop ()
@@ -27,7 +33,5 @@ void loop ()
   }
 
   delay (1000);
-
-
 }
 

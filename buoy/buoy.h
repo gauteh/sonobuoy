@@ -1,3 +1,10 @@
+/* Author:  Gaute Hope <eg@gaute.vetsj.com>
+ * Date:    2011-09-03
+ *
+ * Buoy controller header, definitions and conventions.
+ *
+ */
+
 # ifndef BUOY_H
 # define BUOY_H
 

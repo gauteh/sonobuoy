@@ -1,5 +1,6 @@
 /* Author: Gaute Hope <eg@gaute.vetsj.com>
  *
+ * Controls and interfaces the AD7710 over three-wire SPI.
  *
  */
 
@@ -7,8 +8,6 @@
 # define AD7710
 
 # include "buoy.h"
-
-# define BYTES_PER_READ   3
 
 /* PIN setup */
 # define A0     46
@@ -20,7 +19,9 @@
 
 void          configure ();
 void          ad_setup ();
-unsigned long sample ();
+ulong         sample ();
+
+volatile ulong samples = 0;
 
 void ad_setup ()
 {
@@ -88,15 +89,20 @@ void configure ()
   # define CONTROL_24BIT              0b000000001000
   # define CONTROL_DEFAULT            0
 
-  // Notch frequency (12 bits)
-  # define FREQUENCY 326
+  /* Notch frequency (12 bits)
+   *
+   * Range: 19 - 2000L
+   * 19   gives approximately 1000 samples / 970 ms
+   * 2000 gives approximately 1000 samples / 50 s
+   */
+  # define FREQUENCY 19L
 
 
   // Build control bits
   ulong ctb = 0;
 
-  ctb  = (ulong)(CONTROL_24BIT) << 12;
-  ctb += FREQUENCY;
+  ctb  = (ulong) (CONTROL_SELF_CALIBRATION + CONTROL_24BIT) << 12;
+  ctb += (ulong) FREQUENCY;
 
   Serial.print ("[AD7710] Sending configuration: ");
   Serial.println (ctb, BIN);
@@ -108,13 +114,13 @@ void configure ()
     shiftOut (SDATA, SCLK, MSBFIRST, b);
   }
 
-  delay (10);
+  delay (1);
   digitalWrite (nTFS, HIGH);
   digitalWrite (A0, HIGH);
-  delay (10);
+  delay (1);
 
   /* Waiting for calibration to finish */
-  while (digitalRead(nDRDY) == HIGH) delay(10);
+  while (digitalRead(nDRDY) == HIGH) delay(1);
 
   pinMode(SDATA, INPUT);
 
@@ -122,38 +128,39 @@ void configure ()
 
 }
 
-unsigned long sample ()
+/* Get sample from AD, will return latest value even if it has been
+ * read before. Use sample (true) for a blocking version.
+ */
+ulong sample ()
 {
-  unsigned long r = 0;
-
-  byte b;
+  ulong r = 0;
 
   digitalWrite (nRFS, LOW);
   delayMicroseconds(10);
 
+  /* Shift 24 bits = 3 bytes */
+
   int i = 0;
   do {
-    b = shiftIn (SDATA, SCLK, MSBFIRST);
-    r += b;
+    r += shiftIn (SDATA, SCLK, MSBFIRST);
 
     i++;
 
-    if (i < BYTES_PER_READ)
+    if (i < 3)
       r <<= 8;
 
-  } while (i < BYTES_PER_READ);
+  } while (i < 3);
 
-  delay (10);
   digitalWrite (nRFS, HIGH);
 
   return r;
 }
 
-unsigned long verbose_sample ()
+ulong verbose_sample ()
 {
   Serial.print ("[AD7710] Sampling, value: ");
 
-  unsigned long r = sample ();
+  ulong r = sample ();
 
   Serial.print (r, BIN);
   Serial.print ("(");
@@ -162,6 +169,36 @@ unsigned long verbose_sample ()
 
   return r;
 }
+
+ulong sample (bool blocking)
+{
+  if (blocking)
+    while (digitalRead(nDRDY) == HIGH) delayMicroseconds(10);
+
+  return sample ();
+}
+
+void sample_performance_test ()
+{
+  Serial.println ("[AD7710] Sample performance test");
+  Serial.println ("[AD7710] Timing 1000 samples..");
+
+  ulong end = 0;
+  ulong start = micros ();
+
+  for (int i = 1001; i > 0; i--) {
+    while (digitalRead(nDRDY) == HIGH) ; // run in loop until data ready
+    sample ();                           // sample
+  }
+
+  end = micros ();
+  ulong total = (ulong)(end - start) / 1000.0L;
+  
+  Serial.print ("[AD7710] Duration [ms]: ");
+  Serial.println (total);
+}
+
+
 
 # endif
 
