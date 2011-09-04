@@ -234,7 +234,7 @@ void ad_status ()
 
   ulong srate = (ad_samples * 1000) / (millis() - ad_start);
   Serial.print (srate);
-  Serial.print (" [Hz], last value: ");
+  Serial.print (" [Hz], last value: 0x");
   Serial.println (ad_value, HEX);
 
   /* Reset sample rate counter */
