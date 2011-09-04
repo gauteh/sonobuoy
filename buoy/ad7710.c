@@ -160,9 +160,8 @@ ulong ad_sample ()
   ulong r = 0;
 
   digitalWrite (nRFS, LOW);
-  //delayMicroseconds(10);
 
-  /* Shift 24 bits = 3 bytes */
+  /* Shift 24 bits = 3 bytes in from AD serial register */
 
   int i = 0;
   do {
@@ -241,4 +240,6 @@ void ad_status ()
 
 
 # endif
+
+/* vim: set filetype=arduino :  */
 

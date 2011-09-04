@@ -14,3 +14,5 @@ typedef unsigned long ulong;
 
 # endif
 
+/* vim: set filetype=arduino :  */
+

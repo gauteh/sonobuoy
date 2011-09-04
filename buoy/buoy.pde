@@ -15,8 +15,8 @@ void setup ()
   Serial.begin (9600);
   delay(10);
 
-  Serial.println ("[buoy] Buoy Control ( version " VERSION " ) starting up..");
-  Serial.println ("[buoy] Gaute Hope <eg@gaute.vetsj.com> / 2011");
+  Serial.println ("[Buoy] Buoy Control ( version " VERSION " ) starting up..");
+  Serial.println ("[Buoy] by Gaute Hope <eg@gaute.vetsj.com> / <gaute.hope@student.uib.no>  (2011)");
 
   /* Set up devices */
   ad_setup ();
@@ -32,4 +32,6 @@ void loop ()
 
   delay (1000);
 }
+
+/* vim: set filetype=arduino :  */
 
