@@ -3,7 +3,7 @@
  *
  * Interface to the AD7710 over three-wire SPI.
  *
- * Sampling when watching for DRDY interrupts:
+ * Sampling when monitoring for DRDY interrupts:
  *
  *   When monitoring nDRDY for interrupts none of the blocking sample
  *   functions will work since the value will be retrieved immediately
@@ -213,8 +213,8 @@ void ad_sample_performance_test ()
   ulong start = micros ();
 
   for (int i = 1001; i > 0; i--) {
-    while (digitalRead(nDRDY) == HIGH) ; // run in loop until data ready
-    ad_sample ();                           // sample
+    while (digitalRead(nDRDY) == HIGH) ; // wait for DRDY
+    ad_sample ();                        // sample
   }
 
   end = micros ();
@@ -222,6 +222,21 @@ void ad_sample_performance_test ()
 
   Serial.print ("[AD7710] Duration [ms]: ");
   Serial.println (total);
+}
+
+/* Print status message to Serial 0 */
+void ad_status ()
+{
+  Serial.print ("[AD7710] [Status] Sample rate: ");
+
+  ulong srate = (ad_samples * 1000) / (millis() - ad_start);
+  Serial.print (srate);
+  Serial.print (" [Hz], last value: ");
+  Serial.println (ad_value, HEX);
+
+  /* Reset sample rate counter */
+  ad_samples = 0;
+  ad_start   = millis ();
 }
 
 
