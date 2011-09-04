@@ -100,7 +100,7 @@ void ad_configure ()
    *
    */
 
-  Serial.print ("[AD7710] Configure word-length, notch frequency and activate self-calibration..: ");
+  Serial.println ("[AD7710] Configure word-length, notch frequency and activate self-calibration.. ");
 
   delay(100);
   digitalWrite (nTFS, LOW);
@@ -129,6 +129,7 @@ void ad_configure ()
   ctb += (ulong) FREQUENCY;
 
 
+  Serial.print ("[AD7710] Writing to control register: ");
   Serial.println (ctb, BIN);
 
 
@@ -160,6 +161,9 @@ ulong ad_sample ()
   ulong r = 0;
 
   digitalWrite (nRFS, LOW);
+
+  // TODO: Check timing requirements from RFS HIGH to data ready.
+  //       And check if that works in interrupt mode..
 
   /* Shift 24 bits = 3 bytes in from AD serial register */
 
