@@ -144,7 +144,7 @@ void ad_configure ()
   delay (1);
 
   /* Waiting for calibration to finish */
-  while (digitalRead(nDRDY) == HIGH) delay(1);
+  while (digitalRead(nDRDY)) delay(1);
 
   pinMode(SDATA, INPUT);
 
@@ -197,7 +197,7 @@ ulong ad_sample_verbose ()
 ulong ad_sample (bool blocking)
 {
   if (blocking)
-    while (digitalRead(nDRDY) == HIGH) delayMicroseconds(1);
+    while (digitalRead(nDRDY)) delayMicroseconds(1);
 
   return ad_sample ();
 }
@@ -212,8 +212,8 @@ void ad_sample_performance_test ()
   ulong start = micros ();
 
   for (int i = 1001; i > 0; i--) {
-    while (digitalRead(nDRDY) == HIGH) ; // wait for DRDY
-    ad_sample ();                        // sample
+    while (digitalRead(nDRDY)) ;  // wait for DRDY
+    ad_sample ();                 // sample
   }
 
   end = micros ();
