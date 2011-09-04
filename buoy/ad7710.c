@@ -1,6 +1,14 @@
-/* Author: Gaute Hope <eg@gaute.vetsj.com>
+/* Author:  Gaute Hope <eg@gaute.vetsj.com>
+ * Date:    2011-09-03
  *
- * Controls and interfaces the AD7710 over three-wire SPI.
+ * Interface to the AD7710 over three-wire SPI.
+ *
+ * Sampling when watching for DRDY interrupts:
+ *
+ *   When monitoring nDRDY for interrupts none of the blocking sample
+ *   functions will work since the value will be retrieved immediately
+ *   as DRDY goes LOW and returns HIGH again before the blocking sample
+ *   polls DRDY again. That means a call to those will _block forever_.
  *
  */
 
@@ -11,17 +19,23 @@
 
 /* PIN setup */
 # define A0     46
-# define nDRDY  47
+# define nDRDY  2
+# define nDRDY_INTERRUPT 0
 # define nRFS   44
 # define nTFS   45
 # define SCLK   52
 # define SDATA  50
 
-void          configure ();
+void          ad_configure ();
 void          ad_setup ();
-ulong         sample ();
+void          ad_drdy ();
+ulong         ad_sample ();
+ulong         ad_sample (bool);
 
-volatile ulong samples = 0;
+volatile  ulong   ad_samples = 0;
+volatile  ulong   ad_value   = 0; /* Last sampled value */
+
+ulong     ad_start = 0; // Starting time for sample
 
 void ad_setup ()
 {
@@ -35,56 +49,66 @@ void ad_setup ()
   pinMode (SCLK, OUTPUT);
   pinMode (SDATA, INPUT);
 
-  /* Configure AD */
-  digitalWrite (A0, HIGH);
-  digitalWrite (nRFS, HIGH);
-  digitalWrite (nTFS, HIGH);
+  ad_configure ();
 
+  ad_start = millis ();
+
+  /* Configure interrupt */
+  attachInterrupt (nDRDY_INTERRUPT, ad_drdy, LOW);
+}
+
+/* Will be run on nDRDY falling */
+void ad_drdy ()
+{
+  ad_value = ad_sample ();
+  ad_samples++;
+}
+
+void ad_read_control_register ()
+{
+  /* Note:  If output register is ready, it seems like setting A0 LOW
+   *        has no effect on changing output to control register
+   *        before one READ cycle has been performed and output register
+   *        has been purged.
+   *
+   *        TODO: A single pre-sample / or double sample should fix that.
+   */
 
   /* Get control register */
   digitalWrite (A0, LOW);
   delay(1);
 
   Serial.print ("[AD7710] Initial control register: ");
-  Serial.println (sample (), BIN);
-
-  digitalWrite (A0, HIGH);
-  delay (1);
-
-  configure ();
-
-  /* Get control register */
-  digitalWrite (A0, BIN);
-  delay(1);
-
-  Serial.print ("[AD7710] Configured control register: ");
-  Serial.println (sample (), BIN);
+  Serial.println (ad_sample (), BIN);
 
   digitalWrite (A0, HIGH);
   delay (1);
 }
 
-void configure ()
+void ad_configure ()
 {
   /* Configure AD */
   pinMode (SDATA, OUTPUT);
+
   digitalWrite (A0, HIGH);
   digitalWrite (nRFS, HIGH);
   digitalWrite (nTFS, HIGH);
 
-  /* Activate self-calibration */
-  Serial.println ("[AD7710] Configure and activate self-calibration..");
+  /*
+   * Activate 24 BIT words, self-calibration and set up notch
+   * frequency.
+   *
+   */
+
+  Serial.print ("[AD7710] Configure word-length, notch frequency and activate self-calibration..: ");
 
   delay(100);
   digitalWrite (nTFS, LOW);
   digitalWrite (A0, LOW);
   delay (100);
 
-  // Self-calibration mode:
-  // Control:   0b001 000 0 0 1 0 0 0
-  // Frequency: 2000 (range 19 to 2000 decimal)
+  /* Configuration masks (12 bits) */
 
-  // Configuration masks (12 bits)
   # define CONTROL_SELF_CALIBRATION   0b001000000000
   # define CONTROL_24BIT              0b000000001000
   # define CONTROL_DEFAULT            0
@@ -98,13 +122,13 @@ void configure ()
   # define FREQUENCY 19L
 
 
-  // Build control bits
+  // Build control configuration, total of 24 bits.
   ulong ctb = 0;
 
   ctb  = (ulong) (CONTROL_SELF_CALIBRATION + CONTROL_24BIT) << 12;
   ctb += (ulong) FREQUENCY;
 
-  Serial.print ("[AD7710] Sending configuration: ");
+
   Serial.println (ctb, BIN);
 
 
@@ -125,18 +149,18 @@ void configure ()
   pinMode(SDATA, INPUT);
 
   Serial.println ("[AD7710] Calibration finished, ready for normal operation.");
-
 }
 
-/* Get sample from AD, will return latest value even if it has been
+/*
+ * Get sample from AD, will return latest value even if it has been
  * read before. Use sample (true) for a blocking version.
  */
-ulong sample ()
+ulong ad_sample ()
 {
   ulong r = 0;
 
   digitalWrite (nRFS, LOW);
-  delayMicroseconds(10);
+  //delayMicroseconds(10);
 
   /* Shift 24 bits = 3 bytes */
 
@@ -156,11 +180,11 @@ ulong sample ()
   return r;
 }
 
-ulong verbose_sample ()
+ulong ad_sample_verbose ()
 {
   Serial.print ("[AD7710] Sampling, value: ");
 
-  ulong r = sample ();
+  ulong r = ad_sample ();
 
   Serial.print (r, BIN);
   Serial.print ("(");
@@ -170,15 +194,17 @@ ulong verbose_sample ()
   return r;
 }
 
-ulong sample (bool blocking)
+/* Version of sample that waits for DRDY */
+ulong ad_sample (bool blocking)
 {
   if (blocking)
-    while (digitalRead(nDRDY) == HIGH) delayMicroseconds(10);
+    while (digitalRead(nDRDY) == HIGH) delayMicroseconds(1);
 
-  return sample ();
+  return ad_sample ();
 }
 
-void sample_performance_test ()
+/* Performance test of sampling */
+void ad_sample_performance_test ()
 {
   Serial.println ("[AD7710] Sample performance test");
   Serial.println ("[AD7710] Timing 1000 samples..");
@@ -188,16 +214,15 @@ void sample_performance_test ()
 
   for (int i = 1001; i > 0; i--) {
     while (digitalRead(nDRDY) == HIGH) ; // run in loop until data ready
-    sample ();                           // sample
+    ad_sample ();                           // sample
   }
 
   end = micros ();
   ulong total = (ulong)(end - start) / 1000.0L;
-  
+
   Serial.print ("[AD7710] Duration [ms]: ");
   Serial.println (total);
 }
-
 
 
 # endif

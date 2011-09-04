@@ -14,23 +14,26 @@ void setup ()
   delay(1000);
   Serial.begin (9600);
   delay(10);
-  Serial.println ("Buoy ( version " VERSION " ) starting up..");
-  Serial.println ("Gaute Hope <eg@gaute.vetsj.com> / 2011");
+  Serial.println ("[BUOY] Buoy Control ( version " VERSION " ) starting up..");
+  Serial.println ("[BUOY] Gaute Hope <eg@gaute.vetsj.com> / 2011");
   
   ad_setup ();
 
   delay(10);
-  sample_performance_test ();
-
-  sample_performance_test ();
-
 }
 
 void loop ()
 {
-  if (digitalRead(nDRDY) == LOW) {
-    verbose_sample ();
-  }
+  Serial.print ("[BUOY] [Status] AD sample rate: ");
+
+  ulong srate = (ad_samples * 1000) / (millis() - ad_start);
+  Serial.print (srate);
+  Serial.print (" [Hz], last value: ");
+  Serial.println (ad_value, HEX);
+
+  /* Reset sample rate counter */
+  ad_samples = 0;
+  ad_start   = millis ();
 
   delay (1000);
 }
