@@ -10,8 +10,13 @@
 
 # define VERSION "0.1.0"
 
+# define GREETING \
+"Buoy Control ( version " VERSION " ) starting up..\n" \
+"by Gaute Hope <eg@gaute.vetsj.com> / <gaute.hope@student.uib.no>  (2011)"
+
 typedef unsigned long ulong;
 typedef unsigned int  uint;
+
 
 # endif
 

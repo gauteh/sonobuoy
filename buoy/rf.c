@@ -1,8 +1,7 @@
 /* Author:  Gaute Hope <eg@gaute.vetsj.com>
  * Date:    2011-09-07
  *
- * Communication protocol and implementation to Synapse RF
- * chip.
+ * Communication protocol and to Synapse RF Wireless.
  *
  */
 
