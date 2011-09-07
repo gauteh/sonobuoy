@@ -1,18 +1,20 @@
 /* Author:  Gaute Hope <eg@gaute.vetsj.com>
  * Date:    2011-09-05
  *
- * Interface to the LINX RXM GPS over UART.
+ * Interface to standard NMEA GPS.
  *
  *
  */
 
-# ifndef LINXGPS
-# define LINXGPS
+# ifndef GPS
+# define GPS
 
 # include "buoy.h"
 
 # define GPS_BUF_LEN  1024
 # define TELEGRAM_LEN 80
+
+# define GPS_BAUDRATE 4800
 
 char gps_buf[TELEGRAM_LEN + 2];
 int  gps_buf_pos   = 0;
@@ -23,7 +25,7 @@ char gps_rmc[TELEGRAM_LEN];
 void gps_setup ()
 {
   Serial.println ("[GPS] Setting up GPS serial interface (Serial1)..");
-  Serial1.begin (9600);
+  Serial1.begin (GPS_BAUDRATE);
 
   gps_buf[0] = 0;
   gps_rmc[0] = 0;
@@ -41,6 +43,7 @@ void gps_loop ()
 
     if (((char)c) == '$') {
       gps_buf[gps_buf_pos] = 0;
+      Serial.println (gps_buf);
       for (int i = 0; i < gps_buf_pos; i++)
       {
         strcpy (gps_rmc, gps_buf);

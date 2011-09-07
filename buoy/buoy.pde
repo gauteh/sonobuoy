@@ -19,7 +19,7 @@ void setup ()
   delay(10);
 
   /* Setting up serial link to RF200 */
-  Serial2.begin (9600);
+  Serial2.begin (38400);
 
   Serial.println ("[Buoy] Buoy Control ( version " VERSION " ) starting up..");
   Serial.println ("[Buoy] by Gaute Hope <eg@gaute.vetsj.com> / <gaute.hope@student.uib.no>  (2011)");
