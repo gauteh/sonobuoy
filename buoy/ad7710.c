@@ -228,14 +228,15 @@ void ad_sample_performance_test ()
 }
 
 /* Print status message to Serial 0 */
-void ad_status ()
+void ad_status (HardwareSerial s)
 {
-  Serial.print ("[AD7710] [Status] Sample rate: ");
+  s.print ("[AD7710] [Status] Sample rate: ");
 
   ulong srate = (ad_samples * 1000) / (millis() - ad_start);
-  Serial.print (srate);
-  Serial.print (" [Hz], last value: 0x");
-  Serial.println (ad_value, HEX);
+  s.print (srate);
+  s.print (" [Hz], last value: 0x");
+  s.print (ad_value, HEX);
+  s.println ("$");
 
   /* Reset sample rate counter */
   ad_samples = 0;

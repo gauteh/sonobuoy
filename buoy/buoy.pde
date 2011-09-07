@@ -7,6 +7,9 @@
 
 # include "buoy.h"
 # include "ad7710.c"
+# include "linx_rxm_gps.c"
+
+ulong laststatus = 0;
 
 void setup ()
 {
@@ -15,11 +18,15 @@ void setup ()
   Serial.begin (9600);
   delay(10);
 
+  /* Setting up serial link to RF200 */
+  Serial2.begin (9600);
+
   Serial.println ("[Buoy] Buoy Control ( version " VERSION " ) starting up..");
   Serial.println ("[Buoy] by Gaute Hope <eg@gaute.vetsj.com> / <gaute.hope@student.uib.no>  (2011)");
 
   /* Set up devices */
   ad_setup ();
+  gps_setup ();
 
   /* Let devices settle */
   delay(10);
@@ -27,10 +34,21 @@ void setup ()
 
 void loop ()
 {
-  /* Print AD7710 status */
-  ad_status ();
 
-  delay (1000);
+  if ((millis () - laststatus) > 1000) {
+    /* Print AD7710 status */
+    ad_status (Serial);
+    ad_status (Serial2);
+
+    gps_status (Serial);
+    gps_status (Serial2);
+    
+    laststatus = millis ();
+  }
+
+  gps_loop ();
+
+  delay(1);
 }
 
 /* vim: set filetype=arduino :  */
