@@ -16,9 +16,15 @@
 
 # define RF_BUFLEN 1024
 
-uint gen_checksum (char, int);
-char * sgen_checksum (char, int);
-bool test_checksum (char, int);
+/* Format for printing checksum and macro for appending checksum
+ * to NULL terminated buffer with string encapsulated in $ and *.
+ */
+# define F_CSUM "%lX02"
+# define APPEND_CSUM(buf) sprintf(&buf[strlen(buf)], F_CSUM, \
+                                  gen_checksum(buf))
+
+uint gen_checksum (char *);
+bool test_checksum (char *);
 void rf_setup ();
 void rf_send_status ();
 void rf_ad_status ();
@@ -41,7 +47,7 @@ void rf_setup ()
  *  - STA   System status
  *
  * After * checksum is computed as XOR of all values
- * between, not including, $ and *. Two hexadecimal digits.
+ * between, and not including, $ and *. Two hexadecimal digits.
  *
  */
 
@@ -56,9 +62,10 @@ void rf_ad_status ()
   int len = 4;
 
   // Format:
-  // $AD,S,[sample rate],[lastvalue]*CS
+  // $AD,S,[sample rate],[value]*CS
   char buf[RF_BUFLEN];
-  sprintf (buf, "$AD,R,%X, %u,*", ad_value);
+  sprintf (buf, "$AD,R,%lu,%lX,*", ad_sample_rate (), ad_value);
+  APPEND_CSUM(buf);
 
   RF_Serial.println(buf);
 }
@@ -69,28 +76,26 @@ void rf_gps_status ()
 }
 
 
-uint gen_checksum (char *buf, int len)
+uint gen_checksum (char *buf)
 {
-  uint csum = 0;
+/* Generate checksum for NULL terminated string
+ * (skipping first and last char) */
 
-  for (int i = 0; i < len; i++)
+  uint csum = 0;
+  int len = strlen(buf);
+
+  for (int i = 1; i < (len-1); i++)
     csum = csum ^ (uint)buf[i];
 
   return csum;
 }
 
-uint sgen_checksum (char *buf, int len, char *out)
-{
-  uint csum = gen_checksum (buf, len);
-  sprintf (out, "%X%X", csum);
-  return csum;
-}
-
-bool test_checksum (char *buf, int len)
+bool test_checksum (char *buf)
 {
   /* Input: String including $ and * with HEX decimal checksum
-   *        to test.
+   *        to test. NULL terminated.
    */
+  int len = strlen(buf);
 
   char ccsum[2] = { buf[len-2], buf[len-1] };
   uint csum = 0;
