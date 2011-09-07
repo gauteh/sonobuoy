@@ -31,6 +31,7 @@ void          ad_setup ();
 void          ad_drdy ();
 ulong         ad_sample ();
 ulong         ad_sample (bool);
+ulong         ad_sample_rate ();
 
 volatile  ulong   ad_samples = 0;
 volatile  ulong   ad_value   = 0; /* Last sampled value */
@@ -232,15 +233,28 @@ void ad_status (HardwareSerial s)
 {
   s.print ("[AD7710] [Status] Sample rate: ");
 
-  ulong srate = (ad_samples * 1000) / (millis() - ad_start);
-  s.print (srate);
+  s.print (ad_sample_rate ());
   s.print (" [Hz], last value: 0x");
   s.print (ad_value, HEX);
   s.println ("$");
 
+}
+
+/* Calculate sample rate, resets counter */
+ulong ad_sample_rate ()
+{
+  ulong r =  (ad_samples * 1000) / (millis () - ad_start);
+
   /* Reset sample rate counter */
   ad_samples = 0;
   ad_start   = millis ();
+
+  return r;
+}
+
+ulong ad_get_value ()
+{
+  return ad_value;
 }
 
 

@@ -7,26 +7,27 @@
 
 # include "buoy.h"
 # include "ad7710.c"
-# include "linx_rxm_gps.c"
+# include "gps.c"
+# include "rf.c"
 
 ulong laststatus = 0;
 
 void setup ()
 {
   /* Setting up serial link to computer */
+  /*
   delay(1000);
   Serial.begin (9600);
   delay(10);
 
-  /* Setting up serial link to RF200 */
-  Serial2.begin (38400);
-
   Serial.println ("[Buoy] Buoy Control ( version " VERSION " ) starting up..");
   Serial.println ("[Buoy] by Gaute Hope <eg@gaute.vetsj.com> / <gaute.hope@student.uib.no>  (2011)");
+  */
 
   /* Set up devices */
   ad_setup ();
   gps_setup ();
+  rf_setup ();
 
   /* Let devices settle */
   delay(10);
@@ -37,14 +38,15 @@ void loop ()
 
   if ((millis () - laststatus) > 1000) {
     /* Print AD7710 status */
-    ad_status (Serial);
-    ad_status (Serial2);
+    //ad_status (Serial);
+    //gps_status (Serial);
 
-    gps_status (Serial);
-    gps_status (Serial2);
+    /* Send status to RF */
+    rf_send_status ();
     
     laststatus = millis ();
   }
+
 
   gps_loop ();
 
