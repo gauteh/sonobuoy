@@ -1,7 +1,7 @@
 /* Author:  Gaute Hope <eg@gaute.vetsj.com>
  * Date:    2011-09-07
  *
- * Communication protocol and to Synapse RF Wireless.
+ * Communication protocol to Synapse RF Wireless.
  *
  */
 
@@ -24,6 +24,11 @@ typedef enum _RF_AD_MESSAGE {
   AD_STATUS = 0,
   AD_SAMPLE,
 } RF_AD_MESSAGE;
+
+typedef enum _RF_GPS_MESSAGE {
+  GPS_STATUS = 0,
+  GPS_POSITION,
+} RF_GPS_MESSAGE;
 
 uint gen_checksum (char *);
 bool test_checksum (char *);

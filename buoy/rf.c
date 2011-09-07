@@ -1,7 +1,7 @@
 /* Author:  Gaute Hope <eg@gaute.vetsj.com>
  * Date:    2011-09-07
  *
- * Communication protocol and to Synapse RF Wireless.
+ * Communication protocol to Synapse RF Wireless.
  *
  */
 
