@@ -5,29 +5,11 @@
  *
  */
 
-# ifndef RF
-# define RF
+# ifndef RF_C
+# define RF_C
 
 # include "buoy.h"
-
-# define RF_BAUDRATE 38400
-# define RF_Serial Serial2
-
-# define RF_BUFLEN 1024
-
-/* Format for printing checksum and macro for appending checksum
- * to NULL terminated buffer with string encapsulated in $ and *.
- */
-# define F_CSUM "%lX02"
-# define APPEND_CSUM(buf) sprintf(&buf[strlen(buf)], F_CSUM, \
-                                  gen_checksum(buf))
-
-uint gen_checksum (char *);
-bool test_checksum (char *);
-void rf_setup ();
-void rf_send_status ();
-void rf_ad_status ();
-void rf_gps_status ();
+# include "rf.h"
 
 void rf_setup ()
 {
@@ -52,18 +34,25 @@ void rf_setup ()
 
 void rf_send_status ()
 {
-  rf_ad_status ();
+  rf_ad_message (AD_STATUS);
   rf_gps_status ();
 }
 
-void rf_ad_status ()
-{
-  int len = 4;
 
-  // Format:
-  // $AD,S,[sample rate],[value]*CS
+void rf_ad_message (RF_AD_MESSAGE messagetype)
+{
   char buf[RF_BUFLEN];
-  sprintf (buf, "$AD,R,%lu,%lX,*", ad_sample_rate (), ad_value);
+
+  switch (messagetype)
+  {
+    case AD_STATUS:
+      // $AD,S,[sample rate],[value]*CS
+      sprintf (buf, "$AD,R,%lu,0x%lX,*", ad_sample_rate (), ad_value);
+
+      break;
+    default: return;
+  }
+
   APPEND_CSUM(buf);
 
   RF_Serial.println(buf);
@@ -96,9 +85,8 @@ bool test_checksum (char *buf)
    */
   int len = strlen(buf);
 
-  char ccsum[2] = { buf[len-2], buf[len-1] };
   uint csum = 0;
-  sscanf (ccsum, "%x%x", &csum);
+  sscanf (&(buf[len-2]), F_CSUM, &csum);
 
   ulong tsum = 0;
   for (int i = 1; i < (len - 3); i++)
@@ -108,4 +96,6 @@ bool test_checksum (char *buf)
 }
 
 # endif
+
+/* vim: set filetype=arduino :  */
 
