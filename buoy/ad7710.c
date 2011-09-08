@@ -40,8 +40,6 @@ ulong     ad_start = 0; // Starting time for sample
 
 void ad_setup ()
 {
-  Serial.println ("[AD7710] Setting up AD7710..");
-
   /* Setting up pins */
   pinMode (nDRDY, INPUT);
   pinMode (A0, OUTPUT);

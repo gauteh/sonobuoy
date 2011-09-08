@@ -16,7 +16,7 @@
 /* Format for printing checksum and macro for appending checksum
  * to NULL terminated buffer with string encapsulated in $ and *.
  */
-# define F_CSUM "%02lX"
+# define F_CSUM "%02X"
 # define APPEND_CSUM(buf) sprintf(&buf[strlen(buf)], F_CSUM, \
                                   gen_checksum(buf))
 
@@ -30,12 +30,13 @@ typedef enum _RF_GPS_MESSAGE {
   GPS_POSITION,
 } RF_GPS_MESSAGE;
 
-uint gen_checksum (char *);
+
+byte gen_checksum (char *);
 bool test_checksum (char *);
 void rf_setup ();
 void rf_send_status ();
 void rf_ad_message (RF_AD_MESSAGE);
-void rf_gps_status ();
+void rf_gps_message (RF_GPS_MESSAGE);
 
 # endif
 

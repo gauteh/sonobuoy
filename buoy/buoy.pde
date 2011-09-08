@@ -5,6 +5,9 @@
  *
  */
 
+# include <stdlib.h>
+# include <stdio.h>
+
 # include "buoy.h"
 # include "ad7710.c"
 # include "gps.c"

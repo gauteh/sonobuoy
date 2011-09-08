@@ -8,8 +8,12 @@
 # ifndef RF_C
 # define RF_C
 
+# include <stdio.h>
+# include <stdlib.h>
+
 # include "buoy.h"
 # include "rf.h"
+# include "util.c"
 
 void rf_setup ()
 {
@@ -35,7 +39,7 @@ void rf_setup ()
 void rf_send_status ()
 {
   rf_ad_message (AD_STATUS);
-  rf_gps_status ();
+  rf_gps_message (GPS_STATUS);
 }
 
 
@@ -47,33 +51,52 @@ void rf_ad_message (RF_AD_MESSAGE messagetype)
   {
     case AD_STATUS:
       // $AD,S,[sample rate],[value]*CS
-      sprintf (buf, "$AD,R,%lu,0x%lX,*", ad_sample_rate (), ad_value);
-
+      sprintf (buf, "$AD,S,%lu,0x%lX*", ad_sample_rate (), ad_value);
       break;
-    default: return;
+
+    default:
+      return;
   }
 
-  APPEND_CSUM(buf);
+  APPEND_CSUM (buf);
 
-  RF_Serial.println(buf);
+  RF_Serial.println (buf);
 }
 
-void rf_gps_status ()
+# define FLOAT(n) (int)n, abs((n - (int)n) * 100)
+
+void rf_gps_message (RF_GPS_MESSAGE messagetype)
 {
-  gps_status (RF_Serial);
+  char buf[RF_BUFLEN];
+
+  switch (messagetype)
+  {
+    case GPS_STATUS:
+      // $GPS,S,[lasttype],[telegrams received],[lasttelegram],Lat,Lon,Time,Valid*CS
+      // Valid: Y = Yes, N = No
+      sprintf (buf, "$GPS,S,%d,%d,%s%c,%s%c,%lu,%c*", gps_data.lasttype, gps_data.received, gps_data.latitude, (gps_data.north ? 'N' : 'S'), gps_data.longitude, (gps_data.east ? 'E' : 'W'), gps_data.time, (gps_data.valid ? 'Y' : 'N'));
+
+      break;
+
+    default:
+      return;
+  }
+
+  APPEND_CSUM (buf);
+  RF_Serial.println (buf);
 }
 
 
-uint gen_checksum (char *buf)
+byte gen_checksum (char *buf)
 {
 /* Generate checksum for NULL terminated string
  * (skipping first and last char) */
 
-  uint csum = 0;
+  byte csum = 0;
   int len = strlen(buf);
 
   for (int i = 1; i < (len-1); i++)
-    csum = csum ^ (uint)buf[i];
+    csum = csum ^ ((byte)buf[i]);
 
   return csum;
 }
