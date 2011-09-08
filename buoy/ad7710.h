@@ -15,6 +15,8 @@
 # ifndef AD7710_H
 # define AD7710_H
 
+# include "buoy.h"
+
 extern volatile ulong ad_value;
 
 ulong ad_get_value ();
