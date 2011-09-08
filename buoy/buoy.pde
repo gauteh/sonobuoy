@@ -9,9 +9,9 @@
 # include <stdio.h>
 
 # include "buoy.h"
-# include "ad7710.c"
-# include "gps.c"
-# include "rf.c"
+//# include "ad7710.c"
+//# include "gps.c"
+//# include "rf.c"
 
 ulong laststatus = 0;
 

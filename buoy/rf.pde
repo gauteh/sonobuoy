@@ -13,7 +13,7 @@
 
 # include "buoy.h"
 # include "rf.h"
-# include "util.c"
+# include "ad7710.h"
 
 void rf_setup ()
 {

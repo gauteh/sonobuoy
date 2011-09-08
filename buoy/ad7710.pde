@@ -16,6 +16,7 @@
 # define AD7710
 
 # include "buoy.h"
+# include "ad7710.h"
 
 /* PIN setup */
 # define A0     46
