@@ -28,17 +28,17 @@ typedef enum _GPS_TELEGRAM {
 
 typedef struct _GPS_DATA {
   GPS_TELEGRAM lasttype;
-  char  lasttelegram[TELEGRAM_LEN];
-  int   received; /* Received telegrams */
-  bool  valid;
-  char latitude[12];
-  bool  north;    /* true = Latitude is north aligned, false = south */
-  char longitude[12];
-  bool  east;     /* true = Longitude is east aligned, false = south */
-  ulong time;
-  float speedoverground;
-  float courseoverground; /* True north */
-  int   date;
+  char    lasttelegram[TELEGRAM_LEN];
+  int     received; /* Received telegrams */
+  bool    valid;
+  char    latitude[12];
+  bool    north;    /* true = Latitude is north aligned, false = south */
+  char    longitude[12];
+  bool    east;     /* true = Longitude is east aligned, false = south */
+  ulong   time;
+  char    speedoverground[6];
+  char    courseoverground[6]; /* True north */
+  int     date;
 } GPS_DATA;
 
 char gps_buf[TELEGRAM_LEN + 2];
@@ -159,15 +159,19 @@ void gps_parse ()
                 break;
 
               case 7:
-                sscanf (token, "%lu", &(gps_data.speedoverground));
+                strcpy (gps_data.speedoverground, token);
                 break;
 
               case 8:
-                sscanf (token, "%lu", &(gps_data.courseoverground));
+                strcpy (gps_data.courseoverground, token);
                 break;
 
               case 9:
-                /* Magnetic declination not supported by device */
+                sscanf (token, "%d", &(gps_data.date));
+                break;
+
+              case 10: /* Magnetic declination not supported by device */
+
               default:
                 break;
             }
