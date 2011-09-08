@@ -38,8 +38,22 @@ volatile  ulong   ad_value   = 0; /* Last sampled value */
 
 ulong     ad_start = 0; // Starting time for sample
 
+
+/*
+# define AD_QUEUE_LENGTH 10
+volatile  ulong   ad_queue[AD_QUEUE_LENGTH];
+volatile  int     ad_qposition;
+*/
+
 void ad_setup ()
 {
+  /*
+  for (int i = 0; i < AD_QUEUE_LENGTH; i++)
+    ad_queue[i] = 0;
+
+  ad_qposition = 0;
+  */
+
   /* Setting up pins */
   pinMode (nDRDY, INPUT);
   pinMode (A0, OUTPUT);
@@ -47,6 +61,7 @@ void ad_setup ()
   pinMode (nTFS, OUTPUT);
   pinMode (SCLK, OUTPUT);
   pinMode (SDATA, INPUT);
+
 
   ad_configure ();
 
@@ -61,6 +76,9 @@ void ad_drdy ()
 {
   ad_value = ad_sample ();
   ad_samples++;
+  //ad_qposition++;
+
+  //if (ad_qposition >= AD_QUEUE_LENGTH) ad_qposition = 0;
 }
 
 void ad_read_control_register ()
