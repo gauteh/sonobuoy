@@ -42,7 +42,10 @@ void rf_send_status ()
 {
   rf_ad_message (AD_STATUS);
   rf_gps_message (GPS_STATUS);
-  rf_send_debug ("Testing..");
+
+  char buf[RF_BUFLEN];
+  sprintf(buf, "AD queue postion: %d", ad_qposition);
+  rf_send_debug (buf);
 }
 
 void rf_send_debug (const char * msg)

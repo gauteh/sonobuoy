@@ -19,6 +19,11 @@
 
 extern volatile ulong ad_value;
 
+# define AD_QUEUE_LENGTH 1000 
+extern volatile int   ad_qposition;
+extern volatile ulong ad_queue[];
+
+
 void ad_setup ();
 
 ulong ad_get_value ();

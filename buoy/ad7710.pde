@@ -39,21 +39,15 @@ volatile  ulong   ad_value   = 0; /* Last sampled value */
 
 ulong     ad_start = 0; // Starting time for sample
 
-
-/*
-# define AD_QUEUE_LENGTH 10
 volatile  ulong   ad_queue[AD_QUEUE_LENGTH];
 volatile  int     ad_qposition;
-*/
 
 void ad_setup ()
 {
-  /*
   for (int i = 0; i < AD_QUEUE_LENGTH; i++)
     ad_queue[i] = 0;
 
   ad_qposition = 0;
-  */
 
   /* Setting up pins */
   pinMode (nDRDY, INPUT);
@@ -77,9 +71,11 @@ void ad_drdy ()
 {
   ad_value = ad_sample ();
   ad_samples++;
-  //ad_qposition++;
 
-  //if (ad_qposition >= AD_QUEUE_LENGTH) ad_qposition = 0;
+  ad_queue[ad_qposition] = ad_value;
+  ad_qposition++;
+
+  if (ad_qposition >= AD_QUEUE_LENGTH) ad_qposition = 0;
 }
 
 void ad_read_control_register ()
@@ -96,8 +92,8 @@ void ad_read_control_register ()
   digitalWrite (A0, LOW);
   delay(1);
 
-  Serial.print ("[AD7710] Initial control register: ");
-  Serial.println (ad_sample (), BIN);
+  //Serial.print ("[AD7710] Initial control register: ");
+  //Serial.println (ad_sample (), BIN);
 
   digitalWrite (A0, HIGH);
   delay (1);
@@ -118,7 +114,7 @@ void ad_configure ()
    *
    */
 
-  Serial.println ("[AD7710] Configure word-length, notch frequency and activate self-calibration.. ");
+  //Serial.println ("[AD7710] Configure word-length, notch frequency and activate self-calibration.. ");
 
   delay(100);
   digitalWrite (nTFS, LOW);
@@ -147,8 +143,10 @@ void ad_configure ()
   ctb += (ulong) FREQUENCY;
 
 
+  /*
   Serial.print ("[AD7710] Writing to control register: ");
   Serial.println (ctb, BIN);
+  */
 
 
   for (int i = 2; i >= 0; i--) {
@@ -167,7 +165,7 @@ void ad_configure ()
 
   pinMode(SDATA, INPUT);
 
-  Serial.println ("[AD7710] Calibration finished, ready for normal operation.");
+  //Serial.println ("[AD7710] Calibration finished, ready for normal operation.");
 }
 
 /*
@@ -197,20 +195,6 @@ ulong ad_sample ()
   } while (i < 3);
 
   digitalWrite (nRFS, HIGH);
-
-  return r;
-}
-
-ulong ad_sample_verbose ()
-{
-  Serial.print ("[AD7710] Sampling, value: ");
-
-  ulong r = ad_sample ();
-
-  Serial.print (r, BIN);
-  Serial.print ("(");
-  Serial.print (r, HEX);
-  Serial.println (")");
 
   return r;
 }
@@ -245,18 +229,6 @@ void ad_sample_performance_test ()
   Serial.println (total);
 }
 
-/* Print status message to Serial 0 */
-void ad_status (HardwareSerial s)
-{
-  s.print ("[AD7710] [Status] Sample rate: ");
-
-  s.print (ad_sample_rate ());
-  s.print (" [Hz], last value: 0x");
-  s.print (ad_value, HEX);
-  s.println ("$");
-
-}
-
 /* Calculate sample rate, resets counter */
 ulong ad_sample_rate ()
 {
@@ -273,7 +245,6 @@ ulong ad_get_value ()
 {
   return ad_value;
 }
-
 
 # endif
 
