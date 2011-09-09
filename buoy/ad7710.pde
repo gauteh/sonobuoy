@@ -97,6 +97,8 @@ ulong ad_read_control_register ()
   digitalWrite (A0, LOW);
   delay(1);
 
+  ad_sample (true); // Empty output register (see above) [UNTESTED]
+
   ulong r = ad_sample (true);
 
   digitalWrite (A0, HIGH);
