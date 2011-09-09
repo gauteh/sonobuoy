@@ -43,5 +43,8 @@ ulong         ad_get_value ();
 ulong         ad_sample_rate ();
 ulong         ad_read_control_register ();
 
+/* Turn on DRDY interrupt and sample AD is ready  */
+# define AD_MONITOR_DRDY
+
 # endif
 

@@ -8,7 +8,8 @@
  *   When monitoring nDRDY for interrupts none of the blocking sample
  *   functions will work since the value will be retrieved immediately
  *   as DRDY goes LOW and returns HIGH again before the blocking sample
- *   polls DRDY again. That means a call to those will _block forever_.
+ *   polls DRDY again. That means a call to those will _block forever_
+ *   in monitoring mode.
  *
  */
 
@@ -59,8 +60,10 @@ void ad_setup ()
 
   ad_start = millis ();
 
+# ifdef AD_MONITOR_DRDY
   /* Configure interrupt */
   attachInterrupt (nDRDY_INTERRUPT, ad_drdy, LOW);
+# endif
 }
 
 /* Will be run on nDRDY LOW */
@@ -86,6 +89,10 @@ ulong ad_read_control_register ()
    *        TODO: A single pre-sample / or double sample should fix that.
    */
 
+# ifdef AD_MONITOR_DRDY
+  detachInterrupt (nDRDY_INTERRUPT);
+# endif
+
   /* Get control register */
   digitalWrite (A0, LOW);
   delay(1);
@@ -94,6 +101,10 @@ ulong ad_read_control_register ()
 
   digitalWrite (A0, HIGH);
   delay (1);
+
+# ifdef AD_MONITOR_DRDY
+  attachInterrupt (nDRDY_INTERRUPT, ad_drdy, LOW);
+# endif
 
   return r;
 }
