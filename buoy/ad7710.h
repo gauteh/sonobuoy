@@ -19,6 +19,8 @@
 
 extern volatile ulong ad_value;
 
+void ad_setup ();
+
 ulong ad_get_value ();
 ulong ad_sample_rate ();
 

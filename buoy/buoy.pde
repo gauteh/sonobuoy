@@ -5,13 +5,10 @@
  *
  */
 
-# include <stdlib.h>
-# include <stdio.h>
-
 # include "buoy.h"
-//# include "ad7710.c"
-//# include "gps.c"
-//# include "rf.c"
+# include "ad7710.h"
+# include "gps.h"
+# include "rf.h"
 
 ulong laststatus = 0;
 
