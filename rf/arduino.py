@@ -10,6 +10,7 @@ from synapse.evalBase import *
 from synapse.switchboard import *
 
 from gps import *
+from ad import *
 
 ARDUINO_UART  = 1
 ARDUINO_BAUD  = 38400
@@ -74,6 +75,7 @@ def a_parse (buf):
   # Test checksum
   if (not test_checksum (buf)):
     print "[AUINO] Message discarded, checksum failed."
+    print buf
     return
 
   # Parse message
@@ -143,12 +145,19 @@ def a_parse (buf):
         if (tokeni == 1): subtype = token
         elif (tokeni > 1):
           if (subtype == 'S'):
-            if (tokeni == 3):
-              pass
-            elif (tokeni == 4):
-              pass
-            elif (tokeni == 5):
-              pass
+            if (tokeni == 2):
+              global ad_samplerate
+              ad_samplerate = int (token)
+            elif (tokeni == 3):
+              global ad_value
+              ad_value = token
+          if (subtype == 'D'):
+            print "Got data: ", buf
+            return
+
+        if finished:
+          ad_status ()
+          return
 
       elif (msgtype == 'DBG'):
         if (tokeni == 1):
