@@ -8,7 +8,13 @@
 # ifndef BUOY_H
 # define BUOY_H
 
-# define VERSION "0.1.0"
+# define VERSION_BASE "0.1.0"
+# ifdef GIT_SHA
+# define VERSION VERSION_BASE " " GIT_SHA
+# else
+# define VERSION VERSION_BASE
+# endif
+
 
 # define GREETING \
 "Buoy Control ( version " VERSION " ) starting up..\n" \

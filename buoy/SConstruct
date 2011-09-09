@@ -40,10 +40,18 @@ from glob import glob
 import sys
 import re
 import os
+from subprocess import *
 pathJoin = os.path.join
 
 env = Environment()
 platform = env['PLATFORM']
+
+def getGitSha():
+    return Popen('git rev-parse --short=7 HEAD', stdout=PIPE, shell=True).stdout.read ().strip ()
+
+
+GIT_SHA = getGitSha ()
+print "Building " + getGitSha () + ".."
 
 def getUsbTty(rx):
     usb_ttys = glob(rx)
@@ -128,7 +136,7 @@ assert(os.path.exists(TARGET+'.pde'))
 
 cFlags = ['-ffunction-sections', '-fdata-sections', '-fno-exceptions',
     '-funsigned-char', '-funsigned-bitfields', '-fpack-struct', '-fshort-enums',
-    '-Os', '-mmcu=%s'%MCU]
+    '-Os', '-mmcu=%s'%MCU, '-DGIT_SHA=%s'%GIT_SHA]
 envArduino = Environment(CC = AVR_BIN_PREFIX+'gcc', CXX = AVR_BIN_PREFIX+'g++',
     CPPPATH = ['build/core'], CPPDEFINES = {'F_CPU':F_CPU, 'ARDUINO':ARDUINO_VER},
     CFLAGS = cFlags+['-std=gnu99'], CCFLAGS = cFlags, TOOLS = ['gcc','g++'])
