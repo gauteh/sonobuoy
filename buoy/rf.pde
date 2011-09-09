@@ -74,15 +74,37 @@ void rf_ad_message (RF_AD_MESSAGE messagetype)
     case AD_DATA_BATCH:
       /* Send AD_DATA_BATCH_LEN samples */
       # define AD_DATA_BATCH_LEN 5 
+
+      /* Format:
+       *
+       * $AD,D,[k = number of samples],[binary: 4 * k bytes],*CC
+       *
+       */
       {
         int n = sprintf (buf, "$AD,D,%d,", AD_DATA_BATCH_LEN);
 
         int l = ad_qposition;
-        for (int i = (l - AD_DATA_BATCH_LEN); i < l; i++)
-          n += sprintf(&(buf[n]), "%lX,", ad_queue[i]);
+        for (int i = (l - AD_DATA_BATCH_LEN); i < l; i++) {
 
-        buf[n-1] = '*';
-        buf[n] = 0;
+          ulong *bufto = (ulong *) &(buf[n]);
+          *bufto = ad_queue[i];
+
+          n += 4;
+
+          // TODO: Any special chars sent.. ?
+          //       Handle special on receiver.. 
+          // use memcpy()
+
+          /*
+          for (int j = 4; j >= 0; j++) {
+            buf[n] = (byte) (ad_queue[i]>>(j*8)) & 0x000000FF;
+            n++;
+          }
+          */
+        }
+
+        buf[n] = '*';
+        buf[n+1] = 0;
       }
       break;
 
