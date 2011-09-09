@@ -37,24 +37,24 @@ void rf_setup ()
  *
  */
 
-void rf_send_debug (char * msg)
-{
-  // Format
-  // $DBG,[msg]*CS
-  int len = strlen(msg);
-  char buf[len + 10];
-  sprintf(buf, "$DBG,%s*", msg);
-  APPEND_CSUM (buf);
-
-  RF_Serial.println (buf);
-}
 
 void rf_send_status ()
 {
   rf_ad_message (AD_STATUS);
   rf_gps_message (GPS_STATUS);
+  rf_send_debug ("Testing..");
 }
 
+void rf_send_debug (char * msg)
+{
+  // Format
+  // $DBG,[msg]*CS
+  char buf[RF_BUFLEN];
+  sprintf(buf, "$DBG,%s*", msg);
+  APPEND_CSUM (buf);
+
+  RF_Serial.println (buf);
+}
 
 void rf_ad_message (RF_AD_MESSAGE messagetype)
 {
