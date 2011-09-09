@@ -241,6 +241,13 @@ for orig_lib_dir in ARDUINO_LIBS:
 envArduino.Processing('build/'+TARGET+'.cpp', 'build/'+TARGET+'.pde')
 VariantDir('build', '.')
 
+# Delete build/TARGET.{cpp,pde} to assure changes from other pde's are rebuilt
+try:
+    os.remove ('build/' + TARGET + '.cpp')
+    os.remove ('build/' + TARGET + '.pde')
+except:
+    pass
+
 sources = ['build/'+TARGET+'.cpp']
 sources += all_libs_sources
 sources += core_sources
