@@ -40,6 +40,7 @@ volatile  ulong   ad_value   = 0; /* Last sampled value */
 ulong     ad_start = 0; // Starting time for sample
 
 volatile  ulong   ad_queue[AD_QUEUE_LENGTH];
+volatile  ulong   ad_time[AD_QUEUE_LENGTH];
 volatile  int     ad_qposition;
 
 void ad_setup ()
@@ -73,6 +74,7 @@ void ad_drdy ()
   ad_samples++;
 
   ad_queue[ad_qposition] = ad_value;
+  ad_time[ad_qposition]  = micros ();
   ad_qposition++;
 
   if (ad_qposition >= AD_QUEUE_LENGTH) ad_qposition = 0;

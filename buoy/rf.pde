@@ -41,6 +41,7 @@ void rf_setup ()
 void rf_send_status ()
 {
   rf_ad_message (AD_STATUS);
+  rf_ad_message (AD_DATA_BATCH);
   rf_gps_message (GPS_STATUS);
 
   char buf[RF_BUFLEN];
@@ -61,13 +62,28 @@ void rf_send_debug (const char * msg)
 
 void rf_ad_message (RF_AD_MESSAGE messagetype)
 {
-  char buf[RF_BUFLEN];
+  char buf[80];
 
   switch (messagetype)
   {
     case AD_STATUS:
       // $AD,S,[sample rate],[value]*CS
       sprintf (buf, "$AD,S,%lu,0x%lX*", ad_sample_rate (), ad_value);
+      break;
+
+    case AD_DATA_BATCH:
+# define AD_DATA_BATCH_LEN 5 
+      /* Send 10 samples */
+      {
+      int n = sprintf (buf, "$AD,D,%d,", AD_DATA_BATCH_LEN);
+
+      int l = ad_qposition;
+      for (int i = (l - AD_DATA_BATCH_LEN); i < l; i++)
+        n += sprintf(&(buf[n]), "%lX,", ad_queue[i]);
+
+      buf[n-1] = '*';
+      buf[n] = 0;
+      }
       break;
 
     default:
@@ -78,8 +94,6 @@ void rf_ad_message (RF_AD_MESSAGE messagetype)
 
   RF_Serial.println (buf);
 }
-
-# define FLOAT(n) (int)n, abs((n - (int)n) * 100)
 
 void rf_gps_message (RF_GPS_MESSAGE messagetype)
 {

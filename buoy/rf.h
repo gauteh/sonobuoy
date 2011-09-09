@@ -22,7 +22,7 @@
 
 typedef enum _RF_AD_MESSAGE {
   AD_STATUS = 0,
-  AD_SAMPLE,
+  AD_DATA_BATCH,
 } RF_AD_MESSAGE;
 
 typedef enum _RF_GPS_MESSAGE {

@@ -19,10 +19,21 @@
 
 extern volatile ulong ad_value;
 
-# define AD_QUEUE_LENGTH 1000 
+/* Early tests:
+ *
+ * Seems there's space for just above 1000 ulongs, meaning a
+ * queue length of 500 for both time and value.
+ *
+ * ulong = 4 bytes, total SRAM on Mega2560 = 8K
+ *
+ * There is 4K available on the EEPROM
+ *
+ */
+
+# define AD_QUEUE_LENGTH 500 
 extern volatile int   ad_qposition;
 extern volatile ulong ad_queue[];
-
+extern volatile ulong ad_time[];
 
 void ad_setup ();
 
