@@ -151,7 +151,7 @@ void ad_configure ()
   // Build control configuration, total of 24 bits.
   ulong ctb = 0;
 
-  ctb  = (ulong) (CONTROL_SELF_CALIBRATION + CONTROL_24BIT) << 12;
+  ctb  = (ulong) (CONTROL_SELF_CALIBRATION | CONTROL_24BIT) << 12;
   ctb += (ulong) FREQUENCY;
 
 
