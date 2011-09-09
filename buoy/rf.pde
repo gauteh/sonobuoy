@@ -72,17 +72,17 @@ void rf_ad_message (RF_AD_MESSAGE messagetype)
       break;
 
     case AD_DATA_BATCH:
-# define AD_DATA_BATCH_LEN 5 
-      /* Send 10 samples */
+      /* Send AD_DATA_BATCH_LEN samples */
+      # define AD_DATA_BATCH_LEN 5 
       {
-      int n = sprintf (buf, "$AD,D,%d,", AD_DATA_BATCH_LEN);
+        int n = sprintf (buf, "$AD,D,%d,", AD_DATA_BATCH_LEN);
 
-      int l = ad_qposition;
-      for (int i = (l - AD_DATA_BATCH_LEN); i < l; i++)
-        n += sprintf(&(buf[n]), "%lX,", ad_queue[i]);
+        int l = ad_qposition;
+        for (int i = (l - AD_DATA_BATCH_LEN); i < l; i++)
+          n += sprintf(&(buf[n]), "%lX,", ad_queue[i]);
 
-      buf[n-1] = '*';
-      buf[n] = 0;
+        buf[n-1] = '*';
+        buf[n] = 0;
       }
       break;
 
