@@ -19,6 +19,8 @@ void rf_setup ()
 {
   /* Setting up Serial interface to RF */
   RF_Serial.begin(RF_BAUDRATE);
+
+  rf_send_debug (GREETING);
 }
 
 /* Protocol
@@ -30,11 +32,24 @@ void rf_setup ()
  *  - AD    Readout from AD
  *  - GPS   GPS position and time data
  *  - STA   System status
+ *  - DBG   Debug message
  *
  * After * checksum is computed as XOR of all values
  * between, and not including, $ and *. Two hexadecimal digits.
  *
  */
+
+void rf_send_debug (char * msg)
+{
+  // Format
+  // $DBG,[msg]*CS
+  int len = strlen(msg);
+  char buf[len + 10];
+  sprintf(buf, "$DBG,%s*", msg);
+  APPEND_CSUM (buf);
+
+  RF_Serial.println (buf);
+}
 
 void rf_send_status ()
 {

@@ -13,10 +13,14 @@ from synapse import *
 from synapse.evalBase import *
 from synapse.switchboard import *
 
-from util import *
+# GPS pin configuration
+# GPS TX is at GPIO3 (UART0 RX)
 
 # Latest GPS data
-valid      = False # Data valid
+checkvalid = False  # Checksum valid
+datavalid  = False  # Data valid
+valid      = False  # GPS fields are all valid (checkvalid & datavalid)
+                    # _Must_ be checked before using GPS data
 
 longitude  = 0
 longituder = '' # Reference E/W
@@ -27,10 +31,11 @@ satellites = 0
 time       = 0
 
 # Token parsing
-nmea      = '' 
-lastnmea  = '' 
+nmea      = ''
+lastnmea  = ''
 token     = ''
 tokeni    = 0 # Token no
+
 
 ''' Set up GPS module and serial connection '''
 def gps_setup ():
@@ -42,7 +47,7 @@ def gps_setup ():
 
 ''' Handle NMEA data '''
 def gps_stdinhandler (buf):
-  global token, lastnmea, tokeni
+  global token, lastnmea, tokeni, nmea
   i = 0
   l = len(buf)
 
@@ -52,41 +57,86 @@ def gps_stdinhandler (buf):
     c = buf[i]
     i += 1
 
-    if c == '$' or c == ',':
+    if c == ',' or c == '*':
       do_token ()
       token = ''
 
-      # New line, reset
-      if c == '$':
-        lastnmea = ''
-        tokeni   = 0
+    # New line, reset
+    elif c == '$':
+      # Token contains check sum, test
+      check_nmea_sum ()
+
+      token    = ''
+      lastnmea = ''
+      tokeni   = 0
 
     else:
       token += c
 
+    # Error:
     if len(token) > 80:
-      lastnmea  = ''
-      token     = ''
-      tokeni    = 0
+      gps_fields_reset ()
+
+''' Return hexdecimal string representation of integer, result in 2 digits '''
+def hex (i):
+  h = '0123456789ABCDEF'
+  return h[i >> 4] + h[i & 0x0f]
+
+''' Checks NMEA if it matches checksum '''
+def check_nmea_sum ():
+  global nmea, token, checkvalid, checkednmea, valid, datavalid
+
+  if token[0:2] == hex(gen_check_sum(nmea)):
+    checkvalid = True
+    valid = (checkvalid and datavalid)
+  else:
+    checkvalid = False
+    gps_fields_reset ()
+
+''' Generate check sum for string, XOR of all characters '''
+def gen_check_sum (src):
+  i = 0
+  l = len(src)
+  sum = 0
+  while i < l:
+    sum = sum ^ ord(src[i])
+    i += 1
+
+  return sum
+
+def gps_fields_reset ():
+  global nmea, lastnmea, tokeni, token, valid, datavalid
+  nmea      = ''
+  lastnmea  = ''
+  token     = ''
+  tokeni    = 0
+  valid     = False
+  datavalid = False
 
 def do_token ():
-  global lastnmea, token
+  global lastnmea, token, nmea
   global time, satellites
-  global valid, latitude, longitude
+  global datavalid, latitude, longitude
   global latituder, longituder
 
   global tokeni
 
   if tokeni == 0:
     lastnmea = token
+    nmea = token
 
   else:
+    nmea += ','
+    nmea += token
+
     if lastnmea == 'GPRMC':
       if tokeni == 1:
         time = token
+
       elif tokeni == 2:
-        if (token == 'A'): valid = True
-        else: valid = False
+        if token == 'A': datavalid = True
+        else: datavalid = False
+
       elif tokeni == 3:
         latitude = token
         latituder = ''
@@ -98,6 +148,14 @@ def do_token ():
       elif tokeni == 6:
         longituder = token
 
+    elif lastnmea == 'GPGGA':
+      if tokeni == 1:
+        time = token
+
+    elif lastnmea == 'GPGLL':
+      if tokeni == 5:
+        time = token
+
     elif lastnmea == 'GPGSA':
       if tokeni == 3:
         satellites = int(token)
@@ -106,11 +164,9 @@ def do_token ():
 
 def gps_status ():
   global time, satellites, lastnmea
-  print "GPS time: ", time
+  print "GPS time: ", time, " (Sats: ", satellites, ")"
   print "Latitude:  ", latitude, latituder
   print "Longitude: ", longitude, longituder
   print "Valid: ", valid
-  print "Satellites: ", satellites
-  print "Current NMEA: ", lastnmea
 
 

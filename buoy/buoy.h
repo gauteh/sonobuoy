@@ -17,7 +17,7 @@
 
 
 # define GREETING \
-"Buoy Control ( version " VERSION " ) starting up..\n" \
+"Buoy Control ( version " VERSION " )\n" \
 "by Gaute Hope <eg@gaute.vetsj.com> / <gaute.hope@student.uib.no>  (2011)"
 
 typedef unsigned long ulong;
