@@ -45,7 +45,7 @@ void rf_send_status ()
   rf_send_debug ("Testing..");
 }
 
-void rf_send_debug (char * msg)
+void rf_send_debug (const char * msg)
 {
   // Format
   // $DBG,[msg]*CS
