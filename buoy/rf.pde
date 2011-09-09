@@ -19,8 +19,6 @@ void rf_setup ()
 {
   /* Setting up Serial interface to RF */
   RF_Serial.begin(RF_BAUDRATE);
-
-  rf_send_debug (GREETING);
 }
 
 /* Protocol
@@ -89,7 +87,7 @@ void rf_gps_message (RF_GPS_MESSAGE messagetype)
     case GPS_STATUS:
       // $GPS,S,[lasttype],[telegrams received],[lasttelegram],Lat,Lon,Time,Valid*CS
       // Valid: Y = Yes, N = No
-      sprintf (buf, "$GPS,S,%d,%d,%s%c,%s%c,%lu,%c*", gps_data.lasttype, gps_data.received, gps_data.latitude, (gps_data.north ? 'N' : 'S'), gps_data.longitude, (gps_data.east ? 'E' : 'W'), gps_data.time, (gps_data.valid ? 'Y' : 'N'));
+      sprintf (buf, "$GPS,S,%d,%d,%s,%c,%s,%c,%lu,%c*", gps_data.lasttype, gps_data.received, gps_data.latitude, (gps_data.north ? 'N' : 'S'), gps_data.longitude, (gps_data.east ? 'E' : 'W'), gps_data.time, (gps_data.valid ? 'Y' : 'N'));
 
       break;
 
