@@ -30,15 +30,18 @@ extern volatile ulong ad_value;
  *
  */
 
-# define AD_QUEUE_LENGTH 500 
+# define AD_QUEUE_LENGTH 500
 extern volatile int   ad_qposition;
 extern volatile ulong ad_queue[];
 extern volatile ulong ad_time[];
 
-void ad_setup ();
-
-ulong ad_get_value ();
-ulong ad_sample_rate ();
+void          ad_setup ();
+void          ad_configure ();
+ulong         ad_sample ();
+ulong         ad_sample (bool);
+ulong         ad_get_value ();
+ulong         ad_sample_rate ();
+ulong         ad_read_control_register ();
 
 # endif
 

@@ -27,12 +27,8 @@
 # define SCLK   52
 # define SDATA  50
 
-void          ad_configure ();
-void          ad_setup ();
-void          ad_drdy ();
-ulong         ad_sample ();
-ulong         ad_sample (bool);
-ulong         ad_sample_rate ();
+/* Private functions */
+void ad_drdy ();
 
 volatile  ulong   ad_samples = 0;
 volatile  ulong   ad_value   = 0; /* Last sampled value */
@@ -67,7 +63,7 @@ void ad_setup ()
   attachInterrupt (nDRDY_INTERRUPT, ad_drdy, LOW);
 }
 
-/* Will be run on nDRDY falling */
+/* Will be run on nDRDY LOW */
 void ad_drdy ()
 {
   ad_value = ad_sample ();
@@ -80,7 +76,7 @@ void ad_drdy ()
   if (ad_qposition >= AD_QUEUE_LENGTH) ad_qposition = 0;
 }
 
-void ad_read_control_register ()
+ulong ad_read_control_register ()
 {
   /* Note:  If output register is ready, it seems like setting A0 LOW
    *        has no effect on changing output to control register
@@ -94,11 +90,12 @@ void ad_read_control_register ()
   digitalWrite (A0, LOW);
   delay(1);
 
-  //Serial.print ("[AD7710] Initial control register: ");
-  //Serial.println (ad_sample (), BIN);
+  ulong r = ad_sample (true);
 
   digitalWrite (A0, HIGH);
   delay (1);
+
+  return r;
 }
 
 void ad_configure ()
