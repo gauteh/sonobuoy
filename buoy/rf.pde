@@ -41,8 +41,8 @@ void rf_setup ()
 void rf_send_status ()
 {
   rf_ad_message (AD_STATUS);
-  rf_ad_message (AD_DATA_BATCH);
   rf_gps_message (GPS_STATUS);
+  rf_ad_message (AD_DATA_BATCH);
 
   char buf[RF_BUFLEN];
   sprintf(buf, "AD queue postion: %d", ad_qposition);
@@ -51,8 +51,11 @@ void rf_send_status ()
 
 void rf_send_debug (const char * msg)
 {
-  // Format
-  // $DBG,[msg]*CS
+  /* Format:
+   * $DBG,[msg]*CS
+   *
+   */
+
   char buf[RF_BUFLEN];
   sprintf(buf, "$DBG,%s*", msg);
   APPEND_CSUM (buf);
@@ -62,59 +65,70 @@ void rf_send_debug (const char * msg)
 
 void rf_ad_message (RF_AD_MESSAGE messagetype)
 {
-  char buf[80];
+  char buf[RF_BUF_LEN];
 
   switch (messagetype)
   {
     case AD_STATUS:
       // $AD,S,[sample rate],[value]*CS
       sprintf (buf, "$AD,S,%lu,0x%lX*", ad_sample_rate (), ad_value);
+      APPEND_CSUM (buf);
+
+      RF_Serial.println (buf);
+
       break;
 
     case AD_DATA_BATCH:
       /* Send AD_DATA_BATCH_LEN samples */
-      # define AD_DATA_BATCH_LEN 5 
+      # define AD_DATA_BATCH_LEN 5
 
       /* Format:
-       *
-       * $AD,D,[k = number of samples],[binary: 4 * k bytes],*CC
-       *
+
+       * 1. Initiate binary data stream:
+
+       $AD,D,[k = number of samples],[time of first s]*CC
+
+       * 2. Send k number of samples: 4 bytes * k
+
+       * 3. Send end of data with checksum
+
        */
       {
-        int n = sprintf (buf, "$AD,D,%d,", AD_DATA_BATCH_LEN);
-
         int l = ad_qposition;
-        for (int i = (l - AD_DATA_BATCH_LEN); i < l; i++) {
 
-          ulong *bufto = (ulong *) &(buf[n]);
+        int n = sprintf (buf, "$AD,D,%d,%d*", AD_DATA_BATCH_LEN, ad_time[l - AD_DATA_BATCH_LEN]);
+        APPEND_CSUM (buf);
+        RF_Serial.println (buf);
+
+        delayMicroseconds (10);
+
+        /* Send samples */
+        buf[5] = 0;
+        byte r = 0;
+        for (int i = (l - AD_DATA_BATCH_LEN); i < l; i++) {
+          ulong *bufto = (ulong *) buf;
           *bufto = ad_queue[i];
+          RF_Serial.print(buf);
+
+          /* Try not to completly overrun the line.. */
+          delayMicroseconds (10);
+
+          /* Calculate csum */
+          r = r ^ ad_queue[i];
 
           n += 4;
-
-          // TODO: Any special chars sent.. ?
-          //       Handle special on receiver.. 
-          // use memcpy()
-
-          /*
-          for (int j = 4; j >= 0; j++) {
-            buf[n] = (byte) (ad_queue[i]>>(j*8)) & 0x000000FF;
-            n++;
-          }
-          */
         }
 
-        buf[n] = '*';
-        buf[n+1] = 0;
+        /* Send end of data with Checksum */
+        sprintf (buf, "$AD,DE," F_CSUM "*", r);
+        APPEND_CSUM (buf);
+        RF_Serial.println (buf);
       }
       break;
 
     default:
       return;
   }
-
-  APPEND_CSUM (buf);
-
-  RF_Serial.println (buf);
 }
 
 void rf_gps_message (RF_GPS_MESSAGE messagetype)
