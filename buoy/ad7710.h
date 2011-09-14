@@ -48,3 +48,5 @@ ulong         ad_read_control_register ();
 
 # endif
 
+/* vim: set filetype=arduino :  */
+

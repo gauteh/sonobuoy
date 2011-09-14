@@ -65,7 +65,7 @@ void rf_send_debug (const char * msg)
 
 void rf_ad_message (RF_AD_MESSAGE messagetype)
 {
-  char buf[RF_BUF_LEN];
+  char buf[RF_BUFLEN];
 
   switch (messagetype)
   {
@@ -100,27 +100,21 @@ void rf_ad_message (RF_AD_MESSAGE messagetype)
         APPEND_CSUM (buf);
         RF_Serial.println (buf);
 
-        delayMicroseconds (10);
+        delayMicroseconds (100);
 
-        /* Send samples */
-        buf[5] = 0;
-        byte r = 0;
-        for (int i = (l - AD_DATA_BATCH_LEN); i < l; i++) {
-          ulong *bufto = (ulong *) buf;
-          *bufto = ad_queue[i];
-          RF_Serial.print(buf);
+        byte csum = 0;
 
-          /* Try not to completly overrun the line.. */
-          delayMicroseconds (10);
+        for (int i = 0; i < AD_DATA_BATCH_LEN; i++) {
+          ulong v = ad_queue[l - AD_DATA_BATCH_LEN + i];
+          RF_Serial.write ((unsigned char*)&v, 4);
 
-          /* Calculate csum */
-          r = r ^ ad_queue[i];
+          csum = csum ^ (byte)(v&0xff);
 
-          n += 4;
+          delayMicroseconds (100);
         }
 
         /* Send end of data with Checksum */
-        sprintf (buf, "$AD,DE," F_CSUM "*", r);
+        sprintf (buf, "$AD,DE," F_CSUM "*", csum);
         APPEND_CSUM (buf);
         RF_Serial.println (buf);
       }
