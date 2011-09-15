@@ -30,7 +30,7 @@ def ad_handle_samples ():
   print "[AD] Handling samples.."
 
   l = len(ad_samples)
-  if (l != (ad_k_samples * 4)):
+  if (l != (ad_k_samples * 3)):
     print "[AD] Wrong length of binary data."
     return
 
@@ -39,18 +39,18 @@ def ad_handle_samples ():
 
   i = 0
   while (i < ad_k_samples):
-    n =  hex(ord(ad_samples[i * 4 + 3]))
-    n += hex(ord(ad_samples[i * 4 + 2]))
-    n += hex(ord(ad_samples[i * 4 + 1]))
-    n += hex(ord(ad_samples[i * 4]))
+    #n =  hex(ord(ad_samples[i * 4 + 3]))
+    n = hex(ord(ad_samples[i * 3 + 2]))
+    n += hex(ord(ad_samples[i * 3 + 1]))
+    n += hex(ord(ad_samples[i * 3]))
 
-    csum = csum ^ ord(ad_samples[i * 4 + 3])
-    csum = csum ^ ord(ad_samples[i * 4 + 2])
-    csum = csum ^ ord(ad_samples[i * 4 + 1])
-    csum = csum ^ ord(ad_samples[i * 4])
+    #csum = csum ^ ord(ad_samples[i * 4 + 3])
+    csum = csum ^ ord(ad_samples[i * 3 + 2])
+    csum = csum ^ ord(ad_samples[i * 3 + 1])
+    csum = csum ^ ord(ad_samples[i * 3])
 
     i += 1
-    #print "[AD] Sample[", i, "] : ", n
+    print "[AD] Sample[", i, "] : ", n
 
   if (hex (csum) != ad_sample_csum):
     print "[AD] Checksum mismatch: Received binary samples.", hex(csum), ",", ad_sample_csum, ",", l

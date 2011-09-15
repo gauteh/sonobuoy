@@ -79,8 +79,12 @@ void rf_ad_message (RF_AD_MESSAGE messagetype)
       break;
 
     case AD_DATA_BATCH:
-      /* Send AD_DATA_BATCH_LEN samples */
-      # define AD_DATA_BATCH_LEN 20
+      /* Send AD_DATA_BATCH_LEN samples
+       *
+       * The RF200 (AtMega128) can hold strings of maximum 126 bytes.
+       *
+       */
+      # define AD_DATA_BATCH_LEN 5
 
       /* Format:
 
@@ -109,17 +113,21 @@ void rf_ad_message (RF_AD_MESSAGE messagetype)
         /* Write '$' to signal start of binary data */
         RF_Serial.write ('$');
 
+        ulong lasts = 0;
+
         for (int i = 0; i < AD_DATA_BATCH_LEN; i++) {
           ulong v = ad_queue[l - AD_DATA_BATCH_LEN + i];
 
           /* MSB first, means concatenating bytes on RX will result
            * in LSB first. (Byte wise) */
-          RF_Serial.write ((unsigned char*)&v, 4);
+          RF_Serial.write ((unsigned char*)&v, 3);
 
-          csum = csum ^ (v>>(3*8)&0xff);
-          csum = csum ^ (v>>(2*8)&0xff);
-          csum = csum ^ (v>>8    &0xff);
-          csum = csum ^ (v       &0xff);
+          csum = csum ^ (byte)(v>>(3*8)&0xff);
+          csum = csum ^ (byte)(v>>(2*8)&0xff);
+          csum = csum ^ (byte)(v>>8    &0xff);
+          //csum = csum ^ (v       &0xff);
+
+          lasts = v;
 
           delayMicroseconds (100);
         }
@@ -128,6 +136,10 @@ void rf_ad_message (RF_AD_MESSAGE messagetype)
         sprintf (buf, "$AD,DE," F_CSUM "*", csum);
         APPEND_CSUM (buf);
         RF_Serial.println (buf);
+
+        char buf[RF_BUFLEN];
+        sprintf(buf, "AD last sent val: %lX", lasts);
+        rf_send_debug (buf);
       }
       break;
 

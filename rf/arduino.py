@@ -174,7 +174,7 @@ def a_parse (buf):
               global ad_k_samples, ad_k_remaining
               global a_receive_state, ad_samples
               ad_k_samples = int (token)
-              ad_k_remaining = ad_k_samples * 4
+              ad_k_remaining = ad_k_samples * 3
               ad_samples = ''
               a_receive_state = 4
 
