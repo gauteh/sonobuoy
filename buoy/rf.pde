@@ -80,7 +80,7 @@ void rf_ad_message (RF_AD_MESSAGE messagetype)
 
     case AD_DATA_BATCH:
       /* Send AD_DATA_BATCH_LEN samples */
-      # define AD_DATA_BATCH_LEN 5
+      # define AD_DATA_BATCH_LEN 20
 
       /* Format:
 
@@ -88,9 +88,11 @@ void rf_ad_message (RF_AD_MESSAGE messagetype)
 
        $AD,D,[k = number of samples],[time of first s]*CC
 
-       * 2. Send k number of samples: 4 bytes * k
+       * 2. Send one $
 
-       * 3. Send end of data with checksum
+       * 3. Send k number of samples: 4 bytes * k
+
+       * 4. Send end of data with checksum
 
        */
       {
@@ -104,11 +106,20 @@ void rf_ad_message (RF_AD_MESSAGE messagetype)
 
         byte csum = 0;
 
+        /* Write '$' to signal start of binary data */
+        RF_Serial.write ('$');
+
         for (int i = 0; i < AD_DATA_BATCH_LEN; i++) {
           ulong v = ad_queue[l - AD_DATA_BATCH_LEN + i];
+
+          /* MSB first, means concatenating bytes on RX will result
+           * in LSB first. (Byte wise) */
           RF_Serial.write ((unsigned char*)&v, 4);
 
-          csum = csum ^ (byte)(v&0xff);
+          csum = csum ^ (v>>(3*8)&0xff);
+          csum = csum ^ (v>>(2*8)&0xff);
+          csum = csum ^ (v>>8    &0xff);
+          csum = csum ^ (v       &0xff);
 
           delayMicroseconds (100);
         }

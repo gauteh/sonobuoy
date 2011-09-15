@@ -26,6 +26,10 @@ def a_setup ():
 # 1 = Between '$' and '*'
 # 2 = On first CS digit
 # 3 = On second CS digit
+
+# 4 = Waiting for '$' to signal start of binary data
+# 5 = Receiving AD binary data
+
 a_receive_state = 0
 a_buf   = ''
 
@@ -57,9 +61,20 @@ def a_stdinhandler (buf):
 
     elif (a_receive_state == 3):
       a_buf += c
+      a_receive_state = 0
       a_parse (a_buf)
       a_buf = ''
-      a_receive_state = 0
+
+    elif (a_receive_state == 4):
+      if (c == '$'):
+        a_receive_state = 5
+
+    elif (a_receive_state == 5):
+      global ad_samples, ad_k_remaining
+      ad_samples += c
+      ad_k_remaining -= 1
+      if (ad_k_remaining < 1):
+        a_receive_state = 0
 
     else:
       # Something went terribly wrong..
@@ -151,13 +166,33 @@ def a_parse (buf):
             elif (tokeni == 3):
               global ad_value
               ad_value = token
-          if (subtype == 'D'):
-            print "Got data: ", buf
-            return
+              ad_status ()
+              return
 
-        if finished:
-          ad_status ()
-          return
+          elif (subtype == 'D'):
+            if (tokeni == 2):
+              global ad_k_samples, ad_k_remaining
+              global a_receive_state, ad_samples
+              ad_k_samples = int (token)
+              ad_k_remaining = ad_k_samples * 4
+              ad_samples = ''
+              a_receive_state = 4
+
+            elif (tokeni == 3):
+              global ad_time_of_first
+              ad_time_of_first = int (token)
+
+              print "[AD] Initiating binary transfer.. samples: ", ad_k_samples
+              return
+
+          elif (subtype == 'DE'):
+            if (tokeni == 2):
+              global ad_sample_csum
+              print "[AD] Binay data transfer complete."
+              ad_sample_csum = token
+              ad_handle_samples ()
+
+            return
 
       elif (msgtype == 'DBG'):
         if (tokeni == 1):
