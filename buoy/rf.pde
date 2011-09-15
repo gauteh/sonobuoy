@@ -115,11 +115,12 @@ void rf_ad_message (RF_AD_MESSAGE messagetype)
 
         ulong lasts = 0;
 
-        for (int i = 0; i < AD_DATA_BATCH_LEN; i++) {
+        for (int i = 0; i < AD_DATA_BATCH_LEN; i++)
+        {
           ulong v = ad_queue[l - AD_DATA_BATCH_LEN + i];
 
-          /* MSB first, means concatenating bytes on RX will result
-           * in LSB first. (Byte wise) */
+          /* MSB first (big endian), means concatenating bytes on RX will
+           * result in LSB first; little endian. */
           RF_Serial.write ((unsigned char*)&v, 3);
 
           csum = csum ^ (byte)(v>>(3*8)&0xff);
