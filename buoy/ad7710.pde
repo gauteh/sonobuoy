@@ -32,18 +32,17 @@
 void ad_drdy ();
 
 volatile  ulong   ad_samples = 0;
-volatile  ulong   ad_value   = 0; /* Last sampled value */
+volatile  sample  ad_value   = {0, 0, 0}; /* Last sampled value */
 
 ulong     ad_start = 0; // Starting time for sample
 
-volatile  ulong   ad_queue[AD_QUEUE_LENGTH];
+volatile  sample  ad_queue[AD_QUEUE_LENGTH];
 volatile  ulong   ad_time[AD_QUEUE_LENGTH];
-volatile  int     ad_qposition;
+volatile  uint    ad_qposition;
 
 void ad_setup ()
 {
-  for (int i = 0; i < AD_QUEUE_LENGTH; i++)
-    ad_queue[i] = 0;
+  memset ((void *)ad_queue, 0, 3 * AD_QUEUE_LENGTH);
 
   ad_qposition = 0;
 
@@ -54,7 +53,6 @@ void ad_setup ()
   pinMode (nTFS, OUTPUT);
   pinMode (SCLK, OUTPUT);
   pinMode (SDATA, INPUT);
-
 
   ad_configure ();
 
@@ -69,17 +67,21 @@ void ad_setup ()
 /* Will be run on nDRDY LOW */
 void ad_drdy ()
 {
-  ad_value = ad_sample ();
+  ad_sample (); // Puts latest sample in ad_value
   ad_samples++;
 
-  ad_queue[ad_qposition] = ad_value;
+  /* ad_value cannot change while in this interrupt */
+
+  memcpy ((void *)ad_queue[ad_qposition], (const void*)ad_value, 3);
+
   ad_time[ad_qposition]  = micros ();
+
   ad_qposition++;
 
   if (ad_qposition >= AD_QUEUE_LENGTH) ad_qposition = 0;
 }
 
-ulong ad_read_control_register ()
+void ad_read_control_register ()
 {
   /* Note:  If output register is ready, it seems like setting A0 LOW
    *        has no effect on changing output to control register
@@ -99,7 +101,7 @@ ulong ad_read_control_register ()
 
   ad_sample (true); // Empty output register (see above) [UNTESTED]
 
-  ulong r = ad_sample (true);
+  ad_sample (true);
 
   digitalWrite (A0, HIGH);
   delay (1);
@@ -107,8 +109,6 @@ ulong ad_read_control_register ()
 # ifdef AD_MONITOR_DRDY
   attachInterrupt (nDRDY_INTERRUPT, ad_drdy, LOW);
 # endif
-
-  return r;
 }
 
 void ad_configure ()
@@ -184,10 +184,8 @@ void ad_configure ()
  * Get sample from AD, will return latest value even if it has been
  * read before. Use sample (true) for a blocking version.
  */
-ulong ad_sample ()
+void ad_sample ()
 {
-  ulong r = 0;
-
   digitalWrite (nRFS, LOW);
 
   // TODO: Check timing requirements from RFS HIGH to data ready.
@@ -195,24 +193,14 @@ ulong ad_sample ()
 
   /* Shift 24 bits = 3 bytes in from AD serial register */
 
-  int i = 0;
-  do {
-    r += shiftIn (SDATA, SCLK, MSBFIRST);
-
-    i++;
-
-    if (i < 3)
-      r <<= 8;
-
-  } while (i < 3);
+  for (int i = 0; i < 3; i++)
+    ad_value[i] = shiftIn (SDATA, SCLK, MSBFIRST);
 
   digitalWrite (nRFS, HIGH);
-
-  return r;
 }
 
 /* Version of sample that waits for DRDY */
-ulong ad_sample (bool blocking)
+void ad_sample (bool blocking)
 {
   if (blocking)
     while (digitalRead(nDRDY)) delayMicroseconds(1);
@@ -251,11 +239,6 @@ ulong ad_sample_rate ()
   ad_start   = millis ();
 
   return r;
-}
-
-ulong ad_get_value ()
-{
-  return ad_value;
 }
 
 # endif

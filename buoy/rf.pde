@@ -41,8 +41,8 @@ void rf_setup ()
 void rf_send_status ()
 {
   rf_ad_message (AD_STATUS);
-  rf_gps_message (GPS_STATUS);
-  rf_ad_message (AD_DATA_BATCH);
+  //rf_gps_message (GPS_STATUS);
+  //rf_ad_message (AD_DATA_BATCH);
 
   char buf[RF_BUFLEN];
   sprintf(buf, "AD queue postion: %d", ad_qposition);
@@ -71,7 +71,7 @@ void rf_ad_message (RF_AD_MESSAGE messagetype)
   {
     case AD_STATUS:
       // $AD,S,[sample rate],[value]*CS
-      sprintf (buf, "$AD,S,%lu,0x%lX*", ad_sample_rate (), ad_value);
+      sprintf (buf, "$AD,S,%lu,0x%02X%02X%02X*", ad_sample_rate (), ad_value[0], ad_value[1], ad_value[2]);
       APPEND_CSUM (buf);
 
       RF_Serial.println (buf);
@@ -113,22 +113,21 @@ void rf_ad_message (RF_AD_MESSAGE messagetype)
         /* Write '$' to signal start of binary data */
         RF_Serial.write ('$');
 
-        ulong lasts = 0;
+        sample lasts;
+        sample s;
 
         for (int i = 0; i < AD_DATA_BATCH_LEN; i++)
         {
-          ulong v = ad_queue[l - AD_DATA_BATCH_LEN + i];
-
+          memcpy (s, (const void *) ad_queue[l - AD_DATA_BATCH_LEN + i], 3);
           /* MSB first (big endian), means concatenating bytes on RX will
            * result in LSB first; little endian. */
-          RF_Serial.write ((unsigned char*)&v, 3);
+          RF_Serial.write (s, 3);
 
-          csum = csum ^ (byte)(v>>(3*8)&0xff);
-          csum = csum ^ (byte)(v>>(2*8)&0xff);
-          csum = csum ^ (byte)(v>>8    &0xff);
-          //csum = csum ^ (v       &0xff);
+          csum = csum ^ s[0];
+          csum = csum ^ s[1];
+          csum = csum ^ s[2];
 
-          lasts = v;
+          memcpy (lasts, s, 3);
 
           delayMicroseconds (100);
         }
@@ -137,10 +136,12 @@ void rf_ad_message (RF_AD_MESSAGE messagetype)
         sprintf (buf, "$AD,DE," F_CSUM "*", csum);
         APPEND_CSUM (buf);
         RF_Serial.println (buf);
+        delayMicroseconds (100);
 
         char buf[RF_BUFLEN];
         sprintf(buf, "AD last sent val: %lX", lasts);
         rf_send_debug (buf);
+        delayMicroseconds (100);
       }
       break;
 

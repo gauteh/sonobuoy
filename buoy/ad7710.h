@@ -17,7 +17,6 @@
 
 # include "buoy.h"
 
-extern volatile ulong ad_value;
 
 /* Early tests:
  *
@@ -30,18 +29,21 @@ extern volatile ulong ad_value;
  *
  */
 
+/* Sample is 24 bit / 8 = 3 bytes */
+typedef byte sample[3]; 
+extern volatile sample ad_value;
+
 # define AD_QUEUE_LENGTH 500
-extern volatile int   ad_qposition;
-extern volatile ulong ad_queue[];
-extern volatile ulong ad_time[];
+extern volatile uint    ad_qposition;
+extern volatile sample  ad_queue[];
+extern volatile ulong   ad_time[];
 
 void          ad_setup ();
 void          ad_configure ();
-ulong         ad_sample ();
-ulong         ad_sample (bool);
-ulong         ad_get_value ();
+void          ad_sample ();
+void          ad_sample (bool);
 ulong         ad_sample_rate ();
-ulong         ad_read_control_register ();
+void          ad_read_control_register ();
 
 /* Turn on DRDY interrupt and sample AD is ready  */
 # define AD_MONITOR_DRDY
