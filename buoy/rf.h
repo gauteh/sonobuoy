@@ -11,7 +11,7 @@
 # define RF_BAUDRATE 38400
 # define RF_Serial Serial2
 
-# define RF_BUFLEN 1024
+# define RF_BUFLEN 150
 
 /* Format for printing checksum and macro for appending checksum
  * to NULL terminated buffer with string encapsulated in $ and *.

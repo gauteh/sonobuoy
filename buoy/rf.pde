@@ -84,7 +84,7 @@ void rf_ad_message (RF_AD_MESSAGE messagetype)
        * The RF200 (AtMega128) can hold strings of maximum 126 bytes.
        *
        */
-      # define AD_DATA_BATCH_LEN 5
+      # define AD_DATA_BATCH_LEN 20
 
       /* Format:
 
@@ -138,7 +138,7 @@ void rf_ad_message (RF_AD_MESSAGE messagetype)
         RF_Serial.println (buf);
         delayMicroseconds (100);
 
-        sprintf(buf, "AD last sent val: %02X%02X%02X", lasts[0], lasts[1], lasts[2]);
+        sprintf(buf, "AD last sent val: 0x%02X%02X%02X", lasts[0], lasts[1], lasts[2]);
         rf_send_debug (buf);
         delayMicroseconds (100);
       }
