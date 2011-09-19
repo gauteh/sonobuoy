@@ -26,7 +26,7 @@ void setup ()
 void loop ()
 {
 
-  if ((millis () - laststatus) > 1000) {
+  if ((millis () - laststatus) > 200) {
     /* Send status to RF */
     rf_send_status ();
 
