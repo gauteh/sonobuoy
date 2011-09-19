@@ -44,9 +44,11 @@ void rf_send_status ()
   //rf_gps_message (GPS_STATUS);
   rf_ad_message (AD_DATA_BATCH);
 
+  /*
   char buf[RF_BUFLEN];
   sprintf(buf, "AD queue postion: %d", ad_qposition);
   rf_send_debug (buf);
+  */
 }
 
 void rf_send_debug (const char * msg)
@@ -84,7 +86,7 @@ void rf_ad_message (RF_AD_MESSAGE messagetype)
        * The RF200 (AtMega128) can hold strings of maximum 126 bytes.
        *
        */
-      # define AD_DATA_BATCH_LEN 20
+      # define AD_DATA_BATCH_LEN 35 
 
       /* Format:
 
