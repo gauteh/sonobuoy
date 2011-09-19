@@ -39,12 +39,10 @@ def ad_handle_samples ():
 
   i = 0
   while (i < ad_k_samples):
-    #n =  hex(ord(ad_samples[i * 4 + 3]))
-    n = hex(ord(ad_samples[i * 3 + 2]))
+    n = hex(ord(ad_samples[i * 3]))
     n += hex(ord(ad_samples[i * 3 + 1]))
-    n += hex(ord(ad_samples[i * 3]))
+    n += hex(ord(ad_samples[i * 3 + 2]))
 
-    #csum = csum ^ ord(ad_samples[i * 4 + 3])
     csum = csum ^ ord(ad_samples[i * 3 + 2])
     csum = csum ^ ord(ad_samples[i * 3 + 1])
     csum = csum ^ ord(ad_samples[i * 3])

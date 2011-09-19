@@ -42,7 +42,7 @@ void rf_send_status ()
 {
   rf_ad_message (AD_STATUS);
   //rf_gps_message (GPS_STATUS);
-  //rf_ad_message (AD_DATA_BATCH);
+  rf_ad_message (AD_DATA_BATCH);
 
   char buf[RF_BUFLEN];
   sprintf(buf, "AD queue postion: %d", ad_qposition);
@@ -138,8 +138,7 @@ void rf_ad_message (RF_AD_MESSAGE messagetype)
         RF_Serial.println (buf);
         delayMicroseconds (100);
 
-        char buf[RF_BUFLEN];
-        sprintf(buf, "AD last sent val: %lX", lasts);
+        sprintf(buf, "AD last sent val: %02X%02X%02X", lasts[0], lasts[1], lasts[2]);
         rf_send_debug (buf);
         delayMicroseconds (100);
       }

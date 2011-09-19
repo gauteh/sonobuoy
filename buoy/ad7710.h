@@ -18,7 +18,7 @@
 # include "buoy.h"
 
 
-/* Early tests:
+/* Early tests: (for ulongs)
  *
  * Seems there's space for just above 1000 ulongs, meaning a
  * queue length of 500 for both time and value.
@@ -30,7 +30,8 @@
  */
 
 /* Sample is 24 bit / 8 = 3 bytes */
-typedef byte sample[3]; 
+typedef byte sample[3];
+
 extern volatile sample ad_value;
 
 # define AD_QUEUE_LENGTH 500
