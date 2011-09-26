@@ -6,4 +6,6 @@ buoy/build
 .sconsign*
 *.elf
 *.hex
+*.log
+*.pyc
 

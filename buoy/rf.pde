@@ -86,7 +86,7 @@ void rf_ad_message (RF_AD_MESSAGE messagetype)
        * The RF200 (AtMega128) can hold strings of maximum 126 bytes.
        *
        */
-      # define AD_DATA_BATCH_LEN 26
+      # define AD_DATA_BATCH_LEN 20 
 
       /* Format:
 
