@@ -27,15 +27,17 @@ def ad_status ():
 ''' Handle received binary samples '''
 def ad_handle_samples ():
   global ad_samples, ad_k_samples, ad_time_of_first, ad_sample_csum
-  print "[AD] Handling samples.."
+  #print "[AD] Handling samples.."
 
   l = len(ad_samples)
   if (l != (ad_k_samples * 3)):
-    print "[AD] Wrong length of binary data."
+    #print "[AD] Wrong length of binary data."
     return
 
   # Check checksum
   csum = 0
+
+  #rpc (PORTAL_ADDR, 'dosamples', ad_k_samples, ad_samples)
 
   i = 0
   while (i < ad_k_samples):
@@ -48,11 +50,13 @@ def ad_handle_samples ():
     csum = csum ^ ord(ad_samples[i * 3])
 
     i += 1
-    print "[AD] Sample[", i, "] : ", n
+    #print "[AD] Sample[", i, "] : ", n
 
   if (hex (csum) != ad_sample_csum):
-    print "[AD] Checksum mismatch: Received binary samples.", hex(csum), ",", ad_sample_csum, ",", l
+    pass
+    #print "[AD] Checksum mismatch: Received binary samples.", hex(csum), ",", ad_sample_csum, ",", l
   else:
-    print "[AD] Successfully received ", ad_k_samples, " samples.."
+    pass
+    #print "[AD] Successfully received ", ad_k_samples, " samples.."
 
 

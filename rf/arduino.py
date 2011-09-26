@@ -182,13 +182,13 @@ def a_parse (buf):
               global ad_time_of_first
               ad_time_of_first = int (token)
 
-              print "[AD] Initiating binary transfer.. samples: ", ad_k_samples
+              #print "[AD] Initiating binary transfer.. samples: ", ad_k_samples
               return
 
           elif (subtype == 'DE'):
             if (tokeni == 2):
               global ad_sample_csum
-              print "[AD] Binay data transfer complete."
+              #print "[AD] Binay data transfer complete."
               ad_sample_csum = token
               ad_handle_samples ()
 
@@ -196,7 +196,7 @@ def a_parse (buf):
 
       elif (msgtype == 'DBG'):
         if (tokeni == 1):
-          print "[DBG] ", token
+          rpc (PORTAL_ADDR, 'debug', token)
 
     tokeni += 1
 
