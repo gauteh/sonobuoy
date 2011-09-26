@@ -161,12 +161,12 @@ class Protocol:
               elif (tokeni == 3):
                 self.zero.current.ad.ad_time_of_first = int (token)
 
-                print "[AD] Initiating binary transfer.. samples: ", self.zero.current.ad.ad_k_samples
+                #print "[AD] Initiating binary transfer.. samples: ", self.zero.current.ad.ad_k_samples
                 return
 
             elif (subtype == 'DE'):
               if (tokeni == 2):
-                print "[AD] Binay data transfer complete."
+                #print "[AD] Binay data transfer complete."
                 self.zero.current.ad.ad_sample_csum = token
                 self.zero.current.ad.ad_handle_samples ()
 

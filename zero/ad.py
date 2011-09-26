@@ -52,9 +52,9 @@ class AD7710:
 
     i = 0
     while (i < self.ad_k_samples):
-      n = hex2(ord(self.ad_samples[i * 3]))
-      n += hex2(ord(self.ad_samples[i * 3 + 1]))
-      n += hex2(ord(self.ad_samples[i * 3 + 2]))
+      n  = ord(self.ad_samples[i * 3]) << 8 * 2
+      n += ord(self.ad_samples[i * 3 + 1]) << 8
+      n += ord(self.ad_samples[i * 3 + 2])
 
       csum = csum ^ ord(self.ad_samples[i * 3 + 2])
       csum = csum ^ ord(self.ad_samples[i * 3 + 1])
@@ -62,9 +62,9 @@ class AD7710:
 
       i += 1
       if self.store == 0:
-        self.valuesa.append (int(n, 16))
+        self.valuesa.append (n)
       else:
-        self.valuesb.append (int(n, 16))
+        self.valuesb.append (n)
 
       #print "[AD] Sample[", i, "] : ", int(n,16)
 
