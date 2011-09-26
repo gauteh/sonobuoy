@@ -11,18 +11,20 @@ class Buoy:
   gps  = None
   ad   = None
 
-  node = 'One'
+  node = ''
   logfile = node + '.log'
   logfilef = None
 
   keeprun = True
+  active  = False
   runthread = None
   logger  = None
 
   LOG_TIME_DELAY = 2
 
-  def __init__ (self, z):
+  def __init__ (self, z, n):
     self.zero = z
+    self.node = n
     self.logger = self.zero.logger
     self.logger.info ('Starting Buoy ' + self.node + '..')
 
@@ -61,14 +63,23 @@ class Buoy:
     self.logfilef.close ()
 
 
-  def run (self):
-    i = 0 
-    while self.keeprun:
-      if (i >= self.LOG_TIME_DELAY):
-        self.logger.info ('[' + self.name + '] Writing data file..')
-        self.log ()
-        i = 0
+  def activate (self):
+    self.active = True
 
-      i += 0.1 
+  def deactivate (self):
+    self.active = False
+
+  def run (self):
+    i = self.LOG_TIME_DELAY
+
+    while self.keeprun:
+      if self.active:
+        if (i >= self.LOG_TIME_DELAY):
+          self.logger.info ('[' + self.name + '] Writing data file..')
+          self.log ()
+          i = 0
+
+        i += 0.1 
+
       time.sleep (0.1)
 

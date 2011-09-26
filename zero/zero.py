@@ -25,11 +25,11 @@ class Zero:
   protocol = None
   ad       = None
 
+  buoys    = []
   current  = None
 
   # Reading thread
   go       = True
-  stopping = False
 
   def __init__ (self):
     self.logger = multiprocessing.log_to_stderr ()
@@ -40,8 +40,12 @@ class Zero:
     # Setting up signals..
     signal.signal (signal.SIGINT, self.sigterm)
 
-    # Currently receiving buoy object
-    self.current = Buoy (self)
+    # Currently receiving buoy object, hardcode to 'One'.
+    # TODO: Do multicast to map available buoys, also do every now and then.
+    #       Or have ZeroNode do that..
+
+    self.buoys.append (Buoy(self, 'One'))
+    self.setcurrent(self.buoys[0])
 
     # Protocol handler; receives data from ZeroNode
     self.protocol = Protocol (self)
@@ -49,6 +53,12 @@ class Zero:
     self.openserial ()
 
     self.main ()
+
+  def setcurrent (self, b):
+    if self.current: self.current.deactivate ()
+    self.current = b
+    self.current.activate ()
+    self.logger.info ("Setting current Buoy to: " + b.name)
 
   def openserial (self):
     self.logger.info ("Opening serial port " + str(self.port) + "..")
@@ -77,10 +87,8 @@ class Zero:
     self.logger.info ("Main loop finished..")
 
   def sigterm (self, signum, frame):
-    if not self.stopping:
-      self.stopping = True
-      self.logger.info ("Got SIGTERM..")
-      self.stop ()
+    self.logger.info ("Got SIGTERM..")
+    self.stop ()
 
   def stop (self):
     self.logger.info ("Stopping Zero..")
@@ -89,7 +97,11 @@ class Zero:
 
     # Stop all Buoys..
     if self.current:
-      self.current.stop ()
+      self.current.deactivate ()
+      self.current = None
+
+    for i in self.buoys:
+      i.stop ()
 
     sys.exit (0)
 
