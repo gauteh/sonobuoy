@@ -40,8 +40,8 @@ void rf_setup ()
 
 void rf_send_status ()
 {
-  //rf_ad_message (AD_STATUS);
-  //rf_gps_message (GPS_STATUS);
+  rf_ad_message (AD_STATUS);
+  rf_gps_message (GPS_STATUS);
   rf_ad_message (AD_DATA_BATCH);
 
   /*

@@ -8,7 +8,7 @@
 # ifndef RF_H
 # define RF_H
 
-# define RF_BAUDRATE 38400
+# define RF_BAUDRATE 115200 
 # define RF_Serial Serial2
 
 # define RF_BUFLEN 150
