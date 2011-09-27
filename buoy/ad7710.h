@@ -17,7 +17,6 @@
 
 # include "buoy.h"
 
-
 /* Early tests: (for ulongs)
  *
  * Seems there's space for just above 1000 ulongs, meaning a
@@ -47,6 +46,10 @@ void          ad_configure ();
 void          ad_sample ();
 void          ad_sample (bool);
 void          ad_read_control_register ();
+
+# if DIRECT_SERIAL
+void          ad_sample_performance_test ();
+# endif
 
 /* Turn on DRDY interrupt and sample AD is ready  */
 # define AD_MONITOR_DRDY

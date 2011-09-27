@@ -151,8 +151,6 @@ void ad_configure ()
    *
    */
 
-  //Serial.println ("[AD7710] Configure word-length, notch frequency and activate self-calibration.. ");
-
   delay(100);
   digitalWrite (nTFS, LOW);
   digitalWrite (A0, LOW);
@@ -179,13 +177,6 @@ void ad_configure ()
   ctb  = (ulong) (CONTROL_SELF_CALIBRATION | CONTROL_24BIT) << 12;
   ctb |= (ulong) FREQUENCY;
 
-
-  /*
-  Serial.print ("[AD7710] Writing to control register: ");
-  Serial.println (ctb, BIN);
-  */
-
-
   for (int i = 2; i >= 0; i--) {
 
     byte b = ctb >> (8*i);
@@ -201,13 +192,11 @@ void ad_configure ()
   while (digitalRead(nDRDY)) delay(1);
 
   pinMode(SDATA, INPUT);
-
-  //Serial.println ("[AD7710] Calibration finished, ready for normal operation.");
 }
 
 /*
  * Get sample from AD, will return latest value even if it has been
- * read before. Use sample (true) for a blocking version.
+ * read before. Use ad_sample (true) for a blocking version.
  */
 void ad_sample ()
 {
@@ -233,6 +222,7 @@ void ad_sample (bool blocking)
   return ad_sample ();
 }
 
+# if DIRECT_SERIAL
 /* Performance test of sampling */
 void ad_sample_performance_test ()
 {
@@ -253,7 +243,7 @@ void ad_sample_performance_test ()
   Serial.print ("[AD7710] Duration [ms]: ");
   Serial.println (total);
 }
-
+# endif
 
 # endif
 

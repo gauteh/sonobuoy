@@ -15,6 +15,9 @@
 # define VERSION VERSION_BASE
 # endif
 
+/* Define to include functionality that expects a terminal connected
+ * to Serial0. */
+# define DIRECT_SERIAL 0
 
 # define GREETING \
 "Buoy Control ( version " VERSION " )\n" \
