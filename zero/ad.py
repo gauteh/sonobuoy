@@ -3,6 +3,8 @@ Gaute Hope <eg@gaute.vetsj.com> (c) 2011-08-29
 
 """
 
+import time
+
 from util import *
 
 class AD7710:
@@ -24,6 +26,8 @@ class AD7710:
   valuesb = []
   store   = 0 # 0 = a, 1 = b
   nsamples = 0
+  freq     = 0
+  last     = 0
 
 
   def __init__ (self, b):
@@ -41,6 +45,10 @@ class AD7710:
     #print "[AD] Handling samples.."
 
     self.nsamples += self.ad_k_samples
+
+    now = time.time ()
+    self.freq = self.ad_k_samples / (now - self.last)
+    self.last = now
 
     l = len(self.ad_samples)
     if (l != (self.ad_k_samples * 3)):
@@ -71,6 +79,7 @@ class AD7710:
     if (hex2 (csum) != self.ad_sample_csum):
       print "[AD] Checksum mismatch: Received binary samples.", hex2(csum), ",", self.ad_sample_csum, ",", l
     else:
-      print "[AD] Successfully received ", self.ad_k_samples, " samples.."
+      print "[AD] Successfully received ", self.ad_k_samples, " samples.. (time of first: " + str(self.ad_time_of_first) + ")"
+      print "[AD] Frequency: " + str(self.freq) + "[Hz]"
 
 

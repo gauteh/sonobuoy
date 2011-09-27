@@ -16,7 +16,7 @@ class Buoy:
   ad   = None
 
   node = ''
-  logfile = node + '.log'
+  logfile = '' 
   logfilef = None
 
   keeprun = True
@@ -24,11 +24,12 @@ class Buoy:
   runthread = None
   logger  = None
 
-  LOG_TIME_DELAY = 10
+  LOG_TIME_DELAY = 2
 
   def __init__ (self, z, n):
     self.zero = z
     self.node = n
+    self.logfile = self.node + '.log'
     self.logger = self.zero.logger
     self.logger.info ('Starting Buoy ' + self.node + '..')
 
@@ -49,7 +50,7 @@ class Buoy:
     self.ad.swapstore ()
 
     # Use inactive store
-    v = (self.ad.valuesa if (self.ad.store == 0) else self.ad.valuesb)
+    v = (self.ad.valuesb if (self.ad.store == 0) else self.ad.valuesa)
 
     for i in v:
       self.logfilef.write (str(i) + '\n')
