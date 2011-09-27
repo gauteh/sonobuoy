@@ -32,6 +32,7 @@
 void ad_drdy ();
 
 volatile  sample  ad_value   = {0, 0, 0}; /* Last sampled value */
+          sample  ad_config  = {0, 0, 0};
 
 volatile  ulong   ad_start = 0;       // Time last queue fill happened
 volatile  ulong   ad_queue_time = 0;  // Time to fill up queue (millis)
@@ -58,6 +59,8 @@ void ad_setup ()
   pinMode (SDATA, INPUT);
 
   ad_configure ();
+
+  ad_read_control_register ();
 
   ad_start = millis ();
 
@@ -109,7 +112,6 @@ void ad_read_control_register ()
    *        before one READ cycle has been performed and output register
    *        has been purged.
    *
-   *        TODO: A single pre-sample / or double sample should fix that.
    */
 
 # ifdef AD_MONITOR_DRDY
@@ -120,9 +122,11 @@ void ad_read_control_register ()
   digitalWrite (A0, LOW);
   delay(1);
 
-  ad_sample (true); // Empty output register (see above) [UNTESTED]
-
+  ad_sample (true); // Empty output register (see above)
   ad_sample (true);
+
+  for (int i = 0; i < 3; i ++)
+    ad_config[i] = ad_value[i];
 
   digitalWrite (A0, HIGH);
   delay (1);
@@ -166,14 +170,14 @@ void ad_configure ()
    * 19   gives approximately 1000 samples / 970 ms
    * 2000 gives approximately 1000 samples / 50 s
    */
-  # define FREQUENCY 2 
+  # define FREQUENCY 10
 
 
   // Build control configuration, total of 24 bits.
   ulong ctb = 0;
 
   ctb  = (ulong) (CONTROL_SELF_CALIBRATION | CONTROL_24BIT) << 12;
-  ctb += (ulong) FREQUENCY;
+  ctb |= (ulong) FREQUENCY;
 
 
   /*

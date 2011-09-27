@@ -15,6 +15,7 @@ class AD7710:
   ad_qposition  = 0
   ad_queue_time = 0 # Time to fill up queue
   ad_value      = ''
+  ad_config     = ''
 
   # Receving binary data
   ad_k_remaining    = 0
@@ -41,7 +42,7 @@ class AD7710:
 
   ''' Print some AD stats '''
   def ad_status (self):
-    print "[AD] Sample rate: ", (self.AD_QUEUE_LENGTH * 1000 / float(self.ad_queue_time if self.ad_queue_time > 0 else 1)), " [Hz], value: ", self.ad_value, ", Queue postion: ", self.ad_qposition
+    print "[AD] Sample rate: ", (self.AD_QUEUE_LENGTH * 1000 / float(self.ad_queue_time if self.ad_queue_time > 0 else 1)), " [Hz], value: ", self.ad_value, ", Queue postion: ", self.ad_qposition, ", Config: " + self.ad_config
 
   def swapstore (self):
     self.store = 1 if (self.store == 0) else 0

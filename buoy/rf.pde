@@ -71,8 +71,8 @@ void rf_ad_message (RF_AD_MESSAGE messagetype)
   switch (messagetype)
   {
     case AD_STATUS:
-      // $AD,S,[queue position], [queue fill time],[value]*CS
-      sprintf (buf, "$AD,S,%u,%lu,0x%02X%02X%02X*", ad_qposition, ad_queue_time, ad_value[0], ad_value[1], ad_value[2]);
+      // $AD,S,[queue position], [queue fill time],[value],[config]*CS
+      sprintf (buf, "$AD,S,%u,%lu,0x%02X%02X%02X,0x%02X%02X%02X*", ad_qposition, ad_queue_time, ad_value[0], ad_value[1], ad_value[2], ad_config[0], ad_config[1], ad_config[2]);
       APPEND_CSUM (buf);
 
       RF_Serial.println (buf);

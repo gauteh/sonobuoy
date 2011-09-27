@@ -33,6 +33,7 @@
 typedef byte sample[3];
 
 extern volatile sample ad_value;
+extern          sample ad_config;
 
 # define AD_QUEUE_LENGTH 500
 extern volatile byte    batchready;

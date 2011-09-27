@@ -158,6 +158,8 @@ class Protocol:
                 self.zero.current.ad.ad_queue_time = int (token)
               elif (tokeni == 4):
                 self.zero.current.ad.ad_value = token
+              elif (tokeni == 5):
+                self.zero.current.ad.ad_config = token
                 self.zero.current.ad.ad_status ()
                 return
 

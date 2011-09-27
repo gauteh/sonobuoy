@@ -56,7 +56,7 @@ class Buoy:
     l = len(v)
     i = 0
     while i < l:
-      self.logfilef.write (str(t[i]) + ',' + hex(v[i]) + '\n')
+      self.logfilef.write (str(t[i]) + ',' + str(v[i]) + '\n')
       i += 1
 
     # Clear list
