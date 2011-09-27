@@ -1,8 +1,11 @@
 #! /usr/bin/python2
 #
-# Interfaces with ZeroNode and logs data from all nodes
+# Author: Gaute Hope <eg@gaute.vetsj.com> / 2011-09-26
 #
-# Requires pyserial
+# Central logging and managing point 
+#
+# Requires:
+#  - pyserial
 
 import serial
 import signal
@@ -22,11 +25,10 @@ class Zero:
 
   logger = None
 
-  protocol = None
-  ad       = None
+  protocol = None # Serial protocol to ZeroNode
 
-  buoys    = []
-  current  = None
+  buoys    = []   # List of Buoys
+  current  = None # Current Buoy
 
   # Reading thread
   go       = True
@@ -43,6 +45,8 @@ class Zero:
     # Currently receiving buoy object, hardcode to 'One'.
     # TODO: Do multicast to map available buoys, also do every now and then.
     #       Or have ZeroNode do that..
+    #
+    # Each node should register now and then as well..
 
     self.buoys.append (Buoy(self, 'One'))
     self.setcurrent(self.buoys[0])
@@ -61,13 +65,15 @@ class Zero:
     self.logger.info ("Setting current Buoy to: " + b.name)
 
   def openserial (self):
-    self.logger.info ("Opening serial port " + str(self.port) + "..")
-    try:
-      self.ser = serial.Serial (self.port, self.baud)
-    except:
-      self.logger.info ("Failed to open serial port..")
-      self.ser = None
-      #self.stop ()
+    while (self.ser == None or not self.ser.isOpen ()):
+      self.logger.info ("Opening serial port " + str(self.port) + "..")
+      try:
+        self.ser = serial.Serial (self.port, self.baud)
+      except:
+        self.logger.info ("Failed to open serial port.. retrying in 5 seconds.")
+        self.ser = None
+        #self.stop ()
+        time.sleep(5)
 
   def closeserial (self):
     try:
@@ -76,7 +82,7 @@ class Zero:
     except: pass
 
   def main (self):
-    self.logger.info ("Starting main loop..")
+    self.logger.info ("Entering main loop..")
     while self.go:
       if not self.ser == None:
         r = self.ser.read (80)

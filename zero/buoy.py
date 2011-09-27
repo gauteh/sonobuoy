@@ -1,3 +1,7 @@
+# Author: Gaute Hope <eg@gaute.vetsj.com> / 2011-09-26
+#
+# buoy.py: Represents one Buoy with AD and GPS
+
 import threading
 import logging
 import time
@@ -20,7 +24,7 @@ class Buoy:
   runthread = None
   logger  = None
 
-  LOG_TIME_DELAY = 2
+  LOG_TIME_DELAY = 10
 
   def __init__ (self, z, n):
     self.zero = z
@@ -36,11 +40,12 @@ class Buoy:
 
     self.name = 'Buoy' + self.node
 
-    # Starting logging process
+    # Starting log thread 
     self.runthread = threading.Thread (target = self.run, name = 'Buoy' + self.node )
     self.runthread.start ()
 
   def log (self):
+    self.logger.info ('[' + self.name + '] Writing data file.. (every ' + str(self.LOG_TIME_DELAY) + ' seconds)')
     self.ad.swapstore ()
 
     # Use inactive store
@@ -48,7 +53,7 @@ class Buoy:
 
     for i in v:
       self.logfilef.write (str(i) + '\n')
-    
+
     # Clear list
     if self.ad.store == 0:
       self.ad.valuesb = []
@@ -70,16 +75,15 @@ class Buoy:
     self.active = False
 
   def run (self):
-    i = self.LOG_TIME_DELAY
+    i = self.LOG_TIME_DELAY # Log on first iteration
 
     while self.keeprun:
       if self.active:
         if (i >= self.LOG_TIME_DELAY):
-          self.logger.info ('[' + self.name + '] Writing data file..')
           self.log ()
           i = 0
 
-        i += 0.1 
+        i += 0.1
 
       time.sleep (0.1)
 
