@@ -88,7 +88,7 @@ void ad_drdy ()
     ad_qposition = 0;
     batchready = 2;
 
-    /* Sample rate calculation */
+    // Sample rate calculation
     ad_queue_time = millis () - ad_start;
     ad_start      = millis ();
 
@@ -170,7 +170,7 @@ void ad_configure ()
    * 19   gives approximately 1000 samples / 970 ms
    * 2000 gives approximately 1000 samples / 50 s
    */
-  # define FREQUENCY 10
+  # define FREQUENCY 19
 
 
   // Build control configuration, total of 24 bits.
