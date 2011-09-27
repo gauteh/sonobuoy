@@ -10,7 +10,10 @@ from util import *
 class AD7710:
   buoy = None
 
-  ad_samplerate = 0
+  AD_QUEUE_LENGTH = 500.0
+
+  ad_qposition  = 0
+  ad_queue_time = 0 # Time to fill up queue
   ad_value      = ''
 
   # Receving binary data
@@ -19,9 +22,12 @@ class AD7710:
   ad_time_of_first  = 0
   ad_sample_csum    = '' # String rep of hex value
   ad_samples        = '' # Array of bytes (3 * byte / value)
+  ad_time           = '' # Array of bytes (4 * byte / time stamp)
 
 
   # AD storage, swap before storing
+  timesa  = []
+  timesb  = []
   valuesa = []
   valuesb = []
   store   = 0 # 0 = a, 1 = b
@@ -35,7 +41,7 @@ class AD7710:
 
   ''' Print some AD stats '''
   def ad_status (self):
-    print "[AD] Sample rate: ", self.ad_samplerate, " [Hz], value: ", self.ad_value
+    print "[AD] Sample rate: ", (self.AD_QUEUE_LENGTH * 1000 / float(self.ad_queue_time if self.ad_queue_time > 0 else 1)), " [Hz], value: ", self.ad_value, ", Queue postion: ", self.ad_qposition
 
   def swapstore (self):
     self.store = 1 if (self.store == 0) else 0
@@ -76,10 +82,30 @@ class AD7710:
 
       #print "[AD] Sample[", i, "] : ", int(n,16)
 
+    i = 0
+    while (i < self.ad_k_samples):
+      n = long ()
+      n  = long(ord(self.ad_time[i * 4 + 3])) << 8 * 3
+      n += long(ord(self.ad_time[i * 4 + 2])) << 8 * 2
+      n += long(ord(self.ad_time[i * 4 + 1])) << 8
+      n += long(ord(self.ad_time[i * 4 + 0]))
+
+      csum = csum ^ ord(self.ad_time[i * 4 + 3])
+      csum = csum ^ ord(self.ad_time[i * 4 + 2])
+      csum = csum ^ ord(self.ad_time[i * 4 + 1])
+      csum = csum ^ ord(self.ad_time[i * 4])
+
+      i += 1
+      if self.store == 0:
+        self.timesa.append (n)
+      else:
+        self.timesb.append (n)
+
     if (hex2 (csum) != self.ad_sample_csum):
       print "[AD] Checksum mismatch: Received binary samples.", hex2(csum), ",", self.ad_sample_csum, ",", l
     else:
-      print "[AD] Successfully received ", self.ad_k_samples, " samples.. (time of first: " + str(self.ad_time_of_first) + ")"
-      print "[AD] Frequency: " + str(self.freq) + "[Hz]"
+      pass
+      #print "[AD] Successfully received ", self.ad_k_samples, " samples.. (time of first: " + str(self.ad_time_of_first) + ")"
+      #print "[AD] Frequency: " + str(self.freq) + "[Hz]"
 
 

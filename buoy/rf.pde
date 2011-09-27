@@ -42,7 +42,6 @@ void rf_send_status ()
 {
   rf_ad_message (AD_STATUS);
   rf_gps_message (GPS_STATUS);
-  rf_ad_message (AD_DATA_BATCH);
 
   /*
   char buf[RF_BUFLEN];
@@ -72,8 +71,8 @@ void rf_ad_message (RF_AD_MESSAGE messagetype)
   switch (messagetype)
   {
     case AD_STATUS:
-      // $AD,S,[sample rate],[value]*CS
-      sprintf (buf, "$AD,S,%lu,0x%02X%02X%02X*", ad_sample_rate (), ad_value[0], ad_value[1], ad_value[2]);
+      // $AD,S,[queue position], [queue fill time],[value]*CS
+      sprintf (buf, "$AD,S,%u,%lu,0x%02X%02X%02X*", ad_qposition, ad_queue_time, ad_value[0], ad_value[1], ad_value[2]);
       APPEND_CSUM (buf);
 
       RF_Serial.println (buf);
@@ -86,7 +85,7 @@ void rf_ad_message (RF_AD_MESSAGE messagetype)
        * The RF200 (AtMega128) can hold strings of maximum 126 bytes.
        *
        */
-      # define AD_DATA_BATCH_LEN 20 
+      # define AD_DATA_BATCH_LEN (AD_QUEUE_LENGTH / 2)
 
       /* Format:
 
@@ -96,15 +95,17 @@ void rf_ad_message (RF_AD_MESSAGE messagetype)
 
        * 2. Send one $
 
-       * 3. Send k number of samples: 4 bytes * k
+       * 3. Send k number of samples: 3 bytes * k
+
+       * 4. Send k number of timestamps: 4 bytes * k
 
        * 4. Send end of data with checksum
 
        */
       {
-        int l = ad_qposition;
+        int start = (batchready == 1 ? 0 : AD_DATA_BATCH_LEN);
 
-        int n = sprintf (buf, "$AD,D,%d,%d*", AD_DATA_BATCH_LEN, ad_time[l - AD_DATA_BATCH_LEN]);
+        int n = sprintf (buf, "$AD,D,%d,%lu*", AD_DATA_BATCH_LEN, ad_time[start]);
         APPEND_CSUM (buf);
         RF_Serial.println (buf);
 
@@ -120,7 +121,7 @@ void rf_ad_message (RF_AD_MESSAGE messagetype)
 
         for (int i = 0; i < AD_DATA_BATCH_LEN; i++)
         {
-          memcpy (s, (const void *) ad_queue[l - AD_DATA_BATCH_LEN + i], 3);
+          memcpy (s, (const void *) ad_queue[start + i], 3);
           /* MSB first (big endian), means concatenating bytes on RX will
            * result in LSB first; little endian. */
           RF_Serial.write (s, 3);
@@ -132,6 +133,21 @@ void rf_ad_message (RF_AD_MESSAGE messagetype)
           memcpy (lasts, s, 3);
 
           delayMicroseconds (100);
+        }
+
+        /* Send time stamps */
+        ulong t = 0;
+        for (int i = 0; i < AD_DATA_BATCH_LEN; i++)
+        {
+          t = ad_time[start + i];
+
+          /* Writes MSB first */
+          RF_Serial.write ((byte*)(&t), 4);
+
+          csum = csum ^ ((byte*)&t)[0];
+          csum = csum ^ ((byte*)&t)[1];
+          csum = csum ^ ((byte*)&t)[2];
+          csum = csum ^ ((byte*)&t)[3];
         }
 
         /* Send end of data with Checksum */

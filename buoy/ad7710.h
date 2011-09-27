@@ -35,6 +35,8 @@ typedef byte sample[3];
 extern volatile sample ad_value;
 
 # define AD_QUEUE_LENGTH 500
+extern volatile byte    batchready;
+extern volatile ulong   ad_queue_time;
 extern volatile uint    ad_qposition;
 extern volatile sample  ad_queue[];
 extern volatile ulong   ad_time[];
@@ -43,7 +45,6 @@ void          ad_setup ();
 void          ad_configure ();
 void          ad_sample ();
 void          ad_sample (bool);
-ulong         ad_sample_rate ();
 void          ad_read_control_register ();
 
 /* Turn on DRDY interrupt and sample AD is ready  */

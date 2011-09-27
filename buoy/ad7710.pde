@@ -31,20 +31,23 @@
 /* Private functions */
 void ad_drdy ();
 
-volatile  ulong   ad_samples = 0;
 volatile  sample  ad_value   = {0, 0, 0}; /* Last sampled value */
 
-ulong     ad_start = 0; // Starting time for sample
+volatile  ulong   ad_start = 0;       // Time last queue fill happened
+volatile  ulong   ad_queue_time = 0;  // Time to fill up queue (millis)
 
 volatile  sample  ad_queue[AD_QUEUE_LENGTH];
 volatile  ulong   ad_time[AD_QUEUE_LENGTH];
 volatile  uint    ad_qposition;
 
+volatile  byte    batchready;
+
 void ad_setup ()
 {
   memset ((void *)ad_queue, 0, 3 * AD_QUEUE_LENGTH);
 
-  ad_qposition = 0;
+  ad_qposition  = 0;
+  batchready    = 0;
 
   /* Setting up pins */
   pinMode (nDRDY, INPUT);
@@ -68,17 +71,35 @@ void ad_setup ()
 void ad_drdy ()
 {
   ad_sample (); // Puts latest sample in ad_value
-  ad_samples++;
 
   /* ad_value cannot change while in this interrupt */
-
   memcpy ((void *)ad_queue[ad_qposition], (const void*)ad_value, 3);
 
+  /* set time */
   ad_time[ad_qposition]  = micros ();
 
-  ad_qposition++;
+  if (ad_qposition == AD_QUEUE_LENGTH / 2) {
+    batchready = 1;
+    ad_qposition++;
+  } else if (ad_qposition >= AD_QUEUE_LENGTH) {
+    ad_qposition = 0;
+    batchready = 2;
 
-  if (ad_qposition >= AD_QUEUE_LENGTH) ad_qposition = 0;
+    /* Sample rate calculation */
+    ad_queue_time = millis () - ad_start;
+    ad_start      = millis ();
+
+  } else {
+    ad_qposition++;
+  }
+}
+
+void ad_loop ()
+{
+  if (batchready > 0) {
+    rf_ad_message (AD_DATA_BATCH);
+    batchready = 0;
+  }
 }
 
 void ad_read_control_register ()
@@ -145,7 +166,7 @@ void ad_configure ()
    * 19   gives approximately 1000 samples / 970 ms
    * 2000 gives approximately 1000 samples / 50 s
    */
-  # define FREQUENCY 19L
+  # define FREQUENCY 2 
 
 
   // Build control configuration, total of 24 bits.
@@ -229,17 +250,6 @@ void ad_sample_performance_test ()
   Serial.println (total);
 }
 
-/* Calculate sample rate, resets counter */
-ulong ad_sample_rate ()
-{
-  ulong r =  (ad_samples * 1000) / (millis () - ad_start);
-
-  /* Reset sample rate counter */
-  ad_samples = 0;
-  ad_start   = millis ();
-
-  return r;
-}
 
 # endif
 

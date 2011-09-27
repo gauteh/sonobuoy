@@ -81,12 +81,23 @@ class Zero:
         self.ser.close ()
     except: pass
 
+    self.ser = None
+
   def main (self):
     self.logger.info ("Entering main loop..")
     while self.go:
       if not self.ser == None:
-        r = self.ser.read (80)
-        self.protocol.handle (r)
+        try:
+          r = self.ser.read (80)
+          self.protocol.handle (r)
+        except serial.SerialException as e:
+          self.logger.error ("Exception with serial link, reconnecting..: " + str(e))
+          self.closeserial ()
+          self.openserial ()
+
+        except Exception as e:
+          self.logger.error ("General exception in main loop: " + str(e))
+          self.stop ()
 
       time.sleep (0.000001)
 

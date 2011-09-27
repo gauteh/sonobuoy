@@ -23,20 +23,20 @@ void setup ()
   delay(10);
 }
 
+int i = 0;
+
 void loop ()
 {
 
-  if ((millis () - laststatus) > 200) {
+  if ((millis () - laststatus) > 500) {
     /* Send status to RF */
     rf_send_status ();
 
     laststatus = millis ();
   }
 
-
+  ad_loop ();
   gps_loop ();
-
-  delay(1);
 }
 
 /* vim: set filetype=arduino :  */

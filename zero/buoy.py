@@ -46,20 +46,26 @@ class Buoy:
     self.runthread.start ()
 
   def log (self):
-    self.logger.info ('[' + self.name + '] Writing data file.. (every ' + str(self.LOG_TIME_DELAY) + ' seconds)')
+    self.logger.debug ('[' + self.name + '] Writing data file.. (every ' + str(self.LOG_TIME_DELAY) + ' seconds)')
     self.ad.swapstore ()
 
     # Use inactive store
     v = (self.ad.valuesb if (self.ad.store == 0) else self.ad.valuesa)
+    t = (self.ad.timesb if(self.ad.store == 0) else self.ad.timesa)
 
-    for i in v:
-      self.logfilef.write (str(i) + '\n')
+    l = len(v)
+    i = 0
+    while i < l:
+      self.logfilef.write (str(t[i]) + ',' + hex(v[i]) + '\n')
+      i += 1
 
     # Clear list
     if self.ad.store == 0:
       self.ad.valuesb = []
+      self.ad.timesb  = []
     else:
       self.ad.valuesa = []
+      self.ad.timesa  = []
 
     self.logfilef.flush ()
 
