@@ -86,11 +86,10 @@ class AD7710:
 
     i = 0
     while (i < self.ad_k_samples):
-      n = long ()
-      n  = long(ord(self.ad_time[i * 4 + 3])) << 8 * 3
-      n += long(ord(self.ad_time[i * 4 + 2])) << 8 * 2
-      n += long(ord(self.ad_time[i * 4 + 1])) << 8
-      n += long(ord(self.ad_time[i * 4 + 0]))
+      n  = ord(self.ad_time[i * 4 + 3]) << 8 * 3
+      n += ord(self.ad_time[i * 4 + 2]) << 8 * 2
+      n += ord(self.ad_time[i * 4 + 1]) << 8
+      n += ord(self.ad_time[i * 4 + 0])
 
       csum = csum ^ ord(self.ad_time[i * 4 + 3])
       csum = csum ^ ord(self.ad_time[i * 4 + 2])

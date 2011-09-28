@@ -35,7 +35,7 @@ class Zero:
 
   def __init__ (self):
     self.logger = multiprocessing.log_to_stderr ()
-    self.logger.setLevel (logging.DEBUG)
+    self.logger.setLevel (logging.INFO)
 
     self.logger.info( "Starting Zero..")
 
@@ -88,7 +88,7 @@ class Zero:
     while self.go:
       if not self.ser == None:
         try:
-          r = self.ser.read (80)
+          r = self.ser.read (1024)
           self.protocol.handle (r)
         except serial.SerialException as e:
           self.logger.error ("Exception with serial link, reconnecting..: " + str(e))
