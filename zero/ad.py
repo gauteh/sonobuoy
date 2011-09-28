@@ -54,10 +54,6 @@ class AD7710:
 
     self.nsamples += self.ad_k_samples
 
-    now = time.time ()
-    self.freq = self.ad_k_samples / (now - self.last)
-    self.last = now
-
     l = len(self.ad_samples)
     if (l != (self.ad_k_samples * 3)):
       print "[AD] Wrong length of binary data."

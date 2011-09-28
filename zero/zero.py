@@ -18,29 +18,48 @@ from ad import *
 from protocol import *
 from buoy import *
 
+from ui import *
+
 class Zero:
   port = '/dev/ttyUSB0'
   baud = 115200
   ser  = None
+
+  uimanager = None
+  uiservicethread = None
 
   logger = None
 
   protocol = None # Serial protocol to ZeroNode
 
   buoys    = []   # List of Buoys
-  current  = None # Current Buoy
+  currenti = 0 # Current buoy index
 
   # Reading thread
   go       = True
+
+  def get_current (self):
+    try:
+      return self.buoys[self.currenti]
+    except ValueError as e:
+      return None
+
+  def set_current (self, b):
+    if self.current:
+      self.current.active = False
+
+    self.currenti = self.buoys.index(b)
+
+    self.current.active = True
+    self.logger.info ("Setting current Buoy to: " + b.name)
+
+  current  = property(get_current, set_current) # Current Buoy
 
   def __init__ (self):
     self.logger = multiprocessing.log_to_stderr ()
     self.logger.setLevel (logging.INFO)
 
     self.logger.info( "Starting Zero..")
-
-    # Setting up signals..
-    signal.signal (signal.SIGINT, self.sigterm)
 
     # Currently receiving buoy object, hardcode to 'One'.
     # TODO: Do multicast to map available buoys, also do every now and then.
@@ -49,20 +68,30 @@ class Zero:
     # Each node should register now and then as well..
 
     self.buoys.append (Buoy(self, 'One'))
-    self.setcurrent(self.buoys[0])
+    self.buoys.append (Buoy(self, 'Two'))
+    self.set_current (self.buoys[0])
 
     # Protocol handler; receives data from ZeroNode
     self.protocol = Protocol (self)
 
-    self.openserial ()
+    # Start UI manager
+    self.uimanagerthread = Thread (target = self.run_ui_service, name = 'ZeroUIService')
+    self.uimanagerthread.daemon = True
+    self.uimanagerthread.start ()
+
+    # Start thread reading stdin
+    t = Thread (target = self.stdin, name = 'StdinHandler')
+    t.daemon = True
+    t.start ()
 
     self.main ()
 
-  def setcurrent (self, b):
-    if self.current: self.current.deactivate ()
-    self.current = b
-    self.current.activate ()
-    self.logger.info ("Setting current Buoy to: " + b.name)
+  def run_ui_service (self):
+    self.uimanager = ZeroUIManager ()
+    self.uimanager.setup_server (self)
+    self.uimanagerserver = self.uimanager.get_server ()
+    self.uimanagerserver.serve_forever ()
+
 
   def openserial (self):
     while (self.ser == None or not self.ser.isOpen ()):
@@ -83,34 +112,45 @@ class Zero:
 
     self.ser = None
 
+  def get_buoys (self):
+    for i in self.buoys:
+      yield i
+
   def main (self):
-    self.logger.info ("Entering main loop..")
-    while self.go:
-      if not self.ser == None:
-        try:
+    try:
+      self.logger.info ("Entering main loop..")
+      self.openserial ()
+
+      while self.go:
+        if not self.ser == None:
           r = self.ser.read (1024)
-          self.protocol.handle (r)
-        except serial.SerialException as e:
-          self.logger.error ("Exception with serial link, reconnecting..: " + str(e))
-          self.closeserial ()
-          self.openserial ()
+          if self.current is not None:
+            self.protocol.handle (r)
 
-        except Exception as e:
-          self.logger.error ("General exception in main loop: " + str(e))
-          self.stop ()
+        time.sleep (0.01)
 
-      time.sleep (0.000001)
+    except serial.SerialException as e:
+      self.logger.error ("Exception with serial link, reconnecting..: " + str(e))
+      self.closeserial ()
+      self.openserial ()
 
-    self.logger.info ("Main loop finished..")
+    except Exception as e:
+      self.logger.error ("General exception in main loop: " + str(e))
 
-  def sigterm (self, signum, frame):
-    self.logger.info ("Got SIGTERM..")
-    self.stop ()
+    finally:
+      self.logger.info ("Main loop finished..")
+      self.closeserial ()
+      self.stop ()
+
+  def stdin (self):
+    # Wait for input on stdin, then exit..
+
+    raw_input ()
+    self.go = False
 
   def stop (self):
     self.logger.info ("Stopping Zero..")
     self.go = False
-    self.closeserial ()
 
     # Stop all Buoys..
     if self.current:
@@ -119,6 +159,7 @@ class Zero:
 
     for i in self.buoys:
       i.stop ()
+
 
     sys.exit (0)
 

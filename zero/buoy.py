@@ -73,8 +73,9 @@ class Buoy:
     self.logfilef.flush ()
 
   def stop (self):
+    self.logger.info ("Stopping " + self.name + "..")
     self.keeprun = False
-    self.log ()
+    self.runthread.join ()
     self.logfilef.close ()
 
 
