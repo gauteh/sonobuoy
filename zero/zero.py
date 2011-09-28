@@ -35,7 +35,7 @@ class Zero:
 
   def __init__ (self):
     self.logger = multiprocessing.log_to_stderr ()
-    self.logger.setLevel (logging.INFO)
+    self.logger.setLevel (logging.DEBUG)
 
     self.logger.info( "Starting Zero..")
 

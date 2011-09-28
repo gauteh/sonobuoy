@@ -47,25 +47,28 @@ class Buoy:
 
   def log (self):
     self.logger.debug ('[' + self.name + '] Writing data file.. (every ' + str(self.LOG_TIME_DELAY) + ' seconds)')
+
+    # Acquire lock and swap stores
+    self.ad.storelock.acquire ()
     self.ad.swapstore ()
+    self.ad.storelock.release ()
 
-    # Use inactive store
-    v = (self.ad.valuesb if (self.ad.store == 0) else self.ad.valuesa)
-    t = (self.ad.timesb if(self.ad.store == 0) else self.ad.timesa)
-
-    l = len(v)
+    # Write data from inactive store
+    l = len(self.ad.samplesb) if (self.ad.store == 0) else len(self.ad.samplesa)
     i = 0
     while i < l:
-      self.logfilef.write (str(t[i]) + ',' + str(v[i]) + '\n')
+      if self.ad.store == 0:
+        self.logfilef.write (str(self.ad.samplesb[i][0]) + ',' + str(self.ad.samplesb[i][1]) + '\n')
+      else:
+        self.logfilef.write (str(self.ad.samplesa[i][0]) + ',' + str(self.ad.samplesa[i][1]) + '\n')
+
       i += 1
 
-    # Clear list
+    # Clear inactive store 
     if self.ad.store == 0:
-      self.ad.valuesb = []
-      self.ad.timesb  = []
+      self.ad.samplesb = []
     else:
-      self.ad.valuesa = []
-      self.ad.timesa  = []
+      self.ad.samplesa = []
 
     self.logfilef.flush ()
 

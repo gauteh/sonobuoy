@@ -4,6 +4,7 @@ Gaute Hope <eg@gaute.vetsj.com> (c) 2011-08-29
 """
 
 import time
+import threading
 
 from util import *
 
@@ -27,11 +28,10 @@ class AD7710:
 
 
   # AD storage, swap before storing
-  timesa  = []
-  timesb  = []
-  valuesa = []
-  valuesb = []
-  store   = 0 # 0 = a, 1 = b
+  storelock = None
+  samplesa = []
+  samplesb = []
+  store    = 0 # 0 = a, 1 = b
   nsamples = 0
   freq     = 0
   last     = 0
@@ -39,6 +39,7 @@ class AD7710:
 
   def __init__ (self, b):
     self.buoy = b
+    self.storelock = threading.Lock ()
 
   ''' Print some AD stats '''
   def ad_status (self):
@@ -59,11 +60,14 @@ class AD7710:
 
     l = len(self.ad_samples)
     if (l != (self.ad_k_samples * 3)):
-      #print "[AD] Wrong length of binary data."
+      print "[AD] Wrong length of binary data."
       return
 
     # Check checksum
     csum = 0
+
+    s = []
+    t = []
 
     i = 0
     while (i < self.ad_k_samples):
@@ -76,10 +80,7 @@ class AD7710:
       csum = csum ^ ord(self.ad_samples[i * 3])
 
       i += 1
-      if self.store == 0:
-        self.valuesa.append (n)
-      else:
-        self.valuesb.append (n)
+      s.append(n)
 
       #print "[AD] Sample[", i, "] : ", int(n,16)
 
@@ -97,16 +98,27 @@ class AD7710:
       csum = csum ^ ord(self.ad_time[i * 4])
 
       i += 1
-      if self.store == 0:
-        self.timesa.append (n)
-      else:
-        self.timesb.append (n)
+      t.append (n)
 
     if (hex2 (csum) != self.ad_sample_csum):
       print "[AD] Checksum mismatch: Received binary samples.", hex2(csum), ",", self.ad_sample_csum, ",", l
+
     else:
-      pass
+      # Successfully received samples and time stamps
+      self.storelock.acquire ()
+      i = 0
+      while i < self.ad_k_samples:
+        if self.store == 0: 
+          self.samplesa.append ((t[i], s[i]))
+        else:
+          self.samplesb.append ((t[i], s[i]))
+
+        i += 1
+
+      self.storelock.release ()
+
       #print "[AD] Successfully received ", self.ad_k_samples, " samples.. (time of first: " + str(self.ad_time_of_first) + ")"
       #print "[AD] Frequency: " + str(self.freq) + "[Hz]"
+
 
 
