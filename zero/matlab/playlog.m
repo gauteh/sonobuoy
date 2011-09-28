@@ -38,7 +38,7 @@ nt = linspace(t(1), t(end), length(t)*round(SFs/(nf*Fs)));
 ny = interp1(t, y, nt);
 
 %% Playback
-fprintf ('Playing: %6.2f seconds (at %dx speed)..', length(t)/(nf*Fs), nf)
+fprintf ('Playing: %6.2f seconds (at %dx speed)..\n', length(t)/(nf*Fs), nf)
 
 sound (ny, SFs);
 
