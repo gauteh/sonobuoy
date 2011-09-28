@@ -27,6 +27,13 @@ class ZeroCliService:
 
     return s
 
+  def buoy_status_by_name (self, bname):
+    for b in self.zero.buoys:
+      if b.name == bname:
+        return self.buoy_status (b)
+
+    return None
+
   def buoy_status (self, b):
     return [b.active, b.name, b.ad.ad_value, b.ad.ad_config, b.ad.ad_qposition, b.ad.ad_queue_time, b.ad.nsamples]
 

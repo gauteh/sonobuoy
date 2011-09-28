@@ -13,6 +13,7 @@ from buoy import *
 from ad import *
 
 import sys
+import os
 from texttable import *
 
 class zCLI:
@@ -20,7 +21,6 @@ class zCLI:
   z         = None
 
   def __init__ (self):
-    print "Zero CLI"
     self.m = ZeroUIManager ()
     self.m.setup_client ()
 
@@ -52,16 +52,51 @@ class zCLI:
 
     print "Total: ", self.z.bouy_count ()
 
+  def show (self, b):
+    q_length = self.z.ad_queue_length ()
+    t = Texttable ()
+
+    s = self.z.buoy_status_by_name (b)
+    if s is None:
+      print "Error: No such buoy."
+      sys.exit (1)
+
+    t.header (['Buoy:', b])
+    t.set_cols_align (["r", "l"])
+    t.set_cols_width ([20, 50])
+
+    t.add_rows ([ ["Active:", s[0]],
+                  ["Current value:", s[1]],
+                  ["Control register:", s[2]],
+                  ["Queue position:", s[3]],
+                  ["Sample rate:", "{0:.2f} Hz".format(0 if s[5] == 0 else q_length * 1000 / s[5])],
+                  ["Total samples:", s[6]]
+                  ], False)
+
+
+    print t.draw ()
+
+  def monitor (self, b):
+    while True:
+      #print chr(27) + "[2J" # Clear screen
+      os.system ('clear')
+      print "Monitoring buoy:"
+      self.show (b)
+      time.sleep (1)
+
   def stop (self):
     print "Stopping Zero Manager.."
     self.z.stop ()
 
   ''' Usage output '''
   def help (self):
-    print "Usage:"
-    print sys.argv[0] + " command [arguments]"
+    print ""
+    print "Usage: ", sys.argv[0] + " command [arguments]"
+    print ""
     print "Commands:"
     print "summary                  Print summary of connected nodes"
+    print "show [buoy name]         Show detailed information about buoy"
+    print "monitor [buoy name]      Regularily print information about buoy"
     print "stop                     Stop Zero Manager"
 
   def go (self):
@@ -75,8 +110,25 @@ class zCLI:
     if sys.argv[1] == 'summary':
       self.summary ()
 
+    elif sys.argv[1] == 'show':
+      if len(sys.argv) != 3:
+        print "Error: No Buoy identifier specified."
+        self.help ()
+        return
+      self.show (sys.argv[2])
+
+    elif sys.argv[1] == 'monitor':
+      if len(sys.argv) != 3:
+        print "Error: No Buoy identifier specified."
+        self.help ()
+        return
+      self.monitor (sys.argv[2])
+
     elif sys.argv[1] == 'stop':
       self.stop ()
+
+    elif sys.argv[1] == 'help' or sys.argv[1] == '--help':
+      self.help ()
 
     else:
       print "Error: Unknown command."

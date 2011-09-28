@@ -39,7 +39,7 @@ class Buoy:
     # Open file
     self.logfilef = open (self.logfile, 'a')
 
-    self.name = 'Buoy' + self.node
+    self.name = self.node
 
     # Starting log thread 
     self.runthread = threading.Thread (target = self.run, name = 'Buoy' + self.node )
