@@ -69,6 +69,7 @@ class Zero:
 
     self.buoys.append (Buoy(self, 'One'))
     self.buoys.append (Buoy(self, 'Two'))
+    self.buoys.append (Buoy(self, 'Three'))
     self.set_current (self.buoys[0])
 
     # Protocol handler; receives data from ZeroNode

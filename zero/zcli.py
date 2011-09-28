@@ -39,12 +39,13 @@ class zCLI:
     q_length = self.z.ad_queue_length ()
 
     t = Texttable ()
-    t.header (['Active', 'Name', 'Last value', 'Config', 'Queue pos.', 'Hz', 'Total samples'])
+    t.header (['A', 'Name', 'Last value', 'Config', 'Queue pos.', 'Sample rate', 'Total samples'])
     t.set_cols_align  (["c", "l", "l", "l", "c", "c", "c"])
     t.set_cols_valign (["m", "m", "m", "m", "m", "m", "m"])
+    t.set_cols_width  ([1, 10, 8, 8, 8, 12, 10,])
 
     for s in self.z.buoy_statuses ():
-      f = "{0:.2f}".format(0 if s[5] == 0 else q_length * 1000 / s[5])
+      f = "{0:.2f} Hz".format(0 if s[5] == 0 else q_length * 1000 / s[5])
       t.add_row ([("X" if s[0] else ""),] + s[1:5] + [f,] + [s[6]])
 
     print t.draw ()
@@ -60,7 +61,7 @@ class zCLI:
     print "Usage:"
     print sys.argv[0] + " command [arguments]"
     print "Commands:"
-    print "summary                  Give short summary of connected nodes"
+    print "summary                  Print summary of connected nodes"
     print "stop                     Stop Zero Manager"
 
   def go (self):
