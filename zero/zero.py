@@ -68,8 +68,8 @@ class Zero:
     # Each node should register now and then as well..
 
     self.buoys.append (Buoy(self, 'One'))
-    self.buoys.append (Buoy(self, 'Two'))
-    self.buoys.append (Buoy(self, 'Three'))
+    #self.buoys.append (Buoy(self, 'Two'))
+    #self.buoys.append (Buoy(self, 'Three'))
     self.set_current (self.buoys[0])
 
     # Protocol handler; receives data from ZeroNode

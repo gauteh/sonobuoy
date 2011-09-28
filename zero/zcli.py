@@ -66,9 +66,9 @@ class zCLI:
     t.set_cols_width ([20, 50])
 
     t.add_rows ([ ["Active:", s[0]],
-                  ["Current value:", s[1]],
-                  ["Control register:", s[2]],
-                  ["Queue position:", s[3]],
+                  ["Current value:", s[2]],
+                  ["Control register:", s[3]],
+                  ["Queue position:", s[4]],
                   ["Sample rate:", "{0:.2f} Hz".format(0 if s[5] == 0 else q_length * 1000 / s[5])],
                   ["Total samples:", s[6]]
                   ], False)
