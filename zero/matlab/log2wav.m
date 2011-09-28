@@ -33,6 +33,6 @@ ny = interp1(t, y, nt);
 
 %% Write
 fprintf ('Writing %6.2f seconds (at %dx speed).. to %s\n', length(t)/(nf*Fs), nf, fout)
-wavwrite (ny, SFs, fout);
+wavwrite (ny, SFs, 24, fout);
 
 end
