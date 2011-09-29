@@ -128,25 +128,26 @@ class Protocol:
                 self.zero.current.gps.lasttype = token
 
               elif (tokeni == 3):
-                self.zero.current.gps.telegramsreceived = token
+                self.zero.current.gps.telegramsreceived = int(token)
 
               elif (tokeni == 4):
-                self.zero.current.gps.latitude = token
+                self.zero.current.gps.latitude = float(token) if len(token) else 0
 
               elif (tokeni == 5):
                 self.zero.current.gps.north = (token[0] == 'N')
 
               elif (tokeni == 6):
-                self.zero.current.gps.longitude = token
+                self.zero.current.gps.longitude = float(token) if len(token) > 0 else 0
 
               elif (tokeni == 7):
                 self.zero.current.gps.east = (token[0] == 'E')
 
               elif (tokeni == 8):
-                self.zero.current.gps.gps_time = token
+                self.zero.current.gps.gps_time = float(token)
 
               elif (tokeni == 9):
                 self.zero.current.gps.valid = (token == 'Y')
+                self.zero.current.gps.gps_status ()
 
         elif (msgtype == 'AD'):
           if (tokeni == 1): subtype = token

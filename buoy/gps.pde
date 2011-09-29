@@ -36,9 +36,62 @@ void gps_setup ()
 }
 
 
+bool HAS_LEAP_SECONDS = false;
+bool HAS_TIME         = false;
+bool HAS_SYNC         = false;
+bool IN_OVERFLOW      = false;
+
+volatile ulong referencesecond = 0;
+volatile ulong lastsecond      = 0;
+volatile ulong microdelta      = 0;
+
+volatile ulong lastmicros      = 0;
+
+void gps_sync_pulse ()
+{
+  /* Synchronize time stamp clock */
+  HAS_SYNC = true;
+
+  /* Last second should be received every second */
+  if (gps_data.valid) {
+    lastsecond++;
+
+    microdelta = micros () - (1e6 * (lastsecond - referencesecond));
+
+    /* Is reset because of new microdelta calculation */
+    IN_OVERFLOW = false;
+  }
+
+  /* For overrun handling */
+  lastmicros = micros ();
+}
+
+void gps_roll_reference ()
+{
+  /* Change referencesecond to latest */
+  if (gps_data.valid) {
+    microdelta = microdelta - (1e6 * (lastsecond - referencesecond));
+    referencesecond = lastsecond;
+  }
+}
+
+void gps_update_second ()
+{
+  /* Got a telegram with UTC time information */
+  HAS_TIME = gps_data.valid;
+  HAS_SYNC = (HAS_SYNC && gps_data.valid);
+
+  if (gps_data.valid) {
+    /* Create time in utc seconds from GPS data */
+
+  }
+}
+
 void gps_parse ()
 {
-  /* Telegram types:
+  /* GPS parser {{{
+   *
+   * Telegram types:
    *
    * GPRMC
    * GPGGA
@@ -79,7 +132,7 @@ void gps_parse ()
     token[j] = 0;
 
     /* The last token, where parsing has reached the full length
-     * of gps_buf, will contain the checksum. 
+     * of gps_buf, will contain the checksum.
      *
      * We don't need this since we have already checked it beforehand.
      *
@@ -143,6 +196,7 @@ void gps_parse ()
                 break;
 
               case 10: /* Magnetic declination not supported by device */
+                gps_update_second ();
 
               default:
                 break;
@@ -171,16 +225,37 @@ void gps_parse ()
     }
     tokeni++;
   }
+  /* Done parser }}} */
 }
 
 void gps_loop ()
 {
-/* States:
- * 0 = Waiting for start of telegram $
- * 1 = Receiving (between $ and *)
- * 2 = Waiting for Checksum digit 1
- * 3 = Waiting for Checksum digit 2
- */
+
+  /* Check wether to update reference second */
+  if ((lastsecond - referencesecond) > ROLL_REFERENCE)
+  {
+    gps_roll_reference ();
+  }
+
+  /* This can happen if we don't have valid GPS data and
+   * an overflow has happened, handle within 10 seconds of
+   * reaching microdelta */
+  if (IN_OVERFLOW && ((microdelta - micros()) > (ulong)10e6))
+  {
+    /* Set new reference using internal clock */
+    referencesecond += TIME_FROM_REFERENCE / (ulong)10e6;
+    microdelta = micros ();
+    IN_OVERFLOW = false;
+  }
+
+  /* Handle incoming GPS telegrams on serial line {{{
+   *
+   * States:
+   * 0 = Waiting for start of telegram $
+   * 1 = Receiving (between $ and *)
+   * 2 = Waiting for Checksum digit 1
+   * 3 = Waiting for Checksum digit 2
+   */
   static int state = 0;
 
   int ca = GPS_Serial.available ();
@@ -224,6 +299,8 @@ void gps_loop ()
 
     ca--;
   }
+
+  /* }}} Done telegram handler */
 }
 
 # endif

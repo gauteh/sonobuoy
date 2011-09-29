@@ -18,6 +18,7 @@
 
 # include "buoy.h"
 # include "ad7710.h"
+# include "gps.h"
 
 /* PIN setup */
 # define A0     46
@@ -73,13 +74,16 @@ void ad_setup ()
 /* Will be run on nDRDY LOW */
 void ad_drdy ()
 {
+  /* Check for overflow */
+  CHECK_FOR_OVERFLOW();
+
   ad_sample (); // Puts latest sample in ad_value
 
   /* ad_value cannot change while in this interrupt */
   memcpy ((void *)ad_queue[ad_qposition], (const void*)ad_value, 3);
 
   /* set time */
-  ad_time[ad_qposition]  = micros ();
+  ad_time[ad_qposition]  = TIME_FROM_REFERENCE; 
 
   if (ad_qposition == AD_QUEUE_LENGTH / 2) {
     batchready = 1;
@@ -95,6 +99,8 @@ void ad_drdy ()
   } else {
     ad_qposition++;
   }
+
+  lastmicros = micros ();
 }
 
 void ad_loop ()

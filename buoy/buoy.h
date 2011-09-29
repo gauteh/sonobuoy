@@ -23,6 +23,7 @@
 "Buoy Control ( version " VERSION " )\n" \
 "by Gaute Hope <eg@gaute.vetsj.com> / <gaute.hope@student.uib.no>  (2011)"
 
+# define ULONG_MAX 4294967295
 typedef unsigned long ulong;
 typedef unsigned int  uint;
 

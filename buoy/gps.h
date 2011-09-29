@@ -40,7 +40,81 @@ typedef struct _GPS_DATA {
 
 extern GPS_DATA gps_data;
 
+/* Timing */
+# define LEAP_SECONDS 19 // as of 2011
+extern bool HAS_LEAP_SECONDS;
+extern bool HAS_TIME;
+extern bool HAS_SYNC;
+extern bool IN_OVERFLOW;
+
+/* Current basis to calculate microsecond timestamp from
+ *
+ * Needs to be logged as reference for following time stamps in data.
+ *
+ * ROLL_REFERENCE specifies how many seconds to wait before updating
+ * referencesecond to current.
+ *
+ */
+extern volatile ulong referencesecond;
+# define ROLL_REFERENCE 60
+
+/* Last second received from GPS , the next pulse should indicate +1 second.
+ * UTC (HAS_LEAP_SECONDS indicate wether this includes leap seconds)
+ */
+extern volatile ulong lastsecond;
+
+/* The time in microseconds between Arduino micros() clock and referencesecond
+ *
+ * Synchronized with pulse from GPS.
+ *
+ */
+extern volatile ulong microdelta;
+
+/*
+ * For detecting overflow: lastmicros is result of last micros ()
+ *                         call in ad_drdy ()
+ *
+ * TODO: Check if we count the first step (0) correctly when in overflow.
+ *
+ */
+extern volatile ulong lastmicros;
+
+/* Get time related to reference */
+# define TIME_FROM_REFERENCE (!IN_OVERFLOW ? (micros() - microdelta) : (micros () + (ULONG_MAX - microdelta)))
+# define CHECK_FOR_OVERFLOW() (IN_OVERFLOW = (micros () < lastmicros))
+
+/* Overflow handling:
+ *
+ * m   = micros
+ * d   = delta
+ *
+ * at t0:
+ * ref = const.
+ * d   = m0
+ * t   = ref + (m0 - d)
+ *
+ * at t1:
+ * t   = ref + (m1 - d)
+ *
+ * at t2:
+ * m > ULONG_MAX and is clocked around
+ *
+ * g is modulated m
+ *
+ * g = m - ULONG_MAX, we _will_ catch overrun/modulation before a second
+ *                    modulation would have time to occur.
+ * t = ref + (m - d)
+ *   = ref + (g + ULONG_MAX - d)
+ *   = ref + (g + (ULONG_MAX - d))
+ *
+ * for d > g, this means we will have to recalculate ref before g >= d.
+ *
+ */
+
 void gps_setup ();
 void gps_loop ();
+void gps_sync_pulse ();
+void gps_roll_reference ();
+void gps_update_second ();
 
 # endif

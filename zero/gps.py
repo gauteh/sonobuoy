@@ -16,7 +16,4 @@ class Gps ():
     self.buoy = b
 
   def gps_status (self):
-    print "GPS time: ", self.gps_time, " (T rec: ", self.telegramsreceived, ")"
-    print "Latitude:  ", self.latitude, ('N' if self.north else 'S')
-    print "Longitude: ", self.longitude, ('E' if self.east else 'W') 
-    print "Valid: ", self.valid
+    print "[GPS] [", ("valid" if self.valid else "invalid"), "] Time: ", self.gps_time, " Position: ", self.latitude, ('N' if self.north else 'S'),  ", ", self.longitude, ('E' if self.east else 'W') 
