@@ -74,7 +74,7 @@ void ad_setup ()
 /* Will be run on nDRDY LOW */
 void ad_drdy ()
 {
-  /* Check for overflow */
+  /* Check for micros () overflow */
   CHECK_FOR_OVERFLOW();
 
   ad_sample (); // Puts latest sample in ad_value
