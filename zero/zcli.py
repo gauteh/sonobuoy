@@ -68,9 +68,8 @@ class zCLI:
 
     t.add_rows ([ ["Active:", s[0]],
                   ["Current value:", s[2]],
-                  ["Control register:", s[3]],
                   ["Queue position:", s[4]],
-                  ["Sample rate:", "{0:.2f} Hz".format(0 if s[5] == 0 else q_length * 1000 / s[5])],
+                  ["Sample rate:", "{0:.2f} Hz".format(0 if s[5] == 0 else q_length * 1000 / s[5]) + " ( Control register: " + s[3] + " )"],
                   ["Total samples:", s[6]],
                   ["Position:", "{0:.4f}{1}, {2:.4f}{3}".format(s[7], ("N" if s[8] else "S"), s[9], ("E" if s[10] else "W"))],
                   ["Valid GPS:", str(s[11]) + " ( Sync: " + str(s[16]) + " )" + '( Time: ' + str(s[15]) + " )"],
