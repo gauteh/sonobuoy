@@ -30,6 +30,8 @@ void gps_setup ()
   gps_buf_pos = 0;
 
   memset (&gps_data, 0, sizeof(gps_data));
+
+  attachInterrupt (GPS_SYNC_INTERRUPT, gps_sync_pulse, RISING);
 }
 
 
@@ -51,6 +53,7 @@ void gps_sync_pulse ()
 
   /* Last second should be received every second */
   if (gps_data.valid) {
+    // TODO: Avoid race-condition with gps_update_second
     lastsecond++;
 
     microdelta = micros () - (1e6 * (lastsecond - referencesecond));
@@ -79,20 +82,16 @@ void gps_update_second ()
   HAS_SYNC = (HAS_SYNC && gps_data.valid);  // Resets HAS_SYNC when data.valid
                                             // goes low.
 
-  if (gps_data.valid) {
-    /* Create time in utc seconds from GPS data */
+  /* Create time in utc seconds from GPS data */
+  detachInterrupt (GPS_SYNC_INTERRUPT);
 
-  }
+  attachInterrupt (GPS_SYNC_INTERRUPT, gps_sync_pulse, RISING);
 }
 
 void gps_parse ()
 {
   /* GPS parser {{{
    *
-   * Telegram types:
-   *
-   * GPRMC
-   * GPGGA
    *
    */
 
@@ -157,6 +156,7 @@ void gps_parse ()
       } else {
         switch (type)
         {
+          // GPRMC {{{
           case GPRMC:
             switch (tokeni)
             {
@@ -204,7 +204,9 @@ void gps_parse ()
                 break;
             }
             break;
+            // }}}
 
+          // GPGGA {{{
           case GPGGA:
             switch (tokeni)
             {
@@ -255,7 +257,9 @@ void gps_parse ()
 
             }
             break;
+          // }}}
 
+          // GPGLL {{{
           case GPGLL:
             switch (tokeni)
             {
@@ -287,7 +291,9 @@ void gps_parse ()
               default: break;
             }
             break;
+          // }}}
 
+          // GPGSA {{{
           case GPGSA:
             switch (tokeni)
             {
@@ -336,7 +342,9 @@ void gps_parse ()
               default: break;
             }
             break;
+          // }}}
 
+          // GPGSV {{{
           case GPGSV:
           /* TODO: Handle multiple messages.. simply ignoring, could result
            * in wrong values for satellite count */
@@ -360,6 +368,7 @@ void gps_parse ()
 
             }
             break;
+          // }}}
 
           default:
             /* Having reached here on an unknown or unspecified telegram

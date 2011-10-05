@@ -176,7 +176,7 @@ void rf_gps_message (RF_GPS_MESSAGE messagetype)
   switch (messagetype)
   {
     case GPS_STATUS:
-      // $GPS,S,[lasttype],[telegrams received],[lasttelegram],Lat,Lon,Time,Valid*CS
+      // $GPS,S,[lasttype],[telegrams received],[lasttelegram],Lat,Lon,Time.Seconds_part,Valid*CS
       // Valid: Y = Yes, N = No
       sprintf (buf, "$GPS,S,%d,%d,%s,%c,%s,%c,%lu.%lu,%c*", gps_data.lasttype, gps_data.received, gps_data.latitude, (gps_data.north ? 'N' : 'S'), gps_data.longitude, (gps_data.east ? 'E' : 'W'), gps_data.time, gps_data.seconds_part, (gps_data.valid ? 'Y' : 'N'));
 

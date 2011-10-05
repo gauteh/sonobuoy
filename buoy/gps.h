@@ -14,6 +14,8 @@
 # define GPS_BAUDRATE 4800
 # define GPS_Serial Serial1
 
+# define GPS_SYNC_INTERRUPT 1
+
 typedef enum _GPS_TELEGRAM {
   UNSPECIFIED = 0,
   UNKNOWN,
@@ -72,6 +74,10 @@ extern volatile ulong referencesecond;
 
 /* Last second received from GPS , the next pulse should indicate +1 second.
  * UTC (HAS_LEAP_SECONDS indicate wether this includes leap seconds)
+ *
+ * This is updated even without valid data and can only be trusted if
+ * data.valid is set and gps_update_second has been run.
+ *
  */
 extern volatile ulong lastsecond;
 
@@ -95,7 +101,7 @@ extern volatile ulong lastmicros;
 # define TIME_FROM_REFERENCE (!IN_OVERFLOW ? (micros() - microdelta) : (micros () + (ULONG_MAX - microdelta)))
 # define CHECK_FOR_OVERFLOW() (IN_OVERFLOW = (micros () < lastmicros))
 
-/* Overflow handling:
+/* Overflow handling, the math.. {{{
  *
  * m   = micros
  * d   = delta
@@ -121,7 +127,7 @@ extern volatile ulong lastmicros;
  *
  * for d > g, this means we will have to recalculate ref before g >= d.
  *
- */
+ * }}} */
 
 void gps_setup ();
 void gps_loop ();
