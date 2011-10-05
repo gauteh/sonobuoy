@@ -129,9 +129,11 @@ class zCLI:
 
     elif sys.argv[1] == 'stop':
       self.stop ()
+      return
 
     elif sys.argv[1] == 'help' or sys.argv[1] == '--help':
       self.help ()
+      return
 
     else:
       print "Error: Unknown command."
