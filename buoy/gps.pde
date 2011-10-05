@@ -12,6 +12,7 @@
 # ifndef GPS
 # define GPS
 
+
 # include "buoy.h"
 # include "rf.h"
 # include "gps.h"
@@ -84,7 +85,38 @@ void gps_update_second ()
 
   /* Create time in utc seconds from GPS data */
   detachInterrupt (GPS_SYNC_INTERRUPT);
-  
+
+  /* Based on makeTime () from:
+   * http://www.arduino.cc/playground/Code/Time
+   */
+
+# define SECONDS_PER_DAY 86400L
+# define LEAP_YEAR(x) (!((1970 + x) % 4) && ( ((1970 + x) % 100) || !((1970 + x) % 400) ))
+
+  ulong year = (2000 + gps_data.year) - 1970; // Offset 1970
+
+  lastsecond = year * 365L * SECONDS_PER_DAY;
+  for (int i = 0; i < year; i++)
+    if (LEAP_YEAR(i))
+      lastsecond += SECONDS_PER_DAY;
+
+  const int monthdays[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+  for (int i = 1; i < gps_data.month; i++) {
+    if ((i == 2) && LEAP_YEAR(year))
+      lastsecond += SECONDS_PER_DAY * 29;
+    else
+      lastsecond += SECONDS_PER_DAY * monthdays[i - 1];
+  }
+
+  lastsecond += SECONDS_PER_DAY * (gps_data.day - 1);
+  lastsecond += 60 * 60 * gps_data.hour;
+  lastsecond += 60 * gps_data.minute;
+  lastsecond += gps_data.second;
+
+  gps_data.time  = gps_data.hour * 1e4;
+  gps_data.time += gps_data.minute * 1e2;
+  gps_data.time += gps_data.second;
+
   attachInterrupt (GPS_SYNC_INTERRUPT, gps_sync_pulse, RISING);
 }
 
@@ -161,7 +193,7 @@ void gps_parse ()
             switch (tokeni)
             {
               case 1:
-                sscanf (token, "%lu.%lu", &(gps_data.time), &(gps_data.seconds_part));
+                sscanf (token, "%02d%02d%02d.%lu", &(gps_data.hour), &(gps_data.minute), &(gps_data.second), &(gps_data.seconds_part));
                 doseconds = true;
                 break;
 
@@ -194,7 +226,7 @@ void gps_parse ()
                 break;
 
               case 9:
-                sscanf (token, "%d", &(gps_data.date));
+                sscanf (token, "%02d%02d%02d", &(gps_data.day), &(gps_data.month), &(gps_data.year));
                 doseconds = true;
                 break;
 
@@ -211,7 +243,7 @@ void gps_parse ()
             switch (tokeni)
             {
               case 1:
-                sscanf (token, "%lu.%lu", &(gps_data.time), &(gps_data.seconds_part));
+                sscanf (token, "%02d%02d%02d.%lu", &(gps_data.hour), &(gps_data.minute), &(gps_data.second), &(gps_data.seconds_part));
                 doseconds = true;
                 break;
 
@@ -280,7 +312,7 @@ void gps_parse ()
                 break;
 
               case 5:
-                sscanf (token, "%lu.%lu", &(gps_data.time), &(gps_data.seconds_part));
+                sscanf (token, "%02d%02d%02d.%lu", &(gps_data.hour), &(gps_data.minute), &(gps_data.second), &(gps_data.seconds_part));
                 doseconds = true;
                 break;
 

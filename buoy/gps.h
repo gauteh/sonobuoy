@@ -45,8 +45,13 @@ typedef struct _GPS_DATA {
   bool    east;     /* true = Longitude is east aligned, false = south */
 
   ulong   time;
-  ulong   seconds_part;
-  int     date;
+  int     hour;
+  int     minute;
+  int     second;
+  int     seconds_part;
+  int     day;
+  int     month;
+  int     year;
 
   char    speedoverground[6];
   char    courseoverground[6]; /* True north */
