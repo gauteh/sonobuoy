@@ -95,7 +95,9 @@ void gps_update_second ()
 
   ulong year = (2000 + gps_data.year) - 1970; // Offset 1970
 
-  lastsecond = year * 365L * SECONDS_PER_DAY;
+  lastsecond = year * 365 * SECONDS_PER_DAY;
+
+  /* Add a day for each leap year */
   for (int i = 0; i < year; i++)
     if (LEAP_YEAR(i))
       lastsecond += SECONDS_PER_DAY;
@@ -109,9 +111,10 @@ void gps_update_second ()
   }
 
   lastsecond += SECONDS_PER_DAY * (gps_data.day - 1);
-  lastsecond += 60 * 60 * gps_data.hour;
-  lastsecond += 60 * gps_data.minute;
-  lastsecond += gps_data.second;
+  lastsecond += 60 * 60 * (ulong)gps_data.hour;
+  lastsecond += 60 * (ulong)gps_data.minute;
+  lastsecond += (ulong)gps_data.second;
+
 
   gps_data.time  = gps_data.hour * 1e4;
   gps_data.time += gps_data.minute * 1e2;
