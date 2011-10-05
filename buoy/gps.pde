@@ -1,7 +1,10 @@
 /* Author:  Gaute Hope <eg@gaute.vetsj.com>
  * Date:    2011-09-05
  *
- * Interface to standard NMEA GPS.
+ * Interface to GlobalSat EM-411 with sync pulse.
+ *
+ * This assumes that we will receive telegrams within each second wether
+ * there is valid data or not.
  *
  *
  */
@@ -26,13 +29,7 @@ void gps_setup ()
   gps_buf[0] = 0;
   gps_buf_pos = 0;
 
-  gps_data.received = 0;
-  gps_data.valid = false;
-  gps_data.latitude[0] = 0;
-  gps_data.north = true;
-  gps_data.longitude[0] = 0;
-  gps_data.time = 0;
-  gps_data.lasttype = UNSPECIFIED;
+  memset (&gps_data, 0, sizeof(gps_data));
 }
 
 
@@ -79,7 +76,8 @@ void gps_update_second ()
 {
   /* Got a telegram with UTC time information */
   HAS_TIME = gps_data.valid;
-  HAS_SYNC = (HAS_SYNC && gps_data.valid);
+  HAS_SYNC = (HAS_SYNC && gps_data.valid);  // Resets HAS_SYNC when data.valid
+                                            // goes low.
 
   if (gps_data.valid) {
     /* Create time in utc seconds from GPS data */
@@ -111,6 +109,9 @@ void gps_parse ()
   /* Test checksum before parsing */
   if (!test_checksum (gps_buf)) return;
 
+  /* Update time, should be set in case time data has been received */
+  bool doseconds = false;
+
   /* Parse */
   int i = 0;
   while (i < len)
@@ -131,13 +132,6 @@ void gps_parse ()
 
     token[j] = 0;
 
-    /* The last token, where parsing has reached the full length
-     * of gps_buf, will contain the checksum.
-     *
-     * We don't need this since we have already checked it beforehand.
-     *
-     */
-
     if (i < len) {
       if (tokeni == 0) {
         /* Determine telegram type */
@@ -145,14 +139,21 @@ void gps_parse ()
           type = GPRMC;
         else if (strcmp(token, "$GPGGA") == 0)
           type = GPGGA;
+        else if (strcmp(token, "$GPGLL") == 0)
+          type = GPGLL;
         else if (strcmp(token, "$GPGSA") == 0)
           type = GPGSA;
+        else if (strcmp(token, "$GPGSV") == 0)
+          type = GPGSV;
+        else if (strcmp(token, "$GPVTG") == 0)
+          type = GPVTG;
         else {
           /* Cancel parsing */
           type = UNKNOWN;
           return;
         }
         gps_data.lasttype = type;
+
       } else {
         switch (type)
         {
@@ -160,7 +161,8 @@ void gps_parse ()
             switch (tokeni)
             {
               case 1:
-                sscanf (token, "%lu.%lu", &(gps_data.time), &(remainder));
+                sscanf (token, "%lu.%lu", &(gps_data.time), &(gps_data.seconds_part));
+                doseconds = true;
                 break;
 
               case 2:
@@ -193,25 +195,168 @@ void gps_parse ()
 
               case 9:
                 sscanf (token, "%d", &(gps_data.date));
+                doseconds = true;
                 break;
 
               case 10: /* Magnetic declination not supported by device */
-                gps_update_second ();
 
               default:
                 break;
             }
             break;
+
           case GPGGA:
             switch (tokeni)
             {
+              case 1:
+                sscanf (token, "%lu.%lu", &(gps_data.time), &(gps_data.seconds_part));
+                doseconds = true;
+                break;
 
+              case 2:
+                strcpy (gps_data.latitude, token);
+                break;
+
+              case 3:
+                gps_data.north =  (token[0] == 'N');
+                break;
+
+              case 4:
+                strcpy (gps_data.longitude, token);
+                break;
+
+              case 5:
+                gps_data.east = (token[0] == 'E');
+                break;
+
+              case 6:
+                /* 0 = Fix not valid
+                 * 1 = GPS SPS mode, fix valid
+                 * 2 = Differential GPS SPS mode, fix valid
+                 * 3 = GPS PPS mode, fix valid
+                 */
+                gps_data.valid = (token[0] >= '1');
+                gps_data.fixtype = (token[0] - '0');
+                break;
+
+              case 7:
+                sscanf (token, "%d", &(gps_data.satellites));
+                break;
+              case 8:  break; /* Discard HDOP */
+              case 9:  break; /* Discard MSL altitude */
+              case 10: break; /* Discard unit for ^^ */
+              case 11: break; /* No support for Geoid separation */
+              case 12: break; /* Discard unit for ^^ */
+              case 13: break; /* Discard age of diff correction */
+              case 14: break; /* Discard Diff. Ref. station ID */
+
+              default:
+                break;
+
+            }
+            break;
+
+          case GPGLL:
+            switch (tokeni)
+            {
+              case 1:
+                strcpy (gps_data.latitude, token);
+                break;
+
+              case 2:
+                gps_data.north =  (token[0] == 'N');
+                break;
+
+              case 3:
+                strcpy (gps_data.longitude, token);
+                break;
+
+              case 4:
+                gps_data.east = (token[0] == 'E');
+                break;
+
+              case 5:
+                sscanf (token, "%lu.%lu", &(gps_data.time), &(gps_data.seconds_part));
+                doseconds = true;
+                break;
+
+              case 6:
+                gps_data.valid = (token[0] == 'A');
+                break;
+
+              default: break;
             }
             break;
 
           case GPGSA:
             switch (tokeni)
             {
+              case 1:
+                /* M = Manual forced to operate in 2D or 3D mode
+                 * A = Automatic-allowed to automatically switch 2D/3D
+                 */
+                gps_data.mode1 = (token[0] == 'M' ? 0 : 1);
+                break;
+
+              case 2:
+                /* 0 => 1 = Fix not available
+                 * 1 => 2 = 2D
+                 * 2 => 3 = 3D
+                 */
+                gps_data.mode2 = (token[0] - '1');
+                gps_data.valid = (token[0] > '1');
+                break;
+
+              case 3:
+              case 4:
+              case 5:
+              case 6:
+              case 7:
+              case 8:
+              case 9:
+              case 10:
+              case 11:
+              case 12:
+              case 13:
+              case 14:
+              {
+                static int s = 0;
+                sscanf (token, "%d", &(gps_data.satellites_used[s]));
+                s++;
+
+                if (s >= 12) s = 0;
+              }
+              break;
+
+              /* Discard:
+               * - PDOP
+               * - HDOP
+               * - VDOP
+               */
+              default: break;
+            }
+            break;
+
+          case GPGSV:
+          /* TODO: Handle multiple messages.. simply ignoring, could result
+           * in wrong values for satellite count */
+            {
+              switch (tokeni)
+              {
+                case 1:
+                  break; /* Discard number of messages */
+
+                case 2:
+                  break; /* Discard message number */
+
+                case 3:
+                  sscanf (token, "%d", &(gps_data.satellites));
+
+                /* Discard the individual satellite data */
+
+                default:
+                  break;
+              }
 
             }
             break;
@@ -222,9 +367,15 @@ void gps_parse ()
             return;
         }
       }
+    } else {
+      /* Last token: Check sum */
     }
     tokeni++;
   }
+
+  if (doseconds)
+    gps_update_second ();
+
   /* Done parser }}} */
 }
 
@@ -246,6 +397,7 @@ void gps_loop ()
     referencesecond += TIME_FROM_REFERENCE / (ulong)10e6;
     microdelta = micros ();
     IN_OVERFLOW = false;
+    HAS_SYNC    = false;
   }
 
   /* Handle incoming GPS telegrams on serial line {{{

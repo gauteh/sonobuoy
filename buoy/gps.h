@@ -19,8 +19,10 @@ typedef enum _GPS_TELEGRAM {
   UNKNOWN,
   GPRMC,
   GPGGA,
+  GPGLL,
   GPGSA,
-
+  GPGSV,
+  GPVTG,
 } GPS_TELEGRAM;
 
 typedef struct _GPS_DATA {
@@ -28,14 +30,24 @@ typedef struct _GPS_DATA {
   char    lasttelegram[TELEGRAM_LEN];
   int     received; /* Received telegrams */
   bool    valid;
+  int     fixtype;
+
+  int     satellites;
+  int     satellites_used[12];
+  byte    mode1;
+  byte    mode2;
+
   char    latitude[12];
   bool    north;    /* true = Latitude is north aligned, false = south */
   char    longitude[12];
   bool    east;     /* true = Longitude is east aligned, false = south */
+
   ulong   time;
+  ulong   seconds_part;
+  int     date;
+
   char    speedoverground[6];
   char    courseoverground[6]; /* True north */
-  int     date;
 } GPS_DATA;
 
 extern GPS_DATA gps_data;
