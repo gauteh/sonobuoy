@@ -62,10 +62,10 @@ void gps_sync_pulse ()
 
     /* Is reset because of new microdelta calculation */
     IN_OVERFLOW = false;
-  }
 
-  /* For overrun handling */
-  lastmicros = micros ();
+    /* Reset overrun handling */
+    lastmicros = micros ();
+  }
 }
 
 void gps_roll_reference ()
@@ -89,6 +89,9 @@ void gps_update_second ()
   HAS_SYNC = (HAS_SYNC && gps_data.valid);
 
   /* Create time in utc seconds from GPS data */
+
+  /* Disable interrupt to make sure lastsecond is not incremented while
+   * parsing time received from GPS */
   detachInterrupt (GPS_SYNC_INTERRUPT);
 
   /* Based on makeTime () from:

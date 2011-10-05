@@ -64,8 +64,8 @@ extern GPS_DATA gps_data;
 # define LEAP_SECONDS 19 // as of 2011
 extern bool HAS_LEAP_SECONDS;
 extern bool HAS_TIME;
-extern bool HAS_SYNC;
-extern bool IN_OVERFLOW;
+extern volatile bool HAS_SYNC;
+extern volatile bool IN_OVERFLOW;
 
 /* Current basis to calculate microsecond timestamp from
  *
