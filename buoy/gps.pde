@@ -84,7 +84,7 @@ void gps_update_second ()
 
   /* Create time in utc seconds from GPS data */
   detachInterrupt (GPS_SYNC_INTERRUPT);
-
+  
   attachInterrupt (GPS_SYNC_INTERRUPT, gps_sync_pulse, RISING);
 }
 
@@ -398,12 +398,12 @@ void gps_loop ()
   }
 
   /* This can happen if we don't have valid GPS data and
-   * an overflow has happened, handle within 10 seconds of
+   * an overflow has happened, handle within 20 seconds of
    * reaching microdelta */
-  if (IN_OVERFLOW && ((microdelta - micros()) > (ulong)10e6))
+  if (IN_OVERFLOW && ((microdelta - micros()) > 20e6))
   {
     /* Set new reference using internal clock */
-    referencesecond += TIME_FROM_REFERENCE / (ulong)10e6;
+    referencesecond += TIME_FROM_REFERENCE / 1e6;
     microdelta = micros ();
     IN_OVERFLOW = false;
     HAS_SYNC    = false;

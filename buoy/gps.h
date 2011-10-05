@@ -65,7 +65,7 @@ extern bool IN_OVERFLOW;
  *
  * Needs to be logged as reference for following time stamps in data.
  *
- * ROLL_REFERENCE specifies how many seconds to wait before updating
+ * ROLL_REFERENCE specifies how many seconds between each reference point
  * referencesecond to current.
  *
  */
