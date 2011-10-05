@@ -196,8 +196,12 @@ void gps_parse ()
             switch (tokeni)
             {
               case 1:
-                sscanf (token, "%02d%02d%02d.%lu", &(gps_data.hour), &(gps_data.minute), &(gps_data.second), &(gps_data.seconds_part));
-                doseconds = true;
+                {
+                  int r = sscanf (token, "%02d%02d%02d.%lu", &(gps_data.hour), &(gps_data.minute), &(gps_data.second), &(gps_data.seconds_part));
+
+                  // Update if we got all values
+                  doseconds = (r == 4) && gps_data.day > 0;
+                }
                 break;
 
               case 2:
@@ -229,8 +233,11 @@ void gps_parse ()
                 break;
 
               case 9:
-                sscanf (token, "%02d%02d%02d", &(gps_data.day), &(gps_data.month), &(gps_data.year));
-                doseconds = true;
+                {
+                  int r = sscanf (token, "%02d%02d%02d", &(gps_data.day), &(gps_data.month), &(gps_data.year));
+                  // Update if we got all values, and got time
+                  doseconds = (r == 3) && gps_data.day > 0;
+                }
                 break;
 
               case 10: /* Magnetic declination not supported by device */
@@ -246,8 +253,12 @@ void gps_parse ()
             switch (tokeni)
             {
               case 1:
-                sscanf (token, "%02d%02d%02d.%lu", &(gps_data.hour), &(gps_data.minute), &(gps_data.second), &(gps_data.seconds_part));
-                doseconds = true;
+                {
+                  int r = sscanf (token, "%02d%02d%02d.%lu", &(gps_data.hour), &(gps_data.minute), &(gps_data.second), &(gps_data.seconds_part));
+
+                  // Update if we got all values
+                  doseconds = (r == 4) && gps_data.day > 0;
+                }
                 break;
 
               case 2:
@@ -315,8 +326,10 @@ void gps_parse ()
                 break;
 
               case 5:
-                sscanf (token, "%02d%02d%02d.%lu", &(gps_data.hour), &(gps_data.minute), &(gps_data.second), &(gps_data.seconds_part));
-                doseconds = true;
+                {
+                  int r = sscanf (token, "%02d%02d%02d.%lu", &(gps_data.hour), &(gps_data.minute), &(gps_data.second), &(gps_data.seconds_part));
+                  doseconds = (r == 4) && gps_data.day > 0;
+                }
                 break;
 
               case 6:
