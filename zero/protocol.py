@@ -143,9 +143,15 @@ class Protocol:
                 self.zero.current.gps.east = (token[0] == 'E')
 
               elif (tokeni == 8):
-                self.zero.current.gps.gps_time = float(token)
+                self.zero.current.gps.unix_time = token
 
               elif (tokeni == 9):
+                self.zero.current.gps.gps_time = token
+
+              elif (tokeni == 10):
+                self.zero.current.gps.gps_date = token
+
+              elif (tokeni == 11):
                 self.zero.current.gps.valid = (token == 'Y')
                 self.zero.current.gps.gps_status ()
 

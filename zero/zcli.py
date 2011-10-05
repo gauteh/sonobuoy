@@ -14,6 +14,7 @@ from ad import *
 
 import sys
 import os
+import time
 from texttable import *
 
 class zCLI:
@@ -73,7 +74,7 @@ class zCLI:
                   ["Total samples:", s[6]],
                   ["Position:", "{0:.4f}{1}, {2:.4f}{3}".format(s[7], ("N" if s[8] else "S"), s[9], ("E" if s[10] else "W"))],
                   ["Valid GPS:", s[11]],
-                  ["Time:", s[12]]
+                  ["Time:", time.asctime(time.gmtime(float(s[13]))) + ' (' + str(s[12]) + ', ' + str(s[14]) + ')']
                   ], False)
 
 
