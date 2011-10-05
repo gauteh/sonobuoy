@@ -153,6 +153,13 @@ class Protocol:
 
               elif (tokeni == 11):
                 self.zero.current.gps.valid = (token == 'Y')
+
+              elif (tokeni == 12):
+                self.zero.current.gps.has_time = (token == 'Y')
+              
+              elif (tokeni == 13):
+                self.zero.current.gps.has_sync = (token == 'Y')
+
                 self.zero.current.gps.gps_status ()
 
         elif (msgtype == 'AD'):

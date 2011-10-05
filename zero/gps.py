@@ -13,6 +13,8 @@ class Gps ():
   gps_time = ''
   gps_date = ''
   valid = False
+  has_time = False
+  has_sync = False
 
   def __init__ (self, b):
     self.buoy = b

@@ -73,7 +73,7 @@ class zCLI:
                   ["Sample rate:", "{0:.2f} Hz".format(0 if s[5] == 0 else q_length * 1000 / s[5])],
                   ["Total samples:", s[6]],
                   ["Position:", "{0:.4f}{1}, {2:.4f}{3}".format(s[7], ("N" if s[8] else "S"), s[9], ("E" if s[10] else "W"))],
-                  ["Valid GPS:", s[11]],
+                  ["Valid GPS:", str(s[11]) + " ( Sync: " + str(s[16]) + " )" + '( Time: ' + str(s[15]) + " )"],
                   ["Time:", time.asctime(time.gmtime(float(s[13]))) + ' (' + str(s[12]) + ', ' + str(s[14]) + ')']
                   ], False)
 
