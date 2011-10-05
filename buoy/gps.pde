@@ -32,6 +32,7 @@ void gps_setup ()
 
   memset (&gps_data, 0, sizeof(gps_data));
 
+  pinMode (GPS_SYNC_PIN, INPUT);
   attachInterrupt (GPS_SYNC_INTERRUPT, gps_sync_pulse, RISING);
 }
 
@@ -80,8 +81,12 @@ void gps_update_second ()
 {
   /* Got a telegram with UTC time information */
   HAS_TIME = gps_data.valid;
-  HAS_SYNC = (HAS_SYNC && gps_data.valid);  // Resets HAS_SYNC when data.valid
-                                            // goes low.
+
+  /* Reset HAS_SYNC if un-valid data.
+   * TODO: Find better way to monitor wether we are getting sync,
+   *       preferably check if there has been > second since last pulse.
+   */
+  HAS_SYNC = (HAS_SYNC && gps_data.valid);
 
   /* Create time in utc seconds from GPS data */
   detachInterrupt (GPS_SYNC_INTERRUPT);

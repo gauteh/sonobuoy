@@ -14,6 +14,7 @@
 # define GPS_BAUDRATE 4800
 # define GPS_Serial Serial1
 
+# define GPS_SYNC_PIN 3
 # define GPS_SYNC_INTERRUPT 1
 
 typedef enum _GPS_TELEGRAM {
