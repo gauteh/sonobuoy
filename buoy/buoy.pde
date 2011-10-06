@@ -5,6 +5,8 @@
  *
  */
 
+# include <SdFat.h>
+
 # include "buoy.h"
 # include "ad7710.h"
 # include "gps.h"
@@ -14,6 +16,8 @@ ulong laststatus = 0;
 
 void setup ()
 {
+  SdFile f;
+
   /* Set up devices */
   ad_setup ();
   gps_setup ();
