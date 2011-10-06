@@ -13,6 +13,7 @@
 # include "ad7710.h"
 # include "gps.h"
 # include "rf.h"
+# include "store.h"
 
 ulong laststatus = 0;
 
@@ -20,6 +21,7 @@ void setup ()
 {
 
   /* Set up devices */
+  sd_setup ();
   ad_setup ();
   gps_setup ();
   rf_setup ();
@@ -42,6 +44,8 @@ void loop ()
 
   ad_loop ();
   gps_loop ();
+  sd_loop ();
+  rf_loop ();
 }
 
 /* vim: set filetype=arduino :  */

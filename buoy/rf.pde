@@ -8,10 +8,8 @@
 # ifndef RF_C
 # define RF_C
 
-# include <stdio.h>
-# include <stdlib.h>
-
 # include "buoy.h"
+# include "store.h"
 # include "rf.h"
 # include "ad7710.h"
 
@@ -40,10 +38,43 @@ void rf_setup ()
  */
 
 
+void rf_loop ()
+{
+
+}
+
 void rf_send_status ()
 {
   rf_ad_message (AD_STATUS);
   rf_gps_message (GPS_STATUS);
+
+
+  if (sd.exists("/TEST.TXT")) {
+    rf_send_debug ("test.txt exists.");
+    char b[80];
+
+    SdFile f;
+    f.open ("/TEST.TXT", O_READ);
+    uint n = f.read (b, 80);
+    b[n] = 0;
+
+
+    rf_send_debug (b);
+
+  }
+  else
+  {
+    rf_send_debug ("test.txt does not exists.");
+  }
+
+  if (SD_AVAILABLE) {
+    rf_send_debug ("SD ok.");
+  } else {
+    rf_send_debug ("SD failed.");
+  }
+
+
+  Serial.println ("asdf");
 
   /*
   char buf[RF_BUFLEN];

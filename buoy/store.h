@@ -10,6 +10,16 @@
 
 # include <SdFat.h>
 
+# define SD_SS    10
+# define SD_MOSI  11
+# define SD_MISO  12
+# define SD_SCK   13
+
+extern SdFat sd;
+extern char sd_error[80];
+
+void sd_setup ();
+void sd_loop ();
 
 
 # endif

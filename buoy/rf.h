@@ -34,6 +34,7 @@ typedef enum _RF_GPS_MESSAGE {
 byte gen_checksum (char *);
 bool test_checksum (char *);
 void rf_setup ();
+void rf_loop ();
 void rf_send_debug (const char *);
 void rf_send_status ();
 void rf_ad_message (RF_AD_MESSAGE);
