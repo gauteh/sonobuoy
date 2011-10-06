@@ -56,7 +56,7 @@
 /**
  * Allow use of deprecated functions if ALLOW_DEPRECATED_FUNCTIONS is nonzero
  */
-#define ALLOW_DEPRECATED_FUNCTIONS 1
+#define ALLOW_DEPRECATED_FUNCTIONS 0
 //------------------------------------------------------------------------------
 /**
  * Allow FAT12 volumes if FAT12_SUPPORT is nonzero.
@@ -74,7 +74,7 @@
  * Set the SS pin high for hardware SPI.  If SS is chip select for another SPI
  * device this will disable that device during the SD init phase.
  */
-#define SET_SPI_SS_HIGH 1
+#define SET_SPI_SS_HIGH 0
 //------------------------------------------------------------------------------
 /**
  * Define MEGA_SOFT_SPI nonzero to use software SPI on Mega Arduinos.
@@ -84,12 +84,12 @@
  * on Mega Arduinos.  Software SPI works well with GPS Shield V1.1
  * but many SD cards will fail with GPS Shield V1.0.
  */
-#define MEGA_SOFT_SPI 0
+#define MEGA_SOFT_SPI 1
 //------------------------------------------------------------------------------
 /**
  * Set USE_SOFTWARE_SPI nonzero to always use software SPI.
  */
-#define USE_SOFTWARE_SPI 0
+#define USE_SOFTWARE_SPI 1
 // define software SPI pins so Mega can use unmodified 168/328 shields
 /** Software SPI chip select pin for the SD */
 uint8_t const SOFT_SPI_CS_PIN = 10;
