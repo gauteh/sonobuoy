@@ -101,7 +101,7 @@ ARDUINO_LIBS = []
 if EXTRA_LIB != None:
     ARDUINO_LIBS += [EXTRA_LIB]
 ARDUINO_LIBS += [pathJoin(ARDUINO_HOME, 'libraries')]
-ARDUINO_LIBS += [os.getcwd ()]
+ARDUINO_LIBS += [pathJoin(os.getcwd (), 'lib')]
 
 # check given board name, ARDUINO_BOARD is valid one
 ptnBoard = re.compile(r'^(.*)\.name=(.*)')
@@ -139,7 +139,7 @@ cFlags = ['-ffunction-sections', '-fdata-sections', '-fno-exceptions',
     '-funsigned-char', '-funsigned-bitfields', '-fpack-struct', '-fshort-enums',
     '-Os', '-mmcu=%s'%MCU, '-DGIT_SHA=\\"%s\\"'%GIT_SHA]
 envArduino = Environment(CC = AVR_BIN_PREFIX+'gcc', CXX = AVR_BIN_PREFIX+'g++',
-    CPPPATH = ['build/core', 'SdFat'], CPPDEFINES = {'F_CPU':F_CPU, 'ARDUINO':ARDUINO_VER},
+    CPPPATH = ['build/core'], CPPDEFINES = {'F_CPU':F_CPU, 'ARDUINO':ARDUINO_VER},
     CFLAGS = cFlags+['-std=gnu99'], CCFLAGS = cFlags, TOOLS = ['gcc','g++'])
 
 def fnProcessing(target, source, env):
@@ -217,8 +217,6 @@ for line in open (TARGET+'.pde'):
 # implicitly on the SPI library.
 if ARDUINO_VER >= 20 and 'Ethernet' in libCandidates:
     libCandidates += ['SPI']
-
-print libCandidates
 
 all_libs_sources = []
 index = 0
