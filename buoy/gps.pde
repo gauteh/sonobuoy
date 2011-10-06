@@ -3,9 +3,12 @@
  *
  * Interface to GlobalSat EM-411 with sync pulse.
  *
- * This assumes that we will receive telegrams within each second wether
+ * Appears to be based on SirfStar III.
+ *
+ * We assume we will receive telegrams within each second wether
  * there is valid data or not.
  *
+ * With no valid data, the time and date figured out by the GPS is used anyway.
  *
  */
 
