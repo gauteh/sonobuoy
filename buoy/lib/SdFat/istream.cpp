@@ -85,6 +85,7 @@ istream& istream::get(char *str, streamsize n, char delim) {
   return *this;
 }
 //------------------------------------------------------------------------------
+/*
 void istream::getBool(bool *b) {
   if ((flags() & boolalpha) == 0) {
     getNumber(b);
@@ -116,6 +117,7 @@ void istream::getBool(bool *b) {
   }
   setstate(failbit);
 }
+*/
 //------------------------------------------------------------------------------
 void istream::getChar(char* ch) {
   int16_t c = readSkip();

@@ -110,7 +110,7 @@ void SdFat::errorHalt_P(PGM_P msg) {
 /** %Print any SD error code. */
 void SdFat::errorPrint() {
   if (!card_.errorCode()) return;
-  PgmPrint("SD errorCode: 0X");
+  //PgmPrint("SD errorCode: 0X");
   Serial.println(card_.errorCode(), HEX);
 }
 //------------------------------------------------------------------------------
@@ -119,7 +119,7 @@ void SdFat::errorPrint() {
  * \param[in] msg Message to print.
  */
 void SdFat::errorPrint(char const* msg) {
-  PgmPrint("error: ");
+  //PgmPrint("error: ");
   Serial.println(msg);
   errorPrint();
 }
@@ -129,7 +129,7 @@ void SdFat::errorPrint(char const* msg) {
  * \param[in] msg Message in program space (flash memory) to print.
  */
 void SdFat::errorPrint_P(PGM_P msg) {
-  PgmPrint("error: ");
+  //PgmPrint("error: ");
   SerialPrintln_P(msg);
   errorPrint();
 }
@@ -187,17 +187,17 @@ void SdFat::initErrorHalt_P(PGM_P msg) {
 /** Print error details after SdFat::init() fails. */
 void SdFat::initErrorPrint() {
   if (card_.errorCode()) {
-    PgmPrintln("Can't access SD card. Do not reformat.");
+    //PgmPrintln("Can't access SD card. Do not reformat.");
     if (card_.errorCode() == SD_CARD_ERROR_CMD0) {
-      PgmPrintln("No card, wrong chip select pin, or SPI problem?");
+      //PgmPrintln("No card, wrong chip select pin, or SPI problem?");
     }
     errorPrint();
   } else if (vol_.fatType() == 0) {
-    PgmPrintln("Invalid format, reformat SD.");
+    //PgmPrintln("Invalid format, reformat SD.");
   } else if (!vwd_.isOpen()) {
-    PgmPrintln("Can't open root directory.");
+    //PgmPrintln("Can't open root directory.");
   } else {
-    PgmPrintln("No error found.");
+    //PgmPrintln("No error found.");
   }
 }
 //------------------------------------------------------------------------------

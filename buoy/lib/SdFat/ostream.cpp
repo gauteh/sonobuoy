@@ -41,6 +41,7 @@ char* ostream::fmtNum(uint32_t n, char *ptr, uint8_t base) {
   return ptr;
 }
 //------------------------------------------------------------------------------
+/*
 void ostream::putBool(bool b) {
   if (flags() & boolalpha) {
     if (b) {
@@ -54,6 +55,7 @@ void ostream::putBool(bool b) {
     putChar(b ? '1' : '0');
   }
 }
+*/
 //------------------------------------------------------------------------------
 void ostream::putChar(char c) {
   fill_not_left(1);
@@ -80,8 +82,8 @@ void ostream::putDouble(double n) {
   }
   // check for larger than uint32_t
   if (n > 4.0E9) {
-    pgm err(PSTR("BIG FLT"));
-    putPgm(err);
+    //pgm err(PSTR("BIG FLT"));
+    //putPgm(err);
     return;
   }
   // round up and separate in and fraction parts
