@@ -5,7 +5,7 @@
  *
  */
 
-# include <SdFat.h>
+# include <SD.h>
 
 # include "buoy.h"
 # include "ad7710.h"
@@ -16,7 +16,6 @@ ulong laststatus = 0;
 
 void setup ()
 {
-  SdFile f;
 
   /* Set up devices */
   ad_setup ();
