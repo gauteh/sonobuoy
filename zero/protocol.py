@@ -160,6 +160,9 @@ class Protocol:
               elif (tokeni == 13):
                 self.zero.current.gps.has_sync = (token == 'Y')
 
+              elif (tokeni == 14):
+                self.zero.current.gps.has_sync_reference = (token == 'Y')
+
                 self.zero.current.gps.gps_status ()
 
         elif (msgtype == 'AD'):

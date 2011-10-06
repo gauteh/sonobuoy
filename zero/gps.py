@@ -15,6 +15,7 @@ class Gps ():
   valid = False
   has_time = False
   has_sync = False
+  has_sync_reference = False
 
   def __init__ (self, b):
     self.buoy = b
