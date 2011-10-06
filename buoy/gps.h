@@ -70,11 +70,10 @@ extern volatile bool IN_OVERFLOW;         // micros () is overflowed
 
 /* Current basis to calculate microsecond timestamp from
  *
- * Needs to be logged as reference for following time stamps in data.
+ * Needs to be logged as reference for microsecond resolution time stamps in
+ * data.
  *
- * ROLL_REFERENCE specifies how many seconds between each reference point
- * referencesecond to current.
- *
+ * ROLL_REFERENCE specifies how often the reference should be updated .
  */
 extern volatile ulong referencesecond;
 # define ROLL_REFERENCE 60

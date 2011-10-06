@@ -201,7 +201,7 @@ class Protocol:
 
         elif (msgtype == 'DBG'):
           if (tokeni == 1):
-            print "[Protocol] Debug: ", token
+            print "[Debug] ", token
 
       tokeni += 1
 

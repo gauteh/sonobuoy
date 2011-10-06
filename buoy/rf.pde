@@ -19,6 +19,9 @@ void rf_setup ()
 {
   /* Setting up Serial interface to RF */
   RF_Serial.begin(RF_BAUDRATE);
+
+  /* Send greeting */
+  rf_send_debug (GREETING);
 }
 
 /* Protocol
@@ -27,9 +30,8 @@ void rf_setup ()
  * $Type,values,values,values*Checksum
  *
  * Type is one of:
- *  - AD    Readout from AD
+ *  - AD    AD data and status messages
  *  - GPS   GPS position and time data
- *  - STA   System status
  *  - DBG   Debug message
  *
  * After * checksum is computed as XOR of all values
@@ -80,11 +82,7 @@ void rf_ad_message (RF_AD_MESSAGE messagetype)
       break;
 
     case AD_DATA_BATCH:
-      /* Send AD_DATA_BATCH_LEN samples
-       *
-       * The RF200 (AtMega128) can hold strings of maximum 126 bytes.
-       *
-       */
+      /* Send AD_DATA_BATCH_LEN samples */
       # define AD_DATA_BATCH_LEN (AD_QUEUE_LENGTH / 2)
 
       /* Format:
@@ -93,7 +91,7 @@ void rf_ad_message (RF_AD_MESSAGE messagetype)
 
        $AD,D,[k = number of samples],[time of first s]*CC
 
-       * 2. Send one $
+       * 2. Send one $ to indicate start of data
 
        * 3. Send k number of samples: 3 bytes * k
 
@@ -155,12 +153,6 @@ void rf_ad_message (RF_AD_MESSAGE messagetype)
         APPEND_CSUM (buf);
         RF_Serial.println (buf);
         delayMicroseconds (100);
-
-/*
-        sprintf(buf, "AD last sent val: 0x%02X%02X%02X", lasts[0], lasts[1], lasts[2]);
-        rf_send_debug (buf);
-        delayMicroseconds (100);
-        */
       }
       break;
 
