@@ -75,34 +75,25 @@ void gps_sync_pulse ()
   /* Reset overrun handling */
   lastmicros = micros ();
 
+  /* Check wether to update reference second */
+  if ((lastsecond - referencesecond) > ROLL_REFERENCE)
+    gps_roll_reference ();
+
   /* Update reference in case reference has been set using local clock */
-  if (!HAS_SYNC_REFERENCE) gps_roll_reference ();
-  HAS_SYNC_REFERENCE = true;
+  if (!HAS_SYNC_REFERENCE)
+    gps_roll_reference ();
 }
 
 void gps_roll_reference ()
 {
   /* Change referencesecond to latest */
-  if (gps_data.valid) {
-    microdelta = microdelta - (1e6 * (lastsecond - referencesecond));
-    referencesecond = lastsecond;
-  }
+  microdelta = microdelta - (1e6 * (lastsecond - referencesecond));
+  referencesecond = lastsecond;
+  HAS_SYNC_REFERENCE = true;
 }
 
 void gps_update_second ()
 {
-  /* Got a telegram with UTC time information */
-  HAS_TIME = gps_data.valid;
-
-  /* Check if we still have synced clock */
-  HAS_SYNC = (HAS_SYNC && gps_data.valid && (millis() - lastsync < 1000));
-
-  /* Create time in utc seconds from GPS data */
-
-  /* Disable interrupt to make sure lastsecond is not incremented while
-   * calculating time received from GPS */
-  detachInterrupt (GPS_SYNC_INTERRUPT);
-
   /* Calculate Unix time from UTC {{{
    * Based on makeTime () as of 2011-10-05 from:
    * http://www.arduino.cc/playground/Code/Time */
@@ -138,8 +129,6 @@ void gps_update_second ()
   gps_data.time += gps_data.second;
 
   // }}}
-
-  attachInterrupt (GPS_SYNC_INTERRUPT, gps_sync_pulse, RISING);
 }
 
 void gps_parse ()
@@ -457,14 +446,10 @@ void gps_parse ()
 
 void gps_loop ()
 {
-
-  /* Check wether to update reference second */
-  if ((lastsecond - referencesecond) > ROLL_REFERENCE)
-  {
-    gps_roll_reference ();
-  }
-
-  /* This can happen if we don't have valid GPS data and
+  /* Check if we are closing second overflow, fix by
+   * setting new reference using internal clock.
+   *
+   * This can happen if we don't have valid GPS data and
    * an overflow has happened, handle within 20 seconds of
    * reaching microdelta */
   if (IN_OVERFLOW && ((microdelta - micros()) > 20e6))
@@ -530,6 +515,11 @@ void gps_loop ()
   }
 
   /* }}} Done telegram handler */
+
+  HAS_TIME = gps_data.valid;
+
+  /* Check if we still have synced clock */
+  HAS_SYNC = (HAS_SYNC && gps_data.valid && (millis() - lastsync < 1000));
 }
 
 # endif

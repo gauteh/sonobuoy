@@ -5,7 +5,9 @@
  *
  */
 
-# include <SD.h>
+/* Must include all external libraries here in main sketch for build system
+ * to recgonize them as a dependency. */
+# include <SdFat.h>
 
 # include "buoy.h"
 # include "ad7710.h"
