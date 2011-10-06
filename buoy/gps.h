@@ -62,10 +62,11 @@ extern GPS_DATA gps_data;
 
 /* Timing */
 # define LEAP_SECONDS 19 // as of 2011
-extern bool HAS_LEAP_SECONDS;
-extern bool HAS_TIME;
-extern volatile bool HAS_SYNC;
-extern volatile bool IN_OVERFLOW;
+extern bool HAS_LEAP_SECONDS;             // Has received leap seconds inf.
+extern bool HAS_TIME;                     // Has valid time from GPS
+extern volatile bool HAS_SYNC;            // Has PPS synced
+extern volatile bool HAS_SYNC_REFERENCE;  // Reference is set using PPS
+extern volatile bool IN_OVERFLOW;         // micros () is overflowed
 
 /* Current basis to calculate microsecond timestamp from
  *

@@ -37,10 +37,11 @@ void gps_setup ()
 }
 
 
-bool HAS_LEAP_SECONDS = false;
-bool HAS_TIME         = false;
-bool HAS_SYNC         = false;
-bool IN_OVERFLOW      = false;
+bool HAS_LEAP_SECONDS             = false;
+bool HAS_TIME                     = false;
+volatile bool HAS_SYNC            = false;
+volatile bool HAS_SYNC_REFERENCE  = false;
+volatile bool IN_OVERFLOW         = false;
 
 volatile ulong referencesecond = 0;
 volatile ulong lastsecond      = 0;
@@ -48,24 +49,32 @@ volatile ulong microdelta      = 0;
 
 volatile ulong lastmicros      = 0;
 
+/* Keep track of last sync pulse */
+volatile ulong lastsync        = 0;
+
 void gps_sync_pulse ()
 {
+  /* Assume data is valid if we have PPS */
+
   /* Synchronize time stamp clock */
   HAS_SYNC = true;
+  lastsync = millis ();
 
   /* Last second should be received every second */
-  if (gps_data.valid) {
-    // TODO: Avoid race-condition with gps_update_second
-    lastsecond++;
+  lastsecond++;
 
-    microdelta = micros () - (1e6 * (lastsecond - referencesecond));
+  /* Update microdelta offset */
+  microdelta = micros () - (1e6 * (lastsecond - referencesecond));
 
-    /* Is reset because of new microdelta calculation */
-    IN_OVERFLOW = false;
+  /* Is reset because of new microdelta calculation */
+  IN_OVERFLOW = false;
 
-    /* Reset overrun handling */
-    lastmicros = micros ();
-  }
+  /* Reset overrun handling */
+  lastmicros = micros ();
+
+  /* Update reference in case reference has been set using local clock */
+  if (!HAS_SYNC_REFERENCE) gps_roll_reference ();
+  HAS_SYNC_REFERENCE = true;
 }
 
 void gps_roll_reference ()
@@ -82,21 +91,18 @@ void gps_update_second ()
   /* Got a telegram with UTC time information */
   HAS_TIME = gps_data.valid;
 
-  /* Reset HAS_SYNC if un-valid data.
-   * TODO: Find better way to monitor wether we are getting sync,
-   *       preferably check if there has been > second since last pulse.
-   */
-  HAS_SYNC = (HAS_SYNC && gps_data.valid);
+  /* Check if we still have synced clock */
+  HAS_SYNC = (HAS_SYNC && gps_data.valid && (millis() - lastsync < 1000));
 
   /* Create time in utc seconds from GPS data */
 
   /* Disable interrupt to make sure lastsecond is not incremented while
-   * parsing time received from GPS */
+   * calculating time received from GPS */
   detachInterrupt (GPS_SYNC_INTERRUPT);
 
-  /* Based on makeTime () from:
-   * http://www.arduino.cc/playground/Code/Time
-   */
+  /* Calculate Unix time from UTC {{{
+   * Based on makeTime () as of 2011-10-05 from:
+   * http://www.arduino.cc/playground/Code/Time */
 
 # define SECONDS_PER_DAY 86400L
 # define LEAP_YEAR(x) (!((1970 + x) % 4) && ( ((1970 + x) % 100) || !((1970 + x) % 400) ))
@@ -127,6 +133,8 @@ void gps_update_second ()
   gps_data.time  = gps_data.hour * 1e4;
   gps_data.time += gps_data.minute * 1e2;
   gps_data.time += gps_data.second;
+
+  // }}}
 
   attachInterrupt (GPS_SYNC_INTERRUPT, gps_sync_pulse, RISING);
 }
@@ -463,6 +471,7 @@ void gps_loop ()
     microdelta = micros ();
     IN_OVERFLOW = false;
     HAS_SYNC    = false;
+    HAS_SYNC_REFERENCE = false;
   }
 
   /* Handle incoming GPS telegrams on serial line {{{
