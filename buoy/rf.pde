@@ -67,14 +67,10 @@ void rf_send_status ()
     rf_send_debug ("test.txt does not exists.");
   }
 
-  if (SD_AVAILABLE) {
-    rf_send_debug ("SD ok.");
-  } else {
-    rf_send_debug ("SD failed.");
+  if (!SD_AVAILABLE) {
+    rf_send_debug ("[SD] Unavailable.");
   }
 
-
-  Serial.println ("asdf");
 
   /*
   char buf[RF_BUFLEN];
