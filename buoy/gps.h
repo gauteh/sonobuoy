@@ -87,7 +87,7 @@ extern volatile ulong referencesecond;
  */
 extern volatile ulong lastsecond;
 
-/* The time in microseconds between Arduino micros() clock and referencesecond
+/* The time in microseconds between Arduino micros() clock and reference second
  *
  * Synchronized with pulse from GPS.
  *
@@ -103,7 +103,15 @@ extern volatile ulong microdelta;
  */
 extern volatile ulong lastmicros;
 
-/* Get time related to reference */
+/* Get time related to reference 
+ *
+ * ACCURACY:
+ * 
+ * Accurate to (max(ulong) 2^32 - 1 ) % 4 for Arduino internal clock, micros()
+ * has steps of 4. And to accuracy of GPS sync pulse (if available), about 1
+ * us + delay for handling pulse.
+ */
+
 # define TIME_FROM_REFERENCE (!IN_OVERFLOW ? (micros() - microdelta) : (micros () + (ULONG_MAX - microdelta)))
 # define CHECK_FOR_OVERFLOW() (IN_OVERFLOW = (micros () < lastmicros))
 
