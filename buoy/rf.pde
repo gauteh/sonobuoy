@@ -48,13 +48,18 @@ void rf_send_status ()
   rf_ad_message (AD_STATUS);
   rf_gps_message (GPS_STATUS);
 
+  char b[80];
 
-  if (sd.exists("/TEST.TXT")) {
-    rf_send_debug ("test.txt exists.");
-    char b[80];
+  sprintf (b, "[SD] Current index: %u", current_index.id);
+  //rf_send_debug (b);
+  
+  /*
+  SdFile f;
+  f.open ("/LASTID.DAT", O_READ);
 
-    SdFile f;
-    f.open ("/TEST.TXT", O_READ);
+  if (f.isOpen ()) {
+    rf_send_debug ("LASTID exists.");
+
     uint n = f.read (b, 80);
     b[n] = 0;
 
@@ -64,12 +69,10 @@ void rf_send_status ()
   }
   else
   {
-    rf_send_debug ("test.txt does not exists.");
+    rf_send_debug ("LASTID does not exists.");
+    //SD_AVAILABLE = false;
   }
-
-  if (!SD_AVAILABLE) {
-    rf_send_debug ("[SD] Unavailable.");
-  }
+  */
 
 
   /*

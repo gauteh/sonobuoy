@@ -16,8 +16,9 @@
 # define SD_MISO  12
 # define SD_SCK   13
 
-extern SdFat sd;
-extern bool SD_AVAILABLE;
+extern SdFat  sd;
+extern bool   SD_AVAILABLE;
+extern uint    sd_error;
 
 void sd_setup ();
 void sd_loop ();
@@ -30,17 +31,16 @@ void write_index ();
 # define SAMPLE_LENGTH 3
 # define TIMESTAMP_LENGTH 4
 
-typedef struct _Lastid {
-  uint id;
-} Lastid;
+/* Last ID is one unsigned long */
+typedef ulong LASTID;
 
 typedef struct _Index {
   uint version;     // Version of data (as defined in STORE_VERSION)
-  uint id;          // Id of index
-  uint datafiles;   // Number of data files
+  ulong id;          // Id of index
+  ulong datafiles;   // Number of data files
 
   uint sample_l;    // Length of sample (bytes)
-  uint timestamp_l; // Length of timestamp (bytes)
+  uint timestamp_l; // Length of time stamp (bytes)
 
   bool closed;      // Indicates whether this index has been closed
 
@@ -56,16 +56,16 @@ typedef struct _DataHeader {
 } DataHeader;
 
 /* File names:
- * LASTID    - file with current index id (not to be trusted..)
+ * LASTID.DAT    - file with current index id (not to be trusted..)
  *
- * INDEX[id] - Index of data files, highest id is current.
- * 
+ * INDEX[id].IND - Index of data files, highest id is current.
+ *
  * A new Index will be created after a number of data files or
  * if index cannot be parsed.
  *
- * DATA[indexid]_[id] - Number of corresponding index as well as
- *                      id of data file.
- * 
+ * DATA[indexid]_[id].DAT - Number of corresponding index as well as
+ *                          id of data file.
+ *
  * A new data file will be created on start up, if file is corrupt, on
  * new index or if file is corrupt.
  */

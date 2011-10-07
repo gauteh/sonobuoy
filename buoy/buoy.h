@@ -22,7 +22,7 @@
 
 /* Define to include functionality that expects a terminal connected
  * to Serial0. */
-# define DIRECT_SERIAL 0
+# define DIRECT_SERIAL 1
 
 # define GREETING "Gautebøye ( rev " VERSION " ) by " \
                   "Gaute Hope <eg@gaute.vetsj.com>"

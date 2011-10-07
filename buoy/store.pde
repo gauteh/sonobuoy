@@ -11,10 +11,13 @@
 # include "rf.h"
 
 SdFat sd;
-char sd_error[80];
+uint  sd_error = 0;
 bool SD_AVAILABLE = false;
 
-/* Storage format */
+bool lastidloaded = false;
+ulong lastsd = 0;
+
+/* Current storage index */
 Index current_index;
 
 void sd_setup () {
@@ -23,95 +26,135 @@ void sd_setup () {
   pinMode (SD_MISO, INPUT);
   pinMode (SD_SCK, OUTPUT);
 
+  lastsd = millis ();
   init_sd ();
 }
 
+# if DIRECT_SERIAL
+ArduinoOutStream cout(Serial);
+# endif
+
 void init_sd ()
 {
-  SD_AVAILABLE = sd.init (SPI_HALF_SPEED);
+  SD_AVAILABLE = (sd.init (SPI_HALF_SPEED, SD_SS) & (sd.card()->cardSize() > 0));
 
   if (SD_AVAILABLE)
   {
-    sd.chdir (true); // Go to root
+    rf_send_debug ("SD card ready.");
 
+    sd.chdir ("/", true);
     open_index ();
+
+  } else {
+    rf_send_debug ("Could not init SD.");
+    current_index.id = 0;
   }
 }
 
 void open_index ()
 {
-  Lastid l;
+  int n = 0;
+  sd.ls ();
+  delayMicroseconds (100);
 
-  if (sd.exists ("LASTID"))
-  {
-    SdFile fl;
-    fl.open ("LASTID", O_READ);
-    fl.read (&l, sizeof(l));
-    fl.close ();
-  } else {
-    l.id = 0;
-  }
+  rf_send_debug ("Opening index..");
 
-  /* Walk through subsequent indexes and check if there are any above 
-   *
-   * If there are gaps in numbering subsequent indexes WILL be overwritten. */
+  ulong i;
+  SdFile fl ("LASTID.DAT", O_READ);
 
-  bool newi = false;
-  uint i = l.id;
+  n = fl.read (reinterpret_cast<char*>(&i), sizeof(ulong));
+  Serial.println (n);
+  
+  fl.close ();
 
   char buf[50];
+  sprintf (buf, "Last id: %lu..", i);
+  rf_send_debug (buf);
+
+  if (i > 1000) i = 1; // Reset last id to 1 if none could be read
+  lastidloaded = true;
+
+  /* Walk through subsequent indexes above lastid and take next free */
+
+  bool newi = false;
+
+  Serial.print ("Checking for subseq. indexes from: ");
+  Serial.println (i);
 
   while (!newi)
   {
-    sprintf (buf, "INDEX%u", i);
+    sprintf (buf, "INDEX%lu.IND", i);
+    Serial.println(buf);
+
     if (!sd.exists(buf)) {
-      newi = true;
+      Serial.print ("Found free index at: ");
+      Serial.println (i);
+      newi = true; /* Found new index file at id I */
     }
     i++;
   }
   i--;
 
-  /* Open latest index and check if it is closed */
-  SdFile fi;
-  fi.open (buf, O_READ);
-  fi.read (&current_index, sizeof(current_index));
-  fi.close ();
+  if (i > 1) {
+    /* Open previous index and check if it is closed */
+    sprintf (buf, "INDEX%lu.IND", (i - 1));
+    SdFile fi (buf, O_READ);
+
+    if (sd.exists(buf)) {
+      n = fi.read(reinterpret_cast<char*>(&current_index), sizeof(current_index));
+      Serial.println (current_index.closed);
+
+      /* Could not fully read index, skip */
+      if (n != sizeof(current_index)) {
+        current_index.closed = true;
+      }
+      Serial.println(n);
+
+    } else {
+      /* No index file found, start new */
+      current_index.closed = true;
+      i = i - 1;
+    }
+    fi.close ();
+
+  } else {
+    i = 0; // Will be incremented below.
+  }
+
 
   if (current_index.closed) {
     // Open new index
-    i++;
     current_index.version = STORE_VERSION;
-    current_index.id = i;
+    current_index.id = i + 1;
     current_index.datafiles = 0;
     current_index.sample_l = SAMPLE_LENGTH;
     current_index.timestamp_l = TIMESTAMP_LENGTH;
     current_index.closed = false;
-    write_index ();
   }
+  write_index ();
 }
 
 void write_index ()
 {
-  if (SD_AVAILABLE) {
-    if (current_index.id != 0) {
-      SdFile fi;
-      char buf[50];
-      sprintf (buf, "INDEX%u", current_index.id);
+  char buf[50];
+  sprintf (buf, "Writing index: %lu..", current_index.id);
+  rf_send_debug (buf);
 
-      fi.open (buf, O_CREAT | O_WRITE | O_TRUNC);
-      fi.write (&current_index, sizeof(current_index));
-      fi.sync ();
-      fi.close ();
-      
-      /* Write back last index */
-      SdFile fl;
-      fl.open ("LASTID", O_CREAT | O_WRITE | O_TRUNC);
-      Lastid l = { current_index.id };
-      fl.write (&l, sizeof (l));
-      fl.sync ();
-      fl.close ();
-    }
+  if (current_index.id != 0) {
+    sprintf (buf, "/INDEX%lu.IND", current_index.id);
+
+    SdFile fi (buf, O_CREAT | O_WRITE | O_TRUNC);
+    fi.write (reinterpret_cast<char*>(&current_index), sizeof(current_index));
+    fi.sync ();
+    fi.close ();
+
+    /* Write back last index */
+    SdFile fl("LASTID.DAT", O_CREAT | O_WRITE | O_TRUNC);
+    fl.write (reinterpret_cast<char*>(&(current_index.id)), sizeof(current_index.id));
+    fl.sync ();
+    fl.close ();
   }
+  sd.ls ();
 }
 
 void next_file ()
@@ -124,13 +167,17 @@ void roll_file ()
 
 }
 
+ulong lasttry = 0;
+
 void sd_loop ()
 {
   /* Check if everything is happy dandy with card.. */
 
-  /* Try to set up SD card */
-  if (!SD_AVAILABLE)
+  /* Try to set up SD card, 5 sec delay  */
+  if (!SD_AVAILABLE & (millis () - lastsd) > 5000) {
     init_sd ();
+    lastsd = millis ();
+  }
 }
 
 /* vim: set filetype=arduino :  */
