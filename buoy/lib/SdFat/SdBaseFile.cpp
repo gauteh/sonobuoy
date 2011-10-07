@@ -403,8 +403,7 @@ bool SdBaseFile::make83Name(const char* str, uint8_t* name, const char** ptr) {
       i = 8;   // place for extension
     } else {
       // illegal FAT characters
-      const char pp[] = "|<>^+=?/[];,*\"\\";
-      char *p = (char*)pp;
+      PGM_P p = PSTR("|<>^+=?/[];,*\"\\");
       uint8_t b;
       while ((b = pgm_read_byte(p++))) if (b == c) goto fail;
       // check size and only allow ASCII printable characters
