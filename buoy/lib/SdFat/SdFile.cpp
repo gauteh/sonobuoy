@@ -77,5 +77,5 @@ void SdFile::write_P(PGM_P str) {
  */
 void SdFile::writeln_P(PGM_P str) {
   write_P(str);
-  write_P(PSTR("\r\n"));
+  write("\r\n");
 }

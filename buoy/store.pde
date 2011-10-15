@@ -96,28 +96,34 @@ void open_index ()
   i--;
 
   if (i > 1) {
+
+    /* Change to previous existing index */
+    i = i - 1;
+
     /* Open previous index and check if it is closed */
-    sprintf (buf, "INDEX%lu.IND", (i - 1));
-    SdFile fi (buf, O_READ);
+    sprintf (buf, "INDEX%lu.IND", i);
 
     if (sd.exists(buf)) {
+
+      SdFile fi (buf, O_READ);
       n = fi.read(reinterpret_cast<char*>(&current_index), sizeof(current_index));
-      Serial.println (current_index.closed);
 
       /* Could not fully read index, skip */
       if (n != sizeof(current_index)) {
         current_index.closed = true;
       }
-      Serial.println(n);
 
     } else {
-      /* No index file found, start new */
+      /* No index file found, start new at previous index (can happen if there
+       * are jumps in LASTID) */
       current_index.closed = true;
       i = i - 1;
     }
     fi.close ();
 
   } else {
+    /* Starting first index */
+    current_index.closed = true;
     i = 0; // Will be incremented below.
   }
 
@@ -142,6 +148,9 @@ void write_index ()
 
   if (current_index.id != 0) {
     sprintf (buf, "/INDEX%lu.IND", current_index.id);
+
+    /* DEBUG*/
+    current_index.closed = true;
 
     SdFile fi (buf, O_CREAT | O_WRITE | O_TRUNC);
     fi.write (reinterpret_cast<char*>(&current_index), sizeof(current_index));
