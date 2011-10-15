@@ -27,7 +27,7 @@
 # define GREETING "Gautebøye ( rev " VERSION " ) by " \
                   "Gaute Hope <eg@gaute.vetsj.com>"
 
-# define ULONG_MAX 4294967295 // 2^32 - 1
+# define ULONG_MAX 4294967295u // 2^32 - 1
 typedef unsigned long ulong;
 typedef unsigned int  uint;
 

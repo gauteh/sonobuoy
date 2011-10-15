@@ -113,6 +113,7 @@ extern volatile ulong lastmicros;
  */
 
 # define TIME_FROM_REFERENCE (!IN_OVERFLOW ? (micros() - microdelta) : (micros () + (ULONG_MAX - microdelta)))
+
 # define CHECK_FOR_OVERFLOW() (IN_OVERFLOW = (micros () < lastmicros))
 
 /* Overflow handling, the math.. {{{
