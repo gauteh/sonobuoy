@@ -36,7 +36,7 @@ ArduinoOutStream cout(Serial);
 
 void init_sd ()
 {
-  SD_AVAILABLE = (sd.init (SPI_HALF_SPEED, SD_SS) & (sd.card()->cardSize() > 0));
+  SD_AVAILABLE = (sd.init (SPI_FULL_SPEED, SD_SS) & (sd.card()->cardSize() > 0));
 
   if (SD_AVAILABLE)
   {

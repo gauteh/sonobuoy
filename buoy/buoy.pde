@@ -46,7 +46,7 @@ void loop ()
     laststatus = millis ();
   }
 
-  //ad_loop ();
+  ad_loop ();
   gps_loop ();
   sd_loop ();
   rf_loop ();
