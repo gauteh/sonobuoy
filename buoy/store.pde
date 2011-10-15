@@ -107,6 +107,7 @@ void open_index ()
 
       SdFile fi (buf, O_READ);
       n = fi.read(reinterpret_cast<char*>(&current_index), sizeof(current_index));
+      fi.close ();
 
       /* Could not fully read index, skip */
       if (n != sizeof(current_index)) {
@@ -119,7 +120,6 @@ void open_index ()
       current_index.closed = true;
       i = i - 1;
     }
-    fi.close ();
 
   } else {
     /* Starting first index */
