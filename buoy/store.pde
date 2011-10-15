@@ -130,7 +130,6 @@ void open_index ()
     // Open new index
     current_index.version = STORE_VERSION;
     current_index.id = i + 1;
-    current_index.datafiles = 0;
     current_index.sample_l = SAMPLE_LENGTH;
     current_index.timestamp_l = TIMESTAMP_LENGTH;
     current_index.closed = false;

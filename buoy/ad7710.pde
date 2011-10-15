@@ -83,7 +83,7 @@ void ad_drdy ()
   memcpy ((void *)ad_queue[ad_qposition], (const void*)ad_value, 3);
 
   /* set time */
-  ad_time[ad_qposition]  = TIME_FROM_REFERENCE; 
+  ad_time[ad_qposition]  = TIME_FROM_REFERENCE;
 
   if (ad_qposition == AD_QUEUE_LENGTH / 2) {
     batchready = 1;
@@ -162,25 +162,10 @@ void ad_configure ()
   digitalWrite (A0, LOW);
   delay (100);
 
-  /* Configuration masks (12 bits) */
-
-  # define CONTROL_SELF_CALIBRATION   0b001000000000
-  # define CONTROL_24BIT              0b000000001000
-  # define CONTROL_DEFAULT            0
-
-  /* Notch frequency (12 bits)
-   *
-   * Range: 19 - 2000L
-   * 19   gives approximately 1000 samples / 970 ms
-   * 2000 gives approximately 1000 samples / 50 s
-   */
-  # define FREQUENCY 19
-
-
   // Build control configuration, total of 24 bits.
   ulong ctb = 0;
 
-  ctb  = (ulong) (CONTROL_SELF_CALIBRATION | CONTROL_24BIT) << 12;
+  ctb  = (ulong) AD_CONTROL << 12;
   ctb |= (ulong) FREQUENCY;
 
   for (int i = 2; i >= 0; i--) {

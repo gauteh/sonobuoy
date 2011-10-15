@@ -28,6 +28,28 @@
  *
  */
 
+/* Configuration masks (12 bits) */
+
+# define CONTROL_SELF_CALIBRATION   0b001000000000
+# define CONTROL_24BIT              0b000000001000
+# define CONTROL_DEFAULT            0
+
+/* Configuration mask to be set */
+# define AD_CONTROL (CONTROL_SELF_CALIBRATION | CONTROL_24BIT)
+
+/* Notch frequency (12 bits)
+ *
+ * Range: 19 - 2000L
+ * 19   gives approximately 1000 samples / 970 ms
+ * 2000 gives approximately 1000 samples / 50 s
+ */
+# define FREQUENCY 19
+
+
+/* Estimated sample rate, for optimizing storage and time consuming
+ * operations. NOT TO BE TRUSTED. */
+# define EST_SAMPLE_RATE 1030L
+
 /* Sample is 24 bit / 8 = 3 bytes */
 typedef byte sample[3];
 

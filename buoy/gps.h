@@ -103,10 +103,10 @@ extern volatile ulong microdelta;
  */
 extern volatile ulong lastmicros;
 
-/* Get time related to reference 
+/* Get time related to reference
  *
  * ACCURACY:
- * 
+ *
  * Accurate to (max(ulong) 2^32 - 1 ) % 4 for Arduino internal clock, micros()
  * has steps of 4. And to accuracy of GPS sync pulse (if available), about 1
  * us + delay for handling pulse.
