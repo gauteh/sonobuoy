@@ -43,7 +43,19 @@ void init_sd ()
     rf_send_debug ("SD card ready.");
 
     sd.chdir ("/", true);
-    open_index ();
+//    open_index ();
+
+    if (sd.exists("LASTID.DAT"))
+    {
+      Serial.println ("LASTID exists.");
+      SdFile f ("LASTID.DAT", O_READ);
+      sd.errorPrint ();
+    }
+
+    // OPEN LASTID
+
+
+
 
   } else {
     rf_send_debug ("Could not init SD.");
@@ -101,6 +113,7 @@ void open_index ()
     SdFile fi (buf, O_READ);
 
     if (sd.exists(buf)) {
+      Serial.println ("Found Index, closed: ");
       n = fi.read(reinterpret_cast<char*>(&current_index), sizeof(current_index));
       Serial.println (current_index.closed);
 
@@ -118,12 +131,15 @@ void open_index ()
     fi.close ();
 
   } else {
+    Serial.println("i = 0");
+    current_index.closed = true;
     i = 0; // Will be incremented below.
   }
 
 
   if (current_index.closed) {
     // Open new index
+    Serial.println ("Index closed.");
     current_index.version = STORE_VERSION;
     current_index.id = i + 1;
     current_index.datafiles = 0;
@@ -139,6 +155,8 @@ void write_index ()
   char buf[50];
   sprintf (buf, "Writing index: %lu..", current_index.id);
   rf_send_debug (buf);
+
+  Serial.println (buf);
 
   if (current_index.id != 0) {
     sprintf (buf, "/INDEX%lu.IND", current_index.id);
@@ -174,10 +192,12 @@ void sd_loop ()
   /* Check if everything is happy dandy with card.. */
 
   /* Try to set up SD card, 5 sec delay  */
+  /*
   if (!SD_AVAILABLE & (millis () - lastsd) > 5000) {
     init_sd ();
     lastsd = millis ();
   }
+  */
 }
 
 /* vim: set filetype=arduino :  */
