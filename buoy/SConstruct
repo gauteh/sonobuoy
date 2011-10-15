@@ -224,11 +224,11 @@ def fnProcessing(target, source, env):
                 prototypes[result[0][0]] = result[0][1]
 
     for name in prototypes.keys():
-        print ("%s;"%(name))
+        #print ("%s;"%(name))
         wp.write("%s;\n"%name)
 
     for file in glob(os.path.realpath(os.curdir) + "/*.pde"):
-        print file, TARGET
+        #print file, TARGET
         if not os.path.samefile(file, TARGET+".pde"):
                 wp.write('#line 1 "%s"\r\n' % file)
                 wp.write(open(file).read())
