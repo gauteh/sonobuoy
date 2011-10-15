@@ -18,6 +18,9 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <SdFatUtil.h>
+
+# include "buoy.h"
+
 //------------------------------------------------------------------------------
 /** Amount of free RAM
  * \return The number of free bytes.
@@ -61,14 +64,18 @@ void SdFatUtil::println_P(Print* pr, PGM_P str) {
  *
  * \param[in] str Pointer to string stored in flash memory.
  */
+# if DIRECT_SERIAL
 void SdFatUtil::SerialPrint_P(PGM_P str) {
   print_P(&Serial, str);
 }
+# endif
 //------------------------------------------------------------------------------
 /** %Print a string in flash memory to Serial followed by a CR/LF.
  *
  * \param[in] str Pointer to string stored in flash memory.
  */
+# if DIRECT_SERIAL
 void SdFatUtil::SerialPrintln_P(PGM_P str) {
   println_P(&Serial, str);
 }
+# endif

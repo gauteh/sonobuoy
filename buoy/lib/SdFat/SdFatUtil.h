@@ -29,17 +29,28 @@
 #else  // ARDUINO
 #include <Arduino.h>
 #endif  // ARDUINO
+
+# include "buoy.h"
+
+# if DIRECT_SERIAL
 /** Store and print a string in flash memory.*/
 #define PgmPrint(x) Serial.print(x)
 /** Store and print a string in flash memory followed by a CR/LF.*/
 #define PgmPrintln(x) Serial.println(x)
 
+# else
+  # define PgmPrint(x) 0
+  # define PgmPrintln(x) 0
+# endif
+
 namespace SdFatUtil {
   int FreeRam();
   void print_P(Print* pr, PGM_P str);
   void println_P(Print* pr, PGM_P str);
+# if DIRECT_SERIAL
   void SerialPrint_P(PGM_P str);
   void SerialPrintln_P(PGM_P str);
+# endif
 }
 
 using namespace SdFatUtil;  // NOLINT

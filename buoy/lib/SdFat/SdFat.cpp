@@ -19,6 +19,8 @@
  */
 #include <SdFat.h>
 #include <SdFatUtil.h>
+
+# include "buoy.h"
 //------------------------------------------------------------------------------
 /** Change a volume's working directory to root
  *
@@ -108,31 +110,37 @@ void SdFat::errorHalt_P(PGM_P msg) {
 }
 //------------------------------------------------------------------------------
 /** %Print any SD error code. */
+# if DIRECT_SERIAL
 void SdFat::errorPrint() {
   if (!card_.errorCode()) return;
   PgmPrint("SD errorCode: 0X");
   Serial.println(card_.errorCode(), HEX);
 }
+# endif 
 //------------------------------------------------------------------------------
 /** %Print msg, any SD error code.
  *
  * \param[in] msg Message to print.
  */
+# if DIRECT_SERIAL
 void SdFat::errorPrint(char const* msg) {
   PgmPrint("error: ");
   Serial.println(msg);
   errorPrint();
 }
+# endif
 //------------------------------------------------------------------------------
 /** %Print msg, any SD error code.
  *
  * \param[in] msg Message in program space (flash memory) to print.
  */
+# if DIRECT_SERIAL
 void SdFat::errorPrint_P(PGM_P msg) {
   PgmPrint("error: ");
   SerialPrintln_P(msg);
   errorPrint();
 }
+# endif
 //------------------------------------------------------------------------------
 /**
  * Test for the existence of a file.
@@ -170,19 +178,23 @@ void SdFat::initErrorHalt() {
  *
  * \param[in] msg Message to print.
  */
+# if DIRECT_SERIAL
 void SdFat::initErrorHalt(char const *msg) {
   Serial.println(msg);
   initErrorHalt();
 }
+# endif
 //------------------------------------------------------------------------------
 /**Print message, error details, and halt after SdFat::init() fails.
  *
  * \param[in] msg Message in program space (flash memory) to print.
  */
+# if DIRECT_SERIAL
 void SdFat::initErrorHalt_P(PGM_P msg) {
   SerialPrintln_P(msg);
   initErrorHalt();
 }
+# endif
 //------------------------------------------------------------------------------
 /** Print error details after SdFat::init() fails. */
 void SdFat::initErrorPrint() {
@@ -206,7 +218,9 @@ void SdFat::initErrorPrint() {
  * \param[in] msg Message to print.
  */
 void SdFat::initErrorPrint(char const *msg) {
+# if DIRECT_SERIAL
   Serial.println(msg);
+# endif
   initErrorPrint();
 }
 //------------------------------------------------------------------------------
@@ -215,7 +229,9 @@ void SdFat::initErrorPrint(char const *msg) {
  * \param[in] msg Message in program space (flash memory) to print.
  */
 void SdFat::initErrorPrint_P(PGM_P msg) {
+# if DIRECT_SERIAL
   SerialPrintln_P(msg);
+# endif
   initErrorHalt();
 }
 //------------------------------------------------------------------------------
@@ -229,9 +245,11 @@ void SdFat::initErrorPrint_P(PGM_P msg) {
  *
  * LS_R - Recursive list of subdirectories.
  */
+# if DIRECT_SERIAL
 void SdFat::ls(uint8_t flags) {
   vwd_.ls(&Serial, flags);
 }
+# endif
 //------------------------------------------------------------------------------
 /** List the directory contents of the volume working directory to Serial.
  *

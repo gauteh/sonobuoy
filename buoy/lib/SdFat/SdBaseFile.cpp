@@ -17,7 +17,10 @@
  * along with the Arduino SdFat Library.  If not, see
  * <http://www.gnu.org/licenses/>.
  */
+# include "buoy.h"
+
 #include <SdBaseFile.h>
+
 //------------------------------------------------------------------------------
 // pointer to cwd directory
 SdBaseFile* SdBaseFile::cwd_ = 0;
@@ -305,9 +308,11 @@ void SdBaseFile::getpos(fpos_t* pos) {
  *
  * LS_R - Recursive list of subdirectories.
  */
+# if DIRECT_SERIAL
 void SdBaseFile::ls(uint8_t flags) {
   ls(&Serial, flags, 0);
 }
+# endif
 //------------------------------------------------------------------------------
 /** List directory contents.
  *
@@ -948,10 +953,12 @@ int SdBaseFile::peek() {
  * \param[in] width Blank fill name if length is less than \a width.
  * \param[in] printSlash Print '/' after directory names if true.
  */
+# if DIRECT_SERIAL
 void SdBaseFile::printDirName(const dir_t& dir,
   uint8_t width, bool printSlash) {
   printDirName(&Serial, dir, width, printSlash);
 }
+# endif
 //------------------------------------------------------------------------------
 /** %Print the name field of a directory entry in 8.3 format.
  * \param[in] pr Print stream for output.
@@ -993,9 +1000,11 @@ static void print2u(Print* pr, uint8_t v) {
  *
  * \param[in] fatDate The date field from a directory entry.
  */
+# if DIRECT_SERIAL
 void SdBaseFile::printFatDate(uint16_t fatDate) {
   printFatDate(&Serial, fatDate);
 }
+# endif
 //------------------------------------------------------------------------------
 /** %Print a directory date field.
  *
@@ -1018,9 +1027,11 @@ void SdBaseFile::printFatDate(Print* pr, uint16_t fatDate) {
  *
  * \param[in] fatTime The time field from a directory entry.
  */
+# if DIRECT_SERIAL
 void SdBaseFile::printFatTime(uint16_t fatTime) {
   printFatTime(&Serial, fatTime);
 }
+# endif
 //------------------------------------------------------------------------------
 /** %Print a directory time field.
  *
@@ -1042,12 +1053,14 @@ void SdBaseFile::printFatTime(Print* pr, uint16_t fatTime) {
  * \return The value one, true, is returned for success and
  * the value zero, false, is returned for failure.
  */
+# if DIRECT_SERIAL
 bool SdBaseFile::printName() {
   char name[13];
   if (!getFilename(name)) return false;
   Serial.print(name);
   return true;
 }
+# endif
 //------------------------------------------------------------------------------
 /** Read the next byte from a file.
  *
