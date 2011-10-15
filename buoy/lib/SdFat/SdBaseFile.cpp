@@ -386,7 +386,6 @@ int8_t SdBaseFile::lsPrintNext(Print *pr, uint8_t flags, uint8_t indent) {
   pr->println();
   return DIR_IS_FILE(&dir) ? 1 : 2;
 }
-
 //------------------------------------------------------------------------------
 // format directory name field from a 8.3 name string
 bool SdBaseFile::make83Name(const char* str, uint8_t* name, const char** ptr) {
@@ -404,9 +403,10 @@ bool SdBaseFile::make83Name(const char* str, uint8_t* name, const char** ptr) {
       i = 8;   // place for extension
     } else {
       // illegal FAT characters
-      PGM_P p = "|<>^+=?/[];,*\"\\";
+      static const char * pp = "|<>^+=?/[];,*\"\\";
+      const char * p = pp;
       uint8_t b;
-      while ((b = pgm_read_byte(p++))) if (b == c) goto fail;
+      while ((b = *(p++))) if (b == c) goto fail;
       // check size and only allow ASCII printable characters
       if (i > n || c < 0X21 || c > 0X7E)goto fail;
       // only upper case allowed in 8.3 names - convert lower to upper

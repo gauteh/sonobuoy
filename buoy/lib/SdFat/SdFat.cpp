@@ -110,7 +110,7 @@ void SdFat::errorHalt_P(PGM_P msg) {
 /** %Print any SD error code. */
 void SdFat::errorPrint() {
   if (!card_.errorCode()) return;
-  PgmPrint ("SD errorCode: 0X");
+  PgmPrint("SD errorCode: 0X");
   Serial.println(card_.errorCode(), HEX);
 }
 //------------------------------------------------------------------------------

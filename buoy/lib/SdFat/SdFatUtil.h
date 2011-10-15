@@ -30,9 +30,9 @@
 #include <Arduino.h>
 #endif  // ARDUINO
 /** Store and print a string in flash memory.*/
-#define PgmPrint(x) { PGM_P _x = x; SerialPrint_P(_x); }
+#define PgmPrint(x) Serial.print(x)
 /** Store and print a string in flash memory followed by a CR/LF.*/
-#define PgmPrintln(x) {PGM_P _x = x; SerialPrintln_P(_x); }
+#define PgmPrintln(x) Serial.println(x)
 
 namespace SdFatUtil {
   int FreeRam();

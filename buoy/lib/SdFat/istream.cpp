@@ -90,9 +90,9 @@ void istream::getBool(bool *b) {
     getNumber(b);
     return;
   }
-  PGM_P truePtr = "true";
+  char * truePtr = (char*) "true";
   const uint8_t true_len = 4;
-  PGM_P falsePtr = "false";
+  char * falsePtr = (char*) "false";
   const uint8_t false_len = 5;
   bool trueOk = true;
   bool falseOk = true;
@@ -100,8 +100,8 @@ void istream::getBool(bool *b) {
   int c = readSkip();
   while (1) {
 //    if (c < 0) break;  // not required
-    falseOk = falseOk && c == pgm_read_byte(falsePtr + i);
-    trueOk = trueOk && c == pgm_read_byte(truePtr + i);
+    falseOk = falseOk && c == *(falsePtr + i);
+    trueOk = trueOk && c == *(truePtr + i);
     if (trueOk == false && falseOk == false) break;
     i++;
     if (trueOk && i == true_len) {
