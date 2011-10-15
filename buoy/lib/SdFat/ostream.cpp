@@ -44,10 +44,12 @@ char* ostream::fmtNum(uint32_t n, char *ptr, uint8_t base) {
 void ostream::putBool(bool b) {
   if (flags() & boolalpha) {
     if (b) {
-      pgm t(PSTR("true"));
+      PGM_P x = "true";
+      pgm t(x);
       putPgm(t);
     } else {
-      pgm f(PSTR("false"));
+      PGM_P x = "false";
+      pgm f(x);
       putPgm(f);
     }
   } else {
@@ -80,7 +82,8 @@ void ostream::putDouble(double n) {
   }
   // check for larger than uint32_t
   if (n > 4.0E9) {
-    pgm err(PSTR("BIG FLT"));
+    PGM_P e = "BIG FLT";
+    pgm err(e);
     putPgm(err);
     return;
   }

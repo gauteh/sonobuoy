@@ -90,9 +90,9 @@ void istream::getBool(bool *b) {
     getNumber(b);
     return;
   }
-  PGM_P truePtr = PSTR("true");
+  PGM_P truePtr = "true";
   const uint8_t true_len = 4;
-  PGM_P falsePtr = PSTR("false");
+  PGM_P falsePtr = "false";
   const uint8_t false_len = 5;
   bool trueOk = true;
   bool falseOk = true;
