@@ -46,6 +46,7 @@ pathJoin = os.path.join
 env = Environment()
 platform = env['PLATFORM']
 
+
 def getGitSha():
     return Popen('git rev-parse --short=7 HEAD', stdout=PIPE, shell=True).stdout.read ().strip ()
 
@@ -141,6 +142,60 @@ cFlags = ['-ffunction-sections', '-fdata-sections', '-fno-exceptions',
 envArduino = Environment(CC = AVR_BIN_PREFIX+'gcc', CXX = AVR_BIN_PREFIX+'g++',
     CPPPATH = ['build/core', 'build'], CPPDEFINES = {'F_CPU':F_CPU, 'ARDUINO':ARDUINO_VER},
     CFLAGS = cFlags+['-std=gnu99'], CCFLAGS = cFlags, TOOLS = ['gcc','g++'])
+
+# Verbose / Non-verbose output{{{
+colors = {}
+colors['cyan']   = '\033[96m'
+colors['purple'] = '\033[95m'
+colors['blue']   = '\033[94m'
+colors['green']  = '\033[92m'
+colors['yellow'] = '\033[93m'
+colors['red']    = '\033[91m'
+colors['end']    = '\033[0m'
+
+#If the output is not a terminal, remove the colors
+if not sys.stdout.isatty():
+   for key, value in colors.iteritems():
+      colors[key] = ''
+
+compile_source_message = '%sCompiling %s==> %s$SOURCE%s' % \
+   (colors['blue'], colors['purple'], colors['yellow'], colors['end'])
+
+compile_shared_source_message = '%sCompiling shared %s==> %s$SOURCE%s' % \
+   (colors['blue'], colors['purple'], colors['yellow'], colors['end'])
+
+link_program_message = '%sLinking Program %s==> %s$TARGET%s' % \
+   (colors['red'], colors['purple'], colors['yellow'], colors['end'])
+
+link_library_message = '%sLinking Static Library %s==> %s$TARGET%s' % \
+   (colors['red'], colors['purple'], colors['yellow'], colors['end'])
+
+ranlib_library_message = '%sRanlib Library %s==> %s$TARGET%s' % \
+   (colors['red'], colors['purple'], colors['yellow'], colors['end'])
+
+link_shared_library_message = '%sLinking Shared Library %s==> %s$TARGET%s' % \
+   (colors['red'], colors['purple'], colors['yellow'], colors['end'])
+
+java_compile_source_message = '%sCompiling %s==> %s$SOURCE%s' % \
+   (colors['blue'], colors['purple'], colors['yellow'], colors['end'])
+
+java_library_message = '%sCreating Java Archive %s==> %s$TARGET%s' % \
+   (colors['red'], colors['purple'], colors['yellow'], colors['end'])
+
+AddOption("--verbose",action="store_true", dest="verbose_flag",default=False,help="verbose output")
+if not GetOption("verbose_flag"):
+  envArduino["CXXCOMSTR"] = compile_source_message,
+  envArduino["CCCOMSTR"] = compile_source_message,
+  envArduino["SHCCCOMSTR"] = compile_shared_source_message,
+  envArduino["SHCXXCOMSTR"] = compile_shared_source_message,
+  envArduino["ARCOMSTR"] = link_library_message,
+  envArduino["RANLIBCOMSTR"] = ranlib_library_message,
+  envArduino["SHLINKCOMSTR"] = link_shared_library_message,
+  envArduino["LINKCOMSTR"] = link_program_message,
+  envArduino["JARCOMSTR"] = java_library_message,
+  envArduino["JAVACCOMSTR"] = java_compile_source_message,
+
+# Verbose }}}
 
 def fnProcessing(target, source, env):
     wp = open ('%s'%target[0], 'wb')
@@ -302,5 +357,6 @@ AlwaysBuild(upload)
 
 # Clean build directory
 envArduino.Clean('all', 'build/')
+
 
 # vim: et sw=4 fenc=utf-8:
