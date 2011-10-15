@@ -55,8 +55,6 @@ void open_index ()
 {
   int n = 0;
 
-  delayMicroseconds (100);
-
   rf_send_debug ("Opening index..");
 
   ulong i;
