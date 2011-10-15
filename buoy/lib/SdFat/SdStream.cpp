@@ -22,7 +22,9 @@
 // catch pure virtual errors
 #if USE_CXA_PURE_VIRTUAL
 extern "C" void __cxa_pure_virtual() {
+# if DIRECT_SERIAL
   Serial.println("VIRTUAL");
+# endif
   exit(1);
 }
 #endif  // USE_CXA_PURE_VIRTUAL

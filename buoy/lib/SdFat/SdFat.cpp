@@ -178,23 +178,23 @@ void SdFat::initErrorHalt() {
  *
  * \param[in] msg Message to print.
  */
-# if DIRECT_SERIAL
 void SdFat::initErrorHalt(char const *msg) {
+# if DIRECT_SERIAL
   Serial.println(msg);
+# endif
   initErrorHalt();
 }
-# endif
 //------------------------------------------------------------------------------
 /**Print message, error details, and halt after SdFat::init() fails.
  *
  * \param[in] msg Message in program space (flash memory) to print.
  */
-# if DIRECT_SERIAL
 void SdFat::initErrorHalt_P(PGM_P msg) {
+# if DIRECT_SERIAL
   SerialPrintln_P(msg);
+# endif
   initErrorHalt();
 }
-# endif
 //------------------------------------------------------------------------------
 /** Print error details after SdFat::init() fails. */
 void SdFat::initErrorPrint() {

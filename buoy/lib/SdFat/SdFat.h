@@ -57,7 +57,9 @@ class SdFat {
   void initErrorPrint();
   void initErrorPrint(char const *msg);
   void initErrorPrint_P(PGM_P msg);
+# if DIRECT_SERIAL
   void ls(uint8_t flags = 0);
+# endif
   void ls(Print* pr, uint8_t flags = 0);
   bool mkdir(const char* path, bool pFlag = true);
   bool remove(const char* path);
