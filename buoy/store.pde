@@ -54,7 +54,7 @@ void init_sd ()
 void open_index ()
 {
   int n = 0;
-  sd.ls ();
+
   delayMicroseconds (100);
 
   rf_send_debug ("Opening index..");
@@ -163,7 +163,9 @@ void write_index ()
     fl.sync ();
     fl.close ();
   }
+# if DIRECT_SERIAL
   sd.ls ();
+# endif
 }
 
 void next_file ()
