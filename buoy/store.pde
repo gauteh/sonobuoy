@@ -181,7 +181,9 @@ bool referencewritten = false;
 void sd_write_batch ()
 {
   if (!SD_AVAILABLE) {
-    rf_send_debug ("Could not write to SD card.");
+    char buf[50];
+    sprintf (buf, "No write: error: %02X.", sd.card ()->errorCode ());
+    rf_send_debug (buf);
     return;
   }
 
@@ -289,6 +291,9 @@ void sd_loop ()
 {
   /* Try to set up SD card, 5 sec delay  */
   if (!SD_AVAILABLE & (millis () - lastsd) > 5000) {
+    char buf[50];
+    sprintf (buf, "SD error code: %02X.", sd.card ()->errorCode ());
+    rf_send_debug (buf);
     sd_init ();
     lastsd = millis ();
   }
