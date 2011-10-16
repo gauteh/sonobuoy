@@ -9,4 +9,5 @@ buoy/build
 *.log
 *.wav
 *.pyc
+zero/storereader/storereader
 

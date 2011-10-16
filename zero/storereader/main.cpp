@@ -12,7 +12,14 @@ typedef unsigned int  uint;
 
 # include "store.h"
 
+# include <iostream>
+
+using namespace std;
+
 int main (int argc, char **argv) {
+
+  cout << "Store reader for Gautebøye (" << VERSION << ")" << endl;
+  cout << "Store version: " << STORE_VERSION << endl;
 
   return 0;
 }
