@@ -47,7 +47,7 @@ void sd_init ();
 
 void sd_open_index ();
 void sd_write_index ();
-void sd_next_index (int);
+void sd_next_index (ulong);
 void sd_roll_data_file ();
 void sd_open_data ();
 

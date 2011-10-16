@@ -83,9 +83,11 @@ void sd_open_index ()
 }
 
 /* Open next index file */
-void sd_next_index (int i)
+void sd_next_index (ulong i)
 {
   // i is LASTID
+
+  if (i > 100) i = 1;  // DEBUG
 
   /* Walk through subsequent indexes above lastid and take next free */
   int n = 0;
@@ -119,7 +121,7 @@ void sd_next_index (int i)
 
   // Open new index
   current_index.version = STORE_VERSION;
-  current_index.id = i + 1;
+  current_index.id = i;
   current_index.sample_l = SAMPLE_LENGTH;
   current_index.timestamp_l = TIMESTAMP_LENGTH;
   current_index.nrefs = 0;
@@ -148,7 +150,6 @@ void sd_write_index ()
     fl.close ();
   }
 
-  rf_send_debug ("Index written.");
 # if DIRECT_SERIAL
   sd.ls ();
 # endif
@@ -159,8 +160,6 @@ void sd_write_index ()
 /* Open new index and data file */
 void sd_roll_data_file ()
 {
-  rf_send_debug ("Rolling data file..");
-
   /* Truncate data file to actual size */
   sd_data.truncate (sd_data.curPosition ());
 
@@ -200,7 +199,7 @@ void sd_write_batch ()
     sd_roll_data_file ();
   }
 
-  /* In case we are in update_reference, check if we have space for 
+  /* In case we are in update_reference, check if we have space for
    * one more reference */
   if (update_reference) {
     if (sd_data.curPosition () > (SD_DATA_FILE_SIZE - (AD_QUEUE_LENGTH / 2 * (SAMPLE_LENGTH + TIMESTAMP_LENGTH)) - SD_REFERENCE_LENGTH))
