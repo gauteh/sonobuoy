@@ -122,6 +122,7 @@ void sd_next_index (int i)
   current_index.id = i + 1;
   current_index.sample_l = SAMPLE_LENGTH;
   current_index.timestamp_l = TIMESTAMP_LENGTH;
+  current_index.nrefs = 0;
 
   sd_write_index ();
 }
@@ -168,7 +169,7 @@ void sd_roll_data_file ()
 
   /* Open new index */
   sd_write_index ();
-  sd_next_index (current_index.id + 1);
+  sd_next_index (current_index.id);
 
   /* Open new data file */
   sd_open_data ();

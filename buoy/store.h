@@ -8,10 +8,12 @@
 # ifndef STORE_H
 # define STORE_H
 
-# include <SdFat.h>
 # include "buoy.h"
 # include "gps.h"
 # include "ad7710.h"
+
+# ifndef ONLY_SPEC
+# include <SdFat.h>
 
 # define SD_SS    10
 # define SD_MOSI  11
@@ -23,6 +25,8 @@ extern bool   SD_AVAILABLE;
 
 extern ulong  sd_status;
 
+# endif /* ONLY_SPEC */
+
 enum SD_STATUS {
   SD_VALID_GPS = 0x1,
   SD_HAS_TIME  = 0x2,
@@ -30,6 +34,7 @@ enum SD_STATUS {
   SD_HAS_SYNC_REF = 0x8,
 };
 
+# ifndef ONLY_SPEC
 /* Should be set when new reference has become available, will be written
  * outside of interrupt since it might otherwise come in the middle of a
  * writing operation */
@@ -48,6 +53,8 @@ void sd_open_data ();
 
 void sd_write_batch ();
 void sd_write_reference (ulong);
+
+# endif /* ONLY_SPEC */
 
 /* Data format */
 # define STORE_VERSION 1
