@@ -63,6 +63,6 @@ if not GetOption("verbose_flag"):
 
 # Verbose }}}
 
-env.Append (CPPPATH = '../../buoy/', CPPDEFINES = { 'GIT_SHA' : ('\\"%s\\"' % GIT_SHA) } )
+env.Append (CPPPATH = '../../buoy/', CPPDEFINES = { 'GIT_SHA' : ('\\"%s\\"' % GIT_SHA) }, CPPFLAGS = '-g' )
 env.Program ('storereader', 'main.cpp')
 
