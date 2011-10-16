@@ -18,7 +18,7 @@ using namespace std;
 
 int main (int argc, char **argv) {
 
-  cerr << "Store reader for Gautebøye (" << VERSION << ")" << endl;
+  cerr << "Store reader for Gautebøye ( rev " << VERSION << ")" << endl;
   cerr << "Store version: " << STORE_VERSION << endl;
 
   return 0;
