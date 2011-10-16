@@ -19,6 +19,7 @@
 # include "buoy.h"
 # include "ad7710.h"
 # include "gps.h"
+# include "store.h"
 
 /* PIN setup */
 # define A0     46
@@ -106,7 +107,12 @@ void ad_drdy ()
 void ad_loop ()
 {
   if (batchready > 0) {
+    /* Send data over RF */
     rf_ad_message (AD_DATA_BATCH);
+
+    /* Store data on SD */
+    sd_write_batch ();
+
     batchready = 0;
   }
 }

@@ -15,7 +15,6 @@
 # include "rf.h"
 # include "store.h"
 
-ulong laststatus = 0;
 
 void setup ()
 {
@@ -34,10 +33,9 @@ void setup ()
   delay(10);
 }
 
-int i = 0;
-
 void loop ()
 {
+  static ulong laststatus = 0;
 
   if ((millis () - laststatus) > 500) {
     /* Send status to RF */

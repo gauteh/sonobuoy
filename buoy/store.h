@@ -20,13 +20,34 @@
 
 extern SdFat  sd;
 extern bool   SD_AVAILABLE;
-extern uint    sd_error;
+
+extern ulong  sd_status;
+
+enum SD_STATUS {
+  SD_VALID_GPS = 0x1,
+  SD_HAS_TIME  = 0x2,
+  SD_HAS_SYNC  = 0x4,
+  SD_HAS_SYNC_REF = 0x8,
+};
+
+/* Should be set when new reference has become available, will be written
+ * outside of interrupt since it might otherwise come in the middle of a
+ * writing operation */
+extern volatile bool update_reference;
+extern volatile uint update_reference_qposition;
 
 void sd_setup ();
 void sd_loop ();
+void sd_init ();
 
-void open_index ();
-void write_index ();
+void sd_open_index ();
+void sd_write_index ();
+void sd_next_index (int);
+void sd_roll_data_file ();
+void sd_open_data ();
+
+void sd_write_batch ();
+void sd_write_reference (ulong);
 
 /* Data format */
 # define STORE_VERSION 1
@@ -34,9 +55,31 @@ void write_index ();
 # define TIMESTAMP_LENGTH 4
 
 /* Maximum number of timestamp, sample pairs for each datafile */
-# define EST_MINUTES_PER_DATAFILE 10L
+# define EST_MINUTES_PER_DATAFILE 2L
 # define MAX_SAMPLES_PER_FILE (EST_SAMPLE_RATE * 60L * EST_MINUTES_PER_DATAFILE)
 # define MAX_REFERENCES (MAX_SAMPLES_PER_FILE / ( EST_SAMPLE_RATE * ROLL_REFERENCE))
+
+# define _SD_DATA_FILE_SIZE (MAX_SAMPLES_PER_FILE * (SAMPLE_LENGTH + TIMESTAMP_LENGTH) + MAX_REFERENCES * 50)
+# define SD_DATA_FILE_SIZE (_SD_DATA_FILE_SIZE + (_SD_DATA_FILE_SIZE % 512))
+
+/* Data file format {{{
+ *
+ * Reference:
+ *  - 3 * (SAMPLE_LENGTH + TIMESTAMP_LENGTH) with 0
+ *  - Reference id: ulong
+ *  - Reference:    ulong referencesecond [unix time]
+ *  - Status bit:   ulong status
+ *  - 3 * (SAMPLE_LENGTH + TIMESTAMP_LENGTH) with 0
+ *  Total length: 54 bytes.
+ *
+ * Entry:
+ *  - TIMESTAMP (4 bytes)
+ *  - SAMPLE    (3 bytes)
+ *  Total length: 7 bytes.
+ *
+ * }}} */
+
+# define SD_REFERENCE_LENGTH 54
 
 /* Last ID is one unsigned long */
 typedef ulong LASTID;
@@ -51,20 +94,8 @@ typedef struct _Index {
   ulong samples;    // Can maximum reach MAX_SAMPLES_PER_FILE
   ulong nrefs;      // Current number of references
   ulong refs[MAX_REFERENCES]; // List with position of reference points.
-
-  bool closed;      // Indicates whether this index has been closed
-
 } Index;
 
-
-typedef struct _DataHeader {
-  uint index;           // Corresponding index file
-  uint id;              // Data file id
-
-  uint samplelength;
-
-  uint firstreference;  // First reference time stamp in data
-} DataHeader;
 
 /* File names:
  * LASTID.DAT    - file with current index id (not to be trusted..)

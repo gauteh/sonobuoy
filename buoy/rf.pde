@@ -47,39 +47,6 @@ void rf_send_status ()
 {
   rf_ad_message (AD_STATUS);
   rf_gps_message (GPS_STATUS);
-
-  char b[80];
-
-  sprintf (b, "[SD] Current index: %u", current_index.id);
-  //rf_send_debug (b);
-  
-  /*
-  SdFile f;
-  f.open ("/LASTID.DAT", O_READ);
-
-  if (f.isOpen ()) {
-    rf_send_debug ("LASTID exists.");
-
-    uint n = f.read (b, 80);
-    b[n] = 0;
-
-
-    rf_send_debug (b);
-
-  }
-  else
-  {
-    rf_send_debug ("LASTID does not exists.");
-    //SD_AVAILABLE = false;
-  }
-  */
-
-
-  /*
-  char buf[RF_BUFLEN];
-  sprintf(buf, "AD queue postion: %d", ad_qposition);
-  rf_send_debug (buf);
-  */
 }
 
 void rf_send_debug (const char * msg)

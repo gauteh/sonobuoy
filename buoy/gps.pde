@@ -19,6 +19,7 @@
 # include "buoy.h"
 # include "rf.h"
 # include "gps.h"
+# include "store.h"
 
 char gps_buf[TELEGRAM_LEN + 2];
 int  gps_buf_pos   = 0;
@@ -89,6 +90,8 @@ void gps_roll_reference ()
   /* Change referencesecond to latest */
   microdelta = microdelta - (1e6 * (lastsecond - referencesecond));
   referencesecond = lastsecond;
+  update_reference = true; // Signal to store that new reference is available
+  update_reference_qposition = ad_qposition;
   HAS_SYNC_REFERENCE = true;
 }
 
