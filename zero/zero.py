@@ -123,17 +123,18 @@ class Zero:
       self.openserial ()
 
       while self.go:
-        if not self.ser == None:
-          r = self.ser.read (1024)
-          if self.current is not None:
-            self.protocol.handle (r)
+        try:
+          if not self.ser == None:
+            r = self.ser.read (1024)
+            if self.current is not None:
+              self.protocol.handle (r)
 
-        time.sleep (0.01)
+          time.sleep (0.01)
+        except serial.SerialException as e:
+          self.logger.error ("Exception with serial link, reconnecting..: " + str(e))
+          self.closeserial ()
+          self.openserial ()
 
-    except serial.SerialException as e:
-      self.logger.error ("Exception with serial link, reconnecting..: " + str(e))
-      self.closeserial ()
-      self.openserial ()
 
     except Exception as e:
       self.logger.error ("General exception in main loop: " + str(e))
