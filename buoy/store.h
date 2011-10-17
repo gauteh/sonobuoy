@@ -28,10 +28,10 @@ extern ulong  sd_status;
 # endif /* ONLY_SPEC */
 
 enum SD_STATUS {
-  SD_VALID_GPS = 0x1,
-  SD_HAS_TIME  = 0x2,
-  SD_HAS_SYNC  = 0x4,
-  SD_HAS_SYNC_REF = 0x8,
+  SD_VALID_GPS    = 0b1,
+  SD_HAS_TIME     = 0b10,
+  SD_HAS_SYNC     = 0b100,
+  SD_HAS_SYNC_REF = 0b1000,
 };
 
 # ifndef ONLY_SPEC
@@ -93,7 +93,7 @@ typedef ulong LASTID;
 
 typedef struct _Index {
   uint version;     // Version of data (as defined in STORE_VERSION)
-  ulong id;          // Id of index
+  ulong id;         // Id of index (limited by MAXID)
 
   uint sample_l;    // Length of sample (bytes)
   uint timestamp_l; // Length of time stamp (bytes)
@@ -104,15 +104,18 @@ typedef struct _Index {
 } Index;
 
 
-/* File names:
- * LASTID.DAT    - file with current index id (not to be trusted..)
+/* Using 8.3 file names limits the ID */
+# define MAXID (10^8 -1)
+
+/* Files:
+ * LASTID.LON     - file with current index id (not to be trusted..)
  *
- * INDEX[id].IND - Index of data files, highest id is current.
+ * [id].IND       - Index of data files, highest id is current.
  *
  * A new Index will be created after a number of data files or
  * if index cannot be parsed.
  *
- * DATA[id].DAT -  Data related to INDEX with same id
+ * [id].DAT       -  Data related to INDEX with same id
  *
  * A new data file will be created on start up, if file is corrupt, on
  * new index or if file is corrupt.
@@ -123,4 +126,5 @@ typedef struct _Index {
 # endif
 
 /* vim: set filetype=arduino :  */
+
 

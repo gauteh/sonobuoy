@@ -63,8 +63,8 @@ void sd_open_index ()
   rf_send_debug ("Opening index..");
 
   ulong i;
-  if (sd.exists("LASTID.DAT")) {
-    SdFile fl ("LASTID.DAT", O_READ);
+  if (sd.exists("LASTID.LON")) {
+    SdFile fl ("LASTID.LON", O_READ);
 
     n = fl.read (reinterpret_cast<char*>(&i), sizeof(ulong));
 
@@ -87,6 +87,8 @@ void sd_next_index (ulong i)
 {
   // i is LASTID
 
+  // TODO: Check if we have reached MAXID
+
   if (i > 100) i = 1;  // DEBUG
 
   /* Walk through subsequent indexes above lastid and take next free */
@@ -101,7 +103,7 @@ void sd_next_index (ulong i)
 
   while (!newi)
   {
-    sprintf (buf, "INDEX%lu.IND", i);
+    sprintf (buf, "%lu.IND", i);
 # if DIRECT_SERIAL
     Serial.println(buf);
 # endif
@@ -136,7 +138,7 @@ void sd_write_index ()
   rf_send_debug (buf);
 
   if (current_index.id != 0) {
-    sprintf (buf, "/INDEX%lu.IND", current_index.id);
+    sprintf (buf, "/%lu.IND", current_index.id);
 
     SdFile fi (buf, O_CREAT | O_WRITE | O_TRUNC);
     fi.write (reinterpret_cast<char*>(&current_index), sizeof(current_index));
@@ -144,7 +146,7 @@ void sd_write_index ()
     fi.close ();
 
     /* Write back last index */
-    SdFile fl("LASTID.DAT", O_CREAT | O_WRITE | O_TRUNC);
+    SdFile fl("LASTID.LON", O_CREAT | O_WRITE | O_TRUNC);
     fl.write (reinterpret_cast<char*>(&(current_index.id)), sizeof(current_index.id));
     fl.sync ();
     fl.close ();
@@ -241,7 +243,7 @@ void sd_write_batch ()
 void sd_open_data ()
 {
   char fname[13];
-  sprintf (fname, "DATA%lu.DAT", current_index.id);
+  sprintf (fname, "%lu.DAT", current_index.id);
 
   SD_AVAILABLE = sd_data.createContiguous (sd.vwd (), fname, SD_DATA_FILE_SIZE);
   SD_AVAILABLE &= (sd.card()->errorCode () == 0);
