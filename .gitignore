@@ -1,6 +1,7 @@
 buoy/build
 *~
 *.swp
+*.swo
 *.o
 *.a
 .sconsign*
