@@ -28,9 +28,21 @@
                   "Gaute Hope <eg@gaute.vetsj.com>"
 
 # define ULONG_MAX 4294967295u // 2^32 - 1
+
+/* Architectures:
+ *
+ * AVR:
+ * uint32_t ulong;
+ * uint16_t uint;
+ *
+ * PC:
+ * uint64_t ulong;
+ * uint32_t uint;
+ *
+ * TODO: Get rid of ulong and uint and replace by exact size!!!
+ */
 typedef unsigned long ulong;
 typedef unsigned int  uint;
-
 
 # endif
 
