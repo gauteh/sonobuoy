@@ -112,6 +112,7 @@ void sd_next_index (ulong i)
       Serial.print ("Found free index at: ");
       Serial.println (i);
 # endif
+      rf_send_debug_f ("Next index: %lu", i);
 
     }
     i++;
@@ -123,6 +124,7 @@ void sd_next_index (ulong i)
   current_index.id = i;
   current_index.sample_l = SAMPLE_LENGTH;
   current_index.timestamp_l = TIMESTAMP_LENGTH;
+  current_index.samples = 0;
   current_index.nrefs = 0;
 
   sd_write_index ();

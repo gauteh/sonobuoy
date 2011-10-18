@@ -10,4 +10,7 @@ buoy/build
 *.wav
 *.pyc
 zero/storereader/storereader
+*.DAT
+*.LON
+*.IND
 

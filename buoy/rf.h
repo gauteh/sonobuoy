@@ -31,7 +31,7 @@ typedef enum _RF_GPS_MESSAGE {
 } RF_GPS_MESSAGE;
 
 
-# define rf_send_debug_f(args...) { char buf[80]; sprintf(buf, args); rf_send_debug (buf); }
+# define rf_send_debug_f(args...) { char buf[RF_BUFLEN - 5 - 4]; sprintf(buf, args); rf_send_debug (buf); }
 
 byte gen_checksum (char *);
 bool test_checksum (char *);

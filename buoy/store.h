@@ -62,7 +62,7 @@ void sd_write_reference (ulong);
 # define TIMESTAMP_LENGTH 4
 
 /* Maximum number of timestamp, sample pairs for each datafile */
-# define EST_MINUTES_PER_DATAFILE 2L
+# define EST_MINUTES_PER_DATAFILE 1L
 # define MAX_SAMPLES_PER_FILE (EST_SAMPLE_RATE * 60L * EST_MINUTES_PER_DATAFILE)
 # define MAX_REFERENCES (MAX_SAMPLES_PER_FILE / ( EST_SAMPLE_RATE * ROLL_REFERENCE))
 
