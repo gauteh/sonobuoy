@@ -8,7 +8,7 @@
 # ifndef RF_H
 # define RF_H
 
-# define RF_BAUDRATE 115200 
+# define RF_BAUDRATE 115200
 # define RF_Serial Serial2
 
 # define RF_BUFLEN 150
@@ -30,6 +30,8 @@ typedef enum _RF_GPS_MESSAGE {
   GPS_POSITION,
 } RF_GPS_MESSAGE;
 
+
+# define rf_send_debug_f(args...) { char buf[80]; sprintf(buf, args); rf_send_debug (buf); }
 
 byte gen_checksum (char *);
 bool test_checksum (char *);

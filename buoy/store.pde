@@ -75,10 +75,7 @@ void sd_open_index ()
     i = 1;
   }
 
-  char buf[50];
-  sprintf (buf, "Last id: %lu..", i);
-  rf_send_debug (buf);
-
+  rf_send_debug_f ("Last id: %lu..", i);
   sd_next_index (i);
 }
 
@@ -93,7 +90,7 @@ void sd_next_index (ulong i)
 
   /* Walk through subsequent indexes above lastid and take next free */
   int n = 0;
-  char buf[50];
+  char buf[8+5];
   bool newi = false;
 
 # if DIRECT_SERIAL
@@ -133,12 +130,11 @@ void sd_next_index (ulong i)
 
 void sd_write_index ()
 {
-  char buf[50];
-  sprintf (buf, "Writing index: %lu..", current_index.id);
-  rf_send_debug (buf);
+  char buf[8+5];
+  rf_send_debug_f ("Writing index: %lu..", current_index.id);
 
   if (current_index.id != 0) {
-    sprintf (buf, "/%lu.IND", current_index.id);
+    sprintf (buf, "%lu.IND", current_index.id);
 
     SdFile fi (buf, O_CREAT | O_WRITE | O_TRUNC);
     fi.write (reinterpret_cast<char*>(&current_index), sizeof(current_index));
@@ -162,6 +158,8 @@ void sd_write_index ()
 /* Open new index and data file */
 void sd_roll_data_file ()
 {
+  rf_send_debug ("Syncing index and data, and rolling..");
+
   /* Truncate data file to actual size */
   sd_data.truncate (sd_data.curPosition ());
 
@@ -182,9 +180,7 @@ bool referencewritten = false;
 void sd_write_batch ()
 {
   if (!SD_AVAILABLE) {
-    char buf[50];
-    sprintf (buf, "No write: error: %02X.", sd.card ()->errorCode ());
-    rf_send_debug (buf);
+    rf_send_debug_f ("No write: error: %02X.", sd.card ()->errorCode ());
     return;
   }
 
@@ -217,7 +213,7 @@ void sd_write_batch ()
   }
 
   /* Writing entries */
-  rf_send_debug ("Writing entries to data file..");
+  rf_send_debug_f ("Writing entries to data file..: %lu", current_index.samples);
   uint i = (batchready == 1 ? 0 : (AD_QUEUE_LENGTH / 2));
   for (; i <  (AD_QUEUE_LENGTH / 2); i++)
   {
@@ -233,10 +229,6 @@ void sd_write_batch ()
   current_index.samples += (AD_QUEUE_LENGTH / 2);
 
   SD_AVAILABLE &= (sd.card()->errorCode () == 0);
-
-  /* For DEBUG */
-  sd_data.sync ();
-  sd_write_index ();
 }
 
 /* Open data file */
@@ -292,9 +284,7 @@ void sd_loop ()
 {
   /* Try to set up SD card, 5 sec delay  */
   if (!SD_AVAILABLE & (millis () - lastsd) > 5000) {
-    char buf[50];
-    sprintf (buf, "SD error code: %02X.", sd.card ()->errorCode ());
-    rf_send_debug (buf);
+    rf_send_debug_f ("SD error code: %02X.", sd.card ()->errorCode ());
     sd_init ();
     lastsd = millis ();
   }
