@@ -5,6 +5,7 @@
 import threading
 import logging
 import time
+import os
 
 from ad import *
 from gps import *
@@ -16,7 +17,8 @@ class Buoy:
   ad   = None
 
   node = ''
-  logfile = '' 
+  logdir  = 'log'
+  logfile = ''
   logfilef = None
 
   keeprun = True
@@ -29,8 +31,13 @@ class Buoy:
   def __init__ (self, z, n):
     self.zero = z
     self.node = n
-    self.logfile = self.node + '.log'
+
+    if not os.path.exists (self.logdir):
+      os.mkdir (self.logdir)
+
+    self.logfile = os.path.join (self.logdir, self.node + '.log')
     self.logger = self.zero.logger
+
     self.logger.info ('Starting Buoy ' + self.node + '..')
 
     self.gps = Gps (self)
@@ -41,7 +48,7 @@ class Buoy:
 
     self.name = self.node
 
-    # Starting log thread 
+    # Starting log thread
     self.runthread = threading.Thread (target = self.run, name = 'Buoy' + self.node )
     self.runthread.start ()
 
@@ -64,7 +71,7 @@ class Buoy:
 
       i += 1
 
-    # Clear inactive store 
+    # Clear inactive store
     if self.ad.store == 0:
       self.ad.samplesb = []
     else:
