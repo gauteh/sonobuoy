@@ -215,8 +215,8 @@ void sd_write_batch ()
 
   /* Writing entries */
   rf_send_debug_f ("Writing entries to data file..: %lu", current_index.samples);
-  uint i = (batchready == 1 ? 0 : (AD_QUEUE_LENGTH / 2));
-  for (; i <  (AD_QUEUE_LENGTH / 2); i++)
+  uint s = (batchready == 1 ? 0 : (AD_QUEUE_LENGTH / 2));
+  for (uint i = s; i <  s + (AD_QUEUE_LENGTH / 2); i++)
   {
     if (update_reference && i == update_reference_qposition) {
       sd_write_reference (referencesecond);
@@ -225,8 +225,9 @@ void sd_write_batch ()
 
     sd_data.write (reinterpret_cast<char*>((ulong*) &(ad_time[i])), sizeof(ulong));
     sd_data.write (reinterpret_cast<char*>((byte*)  &(ad_queue[i])), sizeof(sample));
-    current_index.samples++;
   }
+
+  current_index.samples += (AD_QUEUE_LENGTH / 2);
 
   sd_data.sync ();
   SD_AVAILABLE &= (sd.card()->errorCode () == 0);
