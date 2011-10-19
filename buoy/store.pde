@@ -224,7 +224,7 @@ void sd_write_batch ()
     }
 
     sd_data.write (reinterpret_cast<char*>((ulong*) &(ad_time[i])), sizeof(ulong));
-    sd_data.write (reinterpret_cast<char*>((byte*) &(ad_queue[i])), sizeof(sample));
+    sd_data.write (reinterpret_cast<char*>((byte*)  &(ad_queue[i])), sizeof(sample));
     current_index.samples++;
   }
 
