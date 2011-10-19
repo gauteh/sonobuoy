@@ -12,12 +12,13 @@
 # include "ad7710.h"
 
 SdFat sd;
-bool SD_AVAILABLE = false;
-ulong sd_status = 0;
-volatile bool update_reference = false;
-volatile uint update_reference_qposition = 0;
+bool  SD_AVAILABLE  = false;
+ulong lastsd        = 0;
+ulong sd_status     = 0;
 
-ulong lastsd = 0;
+volatile bool update_reference            = false;
+volatile uint update_reference_qposition  = 0;
+
 
 /* Current storage */
 Index current_index;
@@ -214,11 +215,13 @@ void sd_write_batch ()
   }
 
   /* Writing entries */
-  rf_send_debug_f ("Writing entries to data file..: %lu", current_index.samples);
+  rf_send_debug_f ("Writing entries to data file from sample: %lu", current_index.samples);
   uint s = (batchready == 1 ? 0 : (AD_QUEUE_LENGTH / 2));
   for (uint i = s; i <  s + (AD_QUEUE_LENGTH / 2); i++)
   {
+    /* Write reference at correct position */
     if (update_reference && i == update_reference_qposition) {
+      rf_send_debug_f ("In-loop reference queue: %d", update_reference_qposition);
       sd_write_reference (referencesecond);
       update_reference = false;
     }
@@ -247,7 +250,7 @@ void sd_open_data ()
 
 void sd_write_reference (ulong ref)
 {
-  rf_send_debug ("Write reference.");
+  rf_send_debug_f ("Write reference: %lu", ref);
   if (SD_AVAILABLE)
   {
     /* Check if we have exceeded MAX_REFERENCES */

@@ -43,12 +43,16 @@
  * 19   gives approximately 1000 samples / 970 ms
  * 2000 gives approximately 1000 samples / 50 s
  */
-# define FREQUENCY 100L
+# define FREQUENCY_CODE 100L
 
 
-/* Estimated sample rate, for optimizing storage and time consuming
- * operations. NOT TO BE TRUSTED. */
-# define EST_SAMPLE_RATE 200L
+/* F_CLK is determined by crystal, where a 10MHz should be used.
+ *
+ * The formula for FREQUENCY is taken from AD7710 data sheet, unsure of
+ * accuracy, but it gives an estimate for making sane limitations on file
+ * sizes and contents. */
+# define F_CLK 10000000uL
+# define FREQUENCY (F_CLK / 512) / FREQUENCY_CODE
 
 /* Sample is 24 bit / 8 = 3 bytes */
 typedef byte sample[3];

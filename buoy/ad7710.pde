@@ -172,7 +172,7 @@ void ad_configure ()
   ulong ctb = 0;
 
   ctb  = (ulong) AD_CONTROL << 12;
-  ctb |= (ulong) FREQUENCY;
+  ctb |= (ulong) FREQUENCY_CODE;
 
   for (int i = 2; i >= 0; i--) {
 
