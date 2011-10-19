@@ -43,12 +43,12 @@
  * 19   gives approximately 1000 samples / 970 ms
  * 2000 gives approximately 1000 samples / 50 s
  */
-# define FREQUENCY 19
+# define FREQUENCY 100L
 
 
 /* Estimated sample rate, for optimizing storage and time consuming
  * operations. NOT TO BE TRUSTED. */
-# define EST_SAMPLE_RATE 1030L
+# define EST_SAMPLE_RATE 200L
 
 /* Sample is 24 bit / 8 = 3 bytes */
 typedef byte sample[3];

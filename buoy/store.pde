@@ -211,7 +211,6 @@ void sd_write_batch ()
   /* Write first reference since this is a new file */
   if (!referencewritten) {
     sd_write_reference (referencesecond);
-    referencewritten = true;
   }
 
   /* Writing entries */
@@ -226,10 +225,10 @@ void sd_write_batch ()
 
     sd_data.write (reinterpret_cast<char*>((ulong*) &(ad_time[i])), sizeof(ulong));
     sd_data.write (reinterpret_cast<char*>((byte*) &(ad_queue[i])), sizeof(sample));
+    current_index.samples++;
   }
 
-  current_index.samples += (AD_QUEUE_LENGTH / 2);
-
+  sd_data.sync ();
   SD_AVAILABLE &= (sd.card()->errorCode () == 0);
 }
 
@@ -239,7 +238,7 @@ void sd_open_data ()
   char fname[13];
   sprintf (fname, "%lu.DAT", current_index.id);
 
-  SD_AVAILABLE = sd_data.createContiguous (sd.vwd (), fname, SD_DATA_FILE_SIZE);
+  SD_AVAILABLE = sd_data.open (fname, O_CREAT | O_WRITE | O_TRUNC);
   SD_AVAILABLE &= (sd.card()->errorCode () == 0);
 
   referencewritten = false;
