@@ -27,10 +27,10 @@ int main (int argc, char **argv) {
 
   cerr << "Store reader for Gautebøye ( rev " << VERSION << ")" << endl;
   cerr << endl;
-  cerr << "Store version:  " << STORE_VERSION << endl;
-  cerr << "Max samples:    " << MAX_SAMPLES_PER_FILE << endl;
-  cerr << "Max references: " << MAX_REFERENCES << endl;
-  cerr << "Data file size: " << SD_DATA_FILE_SIZE << endl;
+  cerr << "Store version ......: " << STORE_VERSION << endl;
+  cerr << "Max samples ........: " << MAX_SAMPLES_PER_FILE << endl;
+  cerr << "Max references .....: " << MAX_REFERENCES << endl;
+  cerr << "Standard file size .: " << SD_DATA_FILE_SIZE << endl;
   cerr << endl;
 
   /* Option parsing */
@@ -41,9 +41,12 @@ int main (int argc, char **argv) {
   }
 
   int opt;
-  bool only_index = false;
+  bool opt_only_index = false;
 
-  while ((opt = getopt(argc, argv, "iuhH")) != -1) {
+# define DEFAULT_FORMAT "[%09lu] %07lu\n"
+  string format = DEFAULT_FORMAT;
+
+  while ((opt = getopt(argc, argv, "iuhHf:")) != -1) {
     switch (opt)
     {
       case 'h':
@@ -53,7 +56,10 @@ int main (int argc, char **argv) {
         exit (0);
         break;
       case 'i':
-        only_index = true;
+        opt_only_index = true;
+        break;
+      case 'f':
+        format = optarg;
         break;
       case '?':
         usage (self);
@@ -68,14 +74,13 @@ int main (int argc, char **argv) {
 
 
   string indexfn (argv[optind]);
-  string datafn = indexfn + ".DAT";
-  indexfn += ".IND";
+  string datafn (indexfn);
+  datafn.replace (indexfn.rfind (".IND"), 4, ".DAT");
 
   Index i = open_index (indexfn);
   print_index (i);
 
-
-  if (i.samples > 0 && !only_index) {
+  if (i.samples > 0 && !opt_only_index) {
     cerr << "=> Reading data..";
     /* Opening DATA */
     ifstream fd (datafn.c_str (), ios::binary);
@@ -140,7 +145,8 @@ int main (int argc, char **argv) {
       //timestamp = __builtin_bswap32 (tt);
       timestamp = tt;
 
-      cout << "[" << timestamp << "] " << dec << uppercase << right << setw(8) << s << nouppercase << dec << endl;
+      //cout << "[" << timestamp << "] " << dec << uppercase << right << setw(8) << s << nouppercase << dec << endl;
+      printf (format.c_str (), timestamp, s);
 
       sam++;
 
@@ -195,9 +201,21 @@ void print_index (Index i) {
 }
 
 void usage (string argv) {
-  cerr << endl << "Usage: " << argv << " [-u|-h] [-i] id" << endl;
+  cerr << endl << "Usage: " << argv << " [-u|-h] [-f format] [-i] INDEX_FILE" << endl;
   cerr << endl;
   cerr << " -u or -h      Print this help text." << endl;
   cerr << " -i            Only print index." << endl;
+  cerr << endl;
+  cerr << " -f format     Format specifies output format of data file, " \
+          "follows" << endl;
+  cerr << "               printf syntax, where the first argument will be " \
+          "the" << endl;
+  cerr << "               the time stamp and second the sample. Both are of" \
+       << endl;
+  cerr << "               the type uint32_t." << endl;
+  cerr << "               Default: " << DEFAULT_FORMAT; // Has newline at end
+  cerr << endl;
+  cerr << "  A datafile (.DAT) with the same name as the INDEX_FILE is " \
+          "expected." << endl;
 }
 
