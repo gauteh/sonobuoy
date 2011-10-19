@@ -32,18 +32,18 @@
 
 # define CONTROL_SELF_CALIBRATION   0b001000000000
 # define CONTROL_24BIT              0b000000001000
-# define CONTROL_DEFAULT            0
+# define CONTROL_DEFAULT            0b0
 
 /* Configuration mask to be set */
 # define AD_CONTROL (CONTROL_SELF_CALIBRATION | CONTROL_24BIT)
 
 /* Notch frequency (12 bits)
  *
- * Range: 19 - 2000L
+ * Range: 19 - 2000uL
  * 19   gives approximately 1000 samples / 970 ms
  * 2000 gives approximately 1000 samples / 50 s
  */
-# define FREQUENCY_CODE 100L
+# define FREQUENCY_CODE 100uL
 
 
 /* F_CLK is determined by crystal, where a 10MHz should be used.
