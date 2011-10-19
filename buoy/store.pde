@@ -160,10 +160,10 @@ void sd_write_index ()
 /* Open new index and data file */
 void sd_roll_data_file ()
 {
-  rf_send_debug ("Syncing index and data, and rolling..");
+  rf_send_debug ("Syncing index and data and rolling..");
 
   /* Truncate data file to actual size */
-  sd_data.truncate (sd_data.curPosition ());
+  //sd_data.truncate (sd_data.curPosition ());
 
   sd_data.sync ();
   sd_data.close ();
@@ -258,7 +258,6 @@ void sd_write_reference (ulong ref)
     /* Check if there is more space in data file */
     if (sd_data.curPosition () > (SD_DATA_FILE_SIZE - SD_REFERENCE_LENGTH)) {
       sd_roll_data_file ();
-      referencewritten = true;
     }
 
     /* Update index */
@@ -277,6 +276,7 @@ void sd_write_reference (ulong ref)
       sd_data.write ((byte)0);
 
     current_index.nrefs++;
+    referencewritten = true;
 
     SD_AVAILABLE &= (sd.card()->errorCode () == 0);
   }

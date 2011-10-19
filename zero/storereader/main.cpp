@@ -18,14 +18,27 @@ typedef char byte;
 
 Index open_index (string);
 void  print_index (Index);
+void  usage (char **);
 
 int main (int argc, char **argv) {
 
   cerr << "Store reader for Gautebøye ( rev " << VERSION << ")" << endl;
-  cerr << "Store version: " << STORE_VERSION << endl << endl;
+  cerr << endl;
+  cerr << "Store version:  " << STORE_VERSION << endl;
+  cerr << "Max samples:    " << MAX_SAMPLES_PER_FILE << endl;
+  cerr << "Max references: " << MAX_REFERENCES << endl;
+  cerr << "Data file size: " << SD_DATA_FILE_SIZE << endl;
+  cerr << endl;
 
-  string indexfn = "1.IND";
-  string datafn  = "1.DAT";
+  if (argc < 2) {
+    cerr << "[Error] No ID specified." << endl;
+    usage (argv);
+    exit (1);
+  }
+
+  string indexfn (argv[1]);
+  string datafn = indexfn + ".DAT";
+  indexfn += ".IND";
 
   Index i = open_index (indexfn);
   print_index (i);
@@ -41,7 +54,7 @@ Index open_index (string fn) {
   ifstream fi (fn.c_str (), ios::binary);
 
   if (!fi.is_open ()) {
-    cerr << endl << "[ERROR] Could not open index, exiting..";
+    cerr << endl << "[ERROR] Could not open index." << endl;;
     exit(1);
   }
 
@@ -65,5 +78,9 @@ void print_index (Index i) {
   cerr << "=> Timestamp length:  " << i.timestamp_l << endl;
   cerr << "=> Samples:           " << i.samples << endl;
   cerr << "=> References:        " << i.nrefs << endl;
+}
+
+void usage (char **argv) {
+  cerr << endl << "Usage: " << argv[0] << " id" << endl << endl;
 }
 
