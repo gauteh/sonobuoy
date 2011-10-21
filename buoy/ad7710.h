@@ -36,7 +36,7 @@
 # define CONTROL_DEFAULT            0b0
 
 /* Configuration mask to be set */
-# define AD_CONTROL (CONTROL_SELF_CALIBRATION | CONTROL_24BIT | CONTROL_UNIPOLAR)
+# define AD_CONTROL (CONTROL_SELF_CALIBRATION | CONTROL_24BIT)
 
 /* Notch frequency (12 bits)
  *
