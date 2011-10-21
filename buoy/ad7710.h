@@ -32,10 +32,11 @@
 
 # define CONTROL_SELF_CALIBRATION   0b001000000000
 # define CONTROL_24BIT              0b000000001000
+# define CONTROL_UNIPOLAR           0b000000000001
 # define CONTROL_DEFAULT            0b0
 
 /* Configuration mask to be set */
-# define AD_CONTROL (CONTROL_SELF_CALIBRATION | CONTROL_24BIT)
+# define AD_CONTROL (CONTROL_SELF_CALIBRATION | CONTROL_24BIT | CONTROL_UNIPOLAR)
 
 /* Notch frequency (12 bits)
  *
