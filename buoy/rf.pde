@@ -86,7 +86,7 @@ void rf_ad_message (RF_AD_MESSAGE messagetype)
 
        * 1. Initiate binary data stream:
 
-       $AD,D,[k = number of samples],[time of first s]*CC
+       $AD,D,[k = number of samples],[reference]*CC
 
        * 2. Send one $ to indicate start of data
 
@@ -100,7 +100,7 @@ void rf_ad_message (RF_AD_MESSAGE messagetype)
       {
         int start = (batchready == 1 ? 0 : AD_DATA_BATCH_LEN);
 
-        int n = sprintf (buf, "$AD,D,%d,%lu*", AD_DATA_BATCH_LEN, ad_time[start]);
+        int n = sprintf (buf, "$AD,D,%d,%lu*", AD_DATA_BATCH_LEN, referencesecond);
         APPEND_CSUM (buf);
         RF_Serial.println (buf);
 

@@ -189,7 +189,7 @@ class Protocol:
                 self.a_receive_state = 4
 
               elif (tokeni == 3):
-                self.zero.current.ad.ad_time_of_first = int (token)
+                self.zero.current.ad.ad_reference = int (token)
 
                 #print "[AD] Initiating binary transfer.. samples: ", self.zero.current.ad.ad_k_samples
                 return

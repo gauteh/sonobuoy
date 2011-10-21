@@ -5,6 +5,7 @@ Gaute Hope <eg@gaute.vetsj.com> (c) 2011-08-29
 
 import time
 import threading
+import math
 
 from util import *
 
@@ -21,7 +22,7 @@ class AD7710:
   # Receving binary data
   ad_k_remaining    = 0
   ad_k_samples      = 0
-  ad_time_of_first  = 0
+  ad_reference      = 0
   ad_sample_csum    = '' # String rep of hex value
   ad_samples        = '' # Array of bytes (3 * byte / value)
   ad_time           = '' # Array of bytes (4 * byte / time stamp)
@@ -52,7 +53,7 @@ class AD7710:
 
   ''' Handle received binary samples '''
   def ad_handle_samples (self):
-    #print "[AD] Handling samples.."
+    print "[AD] Handling samples from: ", self.ad_reference
 
     self.nsamples += self.ad_k_samples
 
@@ -95,7 +96,7 @@ class AD7710:
       csum = csum ^ ord(self.ad_time[i * 4])
 
       i += 1
-      t.append (n)
+      t.append (int(self.ad_reference * math.pow(10,6)) + n)
 
     if (hex2 (csum) != self.ad_sample_csum):
       print "[AD] Checksum mismatch: Received binary samples.", hex2(csum), ",", self.ad_sample_csum, ",", l
@@ -105,7 +106,7 @@ class AD7710:
       self.storelock.acquire ()
       i = 0
       while i < self.ad_k_samples:
-        if self.store == 0: 
+        if self.store == 0:
           self.samplesa.append ((t[i], s[i]))
         else:
           self.samplesb.append ((t[i], s[i]))

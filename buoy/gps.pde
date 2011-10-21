@@ -88,6 +88,7 @@ void gps_sync_pulse ()
 void gps_roll_reference ()
 {
   /* Change referencesecond to latest */
+  rf_send_debug ("Roll reference.");
   microdelta = microdelta - (1e6 * (lastsecond - referencesecond));
   referencesecond = lastsecond;
   update_reference = true; // Signal to store that new reference is available
@@ -132,6 +133,12 @@ void gps_update_second ()
   gps_data.time += gps_data.second;
 
   // }}}
+
+  /* Setting first time reference */
+  if (referencesecond == 0) {
+    gps_roll_reference ();
+    HAS_SYNC_REFERENCE = false;
+  }
 }
 
 void gps_parse ()
@@ -458,6 +465,7 @@ void gps_loop ()
   if (IN_OVERFLOW && ((microdelta - micros()) > 20e6))
   {
     /* Set new reference using internal clock */
+    rf_send_debug ("Roll reference: Manual.");
     referencesecond += TIME_FROM_REFERENCE / 1e6;
     microdelta = micros ();
     IN_OVERFLOW = false;
