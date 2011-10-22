@@ -53,7 +53,7 @@ class AD7710:
 
   ''' Handle received binary samples '''
   def ad_handle_samples (self):
-    print "[AD] Handling samples from: ", self.ad_reference
+    print "[AD] Got ", self.ad_k_samples, " samples starting at: ", self.ad_reference
 
     self.nsamples += self.ad_k_samples
 
