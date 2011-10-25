@@ -14,4 +14,9 @@ zero/storereader/storereader
 *.DAT
 *.LON
 *.IND
+*#
+hardware/simulations/*.log
+hardware/simulations/*.plt
+hardware/simulations/*.raw
+hardware/simulations/*.imp
 
