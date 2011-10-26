@@ -19,4 +19,5 @@ hardware/simulations/*.log
 hardware/simulations/*.plt
 hardware/simulations/*.raw
 hardware/simulations/*.imp
+hardware/simulations/*.net
 
