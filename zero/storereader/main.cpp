@@ -11,6 +11,7 @@
 # include <iomanip>
 # include <stdlib.h>
 # include <getopt.h>
+# include <math.h>
 
 using namespace std;
 
@@ -21,17 +22,12 @@ typedef char byte;
 Index open_index (string);
 void  print_index (Index);
 void  usage (string);
+void  header ();
+
+bool verbose = false;
 
 int main (int argc, char **argv) {
   string self = argv[0];
-
-  cerr << "Store reader for Gautebøye ( rev " << VERSION << ")" << endl;
-  cerr << endl;
-  cerr << "Store version ......: " << STORE_VERSION << endl;
-  cerr << "Max samples ........: " << MAX_SAMPLES_PER_FILE << endl;
-  cerr << "Max references .....: " << MAX_REFERENCES << endl;
-  cerr << "Standard file size .: " << SD_DATA_FILE_SIZE << endl;
-  cerr << endl;
 
   /* Option parsing */
   if (argc < 2) {
@@ -46,9 +42,12 @@ int main (int argc, char **argv) {
 # define DEFAULT_FORMAT "[%09lu] %07lu\n"
   string format = DEFAULT_FORMAT;
 
-  while ((opt = getopt(argc, argv, "iuhHf:")) != -1) {
+  while ((opt = getopt(argc, argv, "iuhHvf:")) != -1) {
     switch (opt)
     {
+      case 'v':
+        verbose = true;
+        break;
       case 'h':
       case 'H':
       case 'u':
@@ -67,6 +66,8 @@ int main (int argc, char **argv) {
     }
   }
 
+  if (verbose) header ();
+
   if (optind >= argc) {
     cerr << "[ERROR] You must specify an id." << endl;
     exit (1);
@@ -82,6 +83,7 @@ int main (int argc, char **argv) {
 
   if (i.samples > 0 && !opt_only_index) {
     cerr << "=> Reading data..";
+
     /* Opening DATA */
     ifstream fd (datafn.c_str (), ios::binary);
     if (!fd.is_open ()) {
@@ -89,19 +91,26 @@ int main (int argc, char **argv) {
       exit (1);
     }
 
+    bool corrupt = false;
+
     int ref = 0;
     int sam = 0;
+
+    bool failref        = false;
+    uint32_t refid      = 0;
+    uint32_t reft       = 0;
+    uint32_t refstatus  = 0;
+
     while (!fd.eof ())
     {
       if (ref < i.nrefs) {
         if (fd.tellg() == i.refs[ref]) {
-          /* On index, reading.. */
-          bool failref = false;
-          uint32_t refid;
-          uint32_t ref;
-          uint32_t refstatus;
+          /* On reference, reading.. */
+          failref = false;
 
-          cerr << "=> On reference: " << ref << "..";
+          if (verbose)
+            cerr << "=> On reference: " << ref << "..";
+
           for (int k = 0; k < (3 * (SAMPLE_LENGTH + TIMESTAMP_LENGTH)); k++) {
             int r = fd.get ();
             if (r != 0) {
@@ -110,19 +119,33 @@ int main (int argc, char **argv) {
           }
 
           fd.read (reinterpret_cast<char*>(&refid), sizeof(uint32_t));
-          fd.read (reinterpret_cast<char*>(&ref), sizeof(uint32_t));
+          fd.read (reinterpret_cast<char*>(&reft), sizeof(uint32_t));
           fd.read (reinterpret_cast<char*>(&refstatus), sizeof(uint32_t));
 
           for (int k = 0; k < (3 * (SAMPLE_LENGTH + TIMESTAMP_LENGTH)); k++) {
             int r = fd.get ();
             if (r != 0) {
               failref = true;
+              corrupt = true;
             }
           }
 
+          if (fd.eof ()) {
+            corrupt = true;
+            failref = true;
+            cerr << "=> [ERROR] [Unexpected EOF] While reading reference." << endl;
+            break;
+          }
+
           cerr << "=> Reference id: " << refid << endl;
-          cerr << "=> Reference   : " << ref << endl;
+          cerr << "=> Reference   : " << reft << endl;
           cerr << "=> Status      : " << refstatus << endl;
+
+          if (reft == 0) {
+            cerr << "=> [WARNING] Reference is 0, store has no time reference." << endl;
+            failref = true;
+            corrupt = true;
+          }
 
           ref++;
         }
@@ -137,26 +160,42 @@ int main (int argc, char **argv) {
       fd.read (reinterpret_cast<char*>(&tt), sizeof(tt));
       fd.read (reinterpret_cast<char*>(&ss), sizeof(sample));
 
+      if (fd.eof ()) {
+        if (verbose) cerr << "=> [EOF] File finished." << endl;
+        break;
+      }
+
       s =  ((uint8_t)(ss[0]) << 16);
       s += ((uint8_t)(ss[1]) << 8);
       s +=  (uint8_t)(ss[2]);
 
       // TODO: Endianness probs?
       //timestamp = __builtin_bswap32 (tt);
-      timestamp = tt;
+      timestamp = reft * exp10(6) + tt;
 
-      //cout << "[" << timestamp << "] " << dec << uppercase << right << setw(8) << s << nouppercase << dec << endl;
       printf (format.c_str (), timestamp, s);
 
       sam++;
 
       if (s == 0) {
         cerr << "=> [ERROR] Sample == 0" << endl;
+        corrupt = true;
         break;
       }
     }
 
     cerr << "=> Read " << sam << " samples (of " << i.samples << " expected)." << endl;
+
+    if (sam != i.samples) {
+      corrupt = true;
+      cerr << "=> [ERROR] Number of samples not matching index." << endl;
+    }
+
+    if (corrupt)
+    {
+      cerr << "=> Warning: Datafile seems to be corrupt, please see any error messages." << endl;
+      return 1;
+    }
   }
 
 
@@ -164,7 +203,8 @@ int main (int argc, char **argv) {
 }
 
 Index open_index (string fn) {
-  cerr << "Opening index " << fn << "..";
+  if (verbose)
+    cerr << "Opening index " << fn << "..";
 
   Index i;
 
@@ -184,7 +224,9 @@ Index open_index (string fn) {
   fi.read (reinterpret_cast<char*>(&i.nrefs), sizeof(i.nrefs));
   fi.read (reinterpret_cast<char*>(&i.refs), i.nrefs * sizeof(uint32_t));
 
-  cerr << "done." << endl;
+  if (verbose)
+    cerr << "done." << endl;
+
   return i;
 }
 
@@ -201,9 +243,12 @@ void print_index (Index i) {
 }
 
 void usage (string argv) {
-  cerr << endl << "Usage: " << argv << " [-u|-h] [-f format] [-i] INDEX_FILE" << endl;
+  header ();
+
+  cerr << endl << "Usage: " << argv << " [-u|-h|-H] [-v] [-f format] [-i] INDEX_FILE.IND" << endl;
   cerr << endl;
-  cerr << " -u or -h      Print this help text." << endl;
+  cerr << " -u, -h or -H  Print this help text." << endl;
+  cerr << " -v            Be verbose." << endl;
   cerr << " -i            Only print index." << endl;
   cerr << endl;
   cerr << " -f format     Format specifies output format of data file, " \
@@ -217,5 +262,15 @@ void usage (string argv) {
   cerr << endl;
   cerr << "  A datafile (.DAT) with the same name as the INDEX_FILE is " \
           "expected." << endl;
+}
+
+void header () {
+  cerr << "Store reader for Gautebøye ( rev " << VERSION << " )" << endl;
+  cerr << endl;
+  cerr << "Store version .........: " << STORE_VERSION << endl;
+  cerr << "Max samples ...........: " << MAX_SAMPLES_PER_FILE << endl;
+  cerr << "Max references ........: " << MAX_REFERENCES << endl;
+  cerr << "Standard file size [B] : " << SD_DATA_FILE_SIZE << endl;
+  cerr << endl;
 }
 
