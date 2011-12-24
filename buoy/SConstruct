@@ -140,7 +140,7 @@ cFlags = ['-ffunction-sections', '-fdata-sections', '-fno-exceptions',
     '-funsigned-char', '-funsigned-bitfields', '-fpack-struct', '-fshort-enums',
     '-Os', '-mmcu=%s'%MCU, '-DGIT_SHA=\\"%s\\"'%GIT_SHA]
 envArduino = Environment(CC = AVR_BIN_PREFIX+'gcc', CXX = AVR_BIN_PREFIX+'g++',
-    CPPPATH = ['build/core', 'build'], CPPDEFINES = {'F_CPU':F_CPU, 'ARDUINO':ARDUINO_VER},
+    CPPPATH = ['build/core', 'build', ARDUINO_HOME + '/hardware/arduino/variants/mega'], CPPDEFINES = {'F_CPU':F_CPU, 'ARDUINO':ARDUINO_VER},
     CFLAGS = cFlags+['-std=gnu99'], CCFLAGS = cFlags, TOOLS = ['gcc','g++'])
 
 # Verbose / Non-verbose output{{{
