@@ -104,5 +104,5 @@ uint8_t const SOFT_SPI_SCK_PIN = 13;
  * The __cxa_pure_virtual function is an error handler that is invoked when
  * a pure virtual function is called.
  */
-#define USE_CXA_PURE_VIRTUAL 1
+#define USE_CXA_PURE_VIRTUAL 0
 #endif  // SdFatConfig_h
