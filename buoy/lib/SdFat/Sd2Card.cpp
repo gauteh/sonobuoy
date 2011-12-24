@@ -208,6 +208,8 @@ uint32_t Sd2Card::cardSize() {
 //------------------------------------------------------------------------------
 void Sd2Card::chipSelectHigh() {
   digitalWrite(chipSelectPin_, HIGH);
+  // insure MISO goes high impedance
+  spiSend(0XFF);
 }
 //------------------------------------------------------------------------------
 void Sd2Card::chipSelectLow() {
@@ -294,7 +296,7 @@ bool Sd2Card::init(uint8_t sckRateID, uint8_t chipSelectPin) {
 
   // set pin modes
   pinMode(chipSelectPin_, OUTPUT);
-  chipSelectHigh();
+  digitalWrite(chipSelectPin_, HIGH);
   pinMode(SPI_MISO_PIN, INPUT);
   pinMode(SPI_MOSI_PIN, OUTPUT);
   pinMode(SPI_SCK_PIN, OUTPUT);

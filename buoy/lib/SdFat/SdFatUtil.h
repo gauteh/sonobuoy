@@ -34,9 +34,9 @@
 
 # if DIRECT_SERIAL
 /** Store and print a string in flash memory.*/
-#define PgmPrint(x) Serial.print(x)
+#define PgmPrint(x) SerialPrint_P(PSTR(x))
 /** Store and print a string in flash memory followed by a CR/LF.*/
-#define PgmPrintln(x) Serial.println(x)
+#define PgmPrintln(x) SerialPrintln_P(PSTR(x))
 
 # else
   # define PgmPrint(x) 0

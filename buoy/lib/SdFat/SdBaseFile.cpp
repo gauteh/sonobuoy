@@ -408,7 +408,16 @@ bool SdBaseFile::make83Name(const char* str, uint8_t* name, const char** ptr) {
       i = 8;   // place for extension
     } else {
       // illegal FAT characters
+#define FLASH_ILLEGAL_CHARS
+#ifdef FLASH_ILLEGAL_CHARS
+      // store chars in flash
+      PGM_P p = PSTR("|<>^+=?/[];,*\"\\");
+      uint8_t b;
+      while ((b = pgm_read_byte(p++))) if (b == c) goto fail;
+#else  // FLASH_ILLEGAL_CHARS
+      // store chars in RAM
       if (strchr("|<>^+=?/[];,*\"\\", c)) goto fail;
+#endif  // FLASH_ILLEGAL_CHARS
 
       // check size and only allow ASCII printable characters
       if (i > n || c < 0X21 || c > 0X7E)goto fail;
