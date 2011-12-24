@@ -140,7 +140,13 @@ void sd_write_index ()
     sprintf (buf, "%lu.IND", current_index.id);
 
     SdFile fi (buf, O_CREAT | O_WRITE | O_TRUNC);
-    fi.write (reinterpret_cast<char*>(&current_index), sizeof(current_index));
+    fi.write (reinterpret_cast<char*>(&current_index.version), sizeof(current_index.version));
+    fi.write (reinterpret_cast<char*>(&current_index.id), sizeof(current_index.id));
+    fi.write (reinterpret_cast<char*>(&current_index.sample_l), sizeof(current_index.sample_l));
+    fi.write (reinterpret_cast<char*>(&current_index.timestamp_l), sizeof(current_index.timestamp_l));
+    fi.write (reinterpret_cast<char*>(&current_index.samples), sizeof(current_index.samples));
+    fi.write (reinterpret_cast<char*>(&current_index.nrefs), sizeof(current_index.nrefs));
+    fi.write (reinterpret_cast<char*>(&current_index.refs), current_index.nrefs * sizeof(uint32_t));
     fi.sync ();
     fi.close ();
 
