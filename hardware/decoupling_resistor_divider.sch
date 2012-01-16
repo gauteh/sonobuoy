@@ -1,0 +1,129 @@
+v 20110115 2
+C 40000 40000 0 0 0 title-B.sym
+C 46300 48200 1 270 0 capacitor-2.sym
+{
+T 47000 48000 5 10 0 0 270 0 1
+device=POLARIZED_CAPACITOR
+T 46800 48000 5 10 1 1 270 0 1
+refdes=100 uF
+T 47200 48000 5 10 0 0 270 0 1
+symversion=0.1
+}
+C 49100 45900 1 90 0 resistor-2.sym
+{
+T 48750 46300 5 10 0 0 90 0 1
+device=RESISTOR
+T 48800 46100 5 10 1 1 90 0 1
+refdes=58.34k
+}
+C 50800 48500 1 180 0 terminal-1.sym
+{
+T 50490 47750 5 10 0 0 180 0 1
+device=terminal
+T 50490 47900 5 10 0 0 180 0 1
+footprint=CONNECTOR 1 1
+T 50550 48450 5 10 1 1 180 6 1
+refdes=Power (+12V)
+}
+C 50800 47000 1 180 0 terminal-1.sym
+{
+T 50490 46250 5 10 0 0 180 0 1
+device=terminal
+T 50490 46400 5 10 0 0 180 0 1
+footprint=CONNECTOR 1 1
+T 50550 46950 5 10 1 1 180 6 1
+refdes=Signal (out)
+}
+C 50800 44400 1 180 0 terminal-1.sym
+{
+T 50490 43650 5 10 0 0 180 0 1
+device=terminal
+T 50490 43800 5 10 0 0 180 0 1
+footprint=CONNECTOR 1 1
+T 50550 44350 5 10 1 1 180 6 1
+refdes=Common
+}
+C 42700 48300 1 0 0 terminal-1.sym
+{
+T 43010 49050 5 10 0 0 0 0 1
+device=terminal
+T 43010 48900 5 10 0 0 0 0 1
+footprint=CONNECTOR 1 1
+T 42950 48350 5 10 1 1 0 6 1
+refdes=Power
+}
+C 42700 46800 1 0 0 terminal-1.sym
+{
+T 43010 47550 5 10 0 0 0 0 1
+device=terminal
+T 43010 47400 5 10 0 0 0 0 1
+footprint=CONNECTOR 1 1
+T 42950 46850 5 10 1 1 0 6 1
+refdes=Signal (In)
+}
+C 42700 44200 1 0 0 terminal-1.sym
+{
+T 43010 44950 5 10 0 0 0 0 1
+device=terminal
+T 43010 44800 5 10 0 0 0 0 1
+footprint=CONNECTOR 1 1
+T 42950 44250 5 10 1 1 0 6 1
+refdes=Common
+}
+N 43600 48400 49900 48400 4
+N 46500 48200 46500 48400 4
+N 46500 47300 46500 44300 4
+N 43600 44300 49900 44300 4
+C 47300 46700 1 0 0 capacitor-2.sym
+{
+T 47500 47400 5 10 0 0 0 0 1
+device=POLARIZED_CAPACITOR
+T 47500 47200 5 10 1 1 0 0 1
+refdes=47 uF
+T 47500 47600 5 10 0 0 0 0 1
+symversion=0.1
+}
+N 43600 46900 47300 46900 4
+N 48200 46900 49900 46900 4
+N 49000 46900 49000 46800 4
+T 49600 47000 9 10 1 0 0 0 1
+6 (+/- 6)V  | 0 - 12V
+T 43400 46900 9 10 1 0 0 0 1
+0 - 12 V
+C 49100 47300 1 90 0 resistor-2.sym
+{
+T 48750 47700 5 10 0 0 90 0 1
+device=RESISTOR
+T 48800 47500 5 10 1 1 90 0 1
+refdes=100k
+}
+N 49000 48200 49000 48400 4
+N 49000 47300 49000 46900 4
+C 49100 44500 1 90 0 resistor-2.sym
+{
+T 48750 44900 5 10 0 0 90 0 1
+device=RESISTOR
+T 48800 44700 5 10 1 1 90 0 1
+refdes=41.67k
+}
+N 49000 44500 49000 44300 4
+N 49000 45400 49000 45900 4
+C 50800 45700 1 180 0 terminal-1.sym
+{
+T 50490 44950 5 10 0 0 180 0 1
+device=terminal
+T 50490 45100 5 10 0 0 180 0 1
+footprint=CONNECTOR 1 1
+T 50550 45650 5 10 1 1 180 6 1
+refdes=Signal (out)
+}
+N 49900 45600 49000 45600 4
+T 49600 45800 9 10 1 0 0 0 1
+2.5 (+/- 2.5)V  | 0 - 5V
+T 47200 49000 9 10 1 0 0 0 6
+Temporary solution: Frequency response is changed 
+because of Req from 47uF capacitor is not 100k. Also 
+decoupling is biased because of direct coupling to DC 
+afterwards.
+
+Resistor divider is neither very stable.
