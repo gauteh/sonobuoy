@@ -10,7 +10,7 @@
 
 # include "buoy.h"
 # include "gps.h"
-# include "ad7710.h"
+# include "ads1282.h"
 
 # ifndef ONLY_SPEC
 # include <SdFat.h>

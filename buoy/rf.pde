@@ -11,7 +11,7 @@
 # include "buoy.h"
 # include "store.h"
 # include "rf.h"
-# include "ad7710.h"
+# include "ads1282.h"
 
 void rf_setup ()
 {

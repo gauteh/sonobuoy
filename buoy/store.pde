@@ -9,7 +9,7 @@
 
 # include "store.h"
 # include "rf.h"
-# include "ad7710.h"
+# include "ads1282.h"
 
 SdFat sd;
 bool  SD_AVAILABLE  = false;

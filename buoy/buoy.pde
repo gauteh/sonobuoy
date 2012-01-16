@@ -10,7 +10,7 @@
 # include <SdFat.h>
 
 # include "buoy.h"
-# include "ad7710.h"
+# include "ads1282.h"
 # include "gps.h"
 # include "rf.h"
 # include "store.h"
