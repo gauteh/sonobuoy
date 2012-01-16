@@ -52,7 +52,7 @@ void          ad_sample_performance_test ();
 # endif
 
 /* Turn on DRDY interrupt and sample AD is ready  */
-# define AD_MONITOR_DRDY
+//# define AD_MONITOR_DRDY
 
 # endif
 

@@ -60,15 +60,19 @@ void ad_setup ()
 
   ad_start = millis ();
 
+
+# if 0
 # ifdef AD_MONITOR_DRDY
   /* Configure interrupt */
   attachInterrupt (nDRDY_INTERRUPT, ad_drdy, LOW);
+# endif
 # endif
 }
 
 /* Will be run on nDRDY LOW */
 void ad_drdy ()
 {
+# if 0
   /* Check for micros () overflow */
   CHECK_FOR_OVERFLOW();
 
@@ -96,6 +100,7 @@ void ad_drdy ()
   }
 
   lastmicros = micros ();
+# endif
 }
 
 void ad_loop ()
