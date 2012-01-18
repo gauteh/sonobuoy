@@ -7,16 +7,25 @@
 
 # pragma once
 
-namespace Buoy {
+# include "ads1282.h"
 
+/* Version and settings */
+
+/* Define to have debug messages sent to USB serial */
+# define DIRECT_SERIAL 1
+
+namespace Buoy {
   class BuoyMaster {
     public:
+
+      ADS1282 ad;
+
+
       BuoyMaster ();
       void main ();
 
     private:
       void setup ();
-      void loop ();
   };
 }
 

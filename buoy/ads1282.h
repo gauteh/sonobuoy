@@ -7,12 +7,25 @@
 
 # pragma once
 
+# include <stdint.h>
+
 namespace Buoy {
 
   class ADS1282 {
+
+    typedef uint32_t sample;
+
     public:
+      bool batchready;
+
+      sample lastvalue;
+
       ADS1282 ();
-      int lastvalue;
+      void setup ();
+      void configure ();
+      void read_control_register ();
+
+      void acquire ();
 
   };
 
