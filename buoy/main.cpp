@@ -1,17 +1,14 @@
-
-
-# include "buoy.h"
-using namespace std;
-using namespace Buoy;
-
 /* Author:  Gaute Hope <eg@gaute.vetsj.com>
  * Date:    2012-01-18
  *
- * Buoy controller.
+ * Main function, relay onto BuoyMaster.
  *
  */
 
 # include "wirish.h"
+
+# include "buoy.h"
+using namespace Buoy;
 
 
 // Force init to be called *first*, i.e. before static object allocation.

@@ -1,3 +1,10 @@
+/* Author:  Gaute Hope <eg@gaute.vetsj.com>
+ * Date:    2012-01-18
+ *
+ * Buoy controller.
+ *
+ */
+
 # pragma once
 
 namespace Buoy {
@@ -12,3 +19,6 @@ namespace Buoy {
       void loop ();
   };
 }
+
+/* vim: set filetype=arduino :  */
+
