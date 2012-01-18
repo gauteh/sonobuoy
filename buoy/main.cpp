@@ -6,6 +6,8 @@
 
 #define PWM_PIN  2
 
+using namespace Buoy;
+
 void setup() {
     /* Set up the LED to blink  */
     pinMode(BOARD_LED_PIN, OUTPUT);
@@ -40,6 +42,8 @@ int main(void) {
     while (true) {
         loop();
     }
+
+    ADS1282 *ad = new ADS1282 ();
 
     return 0;
 }

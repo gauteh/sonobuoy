@@ -1,7 +1,4 @@
 # main project target
-SOURCES = main.cpp \
-          ads1282.cpp
-
 $(BUILD_PATH)/main.o: $(SOURCES)
 	$(SILENT_CXX) $(CXX) $(CFLAGS) $(CXXFLAGS) $(LIBMAPLE_INCLUDES) $(WIRISH_INCLUDES) -o $@ -c $< 
 

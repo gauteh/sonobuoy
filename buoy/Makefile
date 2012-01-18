@@ -2,6 +2,9 @@
 
 .DEFAULT_GOAL := sketch
 
+SOURCES = main.cpp \
+          ads1282.cpp
+
 ##
 ## Useful paths, constants, etc.
 ##
