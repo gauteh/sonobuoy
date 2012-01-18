@@ -1,9 +1,10 @@
 # Try "make help" first
 
-.DEFAULT_GOAL := sketch
+SOURCES = buoy.cpp \
+          ads1282.cpp \
+          main.cpp
 
-SOURCES = main.cpp \
-          ads1282.cpp
+.DEFAULT_GOAL := sketch
 
 ##
 ## Useful paths, constants, etc.

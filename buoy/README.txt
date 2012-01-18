@@ -10,5 +10,9 @@
     - openocd
     - python_serial
 
+For coding:
+
+  Vim mode line: /* vim: set filetype=arduino :  */
+
 
 

@@ -1,34 +1,18 @@
-// Sample main.cpp file. Blinks the built-in LED, sends a message out
-// USART2, and turns on PWM on pin 2.
 
-#include "wirish.h"
-# include "ads1282.h"
 
-#define PWM_PIN  2
-
+# include "buoy.h"
+using namespace std;
 using namespace Buoy;
 
-void setup() {
-    /* Set up the LED to blink  */
-    pinMode(BOARD_LED_PIN, OUTPUT);
+/* Author:  Gaute Hope <eg@gaute.vetsj.com>
+ * Date:    2012-01-18
+ *
+ * Buoy controller.
+ *
+ */
 
-    /* Turn on PWM on pin PWM_PIN */
-    pinMode(PWM_PIN, PWM);
-    pwmWrite(PWM_PIN, 0x8000);
+# include "wirish.h"
 
-    /* Send a message out USART2  */
-    Serial2.begin(9600);
-    Serial2.println("Hello world!");
-
-    /* Send a message out the usb virtual serial port  */
-    SerialUSB.println("Hello!");
-}
-
-void loop() {
-    toggleLED();
-    delay(1000);
-    SerialUSB.println("Hello!");
-}
 
 // Force init to be called *first*, i.e. before static object allocation.
 // Otherwise, statically allocated objects that need libmaple may fail.
@@ -37,13 +21,11 @@ __attribute__((constructor)) void premain() {
 }
 
 int main(void) {
-    setup();
+  BuoyMaster b;
+  b.main ();
 
-    while (true) {
-        loop();
-    }
-
-    ADS1282 *ad = new ADS1282 ();
-
-    return 0;
+  return 0;
 }
+
+/* vim: set filetype=arduino :  */
+
