@@ -2,6 +2,7 @@
 // USART2, and turns on PWM on pin 2.
 
 #include "wirish.h"
+# include "ads1282.h"
 
 #define PWM_PIN  2
 
