@@ -1,5 +1,8 @@
 # main project target
-$(BUILD_PATH)/main.o: main.cpp
+SOURCES = main.cpp \
+          ads1282.cpp
+
+$(BUILD_PATH)/main.o: $(SOURCES)
 	$(SILENT_CXX) $(CXX) $(CFLAGS) $(CXXFLAGS) $(LIBMAPLE_INCLUDES) $(WIRISH_INCLUDES) -o $@ -c $< 
 
 $(BUILD_PATH)/libmaple.a: $(BUILDDIRS) $(TGT_BIN)
