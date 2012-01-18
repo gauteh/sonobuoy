@@ -8,7 +8,7 @@
 # include "wirish.h"
 
 # include "spi.h"
-# include "i2c.h"
+# include "Wire.h"
 
 # include "buoy.h"
 # include "ads1282.h"
@@ -34,18 +34,15 @@ namespace Buoy {
 # endif
 
     /* Set up I2C */
-    i2c_init (I2C1);
+    Wire.begin (AD_SDA, AD_SCL);
 
     /* Set up SPI */
-    //pinMode (AD_SCLK, OUTPUT);
-    //pinMode (AD_MISO, INPUT);
-    //pinMode (AD_MOSI, OUTPUT);
-    //pinMode (AD_nDRDY, INPUT);
+    pinMode (AD_nDRDY, INPUT);
     pinMode (AD_SS, OUTPUT);
 
-    digitalWrite (AD_SS, HIGH);
-
     spi.begin (SPI_1_125MHZ, MSBFIRST, SPI_MODE_0);
+    digitalWrite (AD_SS, LOW);
+
 
     /* Configure AD */
     configure ();
@@ -75,8 +72,8 @@ namespace Buoy {
      *                     CLK (ADS1282) periods. */ 
     SerialUSB.println ("[AD] Acquiring..");
 
+
     /* Data is sent with MSB first */
-    digitalWrite (AD_SS, LOW);
     //value = spi->read ();
     //value = spi->read ();
 

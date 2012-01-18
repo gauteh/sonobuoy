@@ -11,10 +11,18 @@
 
 namespace Buoy {
 
-  /* I2C bus */
+  /* I2C bus
+   *
+   * The I2C control unit (U7 on ADS1282-EVM schematic) appears to be an
+   * PCA9535RGE, address for read and write is obtained from PCA9536
+   * datasheet.
+   */
+
 # define AD_I2C  1
 # define AD_SCL 38
 # define AD_SDA 39
+# define AD_I2C_ADDRESS_R 0b10000011 // For read operations
+# define AD_I2C_ADDRESS_W 0b10000010 // For write operations
 
   /* SPI */
 # define AD_SPI  1
