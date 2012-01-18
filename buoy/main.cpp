@@ -1,7 +1,7 @@
 /* Author:  Gaute Hope <eg@gaute.vetsj.com>
  * Date:    2012-01-18
  *
- * Main function, relay onto BuoyMaster.
+ * Main entry point - creates instance of BuoyMaster.
  *
  */
 

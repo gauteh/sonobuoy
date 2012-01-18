@@ -6,17 +6,26 @@
  */
 
 # include "wirish.h"
+
+# include "spi.h"
+# include "i2c.h"
+
 # include "buoy.h"
 # include "ads1282.h"
+
+using namespace std;
 
 namespace Buoy {
 
   ADS1282::ADS1282 () {
-    batchready = false;
-    lastvalue  = 0;
+    batchready  = false;
+    drdy        = false;
+    value       = 0;
 
     return;
   }
+
+  HardwareSPI spi (1);
 
   void ADS1282::setup () {
     /* Setup AD and get ready for data */
@@ -24,8 +33,30 @@ namespace Buoy {
     SerialUSB.println ("[AD] Setting up ADS1282..");
 # endif
 
+    /* Set up I2C */
+    i2c_init (I2C1);
+
+    /* Set up SPI */
+    //pinMode (AD_SCLK, OUTPUT);
+    //pinMode (AD_MISO, INPUT);
+    //pinMode (AD_MOSI, OUTPUT);
+    //pinMode (AD_nDRDY, INPUT);
+    pinMode (AD_SS, OUTPUT);
+
+    digitalWrite (AD_SS, HIGH);
+
+    spi.begin (SPI_1_125MHZ, MSBFIRST, SPI_MODE_0);
+
     /* Configure AD */
     configure ();
+  }
+
+  void ADS1282::reset_spi () {
+    /* Hold SCLK low for 64 nDRDY cycles */
+  }
+
+  void ADS1282::loop () {
+    drdy = !digitalRead (AD_nDRDY);
   }
 
   void ADS1282::configure () {
@@ -40,7 +71,23 @@ namespace Buoy {
   }
 
   void ADS1282::acquire () {
-    /* Not implemented */
+    /* In continuous mode: Must complete read operation before four
+     *                     CLK (ADS1282) periods. */ 
+    SerialUSB.println ("[AD] Acquiring..");
+
+    /* Data is sent with MSB first */
+    digitalWrite (AD_SS, LOW);
+    //value = spi->read ();
+    //value = spi->read ();
+
+    if (!spi_is_rx_nonempty (SPI1)) {
+      SerialUSB.println ("[AD] SPI is empty.");
+    } else {
+      byte a = spi.read ();
+      SerialUSB.print ("[AD] Got value: ");
+      SerialUSB.println (a);
+    }
+
   }
 }
 
