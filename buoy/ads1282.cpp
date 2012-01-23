@@ -17,15 +17,19 @@ using namespace std;
 
 namespace Buoy {
 
+  HardwareSPI ADS1282::spi (AD_SPI);
+
+
   ADS1282::ADS1282 () {
     batchready  = false;
     drdy        = false;
     value       = 0;
 
+
     return;
   }
 
-  HardwareSPI spi (1);
+  //HardwareSPI spi (1);
 
   void ADS1282::setup () {
     /* Setup AD and get ready for data */
@@ -40,7 +44,7 @@ namespace Buoy {
     pinMode (AD_nDRDY, INPUT);
     pinMode (AD_SS, OUTPUT);
 
-    spi.begin (SPI_1_125MHZ, MSBFIRST, SPI_MODE_0);
+    ADS1282::spi.begin (SPI_1_125MHZ, MSBFIRST, SPI_MODE_0);
     digitalWrite (AD_SS, LOW);
 
 
@@ -69,7 +73,7 @@ namespace Buoy {
 
   void ADS1282::acquire () {
     /* In continuous mode: Must complete read operation before four
-     *                     CLK (ADS1282) periods. */ 
+     *                     CLK (ADS1282) periods. */
     SerialUSB.println ("[AD] Acquiring..");
 
 
@@ -80,7 +84,7 @@ namespace Buoy {
     if (!spi_is_rx_nonempty (SPI1)) {
       SerialUSB.println ("[AD] SPI is empty.");
     } else {
-      byte a = spi.read ();
+      byte a = ADS1282::spi.read ();
       SerialUSB.print ("[AD] Got value: ");
       SerialUSB.println (a);
     }

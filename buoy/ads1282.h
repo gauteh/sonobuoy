@@ -37,7 +37,7 @@ namespace Buoy {
 
   class ADS1282 {
     public:
-      /*HardwareSPI *spi;*/
+      static HardwareSPI spi;
 
       bool batchready;
       bool drdy;
