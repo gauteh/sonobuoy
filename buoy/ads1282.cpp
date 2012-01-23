@@ -25,10 +25,17 @@ namespace Buoy {
     drdy        = false;
     value       = 0;
 
+    state.reg1 = 0;
+    state.reg2 = 0;
+
+    state.mflag = false;
+    state.sync  = false;
+    state.pmode = false;
+    state.reset = false;
+    state.pdwn  = false;
+
     return;
   }
-
-  //HardwareSPI spi (1);
 
   void ADS1282::setup () {
 
@@ -69,8 +76,7 @@ namespace Buoy {
     int n = 0;
 
     /* Configure I2C (U7) */
-
-    Wire.beginTransmission (AD_I2C_ADDRESS_W);
+    Wire.beginTransmission (AD_I2C_ADDRESS);
     Wire.send (0x06);
     Wire.send (AD_I2C_CONTROL1);
     Wire.send (AD_I2C_CONTROL2);
@@ -84,31 +90,35 @@ namespace Buoy {
 
     /* Set up outputs:
      * - Turn off SYNC
+     * - Turn off PDWN
      * - Turn on  PMODE
      * - Turn off RESET
      */
-    Wire.beginTransmission (AD_I2C_ADDRESS_W);
+    Wire.beginTransmission (AD_I2C_ADDRESS);
     Wire.send (0x02);
     Wire.send (0);
     Wire.send (AD_I2C_PMODE);
     n = Wire.endTransmission ();
+
     if (n == SUCCESS) SerialUSB.println ("SUCCESS");
     else {
       SerialUSB.print ("ERROR: ");
       SerialUSB.println (n);
     }
 
-
-    // Read output
-    Wire.beginTransmission (AD_I2C_ADDRESS_R);
-    n = Wire.requestFrom (AD_I2C_ADDRESS_R, 2);
-    SerialUSB.println (n);
-    while (Wire.available ()) {
-
+    // Read outputs
+    Wire.beginTransmission (AD_I2C_ADDRESS);
+    n = Wire.requestFrom (AD_I2C_ADDRESS, 2);
+    if (n == 2) {
+      /* Register 1 */
       uint8 r = Wire.receive ();
+      state.sync = (r & AD_I2C_SYNC);
+      state.pdwn = (r & AD_I2C_PDWN);
 
-      SerialUSB.print  ("[AD] [I2C] Got:");
-      SerialUSB.println (r, BIN);
+      /* Register 2 */
+      r = Wire.receive ();
+      state.pmode = (r & AD_I2C_PMODE);
+      state.reset = (r & AD_I2C_RESET);
     }
 
     n = Wire.endTransmission ();
@@ -119,7 +129,7 @@ namespace Buoy {
     }
 
     // Read input
-    Wire.beginTransmission (AD_I2C_ADDRESS_W);
+    Wire.beginTransmission (AD_I2C_ADDRESS);
     Wire.send (0x00);
     n = Wire.endTransmission ();
     if (n == SUCCESS) SerialUSB.println ("SUCCESS");
@@ -128,8 +138,8 @@ namespace Buoy {
       SerialUSB.println (n);
     }
 
-    Wire.beginTransmission (AD_I2C_ADDRESS_R);
-    n = Wire.requestFrom (AD_I2C_ADDRESS_R, 2);
+    Wire.beginTransmission (AD_I2C_ADDRESS);
+    n = Wire.requestFrom (AD_I2C_ADDRESS, 2);
     SerialUSB.println (n);
     while (Wire.available ()) {
 
@@ -147,7 +157,7 @@ namespace Buoy {
     }
 
     // Read configuration
-    Wire.beginTransmission (AD_I2C_ADDRESS_W);
+    Wire.beginTransmission (AD_I2C_ADDRESS);
     Wire.send (0x06);
     n = Wire.endTransmission ();
     if (n == SUCCESS) SerialUSB.println ("SUCCESS");
@@ -156,8 +166,8 @@ namespace Buoy {
       SerialUSB.println (n);
     }
 
-    Wire.beginTransmission (AD_I2C_ADDRESS_R);
-    n = Wire.requestFrom (AD_I2C_ADDRESS_R, 2);
+    Wire.beginTransmission (AD_I2C_ADDRESS);
+    n = Wire.requestFrom (AD_I2C_ADDRESS, 2);
     SerialUSB.println (n);
     while (Wire.available ()) {
 
