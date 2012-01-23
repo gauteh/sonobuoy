@@ -96,8 +96,8 @@ namespace Buoy {
      */
     Wire.beginTransmission (AD_I2C_ADDRESS);
     Wire.send (0x02);
-    Wire.send (0);
-    Wire.send (AD_I2C_PMODE);
+    Wire.send (AD_I2C_OUTPUT0);
+    Wire.send (AD_I2C_OUTPUT1);
     n = Wire.endTransmission ();
 
     if (n == SUCCESS) SerialUSB.println ("SUCCESS");

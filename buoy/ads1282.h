@@ -22,30 +22,35 @@ namespace Buoy {
 # define AD_SDA 39
 # define AD_I2C_ADDRESS 0x20
 
-/* Inputs, register 1 */
-# define AD_I2C_MFLAG 0b10000000
+/* Register 1 */
+/* Inputs */
+# define AD_I2C_MFLAG   0b10000000
 
-/* Outputs, register 1 */
+/* Inputs and outputs */
 # define AD_I2C_M0      0b00000001 // GPIO0 J5.2
 # define AD_I2C_M1      0b00000010 // GPIO1 J5.1
 # define AD_I2C_MCLK    0b00000100 // GPIO2 J5.8
+
+/* Outputs */
 # define AD_I2C_SUPSOR  0b00001000 // GPIO3 (Power supply regulator) J5.12
 # define AD_I2C_PDWN    0b00010000 // GPIO4 J5.14
-# define AD_I2C_EXTCLK  0b00100000 // GPIO5 J5.19
+# define AD_I2C_EXTCLK  0b00100000 // GPIO5 J5.19 (Controlled by jumper: On-
 
 # define AD_I2C_SYNC    0b01000000
 
-/* Register 2 */
+/* Register 2, outputs */
 # define AD_I2C_PMODE   0b00000001
 # define AD_I2C_RESET   0b00000010
 
+/* Outputs configured HIGH */
+# define AD_I2C_OUTPUT0 0
+# define AD_I2C_OUTPUT1 AD_I2C_PMODE
+
 /* Control register of PCA9535RGE:
  * HIGH is input
- * LOW  is output
- *
- * default is output.
+ * LOW  is output (default)
  */
-# define AD_I2C_CONTROL1 AD_I2C_MFLAG
+# define AD_I2C_CONTROL1 AD_I2C_MFLAG | AD_I2C_MCLK | AD_I2C_M0 | AD_I2C_M1
 # define AD_I2C_CONTROL2 0
 
 
