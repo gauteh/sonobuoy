@@ -19,18 +19,17 @@ namespace Buoy {
 
   HardwareSPI ADS1282::spi (AD_SPI);
 
-
   ADS1282::ADS1282 () {
+    disabled    = false;
     batchready  = false;
     drdy        = false;
     value       = 0;
 
-    state.reg1 = 0;
-    state.reg2 = 0;
+    state.ports0 = 0;
+    state.ports1 = 0;
 
     state.mflag = false;
     state.sync  = false;
-    state.pmode = false;
     state.reset = false;
     state.pdwn  = false;
 
@@ -65,7 +64,9 @@ namespace Buoy {
   }
 
   void ADS1282::loop () {
-    drdy = !digitalRead (AD_nDRDY);
+    if (!disabled) {
+      drdy = !digitalRead (AD_nDRDY);
+    }
   }
 
   void ADS1282::configure () {
@@ -82,29 +83,29 @@ namespace Buoy {
     Wire.send (AD_I2C_CONTROL1);
     n = Wire.endTransmission ();
 
-    if (n == SUCCESS) SerialUSB.println ("SUCCESS");
-    else {
-      SerialUSB.print ("ERROR: ");
-      SerialUSB.println (n);
+    if (n != SUCCESS) { error (); return; }
+
+    // Read configuration
+    Wire.beginTransmission (AD_I2C_ADDRESS);
+    n = Wire.requestFrom (AD_I2C_ADDRESS, 2);
+    if (n == 2) {
+      state.ports0 = Wire.receive ();
+      state.ports1 = Wire.receive ();
     }
 
     /* Set up outputs:
      * - Turn off SYNC
      * - Turn off PDWN
-     * - Turn on  PMODE
      * - Turn off RESET
+     *
+     * All other U7 outputs are meanwhile configured as inputs.
      */
     Wire.beginTransmission (AD_I2C_ADDRESS);
     Wire.send (0x02);
     Wire.send (AD_I2C_OUTPUT0);
     Wire.send (AD_I2C_OUTPUT1);
     n = Wire.endTransmission ();
-
-    if (n == SUCCESS) SerialUSB.println ("SUCCESS");
-    else {
-      SerialUSB.print ("ERROR: ");
-      SerialUSB.println (n);
-    }
+    if (n != SUCCESS) { error (); return; }
 
     // Read outputs
     Wire.beginTransmission (AD_I2C_ADDRESS);
@@ -117,72 +118,27 @@ namespace Buoy {
 
       /* Register 2 */
       r = Wire.receive ();
-      state.pmode = (r & AD_I2C_PMODE);
+      //state.pmode = (r & AD_I2C_PMODE);
       state.reset = (r & AD_I2C_RESET);
     }
 
     n = Wire.endTransmission ();
-    if (n == SUCCESS) SerialUSB.println ("SUCCESS");
-    else {
-      SerialUSB.print ("ERROR: ");
-      SerialUSB.println (n);
-    }
+    if (n != SUCCESS) { error (); return; }
 
-    // Read input
-    Wire.beginTransmission (AD_I2C_ADDRESS);
-    Wire.send (0x00);
-    n = Wire.endTransmission ();
-    if (n == SUCCESS) SerialUSB.println ("SUCCESS");
-    else {
-      SerialUSB.print ("ERROR: ");
-      SerialUSB.println (n);
-    }
+# if DIRECT_SERIAL
+    SerialUSB.println ("[AD] Configuration done:");
+    SerialUSB.print   ("[AD] Ports 0: 0b");
+    SerialUSB.println (state.ports0, BIN);
+    SerialUSB.print   ("[AD] Ports 1: 0b");
+    SerialUSB.println (state.ports1, BIN);
+    SerialUSB.print   ("[AD] Sync: ");
+    SerialUSB.print   ((state.sync ? "True" : "False"));
+    SerialUSB.print   (", Reset: ");
+    SerialUSB.print   ((state.reset ? "True" : "False"));
+    SerialUSB.print   (", Power down: ");
+    SerialUSB.println ((state.pdwn ? "True" : "False"));
+# endif
 
-    Wire.beginTransmission (AD_I2C_ADDRESS);
-    n = Wire.requestFrom (AD_I2C_ADDRESS, 2);
-    SerialUSB.println (n);
-    while (Wire.available ()) {
-
-      uint8 r = Wire.receive ();
-
-      SerialUSB.print  ("[AD] [I2C] Got:");
-      SerialUSB.println (r, BIN);
-    }
-
-    n = Wire.endTransmission ();
-    if (n == SUCCESS) SerialUSB.println ("SUCCESS");
-    else {
-      SerialUSB.print ("ERROR: ");
-      SerialUSB.println (n);
-    }
-
-    // Read configuration
-    Wire.beginTransmission (AD_I2C_ADDRESS);
-    Wire.send (0x06);
-    n = Wire.endTransmission ();
-    if (n == SUCCESS) SerialUSB.println ("SUCCESS");
-    else {
-      SerialUSB.print ("ERROR: ");
-      SerialUSB.println (n);
-    }
-
-    Wire.beginTransmission (AD_I2C_ADDRESS);
-    n = Wire.requestFrom (AD_I2C_ADDRESS, 2);
-    SerialUSB.println (n);
-    while (Wire.available ()) {
-
-      uint8 r = Wire.receive ();
-
-      SerialUSB.print  ("[AD] [I2C] Got:");
-      SerialUSB.println (r, BIN);
-    }
-
-    n = Wire.endTransmission ();
-    if (n == SUCCESS) SerialUSB.println ("SUCCESS");
-    else {
-      SerialUSB.print ("ERROR: ");
-      SerialUSB.println (n);
-    }
   }
 
   void ADS1282::read_control_register () {
@@ -207,6 +163,15 @@ namespace Buoy {
       SerialUSB.println (a);
     }
 
+  }
+
+  void ADS1282::error () {
+    /* Some error on the ADS1282 - disable */
+# if DIRECT_SERIAL
+    SerialUSB.println ("[AD] Error. Disabling.");
+# endif
+
+    disabled = true;
   }
 }
 

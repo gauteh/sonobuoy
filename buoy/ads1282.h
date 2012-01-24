@@ -53,9 +53,9 @@ namespace Buoy {
  * Programming all outputs using default (pull up) value as inputs to avoid
  * conflicting U7 output with hardwired output - meaning shortening.
  */
-# define AD_I2C_CONTROL0 (AD_I2C_MFLAG | AD_I2C_MCLK | AD_I2C_M0 | AD_I2C_M1 |\
-                          AD_I2C_EXTCLK | AD_I2C_SUPSOR)
-# define AD_I2C_CONTROL1 0
+# define AD_I2C_CONTROL0 AD_I2C_MFLAG | AD_I2C_MCLK | AD_I2C_M0 | AD_I2C_M1 |\
+                         AD_I2C_EXTCLK | AD_I2C_SUPSOR
+# define AD_I2C_CONTROL1 AD_I2C_PMODE
 
 
   /* SPI */
@@ -72,6 +72,7 @@ namespace Buoy {
 
   class ADS1282 {
     public:
+      bool disabled;
       static HardwareSPI spi;
 
       /* Control registers on EVM */
@@ -82,15 +83,15 @@ namespace Buoy {
          * LOW  is output
          * HIGH is input
          */
-        uint8 reg1;
-        uint8 reg2;
+        uint8 ports0;
+        uint8 ports1;
 
         /* Inputs */
-        bool mflag;
+        bool mflag; // Not reading..
 
         /* Outputs */
         bool sync;
-        bool pmode;
+        //bool pmode;
         bool reset;
         bool pdwn;
 
@@ -112,6 +113,8 @@ namespace Buoy {
 
       void loop ();
       void acquire ();
+
+      void error ();
 
   };
 
