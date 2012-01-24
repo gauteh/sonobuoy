@@ -78,8 +78,8 @@ namespace Buoy {
     /* Configure I2C (U7) */
     Wire.beginTransmission (AD_I2C_ADDRESS);
     Wire.send (0x06);
+    Wire.send (AD_I2C_CONTROL0);
     Wire.send (AD_I2C_CONTROL1);
-    Wire.send (AD_I2C_CONTROL2);
     n = Wire.endTransmission ();
 
     if (n == SUCCESS) SerialUSB.println ("SUCCESS");

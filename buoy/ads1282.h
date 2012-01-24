@@ -44,14 +44,18 @@ namespace Buoy {
 
 /* Outputs configured HIGH */
 # define AD_I2C_OUTPUT0 0
-# define AD_I2C_OUTPUT1 AD_I2C_PMODE
+# define AD_I2C_OUTPUT1 0
 
 /* Control register of PCA9535RGE:
  * HIGH is input
  * LOW  is output (default)
+ *
+ * Programming all outputs using default (pull up) value as inputs to avoid
+ * conflicting U7 output with hardwired output - meaning shortening.
  */
-# define AD_I2C_CONTROL1 AD_I2C_MFLAG | AD_I2C_MCLK | AD_I2C_M0 | AD_I2C_M1
-# define AD_I2C_CONTROL2 0
+# define AD_I2C_CONTROL0 (AD_I2C_MFLAG | AD_I2C_MCLK | AD_I2C_M0 | AD_I2C_M1 |\
+                          AD_I2C_EXTCLK | AD_I2C_SUPSOR)
+# define AD_I2C_CONTROL1 0
 
 
   /* SPI */
@@ -88,8 +92,7 @@ namespace Buoy {
         bool sync;
         bool pmode;
         bool reset;
-        bool pdwn; // Also _hardwired_ to power on.
-
+        bool pdwn;
 
         /* Control registers of ADS1282 */
         // TODO
