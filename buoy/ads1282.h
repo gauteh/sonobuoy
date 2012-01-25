@@ -11,11 +11,11 @@
 
 namespace Buoy {
 
-  /* I2C bus
-   *
-   * The I2C control unit (U7 on ADS1282-EVM schematic) appears to be an
-   * PCA9535RGE.
-   */
+/* I2C bus
+ *
+ * The I2C control unit (U7 on ADS1282-EVM schematic) appears to be an
+ * PCA9535RGE.
+ */
 
 # define AD_I2C  1
 # define AD_SCL 38
@@ -43,8 +43,8 @@ namespace Buoy {
 # define AD_I2C_RESET   0b00000010
 
 /* Outputs configured HIGH */
-# define AD_I2C_OUTPUT0 AD_I2C_SYNC
-# define AD_I2C_OUTPUT1 AD_I2C_RESET
+# define AD_I2C_OUTPUT0 AD_I2C_SYNC | AD_I2C_PDWN
+# define AD_I2C_OUTPUT1 AD_I2C_RESET 
 
 /* Control register of PCA9535RGE:
  * HIGH is input
@@ -55,13 +55,15 @@ namespace Buoy {
  */
 # define AD_I2C_CONTROL0 AD_I2C_MFLAG | AD_I2C_EXTCLK
 # define AD_I2C_CONTROL1 AD_I2C_PMODE
+# define AD_I2C_POLARITY0 0
+# define AD_I2C_POLARITY1 0
 
 
   /* SPI */
-# define AD_SPI  1
-# define AD_SCLK BOARD_SPI1_SCK_PIN   // 53
-# define AD_DOUT BOARD_SPI1_MISO_PIN  // 55
-# define AD_DIN  BOARD_SPI1_MOSI_PIN  // 54
+# define AD_SPI   1
+# define AD_SCLK 53
+# define AD_DOUT 55
+# define AD_DIN  54
 # define AD_SS   BOARD_SPI1_NSS_PIN   // 52
 
 # define AD_nDRDY 40
@@ -84,8 +86,8 @@ namespace Buoy {
         uint8 ports0;
         uint8 ports1;
 
-        /* Inputs */
-        bool mflag; // Not reading..
+        uint8 polarity0;
+        uint8 polarity1;
 
         /* Outputs */
         bool sync;
@@ -97,6 +99,39 @@ namespace Buoy {
         // }}}
       } control;
 
+      typedef enum _pca9535register {
+        /* Register id, corresponds to register id on device {{{ */
+        INPUT0 = 0,
+        INPUT1,
+        OUTPUT0,
+        OUTPUT1,
+        POLARITY0,
+        POLARITY1,
+        CONTROL0,
+        CONTROL1
+        // }}}
+      } PCA9535REGISTER;
+
+      typedef enum _command {
+      /* SPI commands for ADS1282 {{{ */
+        WAKEUP    = 0x00,
+        STANDBY   = 0x02,
+        SYNC      = 0x04,
+        RESET     = 0x06,
+        RDATAC    = 0x10, // Read data continuous
+        SDATAC    = 0x11, // Stop read data continuous
+        RDATA     = 0x12, // Read data on command (in SDATAC mode)
+
+        // Read and write registers
+        RREG      = 0x20, // + starting address, and second byte with number
+                          // of register to be read -1.
+        WREG      = 0x40, // ^^
+
+        OFSCAL    = 0x60, // Offset calibration
+        GANCAL    = 0x61  // Gain calibration
+        // }}}
+      } COMMAND;
+
       control state;
 
       bool batchready;
@@ -107,12 +142,16 @@ namespace Buoy {
       void configure ();
       void reset ();
       void reset_spi ();
-      void read_u7_outputs ();
+      void read_pca9535 (PCA9535REGISTER);
+      void send_command (COMMAND cmd, uint8_t start = 0, uint8_t n = 0);
 
       void loop ();
       void acquire ();
       static void drdy ();
       static void drdy_off ();
+
+      void    shift_out (uint8_t v);
+      uint8_t shift_in  ();
 
       void error ();
 

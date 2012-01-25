@@ -17,8 +17,6 @@
 # define DIRECT_SERIAL 1
 
 namespace Buoy {
-  uint8_t shiftIn(uint8_t dataPin, uint8_t clockPin, uint8_t bitOrder);
-
   class BuoyMaster {
     public:
 
