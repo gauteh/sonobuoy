@@ -43,8 +43,8 @@ namespace Buoy {
 # define AD_I2C_RESET   0b00000010
 
 /* Outputs configured HIGH */
-# define AD_I2C_OUTPUT0 0
-# define AD_I2C_OUTPUT1 0
+# define AD_I2C_OUTPUT0 AD_I2C_SYNC
+# define AD_I2C_OUTPUT1 AD_I2C_RESET
 
 /* Control register of PCA9535RGE:
  * HIGH is input
@@ -53,30 +53,28 @@ namespace Buoy {
  * Programming all outputs using default (pull up) value as inputs to avoid
  * conflicting U7 output with hardwired output - meaning shortening.
  */
-# define AD_I2C_CONTROL0 AD_I2C_MFLAG | AD_I2C_MCLK | AD_I2C_M0 | AD_I2C_M1 |\
-                         AD_I2C_EXTCLK | AD_I2C_SUPSOR
+# define AD_I2C_CONTROL0 AD_I2C_MFLAG | AD_I2C_EXTCLK
 # define AD_I2C_CONTROL1 AD_I2C_PMODE
 
 
   /* SPI */
 # define AD_SPI  1
 # define AD_SCLK BOARD_SPI1_SCK_PIN   // 53
-# define AD_MISO BOARD_SPI1_MISO_PIN  // 55
-# define AD_MOSI BOARD_SPI1_MOSI_PIN  // 54
+# define AD_DOUT BOARD_SPI1_MISO_PIN  // 55
+# define AD_DIN  BOARD_SPI1_MOSI_PIN  // 54
 # define AD_SS   BOARD_SPI1_NSS_PIN   // 52
 
 # define AD_nDRDY 40
 
   typedef uint32_t sample;
 
-
   class ADS1282 {
     public:
       bool disabled;
       static HardwareSPI spi;
 
-      /* Control registers on EVM */
       typedef struct _control {
+      /* Control registers on EVM {{{ */
         /* Control registers of U7 / PCA9535RGE */
 
         /* Configured ports
@@ -96,28 +94,29 @@ namespace Buoy {
         bool pdwn;
 
         /* Control registers of ADS1282 */
-        // TODO
+        // }}}
       } control;
 
       control state;
 
       bool batchready;
-      bool drdy;
-      sample value;
+      volatile sample value;
 
       ADS1282 ();
       void setup ();
       void configure ();
+      void reset ();
       void reset_spi ();
-      void read_control_register ();
+      void read_u7_outputs ();
 
       void loop ();
       void acquire ();
+      static void drdy ();
+      static void drdy_off ();
 
       void error ();
 
   };
-
 }
 
 /* vim: set filetype=arduino :  */

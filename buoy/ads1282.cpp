@@ -7,7 +7,6 @@
 
 # include "wirish.h"
 
-# include "spi.h"
 # include "Wire.h"
 
 # include "buoy.h"
@@ -16,13 +15,10 @@
 using namespace std;
 
 namespace Buoy {
-
-  HardwareSPI ADS1282::spi (AD_SPI);
-
   ADS1282::ADS1282 () {
+    // Init class {{{
     disabled    = false;
     batchready  = false;
-    drdy        = false;
     value       = 0;
 
     state.ports0 = 0;
@@ -34,42 +30,55 @@ namespace Buoy {
     state.pdwn  = false;
 
     return;
+    // }}}
   }
 
   void ADS1282::setup () {
-
-    delay(5000);
+    // Set up interface and ADS1282 {{{
+    delay(1000);
 
     /* Setup AD and get ready for data */
 # if DIRECT_SERIAL
     SerialUSB.println ("[AD] Setting up ADS1282..");
 # endif
 
+    attachInterrupt (AD_nDRDY, (&ADS1282::drdy), FALLING);
+    attachInterrupt (AD_nDRDY, (&ADS1282::drdy_off), RISING);
+    //digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
+
     /* Set up I2C */
     Wire.begin (AD_SDA, AD_SCL);
 
     /* Set up SPI */
+    pinMode (AD_SCLK, OUTPUT);
+    pinMode (AD_DIN, OUTPUT);
+    pinMode (AD_DOUT, INPUT);
     pinMode (AD_nDRDY, INPUT);
     pinMode (AD_SS, OUTPUT);
 
-    spi.begin (SPI_1_125MHZ, MSBFIRST, SPI_MODE_0);
+    //spi.begin (SPI_1_125MHZ, MSBFIRST, SPI_MODE_0);
     digitalWrite (AD_SS, LOW);
+    digitalWrite (AD_SCLK, LOW);
+    digitalWrite (AD_DIN, LOW);
 
     /* Configure AD */
     configure ();
-  }
+    digitalWrite (AD_SCLK, HIGH);
 
-  void ADS1282::reset_spi () {
-    /* Hold SCLK low for 64 nDRDY cycles */
+    reset ();
+    delay (500);
+    // }}}
   }
 
   void ADS1282::loop () {
     if (!disabled) {
-      drdy = !digitalRead (AD_nDRDY);
+      SerialUSB.print ("[AD] Current value: ");
+      SerialUSB.println (value, HEX);
     }
   }
 
   void ADS1282::configure () {
+    // Configure {{{
 # if DIRECT_SERIAL
     SerialUSB.println ("[AD] Configuring ADS1282..");
 # endif
@@ -85,13 +94,13 @@ namespace Buoy {
 
     if (n != SUCCESS) { error (); return; }
 
-    // Read configuration
+    // Read configuration {{{
     Wire.beginTransmission (AD_I2C_ADDRESS);
     n = Wire.requestFrom (AD_I2C_ADDRESS, 2);
     if (n == 2) {
       state.ports0 = Wire.receive ();
       state.ports1 = Wire.receive ();
-    }
+    } // }}}
 
     /* Set up outputs:
      * - Turn off SYNC
@@ -104,6 +113,19 @@ namespace Buoy {
     Wire.send (0x02);
     Wire.send (AD_I2C_OUTPUT0);
     Wire.send (AD_I2C_OUTPUT1);
+    n = Wire.endTransmission ();
+    if (n != SUCCESS) { error (); return; }
+
+    read_u7_outputs ();
+    // }}}
+  }
+
+  void ADS1282::read_u7_outputs () {
+    /* Read outputs of PCA9535RGE {{{ */
+    // Select outputs
+    int n = 0;
+    Wire.beginTransmission (AD_I2C_ADDRESS);
+    Wire.send (0x02);
     n = Wire.endTransmission ();
     if (n != SUCCESS) { error (); return; }
 
@@ -124,30 +146,64 @@ namespace Buoy {
 
     n = Wire.endTransmission ();
     if (n != SUCCESS) { error (); return; }
-
-# if DIRECT_SERIAL
-    SerialUSB.println ("[AD] Configuration done:");
-    SerialUSB.print   ("[AD] Ports 0: 0b");
-    SerialUSB.println (state.ports0, BIN);
-    SerialUSB.print   ("[AD] Ports 1: 0b");
-    SerialUSB.println (state.ports1, BIN);
     SerialUSB.print   ("[AD] Sync: ");
     SerialUSB.print   ((state.sync ? "True" : "False"));
     SerialUSB.print   (", Reset: ");
     SerialUSB.print   ((state.reset ? "True" : "False"));
     SerialUSB.print   (", Power down: ");
     SerialUSB.println ((state.pdwn ? "True" : "False"));
-# endif
-
+    // }}}
   }
 
-  void ADS1282::read_control_register () {
-    /* Not implemented */
+  void ADS1282::reset_spi () {
+    // Reset SPI interface
+
+    /* Hold SCLK low for 64 nDRDY cycles */
+  }
+
+  void ADS1282::reset () {
+    // Reset ADS1282 over I2C / U7 {{{
+    SerialUSB.println ("[AD] Resetting..");
+
+    int n = 0;
+
+    Wire.beginTransmission (AD_I2C_ADDRESS);
+    Wire.send (0x02);
+    Wire.send (AD_I2C_OUTPUT0);
+    Wire.send (AD_I2C_OUTPUT1 & !AD_I2C_RESET);
+    n = Wire.endTransmission ();
+    if (n != SUCCESS) { error (); return; }
+
+    read_u7_outputs ();
+    delay (100);
+
+    Wire.beginTransmission (AD_I2C_ADDRESS);
+    Wire.send (0x02);
+    Wire.send (AD_I2C_OUTPUT0);
+    Wire.send (AD_I2C_OUTPUT1);
+    n = Wire.endTransmission ();
+    if (n != SUCCESS) { error (); return; }
+
+    read_u7_outputs ();
+    delay (100);
+    // }}}
+  }
+
+  void ADS1282::drdy () {
+    SerialUSB.println ("[AD] DRDY");
+    digitalWrite (BOARD_LED_PIN, HIGH);
+    bu->ad.acquire ();
+  }
+
+  void ADS1282::drdy_off () {
+    SerialUSB.println ("[AD] DRDY OFF");
+    digitalWrite (BOARD_LED_PIN, LOW);
   }
 
   void ADS1282::acquire () {
+    // Acquire {{{
     /* In continuous mode: Must complete read operation before four
-     *                     CLK (ADS1282) periods. */
+     *                     DRDY (ADS1282) periods. */
     SerialUSB.println ("[AD] Acquiring..");
 
 
@@ -155,6 +211,18 @@ namespace Buoy {
     //value = spi->read ();
     //value = spi->read ();
 
+    digitalWrite (AD_DIN, LOW);
+    digitalWrite (AD_SCLK, LOW);
+    uint32_t v = 0;
+    v += shiftIn (AD_DOUT, AD_SCLK, MSBFIRST) << 24;
+    v += shiftIn (AD_DOUT, AD_SCLK, MSBFIRST) << 16;
+    v += shiftIn (AD_DOUT, AD_SCLK, MSBFIRST) << 8;
+    v += shiftIn (AD_DOUT, AD_SCLK, MSBFIRST);
+
+    value = v;
+    digitalWrite (AD_SCLK, HIGH);
+
+    /*
     if (!spi_is_rx_nonempty (SPI1)) {
       SerialUSB.println ("[AD] SPI is empty.");
     } else {
@@ -162,7 +230,8 @@ namespace Buoy {
       SerialUSB.print ("[AD] Got value: ");
       SerialUSB.println (a);
     }
-
+    */
+    // }}}
   }
 
   void ADS1282::error () {
@@ -172,6 +241,7 @@ namespace Buoy {
 # endif
 
     disabled = true;
+    detachInterrupt (AD_nDRDY);
   }
 }
 

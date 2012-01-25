@@ -22,17 +22,6 @@ namespace Buoy {
       ad.loop ();
 
       delay (1000);
-      if (ad.drdy) {
-        SerialUSB.println ("Data ready: True");
-        digitalWrite (BOARD_LED_PIN, HIGH);
-
-        ad.acquire ();
-
-      } else {
-        SerialUSB.println ("Data ready: False");
-        digitalWrite (BOARD_LED_PIN, LOW);
-      }
-
 
     }
   }

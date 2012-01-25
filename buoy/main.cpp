@@ -17,9 +17,11 @@ __attribute__((constructor)) void premain() {
     init();
 }
 
+
+BuoyMaster * (Buoy::bu);
 int main(void) {
-  BuoyMaster b;
-  b.main ();
+  Buoy::bu = new BuoyMaster ();
+  Buoy::bu->main (); // defined in buoy.h
 
   return 0;
 }

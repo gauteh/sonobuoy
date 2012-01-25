@@ -31,7 +31,10 @@ namespace Buoy {
     private:
       void setup ();
   };
+
+  extern BuoyMaster *bu;
 }
+
 
 /* vim: set filetype=arduino :  */
 
