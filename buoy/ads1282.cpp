@@ -393,8 +393,8 @@ namespace Buoy {
     SerialUSB.println ("[AD] Read data on command..");
 
     send_command (RDATA);
-    while (digitalRead (AD_nDRDY));
-    acquire ();
+    while (digitalRead (AD_nDRDY)); // Wait for falling DRDY
+    acquire ();                     // Shift bits in (should wait min 100 ns)
 
     SerialUSB.print   ("[AD] Value: ");
     SerialUSB.println (value, HEX);
