@@ -39,12 +39,12 @@ namespace Buoy {
 # define AD_I2C_SYNC    0b01000000
 
 /* Register 2, outputs */
-# define AD_I2C_PMODE   0b00000001
+//# define AD_I2C_PMODE   0b00000001 // Only available on ADS1281
 # define AD_I2C_RESET   0b00000010
 
 /* Outputs configured HIGH */
-# define AD_I2C_OUTPUT0 AD_I2C_SYNC | AD_I2C_PDWN
-# define AD_I2C_OUTPUT1 AD_I2C_RESET 
+# define AD_I2C_OUTPUT0 AD_I2C_SYNC | AD_I2C_PDWN | AD_I2C_M1 | AD_I2C_EXTCLK
+# define AD_I2C_OUTPUT1 AD_I2C_RESET
 
 /* Control register of PCA9535RGE:
  * HIGH is input
@@ -53,8 +53,8 @@ namespace Buoy {
  * Programming all outputs using default (pull up) value as inputs to avoid
  * conflicting U7 output with hardwired output - meaning shortening.
  */
-# define AD_I2C_CONTROL0 AD_I2C_MFLAG | AD_I2C_EXTCLK
-# define AD_I2C_CONTROL1 AD_I2C_PMODE
+# define AD_I2C_CONTROL0 AD_I2C_MFLAG
+# define AD_I2C_CONTROL1  0
 # define AD_I2C_POLARITY0 0
 # define AD_I2C_POLARITY1 0
 
@@ -98,6 +98,14 @@ namespace Buoy {
         /* Control registers of ADS1282 */
         // }}}
       } control;
+      control state;
+
+      typedef struct _registers {
+        uint8_t raw[11];
+
+      } registers;
+
+      registers reg;
 
       typedef enum _pca9535register {
         /* Register id, corresponds to register id on device {{{ */
@@ -132,10 +140,11 @@ namespace Buoy {
         // }}}
       } COMMAND;
 
-      control state;
 
       bool batchready;
       volatile sample value;
+
+      int run;
 
       ADS1282 ();
       void setup ();
@@ -143,7 +152,9 @@ namespace Buoy {
       void reset ();
       void reset_spi ();
       void read_pca9535 (PCA9535REGISTER);
+
       void send_command (COMMAND cmd, uint8_t start = 0, uint8_t n = 0);
+      void read_registers ();
 
       void loop ();
       void acquire ();
@@ -152,6 +163,7 @@ namespace Buoy {
 
       void    shift_out (uint8_t v);
       uint8_t shift_in  ();
+      void    shift_in_n (uint8_t *, int);
 
       void error ();
 

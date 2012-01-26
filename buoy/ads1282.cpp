@@ -5,6 +5,7 @@
  *
  */
 
+# include <string.h>
 # include "wirish.h"
 
 # include "Wire.h"
@@ -20,6 +21,7 @@ namespace Buoy {
     disabled    = false;
     batchready  = false;
     value       = 0;
+    run = 0;
 
     state.ports0 = 0;
     state.ports1 = 0;
@@ -29,6 +31,8 @@ namespace Buoy {
     state.sync  = false;
     state.reset = false;
     state.pdwn  = false;
+
+    for (int i = 0; i < 11; i++) reg.raw[i] = 0;
 
     return;
     // }}}
@@ -48,8 +52,8 @@ namespace Buoy {
     /* Set up SPI */
     pinMode (AD_SCLK, OUTPUT);
     pinMode (AD_DIN, OUTPUT);
-    pinMode (AD_DOUT, INPUT);
-    pinMode (AD_nDRDY, INPUT);
+    pinMode (AD_DOUT, INPUT_PULLDOWN);
+    pinMode (AD_nDRDY, INPUT_PULLDOWN);
     pinMode (AD_SS, OUTPUT);
 
     digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
@@ -72,7 +76,15 @@ namespace Buoy {
       SerialUSB.print ("[AD] Current value: ");
       SerialUSB.println (value, HEX);
       */
+      run++;
+
+      SerialUSB.print ("[AD] Run: ");
+      SerialUSB.println (run);
+
+      if (!(run % 20)) send_command (SDATAC);
+
       digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
+      read_registers ();
     }
   }
 
@@ -95,19 +107,19 @@ namespace Buoy {
     read_pca9535 (CONTROL0);
     read_pca9535 (POLARITY0);
 
-    /* Set up outputs:
-     * - Turn off SYNC
-     * - Turn off PDWN
-     * - Turn off RESET
-     * - Turn off M0
-     * - Turn off M1
-     * - Turn off MCLK
-     * - Turn off SUPSOR
+    /* Set up outputs: (defined in header file)
+     * - SYNC:   HIGH  (active low)
+     * - PDWN:   HIGH  (active low)
+     * - RESET:  HIGH  (active low)
+     * - M0:     LOW
+     * - M1:     HIGH
+     * - MCLK:   LOW
+     * - SUPSOR: LOW
+     * - EXTCLK: HIGH  (also hardwired high: _must_ be set HIGH)
      *
      * All other U7 outputs are meanwhile configured as inputs:
-     * - PMODE
+     * - PMODE (not available on ADS1282)
      * - MFLAG
-     * - EXTCLK
      */
     Wire.beginTransmission (AD_I2C_ADDRESS);
     Wire.send (0x02);
@@ -118,10 +130,27 @@ namespace Buoy {
 
     read_pca9535 (OUTPUT0);
 
-    // Let device settle, then reset
-    delay (100);
+    digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
     reset ();
+    digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
+    delay (5000);
+    digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
 
+    SerialUSB.println ("[AD] Send: RESET..");
+    send_command (RESET);
+    digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
+    delay (5000);
+    digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
+    delay (5000);
+
+    SerialUSB.println ("[AD] Send: SDATAC..");
+    send_command (SDATAC);
+    digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
+    delay (5000);
+
+    read_registers ();
+
+    digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
     SerialUSB.println ("[AD] Configuration done.");
     // }}}
   }
@@ -225,7 +254,9 @@ namespace Buoy {
     if (n != SUCCESS) { error (); return; }
 
     read_pca9535 (OUTPUT0);
-    delay (100);
+    digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
+    delay (1000);
+    digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
 
     Wire.beginTransmission (AD_I2C_ADDRESS);
     Wire.send (0x02);
@@ -235,20 +266,9 @@ namespace Buoy {
     if (n != SUCCESS) { error (); return; }
 
     read_pca9535 (OUTPUT0);
+    digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
     delay (100);
 
-    SerialUSB.println ("[AD] Sending reset command..");
-    send_command (RESET);
-    delay (1000);
-
-    SerialUSB.println ("[AD] Reading registers..");
-    send_command (RREG, 0, 0xA);
-    for (int i = 0; i < 0xA; i++) {
-      delayMicroseconds (10);
-      uint8_t r = shift_in ();
-      SerialUSB.print  ("[AD] Register: 0b");
-      SerialUSB.println (r, BIN);
-    }
 
     SerialUSB.println ("[AD] Reset done.");
     // }}}
@@ -256,6 +276,8 @@ namespace Buoy {
 
   void ADS1282::send_command (COMMAND cmd, uint8_t start, uint8_t n) {
     /* Send SPI command to ADS1282 {{{ */
+    SerialUSB.print   ("[AD] Command: 0b");
+    SerialUSB.println ((uint8_t) (cmd + start), BIN);
     switch (cmd) {
       case WAKEUP:
       case STANDBY:
@@ -266,19 +288,38 @@ namespace Buoy {
       case OFSCAL:
       case GANCAL:
       case RESET:
-        shift_out (cmd);
-        delayMicroseconds (10);
+        shift_out ((uint8_t) cmd);
+        delayMicroseconds (150); // delay, min: 24 / fclk
         break;
 
       case RREG:
       case WREG:
-        shift_out (cmd + start);
-        delayMicroseconds (10);
+        SerialUSB.print   ("[AD] Command: 0b");
+        SerialUSB.println ((uint8_t) (n), BIN);
+        shift_out ((uint8_t) (cmd + start));
+        delayMicroseconds (150); // delay, min: 24 / fclk
         shift_out (n);
-        delayMicroseconds (10);
+        delayMicroseconds (150); // delay, min: 24 / fclk
         break;
     };
     // }}}
+  }
+
+  void ADS1282::read_registers () {
+    SerialUSB.println ("[AD] Reading registers..");
+    send_command (RREG, 0, 10);
+
+    shift_in_n (reg.raw, 11);
+
+    for (int i = 0; i < 11; i++) {
+      SerialUSB.print   ("[AD] Register [");
+      SerialUSB.print   (i);
+      SerialUSB.print   ("] 0b");
+      SerialUSB.print   (reg.raw[i], BIN);
+      SerialUSB.print   (" (0x");
+      SerialUSB.print   (reg.raw[i], HEX);
+      SerialUSB.println (")");
+    }
   }
 
   void ADS1282::drdy () {
@@ -333,15 +374,34 @@ namespace Buoy {
     uint8_t v = 0;
     for (int i = 7; i >= 0; i--) {
       digitalWrite (AD_SCLK, HIGH);
-      delayMicroseconds (1);
       digitalWrite (AD_SCLK, LOW);
-      delayMicroseconds (1);
 
       v |= digitalRead (AD_DOUT) << i;
-      delayMicroseconds (1);
     }
 
     return v;
+  }
+
+  void ADS1282::shift_in_n (uint8_t *v, int n) {
+    /* Shift in n bytes to byte array v */
+    digitalWrite (AD_DIN, LOW);
+    digitalWrite (AD_SCLK, LOW);
+
+    /* Read each byte */
+    for (int j = 0; j < n; j++) {
+
+      v[j] = 0;
+
+      /* Read each bit, MSB first */
+      for (int i = 7; i >= 0; i--) {
+        digitalWrite (AD_SCLK, HIGH);
+        digitalWrite (AD_SCLK, LOW);
+
+        v[j] |= (((uint8_t)digitalRead (AD_DOUT)) << i);
+      }
+
+      delayMicroseconds (11); // delay, min: 24 / fclk
+    }
   }
 
   void ADS1282::shift_out (uint8_t v) {
@@ -350,13 +410,12 @@ namespace Buoy {
 
     /* Write each bit, MSB first */
     for (int i = 7; i >= 0; i--) {
+      digitalWrite (AD_DIN, !!(v & (1 << i)));
       digitalWrite (AD_SCLK, HIGH);
-      delayMicroseconds (1);
-      digitalWrite (AD_DIN, (v >> i) & 1);
-      delayMicroseconds (1);
       digitalWrite (AD_SCLK, LOW);
-      delayMicroseconds (1);
     }
+
+    delayMicroseconds (11);
   }
 
   void ADS1282::error () {
