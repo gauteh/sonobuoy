@@ -57,7 +57,7 @@ namespace Buoy {
     pinMode (AD_SS, OUTPUT);
 
     digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
-    attachInterrupt (AD_nDRDY, (&ADS1282::drdy), CHANGE);
+    //attachInterrupt (AD_nDRDY, (&ADS1282::drdy), CHANGE);
 
     digitalWrite (AD_SS, LOW);
     digitalWrite (AD_SCLK, LOW);
@@ -76,6 +76,7 @@ namespace Buoy {
       SerialUSB.println (value, HEX);
       */
       run++;
+      acquire_on_command ();
 
       /*
       SerialUSB.print ("[AD] Run: ");
@@ -374,13 +375,30 @@ namespace Buoy {
     // Acquire {{{
     /* In continuous mode: Must complete read operation before four
      *                     DRDY (ADS1282) periods. */
-    SerialUSB.print ("[AD] Acquiring..: ");
+    //SerialUSB.print ("[AD] Acquiring..: ");
 
-    shift_in_n ((uint8_t*) &value, 4);
+    value = 0;
+    uint8_t v[4];
+    shift_in_n (v, 4);
 
-    SerialUSB.println (value, HEX);
+    value = v[3];
+    value += v[2] << 8;
+    value += v[1] << 16;
+    value += v[0] << 24;
 
     // }}}
+  }
+
+  void ADS1282::acquire_on_command () {
+    SerialUSB.println ("[AD] Read data on command..");
+
+    send_command (RDATA);
+    while (digitalRead (AD_nDRDY));
+    acquire ();
+
+    SerialUSB.print   ("[AD] Value: ");
+    SerialUSB.println (value, HEX);
+
   }
 
   /* SPI clocking operations: in and out {{{ */

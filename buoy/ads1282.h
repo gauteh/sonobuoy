@@ -208,6 +208,7 @@ namespace Buoy {
 
       void loop ();
       void acquire ();
+      void acquire_on_command ();
       static void drdy ();
       static void drdy_off ();
 
