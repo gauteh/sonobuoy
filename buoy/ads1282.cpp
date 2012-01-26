@@ -308,6 +308,55 @@ namespace Buoy {
       SerialUSB.print   (" (0x");
       SerialUSB.print   (reg.raw[i], HEX);
       SerialUSB.println (")");
+
+      switch (i)
+      {
+        case 0:
+          reg.id = reg.raw[0];
+          break;
+
+        case 1:
+          reg.sync = reg.raw[1] & (1 << 7);
+          reg.mode = reg.raw[1] & (1 << 6);
+          reg.datarate = (reg.raw[1] & 0b00111000) >> 3;
+          reg.firphase = reg.raw[1] & (1 << 2);
+          reg.filterselect = reg.raw[1] & 0b11;
+          break;
+
+        case 2:
+          reg.muxselect = (reg.raw[2] & 0b01110000) >> 4;
+          reg.pgachop = reg.raw[2] & 0b00001000;
+          reg.pgagain = reg.raw[2] & 0b00000111;
+          break;
+
+        case 3:
+          reg.hpf0 = reg.raw[3];
+          break;
+        case 4:
+          reg.hpf1 = reg.raw[4];
+          break;
+
+        case 5:
+          reg.ofc0 = reg.raw[5];
+          break;
+        case 6:
+          reg.ofc1 = reg.raw[6];
+          break;
+        case 7:
+          reg.ofc2 = reg.raw[7];
+          break;
+
+        case 8:
+          reg.fsc0 = reg.raw[8];
+          break;
+        case 9:
+          reg.fsc1 = reg.raw[9];
+          break;
+        case 0xa:
+          reg.fsc2 = reg.raw[0xa];
+          break;
+      };
+
     }
     // }}}
   }
@@ -334,7 +383,7 @@ namespace Buoy {
     // }}}
   }
 
-  /* SPI clocking operations: in and out {{{ */ 
+  /* SPI clocking operations: in and out {{{ */
   uint8_t ADS1282::shift_in () {
     digitalWrite (AD_DIN, LOW);
     digitalWrite (AD_SCLK, LOW);

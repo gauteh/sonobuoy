@@ -101,8 +101,59 @@ namespace Buoy {
       control state;
 
       typedef struct _registers {
+        /* Registers of ADS1282 {{{ */
         uint8_t raw[11];
 
+        // ID (address: 0x00)
+        uint8_t id;
+
+        // Config 0 (address: 0x01)
+        bool    sync;     // pulse (default) | continuous
+        bool    mode;     // low power | high resolution (default)
+        uint8_t datarate; // 0 - 5: - 250
+                          //        - 500
+                          //        - 1000 (default)
+                          //        - 2000
+                          //        - 4000
+        bool    firphase; // linear phase (default) | minimum phase
+        uint8_t filterselect; // 0 - 3: - On-chip filter bypassed
+                              //        - Sinc filter block only
+                              //        - Sinc + LPF filter blocks (default)
+                              //        - Sinc + LPF + HPF filter blocks
+
+
+        // Config 1 (address: 0x02)
+        // First bit reserved (always write 0)
+        uint8_t muxselect; // 0 - 4: - AINP1 and AINN1 (default)
+                           //        - AINP2 and AINN2
+                           //        - Internal short via 400 Ohm
+                           //        - AINP1 and AINN1 conn to AINP2 and AINN2
+                           //        - External short to AINN2
+        bool    pgachop;   // disabled | enabled (default)
+        uint8_t pgagain;   // 0 - 6: - G = 1 (default)
+                           //        - G = 2
+                           //        - G = 4
+                           //        - G = 8
+                           //        - G = 16
+                           //        - G = 32
+                           //        - G = 64
+
+        // High pass filter (address: 0x03 -0x04)
+        // Two bytes set the corner frequency of the High Pass filter
+        uint8_t hpf0; // low byte,  default 0x32
+        uint8_t hpf1; // high byte, default 0x03
+
+        // Offset calibration (address: 0x05 - 0x07)
+        uint8_t ofc0; // low byte,  default 0x00
+        uint8_t ofc1; // mid byte,  default 0x00
+        uint8_t ofc2; // high byte, default 0x00
+
+        // Full scale calibration (address: 0x08 - 0x0a)
+        uint8_t fsc0; // low byte,  default 0x00
+        uint8_t fsc1; // mid byte,  default 0x00
+        uint8_t fsc2; // high byte, default 0x00
+
+        // }}}
       } registers;
 
       registers reg;
@@ -139,7 +190,6 @@ namespace Buoy {
         GANCAL    = 0x61  // Gain calibration
         // }}}
       } COMMAND;
-
 
       bool batchready;
       volatile sample value;
