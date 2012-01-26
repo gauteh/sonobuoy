@@ -141,8 +141,10 @@ namespace Buoy {
     delay (100);
 
     read_registers ();
+    configure_registers ();
+    read_registers ();
+    delay (400); // needs to be somewhere between >200 and <=400
 
-    digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
     SerialUSB.println ("[AD] Configuration done.");
     // }}}
   }
@@ -362,6 +364,18 @@ namespace Buoy {
     // }}}
   }
 
+  void ADS1282::configure_registers () {
+    SerialUSB.print ("[AD] Configuring registers..");
+
+    // Config 0, changes from default:
+    // - Sample rate: 250
+# define AD_CONFIG0 0b01000010
+    send_command (WREG, 1, 0);
+    shift_out (AD_CONFIG0);
+
+    SerialUSB.println ("[AD] Done.");
+  }
+
   void ADS1282::drdy () {
     digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
   }
@@ -371,22 +385,20 @@ namespace Buoy {
     digitalWrite (BOARD_LED_PIN, LOW);
   }
 
+  // Acquire {{{
   void ADS1282::acquire () {
-    // Acquire {{{
     /* In continuous mode: Must complete read operation before four
      *                     DRDY (ADS1282) periods. */
-    //SerialUSB.print ("[AD] Acquiring..: ");
 
-    value = 0;
     uint8_t v[4];
     shift_in_n (v, 4);
 
-    value = v[3];
+    // Ensures correct conversion: appears to be litte endian..
+    value  = v[3];
     value += v[2] << 8;
     value += v[1] << 16;
     value += v[0] << 24;
 
-    // }}}
   }
 
   void ADS1282::acquire_on_command () {
@@ -398,8 +410,8 @@ namespace Buoy {
 
     SerialUSB.print   ("[AD] Value: ");
     SerialUSB.println (value, HEX);
-
   }
+  // }}}
 
   /* SPI clocking operations: in and out {{{ */
   uint8_t ADS1282::shift_in () {

@@ -205,6 +205,7 @@ namespace Buoy {
 
       void send_command (COMMAND cmd, uint8_t start = 0, uint8_t n = 0);
       void read_registers ();
+      void configure_registers ();
 
       void loop ();
       void acquire ();
