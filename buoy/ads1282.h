@@ -193,10 +193,17 @@ namespace Buoy {
       } COMMAND;
 
       bool disabled;
-      bool batchready;
-      volatile sample value;
-
       int run;
+
+      bool batchready;
+# define FREQUENCEY    250
+# define QUEUE_LENGTH 1000 // Should be multiple of sample rate
+      volatile sample   value;
+      volatile uint32_t values[QUEUE_LENGTH];
+      volatile uint32_t times[QUEUE_LENGTH];
+      volatile uint32_t position;
+
+      volatile uint32_t totalsamples;
 
       ADS1282 ();
       void setup ();

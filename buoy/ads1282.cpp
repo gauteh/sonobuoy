@@ -19,8 +19,6 @@ namespace Buoy {
   ADS1282::ADS1282 () {
     // Init class {{{
     disabled    = false;
-    batchready  = false;
-    value       = 0;
     run = 0;
 
     state.ports0 = 0;
@@ -33,6 +31,13 @@ namespace Buoy {
     state.pdwn  = false;
 
     for (int i = 0; i < 11; i++) reg.raw[i] = 0;
+
+    batchready  = false;
+    value       = 0;
+    memset ((void*) values, 0, QUEUE_LENGTH * sizeof (uint32_t));
+    memset ((void*) times, 0, QUEUE_LENGTH * sizeof (uint32_t));
+    position    = 0;
+    totalsamples = 0;
 
     return;
     // }}}
@@ -57,7 +62,6 @@ namespace Buoy {
     pinMode (AD_SS, OUTPUT);
 
     digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
-    //attachInterrupt (AD_nDRDY, (&ADS1282::drdy), CHANGE);
 
     digitalWrite (AD_SS, LOW);
     digitalWrite (AD_SCLK, LOW);
@@ -66,23 +70,28 @@ namespace Buoy {
     /* Configure AD */
     configure ();
 
+    attachInterrupt (AD_nDRDY,&(ADS1282::drdy), FALLING);
+
     // }}}
   }
 
   void ADS1282::loop () {
     if (!disabled) {
-      /*
-      SerialUSB.print ("[AD] Current value: ");
-      SerialUSB.println (value, HEX);
-      */
       run++;
-      acquire_on_command ();
 
       /*
-      SerialUSB.print ("[AD] Run: ");
-      SerialUSB.println (run);
+      SerialUSB.print ("[AD] Loop: ");
+      SerialUSB.print (run);
       */
 
+      SerialUSB.print ("[AD] Queue pos: ");
+      SerialUSB.print (position);
+
+      SerialUSB.print (", samples: ");
+      SerialUSB.print (totalsamples);
+
+      SerialUSB.print (", value: 0x");
+      SerialUSB.println (value, HEX);
     }
   }
 
@@ -143,6 +152,8 @@ namespace Buoy {
     configure_registers ();
     read_registers ();
     delay (400); // needs to be somewhere between >200 and <=400
+
+    send_command (RDATAC);
 
     SerialUSB.println ("[AD] Configuration done.");
     // }}}
@@ -405,19 +416,32 @@ namespace Buoy {
 
   void ADS1282::configure_registers () {
     /* Configure ADS1282 registers {{{ */
-    SerialUSB.print ("[AD] Configuring registers..");
+    SerialUSB.println ("[AD] Configuring registers..");
 
     // Config 0, changes from default:
     // - Sample rate: 250
 # define AD_CONFIG0 0b01000010
     send_command (WREG, 1, 0);
     shift_out (AD_CONFIG0);
-
-    SerialUSB.println ("[AD] Done."); // }}}
   }
 
   void ADS1282::drdy () {
-    digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
+    /* Read data on DOUT, interrupt should only be enabled in RDATAC mode {{{ */
+    bu->ad.acquire ();
+
+    bu->ad.values[bu->ad.position] = bu->ad.value;
+    bu->ad.times[bu->ad.position]  = micros();
+
+    bu->ad.position++;
+    bu->ad.totalsamples++;
+
+    if (bu->ad.position == (QUEUE_LENGTH / 2)) {
+      bu->ad.batchready = true;
+    } else if (bu->ad.position == QUEUE_LENGTH) {
+      bu->ad.batchready = true;
+      bu->ad.position = 0;
+    }
+    // }}}
   }
 
   // Acquire {{{
