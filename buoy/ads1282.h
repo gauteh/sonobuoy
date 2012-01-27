@@ -46,7 +46,8 @@ namespace Buoy {
 # define AD_I2C_RESET   0b00000010
 
 /* Outputs configured HIGH */
-# define AD_I2C_OUTPUT0 AD_I2C_SYNC | AD_I2C_PDWN | AD_I2C_M1 | AD_I2C_EXTCLK
+# define AD_I2C_OUTPUT0 AD_I2C_SYNC | AD_I2C_PDWN | AD_I2C_M1 | AD_I2C_EXTCLK |\
+                        AD_I2C_SUPSOR
 # define AD_I2C_OUTPUT1 AD_I2C_RESET
 
 /* Control register of PCA9535RGE:
@@ -67,7 +68,7 @@ namespace Buoy {
 # define AD_SCLK 53
 # define AD_DOUT 55
 # define AD_DIN  54
-# define AD_SS   BOARD_SPI1_NSS_PIN   // 52
+# define AD_SS   BOARD_SPI1_NSS_PIN   // 52, unused
 
 # define AD_nDRDY 40
 
