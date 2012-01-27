@@ -197,7 +197,7 @@ namespace Buoy {
 
       bool batchready;
 # define FREQUENCEY    250
-# define QUEUE_LENGTH 1000 // Should be multiple of sample rate
+# define QUEUE_LENGTH 4000 // Should be multiple of sample rate
       volatile sample   value;
       volatile uint32_t values[QUEUE_LENGTH];
       volatile uint32_t times[QUEUE_LENGTH];
