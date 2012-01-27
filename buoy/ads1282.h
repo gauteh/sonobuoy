@@ -8,6 +8,9 @@
 # pragma once
 
 # include <stdint.h>
+# include <string>
+
+using namespace std;
 
 namespace Buoy {
 

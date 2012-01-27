@@ -270,8 +270,48 @@ namespace Buoy {
 
   void ADS1282::send_command (COMMAND cmd, uint8_t start, uint8_t n) {
     /* Send SPI command to ADS1282 {{{ */
-    SerialUSB.print   ("[AD] Sending command: 0b");
+    SerialUSB.print   ("[AD] [SPI] Sending command: ");
+
+    // String representation of command {{{
+    switch (cmd) {
+      case WAKEUP:
+        SerialUSB.print   ("WAKEUP");
+        break;
+      case STANDBY:
+        SerialUSB.print   ("STANDBY");
+        break;
+      case SYNC:
+        SerialUSB.print   ("SYNC");
+        break;
+      case RDATAC:
+        SerialUSB.print   ("RDATAC");
+        break;
+      case SDATAC:
+        SerialUSB.print   ("SDATAC");
+        break;
+      case RDATA:
+        SerialUSB.print   ("RDATA");
+        break;
+      case OFSCAL:
+        SerialUSB.print   ("OFSCAL");
+        break;
+      case GANCAL:
+        SerialUSB.print   ("GANCAL");
+        break;
+      case RESET:
+        SerialUSB.print   ("RESET");
+        break;
+      case RREG:
+        SerialUSB.print   ("RREG");
+        break;
+      case WREG:
+        SerialUSB.print   ("WREG");
+        break;
+    }; // }}}
+
+    SerialUSB.print   ("] 0b");
     SerialUSB.println ((uint8_t) (cmd + start), BIN);
+
     switch (cmd) {
       case WAKEUP:
       case STANDBY:
@@ -287,7 +327,7 @@ namespace Buoy {
 
       case RREG:
       case WREG:
-        SerialUSB.print   ("[AD] Sending command: 0b");
+        SerialUSB.print   ("[AD] [SPI] Sending: 0b");
         SerialUSB.println ((uint8_t) (n), BIN);
         shift_out ((uint8_t) (cmd + start));
         shift_out (n);
