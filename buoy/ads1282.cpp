@@ -132,11 +132,10 @@ namespace Buoy {
     reset ();
     delay (100);
 
-    SerialUSB.println ("[AD] Send: RESET..");
+    SerialUSB.println ("[AD] Reset by command and stop read data continuous..");
     send_command (RESET);
     delay (100);
 
-    SerialUSB.println ("[AD] Send: SDATAC..");
     send_command (SDATAC);
     delay (100);
 
@@ -219,9 +218,9 @@ namespace Buoy {
   }
 
   void ADS1282::reset_spi () {
-    /* Reset SPI interface: Hold SCLK low for 64 nDRDY cycles */
+    /* Reset SPI interface: Hold SCLK low for 64 nDRDY cycles  {{{*/
     digitalWrite (AD_SCLK, LOW);
-    delay (1000); // TODO: Long enough.. ?
+    delay (400); // >64 nDRDY cycles }}}
   }
 
   void ADS1282::reset () {
@@ -270,7 +269,7 @@ namespace Buoy {
 
   void ADS1282::send_command (COMMAND cmd, uint8_t start, uint8_t n) {
     /* Send SPI command to ADS1282 {{{ */
-    SerialUSB.print   ("[AD] [SPI] Sending command: ");
+    SerialUSB.print   ("[AD] [SPI] Sending command: [");
 
     // String representation of command {{{
     switch (cmd) {
@@ -405,6 +404,7 @@ namespace Buoy {
   }
 
   void ADS1282::configure_registers () {
+    /* Configure ADS1282 registers {{{ */
     SerialUSB.print ("[AD] Configuring registers..");
 
     // Config 0, changes from default:
@@ -413,16 +413,11 @@ namespace Buoy {
     send_command (WREG, 1, 0);
     shift_out (AD_CONFIG0);
 
-    SerialUSB.println ("[AD] Done.");
+    SerialUSB.println ("[AD] Done."); // }}}
   }
 
   void ADS1282::drdy () {
     digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
-  }
-
-  void ADS1282::drdy_off () {
-    SerialUSB.println ("[AD] DRDY OFF");
-    digitalWrite (BOARD_LED_PIN, LOW);
   }
 
   // Acquire {{{
@@ -509,13 +504,14 @@ namespace Buoy {
   // }}}
 
   void ADS1282::error () {
-    /* Some error on the ADS1282 - disable */
+    /* Some error on the ADS1282 - disable {{{ */
 # if DIRECT_SERIAL
     SerialUSB.println ("[AD] Error. Disabling.");
 # endif
 
     disabled = true;
     detachInterrupt (AD_nDRDY);
+    // }}}
   }
 }
 

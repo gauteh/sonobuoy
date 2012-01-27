@@ -71,13 +71,11 @@ namespace Buoy {
 
 # define AD_nDRDY 40
 
+  /* Samples are 24 bits, but 4 bytes are clocked out */
   typedef uint32_t sample;
 
   class ADS1282 {
     public:
-      bool disabled;
-      static HardwareSPI spi;
-
       typedef struct _control {
       /* Control registers on EVM {{{ */
         /* Control registers of U7 / PCA9535RGE */
@@ -194,6 +192,7 @@ namespace Buoy {
         // }}}
       } COMMAND;
 
+      bool disabled;
       bool batchready;
       volatile sample value;
 
@@ -214,7 +213,6 @@ namespace Buoy {
       void acquire ();
       void acquire_on_command ();
       static void drdy ();
-      static void drdy_off ();
 
       void    shift_out (uint8_t v);
       uint8_t shift_in  ();
