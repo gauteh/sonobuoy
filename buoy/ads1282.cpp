@@ -76,6 +76,7 @@ namespace Buoy {
   }
 
   void ADS1282::loop () {
+    /* Run as part of main loop {{{ */
     if (!disabled) {
       run++;
 
@@ -92,7 +93,7 @@ namespace Buoy {
 
       SerialUSB.print (", value: 0x");
       SerialUSB.println (value, HEX);
-    }
+    } // }}}
   }
 
   void ADS1282::configure () {
@@ -422,9 +423,10 @@ namespace Buoy {
     // - Sample rate: 250
 # define AD_CONFIG0 0b01000010
     send_command (WREG, 1, 0);
-    shift_out (AD_CONFIG0);
+    shift_out (AD_CONFIG0); // }}}
   }
 
+  /* Static function, requried for attaching to interrupt */
   void ADS1282::drdy () {
     /* Read data on DOUT, interrupt should only be enabled in RDATAC mode {{{ */
     bu->ad.acquire ();
