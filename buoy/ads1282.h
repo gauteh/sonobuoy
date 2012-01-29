@@ -78,8 +78,7 @@ namespace Buoy {
   class ADS1282 {
     public:
       typedef struct _control {
-      /* Control registers on EVM {{{ */
-        /* Control registers of U7 / PCA9535RGE */
+        /* Control registers of U7 / PCA9535RGE {{{ */
 
         /* Configured ports
          * LOW  is output
@@ -198,10 +197,10 @@ namespace Buoy {
 
       bool batchready;
 # define FREQUENCEY     250
-# define QUEUE_LENGTH 10000 // Should be multiple of sample rate
+# define QUEUE_LENGTH 10000
       volatile sample   value;
       volatile uint32_t values[QUEUE_LENGTH];
-      volatile uint32_t times[QUEUE_LENGTH];
+      volatile uint32_t times [QUEUE_LENGTH];
       volatile uint32_t position;
 
       volatile uint32_t totalsamples;

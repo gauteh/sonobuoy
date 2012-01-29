@@ -509,6 +509,7 @@ namespace Buoy {
         v[j] |= (((uint8_t)digitalRead (AD_DOUT)) << (i-1));
       }
 
+      // TODO: delay doesn't work inside interrupts; verify returned data
       if (j < n) delayMicroseconds (11); // delay, min: 24 / fclk
     }
   }
