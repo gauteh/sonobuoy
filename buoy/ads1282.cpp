@@ -485,7 +485,7 @@ namespace Buoy {
       digitalWrite (AD_SCLK, HIGH);
       digitalWrite (AD_SCLK, LOW);
 
-      v |= digitalRead (AD_DOUT) << i;
+      v |= (((uint8_t)digitalRead (AD_DOUT)) << (i-1));
     }
 
     return v;
@@ -509,11 +509,11 @@ namespace Buoy {
         v[j] |= (((uint8_t)digitalRead (AD_DOUT)) << (i-1));
       }
 
-      delayMicroseconds (11); // delay, min: 24 / fclk
+      if (j < n) delayMicroseconds (11); // delay, min: 24 / fclk
     }
   }
 
-  void ADS1282::shift_out (uint8_t v) {
+  void ADS1282::shift_out (uint8_t v, bool delay) {
     digitalWrite (AD_DIN, LOW);
     digitalWrite (AD_SCLK, LOW); // hopefully already there..
 
@@ -524,7 +524,8 @@ namespace Buoy {
       digitalWrite (AD_SCLK, LOW);
     }
 
-    delayMicroseconds (11); // delay, min: 24 / fclk
+    if (delay) delayMicroseconds (11); // delay, min: 24 / fclk, required if
+                                       // reading or sending more commands.
   }
 
   // }}}

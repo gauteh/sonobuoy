@@ -197,7 +197,7 @@ namespace Buoy {
       int run;
 
       bool batchready;
-# define FREQUENCEY    250
+# define FREQUENCEY     250
 # define QUEUE_LENGTH 10000 // Should be multiple of sample rate
       volatile sample   value;
       volatile uint32_t values[QUEUE_LENGTH];
@@ -222,7 +222,7 @@ namespace Buoy {
       void acquire_on_command ();
       static void drdy ();
 
-      void    shift_out (uint8_t v);
+      void    shift_out (uint8_t v, bool delay = true);
       uint8_t shift_in  ();
       void    shift_in_n (uint8_t *, int);
 
