@@ -152,7 +152,12 @@ namespace Buoy {
         // Full scale calibration (address: 0x08 - 0x0a)
         uint8_t fsc0; // low byte,  default 0x00
         uint8_t fsc1; // mid byte,  default 0x00
-        uint8_t fsc2; // high byte, default 0x00
+        uint8_t fsc2; // high byte, default 0x40
+
+        /* Final output data is defined as:
+         *
+         * (Input - OFC[2:0]) x FSC[2:0] / 0x400000
+         */
 
         // }}}
       } registers;

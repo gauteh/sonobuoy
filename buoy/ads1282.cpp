@@ -70,7 +70,7 @@ namespace Buoy {
     /* Configure AD */
     configure ();
 
-    attachInterrupt (AD_nDRDY,&(ADS1282::drdy), FALLING);
+    //attachInterrupt (AD_nDRDY,&(ADS1282::drdy), FALLING);
 
     // }}}
   }
@@ -84,7 +84,9 @@ namespace Buoy {
       SerialUSB.print ("[AD] Loop: ");
       SerialUSB.print (run);
       */
+      acquire_on_command ();
 
+      /*
       SerialUSB.print ("[AD] Queue pos: ");
       SerialUSB.print (position);
 
@@ -93,6 +95,7 @@ namespace Buoy {
 
       SerialUSB.print (", value: 0x");
       SerialUSB.println (value, HEX);
+      */
     } // }}}
   }
 
@@ -122,7 +125,7 @@ namespace Buoy {
      * - M0:     LOW
      * - M1:     HIGH
      * - MCLK:   LOW
-     * - SUPSOR: LOW
+     * - SUPSOR: LOW   (bipolar mode)
      * - EXTCLK: HIGH  (also hardwired high: _must_ be set HIGH)
      *
      * All other U7 outputs are meanwhile configured as inputs:
@@ -151,10 +154,11 @@ namespace Buoy {
 
     read_registers ();
     configure_registers ();
+    delay (500);
     read_registers ();
     delay (400); // needs to be somewhere between >200 and <=400
+    send_command (SYNC);
 
-    send_command (RDATAC);
 
     SerialUSB.println ("[AD] Configuration done.");
     // }}}
@@ -231,8 +235,12 @@ namespace Buoy {
 
   void ADS1282::reset_spi () {
     /* Reset SPI interface: Hold SCLK low for 64 nDRDY cycles  {{{*/
+    SerialUSB.println ("[AD] [SPI] Resetting SPI..");
     digitalWrite (AD_SCLK, LOW);
-    delay (400); // >64 nDRDY cycles }}}
+    delay (1000);
+
+
+    // }}}
   }
 
   void ADS1282::reset () {
@@ -355,6 +363,11 @@ namespace Buoy {
     shift_in_n (reg.raw, 11);
 
     for (int i = 0; i < 11; i++) {
+
+      /* TODO: Register values seem to arrive a bit earlier than sample values,
+       * probably loosing MSB here though at the moment.. */
+      reg.raw[i] >>= 1;
+
       SerialUSB.print   ("[AD] Register [");
       SerialUSB.print   (i);
       SerialUSB.print   ("] 0b");
@@ -423,7 +436,9 @@ namespace Buoy {
     // - Sample rate: 250
 # define AD_CONFIG0 0b01000010
     send_command (WREG, 1, 0);
-    shift_out (AD_CONFIG0); // }}}
+    shift_out (AD_CONFIG0);
+
+    // }}}
   }
 
   /* Static function, requried for attaching to interrupt */
@@ -454,19 +469,22 @@ namespace Buoy {
     uint8_t v[4];
     shift_in_n (v, 4);
 
-    // Ensures correct conversion: appears to be litte endian..
-    value  = v[3];
-    value += v[2] << 8;
-    value += v[1] << 16;
-    value += v[0] << 24;
+    // data is formatted in twos complement
+    value  = 0;
+    value |= v[0] << 24;
+    value |= v[1] << 16;
+    value |= v[2] << 8;
+    value |= v[3];
 
+    value >>= 1; // LSB is redundant sign bit
   }
 
   void ADS1282::acquire_on_command () {
-    SerialUSB.println ("[AD] Read data on command..");
-
     send_command (RDATA);
-    while (digitalRead (AD_nDRDY)); // Wait for falling DRDY
+    uint32_t start = millis ();
+    while (digitalRead (AD_nDRDY)) {
+      if ((millis () - start)  > 5000) return; // Time out
+    }; // Wait for falling DRDY
     acquire ();                     // Shift bits in (should wait min 100 ns)
 
     SerialUSB.print   ("[AD] Value: ");
@@ -496,17 +514,20 @@ namespace Buoy {
     digitalWrite (AD_DIN, LOW);
     digitalWrite (AD_SCLK, LOW);
 
+    /* TODO: Shifts bytes a bit too much.. seems to be correct for data values,
+     * but incorrect for register values. */
+
     /* Read each byte */
     for (int j = 0; j < n; j++) {
 
       v[j] = 0;
 
       /* Read each bit, MSB first */
-      for (int i = 7; i >= 0; i--) {
+      for (int i = 0; i < 8; ++i) {
         digitalWrite (AD_SCLK, HIGH);
         digitalWrite (AD_SCLK, LOW);
 
-        v[j] |= (((uint8_t)digitalRead (AD_DOUT)) << (i-1));
+        v[j] |= (((uint8_t)digitalRead (AD_DOUT)) << (7 - i));
       }
 
       // TODO: delay doesn't work inside interrupts; verify returned data
