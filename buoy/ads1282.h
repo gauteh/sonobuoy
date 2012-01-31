@@ -117,7 +117,8 @@ namespace Buoy {
                           //        - 2000
                           //        - 4000
         bool    firphase; // linear phase (default) | minimum phase
-        uint8_t filterselect; // 0 - 3: - On-chip filter bypassed
+        uint8_t filterselect; // 0 - 3: - On-chip filter bypassed (output on
+                              //          modulator only)
                               //        - Sinc filter block only
                               //        - Sinc + LPF filter blocks (default)
                               //        - Sinc + LPF + HPF filter blocks

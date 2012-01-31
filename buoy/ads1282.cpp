@@ -153,10 +153,12 @@ namespace Buoy {
     delay (100);
 
     read_registers ();
-    configure_registers ();
-    delay (500);
+    configure_registers (); // resets ADC, 63 data cycles are lost..
+    delay (100);
     read_registers ();
-    delay (400); // needs to be somewhere between >200 and <=400
+
+    delay (400);
+
     send_command (SYNC);
 
 
@@ -371,7 +373,7 @@ namespace Buoy {
 
       /* TODO: Register values seem to arrive a bit earlier than sample values,
        * probably loosing MSB here though at the moment.. */
-      reg.raw[i] >>= 1;
+      //reg.raw[i] >>= 1;
 
       SerialUSB.print   ("[AD] Register [");
       SerialUSB.print   (i);
@@ -439,8 +441,11 @@ namespace Buoy {
 
     // Config 0, changes from default:
     // - Sample rate: 250
+    // - Sinc filter only
 # define AD_CONFIG0 0b01000010
     send_command (WREG, 1, 0);
+    SerialUSB.print   ("[AD] [SPI] Sending: 0b");
+    SerialUSB.println (AD_CONFIG0, BIN);
     shift_out (AD_CONFIG0);
 
     // }}}
@@ -481,16 +486,18 @@ namespace Buoy {
     value |= v[2] << 8;
     value |= v[3];
 
-    value >>= 1; // LSB is redundant sign bit
+    //value >>= 1; // LSB is redundant sign bit
   }
 
   void ADS1282::acquire_on_command () {
     send_command (RDATA);
+
+    /* Wait for falling nDRDY, time out after 5 secs */
     uint32_t start = millis ();
-    while (digitalRead (AD_nDRDY)) {
-      if ((millis () - start)  > 5000) return; // Time out
-    }; // Wait for falling DRDY
-    acquire ();                     // Shift bits in (should wait min 100 ns)
+    while (digitalRead (AD_nDRDY)) if ((millis () - start)  > 5000) return;
+
+    // Shift bits in (should wait min 100 ns)
+    acquire ();
 
     SerialUSB.print   ("[AD] Value: ");
     SerialUSB.println (value, HEX);
@@ -499,9 +506,6 @@ namespace Buoy {
 
   /* SPI clocking operations: in and out {{{ */
   uint8_t ADS1282::shift_in () {
-    digitalWrite (AD_DIN, LOW);
-    digitalWrite (AD_SCLK, LOW);
-
     /* Read each bit, MSB first */
     uint8_t v = 0;
     for (int i = 7; i >= 0; i--) {
@@ -516,8 +520,6 @@ namespace Buoy {
 
   void ADS1282::shift_in_n (uint8_t *v, int n) {
     /* Shift in n bytes to byte array v */
-    digitalWrite (AD_DIN, LOW);
-    digitalWrite (AD_SCLK, LOW);
 
     /* TODO: Shifts bytes a bit too much.. seems to be correct for data values,
      * but incorrect for register values. */
@@ -530,9 +532,9 @@ namespace Buoy {
       /* Read each bit, MSB first */
       for (int i = 0; i < 8; ++i) {
         digitalWrite (AD_SCLK, HIGH);
-        digitalWrite (AD_SCLK, LOW);
 
         v[j] |= (((uint8_t)digitalRead (AD_DOUT)) << (7 - i));
+        digitalWrite (AD_SCLK, LOW);
       }
 
       // TODO: delay doesn't work inside interrupts; verify returned data
@@ -541,9 +543,6 @@ namespace Buoy {
   }
 
   void ADS1282::shift_out (uint8_t v, bool delay) {
-    digitalWrite (AD_DIN, LOW);
-    digitalWrite (AD_SCLK, LOW); // hopefully already there..
-
     /* Write each bit, MSB first */
     for (int i = 7; i >= 0; i--) {
       digitalWrite (AD_DIN, !!(v & (1 << i)));
@@ -551,6 +550,7 @@ namespace Buoy {
       digitalWrite (AD_SCLK, LOW);
     }
 
+    digitalWrite (AD_DIN, LOW);
     if (delay) delayMicroseconds (11); // delay, min: 24 / fclk, required if
                                        // reading or sending more commands.
   }
