@@ -70,7 +70,7 @@ namespace Buoy {
     /* Configure AD */
     configure ();
 
-    //attachInterrupt (AD_nDRDY,&(ADS1282::drdy), FALLING);
+    attachInterrupt (AD_nDRDY,&(ADS1282::drdy), FALLING);
 
     // }}}
   }
@@ -79,14 +79,14 @@ namespace Buoy {
     /* Run as part of main loop {{{ */
     if (!disabled) {
       run++;
+      //acquire_on_command ();
 
       /*
       SerialUSB.print ("[AD] Loop: ");
       SerialUSB.print (run);
       */
-      acquire_on_command ();
 
-      /*
+
       SerialUSB.print ("[AD] Queue pos: ");
       SerialUSB.print (position);
 
@@ -95,7 +95,6 @@ namespace Buoy {
 
       SerialUSB.print (", value: 0x");
       SerialUSB.println (value, HEX);
-      */
     } // }}}
   }
 
@@ -160,6 +159,7 @@ namespace Buoy {
     delay (400);
 
     send_command (SYNC);
+    send_command (RDATAC);
 
 
     SerialUSB.println ("[AD] Configuration done.");
@@ -451,27 +451,12 @@ namespace Buoy {
     // }}}
   }
 
-  /* Static function, requried for attaching to interrupt */
+  // Acquire {{{
   void ADS1282::drdy () {
-    /* Read data on DOUT, interrupt should only be enabled in RDATAC mode {{{ */
+    /* Static wrapper function for interrupt */
     bu->ad.acquire ();
-
-    bu->ad.values[bu->ad.position] = bu->ad.value;
-    bu->ad.times[bu->ad.position]  = micros();
-
-    bu->ad.position++;
-    bu->ad.totalsamples++;
-
-    if (bu->ad.position == (QUEUE_LENGTH / 2)) {
-      bu->ad.batchready = true;
-    } else if (bu->ad.position == QUEUE_LENGTH) {
-      bu->ad.batchready = true;
-      bu->ad.position = 0;
-    }
-    // }}}
   }
 
-  // Acquire {{{
   void ADS1282::acquire () {
     /* In continuous mode: Must complete read operation before four
      *                     DRDY (ADS1282) periods. */
@@ -479,14 +464,35 @@ namespace Buoy {
     uint8_t v[4];
     shift_in_n (v, 4);
 
-    // data is formatted in twos complement
+    /*
+     * Data is formatted in twos complement.
+     *
+     * In sinc filter mode output is scaled by 1/2.
+     */
+
     value  = 0;
     value |= v[0] << 24;
     value |= v[1] << 16;
     value |= v[2] << 8;
     value |= v[3];
 
-    //value >>= 1; // LSB is redundant sign bit
+    /* LSB of value is a redundant sign bit unless output is clipped to +/- FS
+     * then it is 1 for +FS and 0 for -FS.
+     */
+
+    /* Fill batch */
+    values[bu->ad.position] = value;
+    times [bu->ad.position] = micros(); // Does not change value within interrupt
+
+    position++;
+    totalsamples++;
+
+    if (position == (QUEUE_LENGTH / 2)) {
+      batchready = true;
+    } else if (position == QUEUE_LENGTH) {
+      batchready = true;
+      position = 0;
+    }
   }
 
   void ADS1282::acquire_on_command () {
