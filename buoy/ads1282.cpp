@@ -237,8 +237,13 @@ namespace Buoy {
     /* Reset SPI interface: Hold SCLK low for 64 nDRDY cycles  {{{*/
     SerialUSB.println ("[AD] [SPI] Resetting SPI..");
     digitalWrite (AD_SCLK, LOW);
-    delay (1000);
 
+    /* Make sure data is read continuously and nDRDY interrupt is detached */
+
+    for (int i = 0; i < 64; i++) {
+      while (digitalRead (AD_nDRDY)) delayMicroseconds (2);
+      while (!digitalRead (AD_nDRDY)) delayMicroseconds (2);
+    }
 
     // }}}
   }
