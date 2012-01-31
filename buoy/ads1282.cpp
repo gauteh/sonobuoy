@@ -441,12 +441,23 @@ namespace Buoy {
 
     // Config 0, changes from default:
     // - Sample rate: 250
-    // - Sinc filter only
 # define AD_CONFIG0 0b01000010
     send_command (WREG, 1, 0);
     SerialUSB.print   ("[AD] [SPI] Sending: 0b");
     SerialUSB.println (AD_CONFIG0, BIN);
     shift_out (AD_CONFIG0);
+
+    // High pass filter configuration
+    // HPF[1:0] = 0x0337 => fHP = 0.5 Hz @ 250 SPS
+# define AD_HPF1 0x03
+# define AD_HPF0 0x32
+    send_command (WREG, 3, 1);
+    SerialUSB.print   ("[AD] [SPI] Sending: 0b");
+    SerialUSB.println (AD_HPF0, BIN);
+    shift_out (AD_HPF0);
+    SerialUSB.print   ("[AD] [SPI] Sending: 0b");
+    SerialUSB.println (AD_HPF1, BIN);
+    shift_out (AD_HPF1);
 
     // }}}
   }
