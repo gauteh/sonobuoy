@@ -9,6 +9,7 @@
 
 # include <stdint.h>
 # include <string>
+# include "wirish.h"
 
 using namespace std;
 
@@ -72,11 +73,12 @@ namespace Buoy {
 
 # define AD_nDRDY 40
 
-  /* Samples are 24 bits, but 4 bytes are clocked out */
-  typedef uint32_t sample;
-
   class ADS1282 {
+    private:
     public:
+      void * rf;
+      void * gps;
+
       typedef struct _control {
         /* Control registers of U7 / PCA9535RGE {{{ */
 
@@ -204,10 +206,12 @@ namespace Buoy {
       bool batchready;
 # define FREQUENCEY     250
 # define QUEUE_LENGTH 10000
-      volatile sample   value;
+      /* Samples are 24 bits, but 4 bytes are clocked out */
+      volatile uint32_t value;
       volatile uint32_t values[QUEUE_LENGTH];
       volatile uint32_t times [QUEUE_LENGTH];
       volatile uint32_t position;
+      volatile uint32_t batchfilltime;
 
       volatile uint32_t totalsamples;
 
@@ -235,6 +239,8 @@ namespace Buoy {
 
   };
 }
+
+# define Ad (((ADS1282*)ad))
 
 /* vim: set filetype=arduino :  */
 

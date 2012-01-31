@@ -32,12 +32,13 @@ namespace Buoy {
 
     for (int i = 0; i < 11; i++) reg.raw[i] = 0;
 
-    batchready  = false;
+    batchready  = 0;
     value       = 0;
     memset ((void*) values, 0, QUEUE_LENGTH * sizeof (uint32_t));
     memset ((void*) times, 0, QUEUE_LENGTH * sizeof (uint32_t));
     position    = 0;
     totalsamples = 0;
+    batchfilltime = millis();
 
     return;
     // }}}
@@ -499,10 +500,12 @@ namespace Buoy {
     totalsamples++;
 
     if (position == (QUEUE_LENGTH / 2)) {
-      batchready = true;
+      batchready = 1;
+      batchfilltime = millis () - batchfilltime;
     } else if (position == QUEUE_LENGTH) {
-      batchready = true;
+      batchready = 2;
       position = 0;
+      batchfilltime = millis () - batchfilltime;
     }
   }
 

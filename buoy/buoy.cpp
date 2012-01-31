@@ -7,7 +7,6 @@
 
 # include "wirish.h"
 # include "buoy.h"
-# include "ads1282.h"
 
 namespace Buoy {
   BuoyMaster::BuoyMaster () {
@@ -21,6 +20,8 @@ namespace Buoy {
 
     while (true) {
       ad.loop ();
+      rf.loop ();
+      gps.loop ();
 
       delay (1000);
 
@@ -34,7 +35,17 @@ namespace Buoy {
 
     /* Set up devices */
     ad.setup ();
+    gps.setup ();
+    rf.setup ();
 
+    rf.ad = &ad;
+    rf.gps = &gps;
+
+    gps.ad = &ad;
+    gps.rf = &rf;
+
+    ad.rf = &rf;
+    ad.gps = &gps;
   }
 }
 

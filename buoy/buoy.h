@@ -9,6 +9,8 @@
 
 # include "wirish.h"
 
+# include "gps.h"
+# include "rf.h"
 # include "ads1282.h"
 
 /* Version and settings */
@@ -20,7 +22,9 @@ namespace Buoy {
   class BuoyMaster {
     public:
 
+      GPS gps;
       ADS1282 ad;
+      RF rf;
 
 
       BuoyMaster ();
