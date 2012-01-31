@@ -11,6 +11,7 @@
 
 namespace Buoy {
 # define RF_BAUDRATE 115200
+//# define RF_BAUDRATE 9600
 # define RF_Serial Serial3
 
 # define RF_BUFLEN 150

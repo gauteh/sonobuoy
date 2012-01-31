@@ -22,16 +22,17 @@ namespace Buoy {
 
   void RF::setup () {
     RF_Serial.begin (RF_BAUDRATE);
+    send_debug ("[RF] RF subsystem setup.");
 
   }
 
   void RF::loop () {
-
+    send_status ();
   }
 
   void RF::send_status () {
     ad_message (AD_STATUS);
-    gps_message (GPS_STATUS);
+    //gps_message (GPS_STATUS);
   }
 
   void RF::send_debug (const char * msg)

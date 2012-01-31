@@ -15,7 +15,7 @@ namespace Buoy {
 # define TELEGRAM_LEN 80
 
 # define GPS_BAUDRATE 4800
-# define GPS_Serial Serial4
+# define GPS_Serial Serial1
 
 # define GPS_SYNC_PIN 23
 

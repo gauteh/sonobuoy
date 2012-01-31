@@ -130,6 +130,7 @@ namespace Buoy {
 
 
   void GPS::loop () {
+    SerialUSB.println ("[GPS] loop");
     /* Check if we are closing second overflow, fix by
      * setting new reference using internal clock.
      *

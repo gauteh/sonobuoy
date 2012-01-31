@@ -21,7 +21,7 @@ namespace Buoy {
     while (true) {
       ad.loop ();
       rf.loop ();
-      gps.loop ();
+      //gps.loop ();
 
       delay (1000);
 
