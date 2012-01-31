@@ -38,9 +38,11 @@ namespace Buoy {
 
     memset (&gps_data, 0, sizeof(gps_data));
 
-    /*
+    GPS_Serial.begin (GPS_BAUDRATE);
+
     pinMode (GPS_SYNC_PIN, INPUT);
-    attachInterrupt (GPS_SYNC_INTERRUPT, gps_sync_pulse, RISING);
+    /*
+    attachInterrupt (GPS_SYNC_PIN, gps_sync_pulse, RISING);
     */
   }
 

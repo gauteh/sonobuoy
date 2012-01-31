@@ -21,6 +21,7 @@ namespace Buoy {
   }
 
   void RF::setup () {
+    RF_Serial.begin (RF_BAUDRATE);
 
   }
 

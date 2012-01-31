@@ -15,10 +15,9 @@ namespace Buoy {
 # define TELEGRAM_LEN 80
 
 # define GPS_BAUDRATE 4800
-# define GPS_Serial Serial1
+# define GPS_Serial Serial4
 
-# define GPS_SYNC_PIN 3
-# define GPS_SYNC_INTERRUPT 1
+# define GPS_SYNC_PIN 23
 
     private:
       char gps_buf [TELEGRAM_LEN + 2];
@@ -84,7 +83,7 @@ namespace Buoy {
       void roll_reference ();
       void update_second ();
 
-      
+
 
       /* Timing */
 # define LEAP_SECONDS 19 // as of 2011
