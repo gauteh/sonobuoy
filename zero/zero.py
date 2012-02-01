@@ -99,6 +99,7 @@ class Zero:
       self.logger.info ("Opening serial port " + str(self.port) + "..")
       try:
         self.ser = serial.Serial (self.port, self.baud)
+        self.logger.info ("Serial port open.")
       except:
         self.logger.info ("Failed to open serial port.. retrying in 5 seconds.")
         self.ser = None
