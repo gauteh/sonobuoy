@@ -205,7 +205,7 @@ namespace Buoy {
 
 # define FREQUENCEY     250
 # define QUEUE_LENGTH 10000
-# define BATCHES         20 // _must_ be multiple of QUEUE_LENGTH
+# define BATCHES          5 // _must_ be multiple of QUEUE_LENGTH
 # define BATCH_LENGTH (QUEUE_LENGTH / BATCHES)
       /* Samples are 24 bits, but 4 bytes are clocked out */
       volatile uint32_t value;

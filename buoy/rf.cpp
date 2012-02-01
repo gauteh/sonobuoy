@@ -20,6 +20,7 @@ namespace Buoy {
     laststatus = 0;
     lastbatch = 0;
     continuous_transfer = false;
+    rf = this;
   }
 
   void RF::setup () {
@@ -123,22 +124,22 @@ namespace Buoy {
             /* Write '$' to signal start of binary data */
             RF_Serial.write ('$');
 
-            //uint32_t lasts;
-            uint32_t *s;
+            //uint32_t lasts = 0;
+            uint32_t s;
 
             for (uint32_t i = 0; i < length; i++)
             {
-              s = (uint32_t*) &(Ad->values[start + i]);
+              s = Ad->values[start + i];
               /* MSB first (big endian), means concatenating bytes on RX will
                * result in LSB first; little endian. */
-              RF_Serial.write (s, 4);
+              RF_Serial.write ((byte*)(&s), 4);
 
-              csum = csum ^ ((*s >> 24) &0xff);
-              csum = csum ^ ((*s >> 16) &0xff);
-              csum = csum ^ ((*s >>  8) &0xff);
-              csum = csum ^ ((*s      ) &0xff);
+              csum = csum ^ ((byte*)&s)[0];
+              csum = csum ^ ((byte*)&s)[1];
+              csum = csum ^ ((byte*)&s)[2];
+              csum = csum ^ ((byte*)&s)[3];
 
-              //lasts = *s;
+              //lasts = s;
 
               delayMicroseconds (100);
             }
@@ -163,6 +164,12 @@ namespace Buoy {
             APPEND_CSUM (buf);
             RF_Serial.println (buf);
             delayMicroseconds (100);
+
+            /*
+            SerialUSB.print ("[RF] Last sample: 0x");
+            SerialUSB.println (lasts, HEX);
+            rf_send_debug_f ("[RF] Last sample: 0x%lX", lasts);
+            */
 
             if (update_ref) {
               start = start + length;

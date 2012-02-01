@@ -70,10 +70,10 @@ class AD:
 
     i = 0
     while (i < self.ad_k_samples):
-      n  = ord(self.ad_samples[i * 4 + 3]) << 8 * 3
-      n  = ord(self.ad_samples[i * 4 + 2]) << 8 * 2
-      n += ord(self.ad_samples[i * 4 + 1]) << 8
-      n += ord(self.ad_samples[i * 4 + 0])
+      n  = long(ord(self.ad_samples[i * 4 + 3])) << 8 * 3
+      n += long(ord(self.ad_samples[i * 4 + 2])) << 8 * 2
+      n += long(ord(self.ad_samples[i * 4 + 1])) << 8
+      n += long(ord(self.ad_samples[i * 4 + 0]))
 
       csum = csum ^ ord(self.ad_samples[i * 4 + 3])
       csum = csum ^ ord(self.ad_samples[i * 4 + 2])
@@ -83,7 +83,7 @@ class AD:
       i += 1
       s.append(n)
 
-      #print "[AD] Sample[", i, "] : ", int(n,16)
+      #print "[AD] Sample[", i, "] : ", hex(n) 
 
     i = 0
     while (i < self.ad_k_samples):

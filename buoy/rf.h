@@ -40,6 +40,7 @@ namespace Buoy {
 
   class RF {
     private:
+      void *rf;
     public:
       void *ad;
       void *gps;

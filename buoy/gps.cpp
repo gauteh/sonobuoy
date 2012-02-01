@@ -130,6 +130,7 @@ namespace Buoy {
     /* Setting first time reference */
     if (referencesecond == 0) {
       roll_reference ();
+      update_reference = false;
       HAS_SYNC_REFERENCE = false;
     }
   }
