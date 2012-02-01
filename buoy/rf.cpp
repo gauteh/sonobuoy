@@ -17,22 +17,34 @@ using namespace std;
 
 namespace Buoy {
   RF::RF () {
-
+    laststatus = 0;
+    lastbatch = 0;
+    continuous_transfer = false;
   }
 
   void RF::setup () {
     RF_Serial.begin (RF_BAUDRATE);
-    send_debug ("[RF] RF subsystem setup.");
-
+    send_debug ("[RF] RF subsystem initiated.");
   }
 
   void RF::loop () {
-    send_status ();
+    /* Status should be send every second */
+    if (millis () - laststatus > 1000) send_status ();
+
+    /* Loop must run at least 2x speed (Nyquist) of batchfilltime */
+    if (continuous_transfer) {
+      if (Ad->batchready != lastbatch) {
+       ad_message (AD_DATA_BATCH);
+       lastbatch = Ad->batchready;
+      }
+    }
   }
 
   void RF::send_status () {
     ad_message (AD_STATUS);
-    //gps_message (GPS_STATUS);
+    gps_message (GPS_STATUS);
+
+    laststatus = millis ();
   }
 
   void RF::send_debug (const char * msg)
@@ -65,12 +77,9 @@ namespace Buoy {
         break;
 
       case AD_DATA_BATCH:
-        /* Send AD_DATA_BATCH_LEN samples */
-        # define AD_DATA_BATCH_LEN (QUEUE_LENGTH / 2)
+        /* Send BATCH_LENGTH samples */
 
-        /* TODO: In case reference is changing within batch, communicate it.. */
-
-        /* Format:
+        /* Format and protocol:
 
          * 1. Initiate binary data stream:
 
@@ -84,61 +93,87 @@ namespace Buoy {
 
          * 5. Send end of data with checksum
 
+         ** In case reference has been updated in batch, two separate batches
+         ** are sent.
+
          */
         {
-          int start = (Ad->batchready == 1 ? 0 : AD_DATA_BATCH_LEN);
+          uint32_t start =  ((Ad->batchready + BATCHES - 1) % BATCHES) * BATCH_LENGTH;
+          uint32_t length = BATCH_LENGTH;
+          uint32_t ref = Gps->referencesecond;
+          bool go = true;
+          bool update_ref = false;
 
-          sprintf (buf, "$AD,D,%d,%lu*", AD_DATA_BATCH_LEN, Gps->referencesecond);
-          APPEND_CSUM (buf);
-          RF_Serial.println (buf);
-
-          delayMicroseconds (100);
-
-          byte csum = 0;
-
-          /* Write '$' to signal start of binary data */
-          RF_Serial.write ('$');
-
-          //uint32_t lasts;
-          uint32_t *s;
-
-          for (int i = 0; i < AD_DATA_BATCH_LEN; i++)
+          if (Gps->update_reference && Gps->update_reference_position > start && Gps->update_reference_position < (start + BATCH_LENGTH))
           {
-            s = (uint32_t*) &(Ad->values[start + i]);
-            /* MSB first (big endian), means concatenating bytes on RX will
-             * result in LSB first; little endian. */
-            RF_Serial.write (s, 4);
+            length = Gps->update_reference_position - start;
+            ref = Gps->previous_reference;
+            update_ref = true;
+          }
 
-            csum = csum ^ ((*s >> 24) &0xff);
-            csum = csum ^ ((*s >> 16) &0xff);
-            csum = csum ^ ((*s >>  8) &0xff);
-            csum = csum ^ ((*s      ) &0xff);
-
-            //lasts = *s;
+          while (go) {
+            sprintf (buf, "$AD,D,%lu,%lu*", length, ref);
+            APPEND_CSUM (buf);
+            RF_Serial.println (buf);
 
             delayMicroseconds (100);
+
+            byte csum = 0;
+
+            /* Write '$' to signal start of binary data */
+            RF_Serial.write ('$');
+
+            //uint32_t lasts;
+            uint32_t *s;
+
+            for (uint32_t i = 0; i < length; i++)
+            {
+              s = (uint32_t*) &(Ad->values[start + i]);
+              /* MSB first (big endian), means concatenating bytes on RX will
+               * result in LSB first; little endian. */
+              RF_Serial.write (s, 4);
+
+              csum = csum ^ ((*s >> 24) &0xff);
+              csum = csum ^ ((*s >> 16) &0xff);
+              csum = csum ^ ((*s >>  8) &0xff);
+              csum = csum ^ ((*s      ) &0xff);
+
+              //lasts = *s;
+
+              delayMicroseconds (100);
+            }
+
+            /* Send time stamps */
+            uint32_t t = 0;
+            for (uint32_t i = 0; i < length; i++)
+            {
+              t = Ad->times[start + i];
+
+              /* Writes MSB first */
+              RF_Serial.write ((byte*)(&t), 4);
+
+              csum = csum ^ ((byte*)&t)[0];
+              csum = csum ^ ((byte*)&t)[1];
+              csum = csum ^ ((byte*)&t)[2];
+              csum = csum ^ ((byte*)&t)[3];
+            }
+
+            /* Send end of data with Checksum */
+            sprintf (buf, "$AD,DE," F_CSUM "*", csum);
+            APPEND_CSUM (buf);
+            RF_Serial.println (buf);
+            delayMicroseconds (100);
+
+            if (update_ref) {
+              start = start + length;
+              length = BATCH_LENGTH - length;
+              ref = Gps->referencesecond;
+              update_ref = false;
+              send_debug ("[RF] Sending last part of batch (updated reference).");
+            } else {
+              go = false;
+            }
           }
-
-          /* Send time stamps */
-          uint32_t t = 0;
-          for (int i = 0; i < AD_DATA_BATCH_LEN; i++)
-          {
-            t = Ad->times[start + i];
-
-            /* Writes MSB first */
-            RF_Serial.write ((byte*)(&t), 4);
-
-            csum = csum ^ ((byte*)&t)[0];
-            csum = csum ^ ((byte*)&t)[1];
-            csum = csum ^ ((byte*)&t)[2];
-            csum = csum ^ ((byte*)&t)[3];
-          }
-
-          /* Send end of data with Checksum */
-          sprintf (buf, "$AD,DE," F_CSUM "*", csum);
-          APPEND_CSUM (buf);
-          RF_Serial.println (buf);
-          delayMicroseconds (100);
         }
         break;
 

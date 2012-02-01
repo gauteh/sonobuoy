@@ -14,7 +14,7 @@ class ZeroCliService:
     return len(self.zero.buoys)
 
   def ad_queue_length (self):
-    return AD7710.AD_QUEUE_LENGTH
+    return AD.AD_QUEUE_LENGTH
 
   def stop (self):
     time.sleep (1)
@@ -42,7 +42,7 @@ class ZeroUIManager (BaseManager):
   AUTHKEY = u'sdfaf2faeoidfasdfiasdufoasdiyfa'
 
   def __init__ (self):
-    BaseManager.__init__ (self, address = ('127.0.0.1', 50001), authkey = self.AUTHKEY)
+    BaseManager.__init__ (self, address = ('127.0.0.1', 50002), authkey = self.AUTHKEY)
 
   def setup_server (self, z):
     self.zcliservice = ZeroCliService (z)

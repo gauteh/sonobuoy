@@ -183,7 +183,7 @@ class Protocol:
             elif (subtype == 'D'):
               if (tokeni == 2):
                 self.zero.current.ad.ad_k_samples = int (token)
-                self.zero.current.ad.ad_k_remaining = self.zero.current.ad.ad_k_samples * 3
+                self.zero.current.ad.ad_k_remaining = self.zero.current.ad.ad_k_samples * 4
                 self.zero.current.ad.ad_samples = ''
                 self.zero.current.ad.ad_time = ''
                 self.a_receive_state = 4

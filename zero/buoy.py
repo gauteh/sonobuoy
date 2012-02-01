@@ -41,7 +41,7 @@ class Buoy:
     self.logger.info ('Starting Buoy ' + self.node + '..')
 
     self.gps = Gps (self)
-    self.ad = AD7710 (self)
+    self.ad = AD (self)
 
     # Open file
     self.logfilef = open (self.logfile, 'a')

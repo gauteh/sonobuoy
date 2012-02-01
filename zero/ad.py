@@ -9,10 +9,10 @@ import math
 
 from util import *
 
-class AD7710:
+class AD:
   buoy = None
 
-  AD_QUEUE_LENGTH = 500.0
+  AD_QUEUE_LENGTH = 10000.0
 
   ad_qposition  = 0
   ad_queue_time = 0 # Time to fill up queue
@@ -58,7 +58,7 @@ class AD7710:
     self.nsamples += self.ad_k_samples
 
     l = len(self.ad_samples)
-    if (l != (self.ad_k_samples * 3)):
+    if (l != (self.ad_k_samples * 4)):
       print "[AD] Wrong length of binary data."
       return
 
@@ -70,13 +70,15 @@ class AD7710:
 
     i = 0
     while (i < self.ad_k_samples):
-      n  = ord(self.ad_samples[i * 3]) << 8 * 2
-      n += ord(self.ad_samples[i * 3 + 1]) << 8
-      n += ord(self.ad_samples[i * 3 + 2])
+      n  = ord(self.ad_samples[i * 4 + 0]) << 8 * 2
+      n  = ord(self.ad_samples[i * 4 + 1]) << 8 * 2
+      n += ord(self.ad_samples[i * 4 + 2]) << 8
+      n += ord(self.ad_samples[i * 4 + 3])
 
-      csum = csum ^ ord(self.ad_samples[i * 3 + 2])
-      csum = csum ^ ord(self.ad_samples[i * 3 + 1])
-      csum = csum ^ ord(self.ad_samples[i * 3])
+      csum = csum ^ ord(self.ad_samples[i * 4 + 3])
+      csum = csum ^ ord(self.ad_samples[i * 4 + 2])
+      csum = csum ^ ord(self.ad_samples[i * 4 + 1])
+      csum = csum ^ ord(self.ad_samples[i * 4])
 
       i += 1
       s.append(n)

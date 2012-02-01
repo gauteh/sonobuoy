@@ -23,6 +23,7 @@ namespace Buoy {
     HAS_SYNC_REFERENCE = false;
     IN_OVERFLOW = false;
 
+    previous_reference = 0;
     referencesecond = 0;
     lastmicros = 0;
     microdelta = 0;
@@ -41,9 +42,13 @@ namespace Buoy {
     GPS_Serial.begin (GPS_BAUDRATE);
 
     pinMode (GPS_SYNC_PIN, INPUT);
-    /*
-    attachInterrupt (GPS_SYNC_PIN, gps_sync_pulse, RISING);
-    */
+    attachInterrupt (GPS_SYNC_PIN, &(GPS::sync_pulse_int), RISING);
+
+    Rf->send_debug ("[GPS] GPS subsystem initiated.");
+  }
+
+  void GPS::sync_pulse_int () {
+    bu->gps.sync_pulse ();
   }
 
   void GPS::sync_pulse () {
@@ -76,8 +81,9 @@ namespace Buoy {
 
   void GPS::roll_reference () {
     /* Change referencesecond to latest */
-    ((RF*)rf)->send_debug ("Roll reference.");
+    ((RF*)rf)->send_debug ("[GPS] Roll reference.");
     microdelta = microdelta - (1e6 * (lastsecond - referencesecond));
+    previous_reference = referencesecond;
     referencesecond = lastsecond;
     update_reference = true; // Signal to store that new reference is available
     update_reference_position = ((ADS1282*)ad)->position;
@@ -130,7 +136,6 @@ namespace Buoy {
 
 
   void GPS::loop () {
-    SerialUSB.println ("[GPS] loop");
     /* Check if we are closing second overflow, fix by
      * setting new reference using internal clock.
      *
@@ -140,8 +145,10 @@ namespace Buoy {
     if (IN_OVERFLOW && ((microdelta - micros()) > 20e6))
     {
       /* Set new reference using internal clock */
-      ((RF*)rf)->send_debug ("Roll reference: Manual.");
+      ((RF*)rf)->send_debug ("[GPS] [**] Roll reference: Manual.");
       referencesecond += time_from_reference () / 1e6;
+      update_reference = true; // Signal to store that new reference is available
+      update_reference_position = ((ADS1282*)ad)->position;
       microdelta = micros ();
       IN_OVERFLOW = false;
       HAS_SYNC    = false;

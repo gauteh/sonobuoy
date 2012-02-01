@@ -203,13 +203,15 @@ namespace Buoy {
       bool disabled;
       int run;
 
-      bool batchready;
 # define FREQUENCEY     250
 # define QUEUE_LENGTH 10000
+# define BATCHES         20 // _must_ be multiple of QUEUE_LENGTH
+# define BATCH_LENGTH (QUEUE_LENGTH / BATCHES)
       /* Samples are 24 bits, but 4 bytes are clocked out */
       volatile uint32_t value;
       volatile uint32_t values[QUEUE_LENGTH];
       volatile uint32_t times [QUEUE_LENGTH];
+      volatile uint8_t  batchready;
       volatile uint32_t position;
       volatile uint32_t batchfilltime;
 

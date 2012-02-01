@@ -21,9 +21,9 @@ namespace Buoy {
     while (true) {
       ad.loop ();
       rf.loop ();
-      //gps.loop ();
+      gps.loop ();
 
-      delay (1000);
+      delay (10);
 
     }
   }
@@ -34,9 +34,9 @@ namespace Buoy {
     digitalWrite (BOARD_LED_PIN, LOW);
 
     /* Set up devices */
-    ad.setup ();
-    gps.setup ();
     rf.setup ();
+    gps.setup ();
+    ad.setup ();
 
     rf.ad = &ad;
     rf.gps = &gps;
@@ -46,6 +46,11 @@ namespace Buoy {
 
     ad.rf = &rf;
     ad.gps = &gps;
+
+    SerialUSB.println ("[Buoy] Initiating continuous transfer");
+    rf.send_debug ("[Buoy] All subsystems initiated.");
+    rf.send_debug ("[Buoy] Initiating continuos transfer.");
+    rf.continuous_transfer = true;
   }
 }
 

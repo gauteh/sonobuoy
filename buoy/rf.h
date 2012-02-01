@@ -13,7 +13,7 @@ namespace Buoy {
 # define RF_BAUDRATE 115200
 # define RF_Serial Serial3
 
-# define RF_BUFLEN 150
+# define RF_BUFLEN 512
 
   /* Format for printing checksum and macro for appending checksum
    * to NULL terminated buffer with string encapsulated in $ and *.
@@ -21,7 +21,7 @@ namespace Buoy {
 # define F_CSUM "%02hX"
 # define APPEND_CSUM(buf) sprintf(&buf[strlen(buf)], F_CSUM, gen_checksum(buf))
 
-# define rf_send_debug_f(args...) { char buf[RF_BUFLEN - 5 - 4]; sprintf(buf, args); rf_send_debug (buf); }
+# define rf_send_debug_f(args...) { char buf[RF_BUFLEN - 5 - 4]; sprintf(buf, args); Rf->send_debug (buf); }
 
 /* Protocol
  *
@@ -57,6 +57,13 @@ namespace Buoy {
       RF ();
       void setup ();
       void loop ();
+
+      /* Send data as soon as a batch is ready */
+      uint8_t lastbatch;
+      bool    continuous_transfer;
+
+      /* Status should be sent every second */
+      uint32_t laststatus;
 
       void send_status ();
 

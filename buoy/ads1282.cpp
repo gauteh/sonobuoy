@@ -5,6 +5,7 @@
  *
  */
 
+# include <stdio.h>
 # include <string.h>
 # include "wirish.h"
 
@@ -73,6 +74,7 @@ namespace Buoy {
 
     attachInterrupt (AD_nDRDY,&(ADS1282::drdy), FALLING);
 
+    Rf->send_debug ("[AD] ADS1282 subsystem initiated.");
     // }}}
   }
 
@@ -87,7 +89,9 @@ namespace Buoy {
       SerialUSB.print (run);
       */
 
+      //rf_send_debug_f ("[AD] Queue pos: %lu samples: %lu value: 0x%lX", position, totalsamples, value);
 
+      /*
       SerialUSB.print ("[AD] Queue pos: ");
       SerialUSB.print (position);
 
@@ -96,6 +100,7 @@ namespace Buoy {
 
       SerialUSB.print (", value: 0x");
       SerialUSB.println (value, HEX);
+      */
     } // }}}
   }
 
@@ -499,13 +504,16 @@ namespace Buoy {
     position++;
     totalsamples++;
 
-    if (position == (QUEUE_LENGTH / 2)) {
-      batchready = 1;
+    if (position % BATCH_LENGTH == 0) {
       batchfilltime = millis () - batchfilltime;
-    } else if (position == QUEUE_LENGTH) {
-      batchready = 2;
-      position = 0;
-      batchfilltime = millis () - batchfilltime;
+      batchready++;
+      batchready %= BATCHES;    // Increment batch or roll over
+      position %= QUEUE_LENGTH; // Roll over queue position
+
+      /* Reset update_reference if it is in new active batch */
+      if (Gps->update_reference && (Gps->update_reference_position >= position &&
+          Gps->update_reference_position < (position + BATCH_LENGTH)))
+        Gps->update_reference = false;
     }
   }
 

@@ -17,7 +17,7 @@ namespace Buoy {
 # define GPS_BAUDRATE 4800
 # define GPS_Serial Serial1
 
-# define GPS_SYNC_PIN 23
+# define GPS_SYNC_PIN 21
 
     private:
       char gps_buf [TELEGRAM_LEN + 2];
@@ -79,6 +79,7 @@ namespace Buoy {
       GPS ();
       void setup ();
       void loop ();
+      static void sync_pulse_int ();
       void sync_pulse ();
       void roll_reference ();
       void update_second ();
@@ -101,10 +102,19 @@ namespace Buoy {
        * ROLL_REFERENCE specifies how often the reference should be updated .
        */
       volatile uint32_t referencesecond;
-# define ROLL_REFERENCE 60
+# define ROLL_REFERENCE 60 // [s]
 
-      /* For Store and RF to know reference has been changed in batch */
-      volatile bool update_reference;
+      /* For Store and RF to know reference has been changed at given
+       * queue position.
+       *
+       * previous_reference contains the original reference. referencesecond
+       * contains the reference for all samples after update_reference_position.
+       *
+       * Is reset by ads1282.cpp when entering the batch interval again.
+       */
+
+      volatile uint32_t previous_reference;
+      volatile bool     update_reference;
       volatile uint32_t update_reference_position;
 
       /* Last second received from GPS , the next pulse should indicate +1 second.
