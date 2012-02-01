@@ -12,7 +12,7 @@ from util import *
 class AD:
   buoy = None
 
-  AD_QUEUE_LENGTH = 10000.0
+  AD_QUEUE_LENGTH = 500.0
 
   ad_qposition  = 0
   ad_queue_time = 0 # Time to fill up queue
@@ -70,10 +70,10 @@ class AD:
 
     i = 0
     while (i < self.ad_k_samples):
-      n  = ord(self.ad_samples[i * 4 + 0]) << 8 * 2
-      n  = ord(self.ad_samples[i * 4 + 1]) << 8 * 2
-      n += ord(self.ad_samples[i * 4 + 2]) << 8
-      n += ord(self.ad_samples[i * 4 + 3])
+      n  = ord(self.ad_samples[i * 4 + 3]) << 8 * 3
+      n  = ord(self.ad_samples[i * 4 + 2]) << 8 * 2
+      n += ord(self.ad_samples[i * 4 + 1]) << 8
+      n += ord(self.ad_samples[i * 4 + 0])
 
       csum = csum ^ ord(self.ad_samples[i * 4 + 3])
       csum = csum ^ ord(self.ad_samples[i * 4 + 2])
