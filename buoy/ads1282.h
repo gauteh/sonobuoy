@@ -214,6 +214,7 @@ namespace Buoy {
       volatile uint8_t  batchready;
       volatile uint32_t position;
       volatile uint32_t batchfilltime;
+      volatile uint32_t batchstart;
 
       volatile uint32_t totalsamples;
 

@@ -39,6 +39,7 @@ namespace Buoy {
     memset ((void*) times, 0, QUEUE_LENGTH * sizeof (uint32_t));
     position    = 0;
     totalsamples = 0;
+    batchstart    = millis ();
     batchfilltime = millis();
 
     return;
@@ -505,7 +506,8 @@ namespace Buoy {
     totalsamples++;
 
     if (position % BATCH_LENGTH == 0) {
-      batchfilltime = millis () - batchfilltime;
+      batchfilltime = millis () - batchstart;
+      batchstart    = millis ();
       batchready++;
       batchready %= BATCHES;    // Increment batch or roll over
       position %= QUEUE_LENGTH; // Roll over queue position
