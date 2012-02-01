@@ -68,6 +68,8 @@ namespace Buoy {
         /* Send AD_DATA_BATCH_LEN samples */
         # define AD_DATA_BATCH_LEN (QUEUE_LENGTH / 2)
 
+        /* TODO: In case reference is changing within batch, communicate it.. */
+
         /* Format:
 
          * 1. Initiate binary data stream:
@@ -80,7 +82,7 @@ namespace Buoy {
 
          * 4. Send k number of timestamps: 4 bytes * k
 
-         * 4. Send end of data with checksum
+         * 5. Send end of data with checksum
 
          */
         {

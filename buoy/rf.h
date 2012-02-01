@@ -11,7 +11,6 @@
 
 namespace Buoy {
 # define RF_BAUDRATE 115200
-//# define RF_BAUDRATE 9600
 # define RF_Serial Serial3
 
 # define RF_BUFLEN 150
@@ -20,8 +19,7 @@ namespace Buoy {
    * to NULL terminated buffer with string encapsulated in $ and *.
    */
 # define F_CSUM "%02hX"
-# define APPEND_CSUM(buf) sprintf(&buf[strlen(buf)], F_CSUM, \
-                                    gen_checksum(buf))
+# define APPEND_CSUM(buf) sprintf(&buf[strlen(buf)], F_CSUM, gen_checksum(buf))
 
 # define rf_send_debug_f(args...) { char buf[RF_BUFLEN - 5 - 4]; sprintf(buf, args); rf_send_debug (buf); }
 
