@@ -13,9 +13,6 @@ class ZeroCliService:
   def bouy_count (self):
     return len(self.zero.buoys)
 
-  def ad_queue_length (self):
-    return AD.AD_QUEUE_LENGTH
-
   def stop (self):
     time.sleep (1)
     self.zero.stop ()
@@ -35,7 +32,7 @@ class ZeroCliService:
     return None
 
   def buoy_status (self, b):
-    return [b.active, b.name, b.ad.ad_value, b.ad.ad_config, b.ad.ad_qposition, b.ad.ad_queue_time, b.ad.nsamples, b.gps.latitude, b.gps.north, b.gps.longitude, b.gps.east, b.gps.valid, b.gps.gps_time, b.gps.unix_time, b.gps.gps_date, b.gps.has_time, b.gps.has_sync, b.gps.has_sync_reference]
+    return [b.active, b.name, b.ad.ad_value, b.ad.ad_config, b.ad.ad_qposition, b.ad.ad_queue_time, b.ad.nsamples, b.gps.latitude, b.gps.north, b.gps.longitude, b.gps.east, b.gps.valid, b.gps.gps_time, b.gps.unix_time, b.gps.gps_date, b.gps.has_time, b.gps.has_sync, b.gps.has_sync_reference, b.ad.ad_k_samples]
 
 
 class ZeroUIManager (BaseManager):

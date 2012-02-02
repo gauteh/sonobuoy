@@ -35,7 +35,7 @@ class zCLI:
 
   def summary (self):
     print "Summary of known buoys:"
-    #print "=" * 80 
+    #print "=" * 80
 
     q_length = self.z.ad_queue_length ()
 
@@ -54,13 +54,14 @@ class zCLI:
     print "Total: ", self.z.bouy_count ()
 
   def show (self, b):
-    q_length = self.z.ad_queue_length ()
     t = Texttable ()
 
     s = self.z.buoy_status_by_name (b)
     if s is None:
       print "Error: No such buoy."
       sys.exit (1)
+
+    q_length = s[18]
 
     t.header (['Buoy:', b])
     t.set_cols_align (["r", "l"])

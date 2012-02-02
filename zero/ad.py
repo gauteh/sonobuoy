@@ -12,8 +12,6 @@ from util import *
 class AD:
   buoy = None
 
-  AD_QUEUE_LENGTH = 500.0
-
   ad_qposition  = 0
   ad_queue_time = 0 # Time to fill up queue
   ad_value      = ''
