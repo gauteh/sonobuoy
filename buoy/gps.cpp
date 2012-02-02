@@ -81,7 +81,7 @@ namespace Buoy {
 
   void GPS::roll_reference () {
     /* Change referencesecond to latest */
-    ((RF*)rf)->send_debug ("[GPS] Roll reference.");
+    Rf->send_debug ("[GPS] Roll reference.");
     microdelta = microdelta - (1e6 * (lastsecond - referencesecond));
     previous_reference = referencesecond;
     referencesecond = lastsecond;
@@ -146,7 +146,7 @@ namespace Buoy {
     if (IN_OVERFLOW && ((microdelta - micros()) > 20e6))
     {
       /* Set new reference using internal clock */
-      ((RF*)rf)->send_debug ("[GPS] [**] Roll reference: Manual.");
+      Rf->send_debug ("[GPS] [**] Roll reference: Manual.");
       referencesecond += time_from_reference () / 1e6;
       update_reference = true; // Signal to store that new reference is available
       update_reference_position = ((ADS1282*)ad)->position;

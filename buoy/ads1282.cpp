@@ -454,6 +454,15 @@ namespace Buoy {
     SerialUSB.println (AD_CONFIG0, BIN);
     shift_out (AD_CONFIG0);
 
+    // Config 1, changes from default:
+    // - Muxselect: Internal short via 400 Ohm
+    /*
+# define AD_CONFIG1 0b00101000
+    SerialUSB.print   ("[AD] [SPI] Sending: 0b");
+    SerialUSB.println (AD_CONFIG1, BIN);
+    shift_out (AD_CONFIG1);
+    */
+
     // High pass filter configuration
     // HPF[1:0] = 0x0337 => fHP = 0.5 Hz @ 250 SPS
 # define AD_HPF1 0x03
