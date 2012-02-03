@@ -1,5 +1,4 @@
 % Calculate noise
-% Expects input from ADS1282 with inputs shorted (only containing noise)
 
 data = load('One.log');
 
