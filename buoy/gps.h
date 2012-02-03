@@ -84,8 +84,6 @@ namespace Buoy {
       void roll_reference ();
       void update_second ();
 
-
-
       /* Timing */
 # define LEAP_SECONDS 19 // as of 2011
       bool HAS_LEAP_SECONDS;             // Has received leap seconds inf.

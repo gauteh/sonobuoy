@@ -86,7 +86,7 @@ namespace Buoy {
     previous_reference = referencesecond;
     referencesecond = lastsecond;
     update_reference = true; // Signal to store that new reference is available
-    update_reference_position = ((ADS1282*)ad)->position;
+    update_reference_position = Ad->position;
     HAS_SYNC_REFERENCE = true;
   }
 
@@ -149,7 +149,7 @@ namespace Buoy {
       Rf->send_debug ("[GPS] [**] Roll reference: Manual.");
       referencesecond += time_from_reference () / 1e6;
       update_reference = true; // Signal to store that new reference is available
-      update_reference_position = ((ADS1282*)ad)->position;
+      update_reference_position = Ad->position;
       microdelta = micros ();
       IN_OVERFLOW = false;
       HAS_SYNC    = false;

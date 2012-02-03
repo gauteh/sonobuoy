@@ -29,7 +29,7 @@ namespace Buoy {
   }
 
   void BuoyMaster::setup () {
-    /* Set up the LED to blink  */
+    /* Configure LED */
     pinMode(BOARD_LED_PIN, OUTPUT);
     digitalWrite (BOARD_LED_PIN, LOW);
 
@@ -50,7 +50,7 @@ namespace Buoy {
     SerialUSB.println ("[Buoy] Initiating continuous transfer");
     rf.send_debug ("[Buoy] All subsystems initiated.");
     rf.send_debug ("[Buoy] Initiating continuos transfer.");
-    rf.continuous_transfer = true;
+    rf.start_continuous_transfer ();
   }
 }
 

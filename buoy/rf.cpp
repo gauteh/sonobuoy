@@ -241,6 +241,13 @@ namespace Buoy {
     return tsum == csum;
   }
 
+  void RF::start_continuous_transfer () {
+    continuous_transfer = true;
+  }
+
+  void RF::stop_continuous_transfer () {
+    continuous_transfer = false;
+  }
 }
 
 /* vim: set filetype=arduino :  */

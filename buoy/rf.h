@@ -72,6 +72,9 @@ namespace Buoy {
       void ad_message (RF_AD_MESSAGE);
       void gps_message (RF_GPS_MESSAGE);
 
+      void start_continuous_transfer ();
+      void stop_continuous_transfer ();
+
       byte gen_checksum (char *);
       bool test_checksum (char *);
   };
