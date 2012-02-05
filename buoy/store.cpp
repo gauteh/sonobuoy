@@ -29,8 +29,8 @@ namespace Buoy {
     pinMode (SD_MISO, INPUT);
     pinMode (SD_SCLK, OUTPUT);
 
-    spi = new HardwareSPI(1);
-    spi.begin (SPI_18MHZ, MSBFIRST, 0);
+    //spi = new HardwareSPI(1);
+    //spi.begin (SPI_18MHZ, MSBFIRST, 0);
 
     lastsd = millis ();
     init ();
@@ -38,7 +38,7 @@ namespace Buoy {
 
   void Store::init ()
   {
-    SD_AVAILABLE = (sd.init (, SD_CS) & (sd.card()->cardSize() > 0));
+    SD_AVAILABLE = (sd.init (spi, SD_CS) & (sd.card()->cardSize() > 0));
     SD_AVAILABLE &= (sd.card()->errorCode () == 0);
 
     if (SD_AVAILABLE)
@@ -88,7 +88,6 @@ namespace Buoy {
     if (i > 100) i = 1;  // DEBUG
 
     /* Walk through subsequent indexes above lastid and take next free */
-    int n = 0;
     char buf[8+5];
     bool newi = false;
 
