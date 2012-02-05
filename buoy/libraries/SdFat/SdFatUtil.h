@@ -21,37 +21,50 @@
 #define SdFatUtil_h
 /**
  * \file
- * \brief Useful utility functions.
+ * Useful utility functions.
  */
-#include <avr/pgmspace.h>
-#if ARDUINO < 100
 #include <WProgram.h>
-#else  // ARDUINO
-#include <Arduino.h>
-#endif  // ARDUINO
-
-# include "buoy.h"
-
-# if DIRECT_SERIAL
+//#include <avr/pgmspace.h>
 /** Store and print a string in flash memory.*/
 #define PgmPrint(x) SerialPrint_P(PSTR(x))
 /** Store and print a string in flash memory followed by a CR/LF.*/
 #define PgmPrintln(x) SerialPrintln_P(PSTR(x))
-
-# else
-  # define PgmPrint(x) 0
-  # define PgmPrintln(x) 0
-# endif
-
-namespace SdFatUtil {
-  int FreeRam();
-  void print_P(Print* pr, PGM_P str);
-  void println_P(Print* pr, PGM_P str);
-# if DIRECT_SERIAL
-  void SerialPrint_P(PGM_P str);
-  void SerialPrintln_P(PGM_P str);
-# endif
+/** Defined so doxygen works for function definitions. */
+#define NOINLINE __attribute__((noinline))
+//------------------------------------------------------------------------------
+/** Return the number of bytes currently free in RAM. */
+static int FreeRam(void) {
+  extern int  __bss_end;
+  extern int* __brkval;
+  int free_memory;
+  if (reinterpret_cast<int>(__brkval) == 0) {
+    // if no heap use from end of bss section
+    free_memory = reinterpret_cast<int>(&free_memory)
+                  - reinterpret_cast<int>(&__bss_end);
+  } else {
+    // use from top of stack to heap
+    free_memory = reinterpret_cast<int>(&free_memory)
+                  - reinterpret_cast<int>(__brkval);
+  }
+  return free_memory;
 }
-
-using namespace SdFatUtil;  // NOLINT
+//------------------------------------------------------------------------------
+/**
+ * %Print a string in flash memory to the serial port.
+ *
+ * \param[in] str Pointer to string stored in flash memory.
+ */
+static NOINLINE void SerialPrint_P(PGM_P str) {
+  for (uint8_t c; (c = pgm_read_byte(str)); str++) Serial.print(c);
+}
+//------------------------------------------------------------------------------
+/**
+ * %Print a string in flash memory followed by a CR/LF.
+ *
+ * \param[in] str Pointer to string stored in flash memory.
+ */
+static NOINLINE void SerialPrintln_P(PGM_P str) {
+  SerialPrint_P(str);
+  Serial.println();
+}
 #endif  // #define SdFatUtil_h
