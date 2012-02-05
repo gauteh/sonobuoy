@@ -34,6 +34,8 @@ namespace Buoy {
 
     lastsd = millis ();
     init ();
+
+    rf->send_debug ("[SD] Store subsystem initiated.");
   }
 
   void Store::init ()
