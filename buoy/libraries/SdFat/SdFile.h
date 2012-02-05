@@ -1,5 +1,5 @@
 /* Arduino SdFat Library
- * Copyright (C) 2008 by William Greiman
+ * Copyright (C) 2009 by William Greiman
  *
  * This file is part of the Arduino SdFat Library
  *
@@ -12,35 +12,36 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
-
+ *
  * You should have received a copy of the GNU General Public License
  * along with the Arduino SdFat Library.  If not, see
  * <http://www.gnu.org/licenses/>.
  */
-#ifndef SdFatUtil_h
-#define SdFatUtil_h
 /**
  * \file
- * \brief Useful utility functions.
+ * \brief SdFile class
  */
-#include <avr/pgmspace.h>
+#include <SdBaseFile.h>
+#ifndef SdFile_h
+#define SdFile_h
+//------------------------------------------------------------------------------
+/**
+ * \class SdFile
+ * \brief SdBaseFile with Print.
+ */
+class SdFile : public SdBaseFile, public Print {
+ public:
+  SdFile() {}
+  SdFile(const char* name, uint8_t oflag);
 #if ARDUINO < 100
-#include <WProgram.h>
-#else  // ARDUINO
-#include <Arduino.h>
-#endif  // ARDUINO
-/** Store and print a string in flash memory.*/
-#define PgmPrint(x) SerialPrint_P(PSTR(x))
-/** Store and print a string in flash memory followed by a CR/LF.*/
-#define PgmPrintln(x) SerialPrintln_P(PSTR(x))
-
-namespace SdFatUtil {
-  int FreeRam();
-  void print_P(Print* pr, PGM_P str);
-  void println_P(Print* pr, PGM_P str);
-  void SerialPrint_P(PGM_P str);
-  void SerialPrintln_P(PGM_P str);
-}
-
-using namespace SdFatUtil;  // NOLINT
-#endif  // #define SdFatUtil_h
+  void write(uint8_t b);
+  void write(const char* str);
+#else  // ARDUINO < 100
+  size_t write(uint8_t b);
+  int16_t write(const char* str);
+#endif  // ARDUINO < 100
+  int16_t write(const void* buf, uint16_t nbyte);
+  void write_P(PGM_P str);
+  void writeln_P(PGM_P str);
+};
+#endif  // SdFile_h
