@@ -430,7 +430,6 @@ bool Sd2Card::waitNotBusy(uint16_t timeoutMillis) {
  fail:
   return false;
 }
-#if 0
 //------------------------------------------------------------------------------
 /**
  * Writes a 512 byte block to an SD card.
@@ -488,7 +487,11 @@ bool Sd2Card::writeData(const uint8_t* src) {
 //------------------------------------------------------------------------------
 // send one block of data for write block or write multiple blocks
 bool Sd2Card::writeData(uint8_t token, const uint8_t* src) {
-  spiSendBlock(token, src);
+  spiSend (token);
+  for (uint16_t i = 0; i < 512; i++) {
+    spiSend (src[i]);
+  }
+  //spiSendBlock(token, src);
 
   spiSend(0xff);  // dummy crc
   spiSend(0xff);  // dummy crc
@@ -554,4 +557,3 @@ bool Sd2Card::writeStop() {
   chipSelectHigh();
   return false;
 }
-# endif
