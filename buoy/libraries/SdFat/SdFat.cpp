@@ -102,16 +102,12 @@ void SdFat::errorHalt(char const* msg) {
  *
  * \param[in] msg Message in program space (flash memory) to print.
  */
-void SdFat::errorHalt_P(PGM_P msg) {
-  errorPrint_P(msg);
-  while (1);
-}
 //------------------------------------------------------------------------------
 /** %Print any SD error code. */
 void SdFat::errorPrint() {
   if (!card_.errorCode()) return;
   PgmPrint("SD errorCode: 0X");
-  Serial.println(card_.errorCode(), HEX);
+  SerialUSB.println(card_.errorCode(), HEX);
 }
 //------------------------------------------------------------------------------
 /** %Print msg, any SD error code.
@@ -120,7 +116,7 @@ void SdFat::errorPrint() {
  */
 void SdFat::errorPrint(char const* msg) {
   PgmPrint("error: ");
-  Serial.println(msg);
+  SerialUSB.println(msg);
   errorPrint();
 }
 //------------------------------------------------------------------------------
@@ -128,11 +124,6 @@ void SdFat::errorPrint(char const* msg) {
  *
  * \param[in] msg Message in program space (flash memory) to print.
  */
-void SdFat::errorPrint_P(PGM_P msg) {
-  PgmPrint("error: ");
-  SerialPrintln_P(msg);
-  errorPrint();
-}
 //------------------------------------------------------------------------------
 /**
  * Test for the existence of a file.
@@ -156,8 +147,8 @@ bool SdFat::exists(const char* name) {
  * \return The value one, true, is returned for success and
  * the value zero, false, is returned for failure.
  */
-bool SdFat::init(uint8_t sckRateID, uint8_t chipSelectPin) {
-  return card_.init(sckRateID, chipSelectPin) && vol_.init(&card_) && chdir(1);
+bool SdFat::init(HardwareSPI *s, uint8_t cs) {
+  return card_.init(s, cs) && vol_.init(&card_) && chdir(1);
 }
 //------------------------------------------------------------------------------
 /** %Print error details and halt after SdFat::init() fails. */
@@ -171,7 +162,7 @@ void SdFat::initErrorHalt() {
  * \param[in] msg Message to print.
  */
 void SdFat::initErrorHalt(char const *msg) {
-  Serial.println(msg);
+  SerialUSB.println(msg);
   initErrorHalt();
 }
 //------------------------------------------------------------------------------
@@ -179,10 +170,6 @@ void SdFat::initErrorHalt(char const *msg) {
  *
  * \param[in] msg Message in program space (flash memory) to print.
  */
-void SdFat::initErrorHalt_P(PGM_P msg) {
-  SerialPrintln_P(msg);
-  initErrorHalt();
-}
 //------------------------------------------------------------------------------
 /** Print error details after SdFat::init() fails. */
 void SdFat::initErrorPrint() {
@@ -206,7 +193,7 @@ void SdFat::initErrorPrint() {
  * \param[in] msg Message to print.
  */
 void SdFat::initErrorPrint(char const *msg) {
-  Serial.println(msg);
+  SerialUSB.println(msg);
   initErrorPrint();
 }
 //------------------------------------------------------------------------------
@@ -214,10 +201,6 @@ void SdFat::initErrorPrint(char const *msg) {
  *
  * \param[in] msg Message in program space (flash memory) to print.
  */
-void SdFat::initErrorPrint_P(PGM_P msg) {
-  SerialPrintln_P(msg);
-  initErrorHalt();
-}
 //------------------------------------------------------------------------------
 /** List the directory contents of the volume working directory to Serial.
  *
@@ -230,7 +213,7 @@ void SdFat::initErrorPrint_P(PGM_P msg) {
  * LS_R - Recursive list of subdirectories.
  */
 void SdFat::ls(uint8_t flags) {
-  vwd_.ls(&Serial, flags);
+  vwd_.ls(&SerialUSB, flags);
 }
 //------------------------------------------------------------------------------
 /** List the directory contents of the volume working directory to Serial.

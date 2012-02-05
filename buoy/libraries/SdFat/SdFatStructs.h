@@ -58,9 +58,9 @@ struct partitionTable {
            * Sector part of Cylinder-head-sector address of the first block in
            * the partition. Legal values are 1-63. Only used in old PC BIOS.
            */
-  unsigned beginSector : 6;
+  uint8_t beginSector : 6;
            /** High bits cylinder for first block in partition. */
-  unsigned beginCylinderHigh : 2;
+  uint8_t beginCylinderHigh : 2;
           /**
            * Combine beginCylinderLow with beginCylinderHigh. Legal values
            * are 0-1023.  Only used in old PC BIOS.
@@ -80,9 +80,9 @@ struct partitionTable {
            * Sector part of cylinder-head-sector address of the last sector in
            * the partition.  Legal values are 1-63. Only used in old PC BIOS.
            */
-  unsigned endSector : 6;
+  uint8_t endSector : 6;
            /** High bits of end cylinder */
-  unsigned endCylinderHigh : 2;
+  uint8_t endCylinderHigh : 2;
           /**
            * Combine endCylinderLow with endCylinderHigh. Legal values
            * are 0-1023.  Only used in old PC BIOS.
@@ -92,7 +92,7 @@ struct partitionTable {
   uint32_t firstSector;
            /** Length of the partition, in blocks. */
   uint32_t totalSectors;
-};
+} __attribute__ ((packed));
 /** Type name for partitionTable */
 typedef struct partitionTable part_t;
 //------------------------------------------------------------------------------
@@ -116,7 +116,7 @@ struct masterBootRecord {
   uint8_t  mbrSig0;
            /** Second MBR signature byte. Must be 0XAA */
   uint8_t  mbrSig1;
-};
+} __attribute__ ((packed));
 /** Type name for masterBootRecord */
 typedef struct masterBootRecord mbr_t;
 //------------------------------------------------------------------------------
@@ -137,7 +137,7 @@ struct fat_boot {
           * This is typically a string of characters that identifies
           * the operating system that formatted the volume.
           */
-  char    oemId[8];
+  uint8_t    oemId[8];
           /**
            * The size of a hardware sector. Valid decimal values for this
            * field are 512, 1024, 2048, and 4096. For most disks used in
@@ -232,19 +232,19 @@ struct fat_boot {
             * A field once used to store the volume label. The volume label
             * is now stored as a special file in the root directory.
             */
-  char     volumeLabel[11];
+  uint8_t     volumeLabel[11];
            /**
             * A field with a value of either FAT, FAT12 or FAT16,
             * depending on the disk format.
             */
-  char     fileSystemType[8];
+  uint8_t     fileSystemType[8];
            /** X86 boot code */
   uint8_t  bootCode[448];
            /** must be 0X55 */
   uint8_t  bootSectorSig0;
            /** must be 0XAA */
   uint8_t  bootSectorSig1;
-};
+} __attribute__ ((packed));
 /** Type name for FAT Boot Sector */
 typedef struct fat_boot fat_boot_t;
 //------------------------------------------------------------------------------
@@ -265,7 +265,7 @@ struct fat32_boot {
           * This is typically a string of characters that identifies
           * the operating system that formatted the volume.
           */
-  char    oemId[8];
+  uint8_t    oemId[8];
           /**
            * The size of a hardware sector. Valid decimal values for this
            * field are 512, 1024, 2048, and 4096. For most disks used in
@@ -387,18 +387,18 @@ struct fat32_boot {
             * A field once used to store the volume label. The volume label
             * is now stored as a special file in the root directory.
             */
-  char     volumeLabel[11];
+  uint8_t     volumeLabel[11];
            /**
             * A text field with a value of FAT32.
             */
-  char     fileSystemType[8];
+  uint8_t     fileSystemType[8];
            /** X86 boot code */
   uint8_t  bootCode[420];
            /** must be 0X55 */
   uint8_t  bootSectorSig0;
            /** must be 0XAA */
   uint8_t  bootSectorSig1;
-};
+} __attribute__ ((packed));
 /** Type name for FAT32 Boot Sector */
 typedef struct fat32_boot fat32_boot_t;
 //------------------------------------------------------------------------------
@@ -438,7 +438,7 @@ struct fat32_fsinfo {
   uint8_t  reserved2[12];
            /** must be 0X00, 0X00, 0X55, 0XAA */
   uint8_t  tailSignature[4];
-};
+} __attribute__ ((packed));
 /** Type name for FAT32 FSINFO Sector */
 typedef struct fat32_fsinfo fat32_fsinfo_t;
 //------------------------------------------------------------------------------
@@ -536,7 +536,7 @@ struct directoryEntry {
   uint16_t firstClusterLow;
            /** 32-bit unsigned holding this file's size in bytes. */
   uint32_t fileSize;
-};
+} __attribute__ ((packed));
 //------------------------------------------------------------------------------
 // Definitions for directory entries
 //

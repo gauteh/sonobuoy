@@ -10,7 +10,7 @@ CFLAGS_$(d) := $(WIRISH_INCLUDES) $(LIBMAPLE_INCLUDES)
 # Local rules and targets
 cSRCS_$(d) :=
 
-cppSRCS_$(d) := Sd2Card.cpp SdFile.cpp SdVolume.cpp
+cppSRCS_$(d) :=  Sd2Card.cpp SdBaseFile.cpp SdFat.cpp SdFatUtil.cpp SdFile.cpp SdVolume.cpp 
 
 cFILES_$(d) := $(cSRCS_$(d):%=$(d)/%)
 cppFILES_$(d) := $(cppSRCS_$(d):%=$(d)/%)

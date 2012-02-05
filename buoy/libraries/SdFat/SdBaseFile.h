@@ -23,12 +23,7 @@
  * \file
  * \brief SdBaseFile class
  */
-#include <avr/pgmspace.h>
-#if ARDUINO < 100
 #include <WProgram.h>
-#else  // ARDUINO
-#include <Arduino.h>
-#endif  // ARDUINO
 #include <SdFatConfig.h>
 #include <SdVolume.h>
 //------------------------------------------------------------------------------

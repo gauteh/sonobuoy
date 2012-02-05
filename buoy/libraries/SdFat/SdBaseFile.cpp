@@ -18,6 +18,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <SdBaseFile.h>
+#include <string.h>
 //------------------------------------------------------------------------------
 // pointer to cwd directory
 SdBaseFile* SdBaseFile::cwd_ = 0;
@@ -306,7 +307,7 @@ void SdBaseFile::getpos(fpos_t* pos) {
  * LS_R - Recursive list of subdirectories.
  */
 void SdBaseFile::ls(uint8_t flags) {
-  ls(&Serial, flags, 0);
+  ls(&SerialUSB, flags, 0);
 }
 //------------------------------------------------------------------------------
 /** List directory contents.
@@ -403,16 +404,7 @@ bool SdBaseFile::make83Name(const char* str, uint8_t* name, const char** ptr) {
       i = 8;   // place for extension
     } else {
       // illegal FAT characters
-#define FLASH_ILLEGAL_CHARS
-#ifdef FLASH_ILLEGAL_CHARS
-      // store chars in flash
-      PGM_P p = PSTR("|<>^+=?/[];,*\"\\");
-      uint8_t b;
-      while ((b = pgm_read_byte(p++))) if (b == c) goto fail;
-#else  // FLASH_ILLEGAL_CHARS
-      // store chars in RAM
       if (strchr("|<>^+=?/[];,*\"\\", c)) goto fail;
-#endif  // FLASH_ILLEGAL_CHARS
 
       // check size and only allow ASCII printable characters
       if (i > n || c < 0X21 || c > 0X7E)goto fail;
@@ -957,7 +949,7 @@ int SdBaseFile::peek() {
  */
 void SdBaseFile::printDirName(const dir_t& dir,
   uint8_t width, bool printSlash) {
-  printDirName(&Serial, dir, width, printSlash);
+  printDirName(&SerialUSB, dir, width, printSlash);
 }
 //------------------------------------------------------------------------------
 /** %Print the name field of a directory entry in 8.3 format.
@@ -1001,7 +993,7 @@ static void print2u(Print* pr, uint8_t v) {
  * \param[in] fatDate The date field from a directory entry.
  */
 void SdBaseFile::printFatDate(uint16_t fatDate) {
-  printFatDate(&Serial, fatDate);
+  printFatDate(&SerialUSB, fatDate);
 }
 //------------------------------------------------------------------------------
 /** %Print a directory date field.
@@ -1026,7 +1018,7 @@ void SdBaseFile::printFatDate(Print* pr, uint16_t fatDate) {
  * \param[in] fatTime The time field from a directory entry.
  */
 void SdBaseFile::printFatTime(uint16_t fatTime) {
-  printFatTime(&Serial, fatTime);
+  printFatTime(&SerialUSB, fatTime);
 }
 //------------------------------------------------------------------------------
 /** %Print a directory time field.
@@ -1052,7 +1044,7 @@ void SdBaseFile::printFatTime(Print* pr, uint16_t fatTime) {
 bool SdBaseFile::printName() {
   char name[13];
   if (!getFilename(name)) return false;
-  Serial.print(name);
+  SerialUSB.print(name);
   return true;
 }
 //------------------------------------------------------------------------------

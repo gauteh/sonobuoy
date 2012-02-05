@@ -24,8 +24,6 @@
  * \brief SdFat class
  */
 #include <SdFile.h>
-#include <SdStream.h>
-#include <ArduinoStream.h>
 //------------------------------------------------------------------------------
 /** SdFat version YYYYMMDD */
 #define SD_FAT_VERSION 20111205
@@ -43,20 +41,15 @@ class SdFat {
   bool chdir(const char* path, bool set_cwd = false);
   void chvol();
   void errorHalt();
-  void errorHalt_P(PGM_P msg);
   void errorHalt(char const *msg);
   void errorPrint();
-  void errorPrint_P(PGM_P msg);
   void errorPrint(char const *msg);
   bool exists(const char* name);
-  bool init(uint8_t sckRateID = SPI_FULL_SPEED,
-    uint8_t chipSelectPin = SD_CHIP_SELECT_PIN);
+  bool init(HardwareSPI *s, uint8_t cs);
   void initErrorHalt();
   void initErrorHalt(char const *msg);
-  void initErrorHalt_P(PGM_P msg);
   void initErrorPrint();
   void initErrorPrint(char const *msg);
-  void initErrorPrint_P(PGM_P msg);
   void ls(uint8_t flags = 0);
   void ls(Print* pr, uint8_t flags = 0);
   bool mkdir(const char* path, bool pFlag = true);

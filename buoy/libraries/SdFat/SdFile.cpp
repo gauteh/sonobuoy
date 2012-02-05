@@ -18,6 +18,9 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <SdFile.h>
+#include "HardwareSPI.h"
+#include <string.h>
+#include <stdint.h>
 /**  Create a file object and open it in the current working directory.
  *
  * \param[in] path A path with a valid 8.3 DOS name for a file to be opened.
@@ -51,43 +54,35 @@ int16_t SdFile::write(const void* buf, uint16_t nbyte) {
  * \param[in] b the byte to be written.
  * Use writeError to check for errors.
  */
-#if ARDUINO < 100
-void SdFile::write(uint8_t b) {
-  SdBaseFile::write(&b, 1);
-}
-#else  // ARDUINO < 100
-size_t SdFile::write(uint8_t b) {
+int16_t SdFile::write(uint8_t b) {
   return SdBaseFile::write(&b, 1) == 1 ? 1 : 0;
 }
-#endif  // ARDUINO < 100
 //------------------------------------------------------------------------------
 /** Write a string to a file. Used by the Arduino Print class.
  * \param[in] str Pointer to the string.
  * Use writeError to check for errors.
  */
-#if ARDUINO < 100
-void SdFile::write(const char* str) {
-  SdBaseFile::write(str, strlen(str));
-}
-#else  // ARDUINO < 100
 int16_t SdFile::write(const char* str) {
   return SdBaseFile::write(str, strlen(str));
 }
-#endif  // ARDUINO < 100
 //------------------------------------------------------------------------------
 /** Write a PROGMEM string to a file.
  * \param[in] str Pointer to the PROGMEM string.
  * Use writeError to check for errors.
  */
+/*
 void SdFile::write_P(PGM_P str) {
   for (uint8_t c; (c = pgm_read_byte(str)); str++) write(c);
 }
+*/
 //------------------------------------------------------------------------------
 /** Write a PROGMEM string followed by CR/LF to a file.
  * \param[in] str Pointer to the PROGMEM string.
  * Use writeError to check for errors.
  */
+/*
 void SdFile::writeln_P(PGM_P str) {
   write_P(str);
   write_P(PSTR("\r\n"));
 }
+*/
