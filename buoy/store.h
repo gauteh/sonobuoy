@@ -19,8 +19,17 @@
  *
  * SDIO_CK (clock)  = 113
  * SDIO_CMD         = 116
+ *
+ * SPI mode, pins:
+ * CS     = CD (card detect) / SDIO_D3 (Data 3)
+ * DI     = SDIO_CMD
+ * SCLK   = SDIO_CK
+ * DO     = SDIO_D0 (Data 0)
  */
-
+# define SD_CS    SDIO_D3
+# define SD_MOSI  SDIO_CMD
+# define SD_MISO  SDIO_D0
+# define SD_SCLK  SDIO_CK
 
 namespace Buoy {
   class Store {
