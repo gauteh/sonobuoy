@@ -88,6 +88,7 @@ LIBMAPLE_MODULES += $(SRCROOT)/wirish
 #LIBMAPLE_MODULES += $(SRCROOT)/libraries/Servo
 #LIBMAPLE_MODULES += $(SRCROOT)/libraries/LiquidCrystal
 LIBMAPLE_MODULES += $(SRCROOT)/libraries/Wire
+LIBMAPLE_MODULES += $(SRCROOT)/libraries/SdFat
 
 # Experimental libraries:
 #LIBMAPLE_MODULES += $(SRCROOT)/libraries/FreeRTOS
