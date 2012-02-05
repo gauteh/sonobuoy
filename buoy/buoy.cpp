@@ -7,6 +7,11 @@
 
 # include "wirish.h"
 # include "buoy.h"
+#
+# include "ads1282.h"
+# include "rf.h"
+# include "gps.h"
+# include "store.h"
 
 namespace Buoy {
   BuoyMaster::BuoyMaster () {
@@ -19,9 +24,9 @@ namespace Buoy {
 
 
     while (true) {
-      ad.loop ();
-      rf.loop ();
-      gps.loop ();
+      ad->loop ();
+      rf->loop ();
+      gps->loop ();
 
       delay (10);
 
@@ -34,23 +39,22 @@ namespace Buoy {
     digitalWrite (BOARD_LED_PIN, LOW);
 
     /* Set up devices */
-    rf.setup ();
-    gps.setup ();
-    ad.setup ();
+    rf = new RF ();
+    rf->setup (this);
 
-    rf.ad = &ad;
-    rf.gps = &gps;
+    gps = new GPS ();
+    gps->setup (this);
 
-    gps.ad = &ad;
-    gps.rf = &rf;
+    ad = new ADS1282 ();
+    ad->setup (this);
 
-    ad.rf = &rf;
-    ad.gps = &gps;
+    store = new Store ();
+    store->setup(this);
 
     SerialUSB.println ("[Buoy] Initiating continuous transfer");
-    rf.send_debug ("[Buoy] All subsystems initiated.");
-    rf.send_debug ("[Buoy] Initiating continuos transfer.");
-    rf.start_continuous_transfer ();
+    rf->send_debug ("[Buoy] All subsystems initiated.");
+    rf->send_debug ("[Buoy] Initiating continuos transfer.");
+    rf->start_continuous_transfer ();
   }
 }
 

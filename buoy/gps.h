@@ -8,7 +8,8 @@
 
 # pragma once
 
-# include "ads1282.h"
+# include <stdint.h>
+# include "types.h"
 
 namespace Buoy {
   class GPS {
@@ -29,8 +30,8 @@ namespace Buoy {
       void parse ();
 
     public:
-      void * rf;
-      void * ad;
+      RF      * rf;
+      ADS1282 * ad;
 
       /* Telegram and data structures {{{ */
       typedef enum _GPS_TELEGRAM {
@@ -53,8 +54,8 @@ namespace Buoy {
 
         int     satellites;
         int     satellites_used[12];
-        byte    mode1;
-        byte    mode2;
+        uint8_t    mode1;
+        uint8_t    mode2;
 
         char    latitude[12];
         bool    north;    /* true = Latitude is north aligned, false = south */
@@ -77,7 +78,7 @@ namespace Buoy {
       GPS_DATA gps_data;
 
       GPS ();
-      void setup ();
+      void setup (BuoyMaster *);
       void loop ();
       static void sync_pulse_int ();
       void sync_pulse ();
@@ -182,8 +183,6 @@ namespace Buoy {
  * }}} */
   };
 }
-
-# define Gps (((GPS*)gps))
 
 /* vim: set filetype=arduino :  */
 

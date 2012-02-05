@@ -8,10 +8,11 @@
 
 # include <stdio.h>
 # include <string.h>
+# include "buoy.h"
 
 # include "gps.h"
-# include "buoy.h"
 # include "ads1282.h"
+# include "rf.h"
 
 using namespace std;
 
@@ -33,7 +34,10 @@ namespace Buoy {
     update_reference = 0;
   }
 
-  void GPS::setup () {
+  void GPS::setup (BuoyMaster *b) {
+    rf = b->rf;
+    ad = b->ad;
+    
     gps_buf[0] = 0;
     gps_buf_pos = 0;
 
@@ -44,11 +48,11 @@ namespace Buoy {
     pinMode (GPS_SYNC_PIN, INPUT);
     attachInterrupt (GPS_SYNC_PIN, &(GPS::sync_pulse_int), RISING);
 
-    Rf->send_debug ("[GPS] GPS subsystem initiated.");
+    rf->send_debug ("[GPS] GPS subsystem initiated.");
   }
 
   void GPS::sync_pulse_int () {
-    bu->gps.sync_pulse ();
+    bu->gps->sync_pulse ();
   }
 
   void GPS::sync_pulse () {
@@ -81,12 +85,12 @@ namespace Buoy {
 
   void GPS::roll_reference () {
     /* Change referencesecond to latest */
-    Rf->send_debug ("[GPS] Roll reference.");
+    rf->send_debug ("[GPS] Roll reference.");
     microdelta = microdelta - (1e6 * (lastsecond - referencesecond));
     previous_reference = referencesecond;
     referencesecond = lastsecond;
     update_reference = true; // Signal to store that new reference is available
-    update_reference_position = Ad->position;
+    update_reference_position = ad->position;
     HAS_SYNC_REFERENCE = true;
   }
 
@@ -146,10 +150,10 @@ namespace Buoy {
     if (IN_OVERFLOW && ((microdelta - micros()) > 20e6))
     {
       /* Set new reference using internal clock */
-      Rf->send_debug ("[GPS] [**] Roll reference: Manual.");
+      rf->send_debug ("[GPS] [**] Roll reference: Manual.");
       referencesecond += time_from_reference () / 1e6;
       update_reference = true; // Signal to store that new reference is available
-      update_reference_position = Ad->position;
+      update_reference_position = ad->position;
       microdelta = micros ();
       IN_OVERFLOW = false;
       HAS_SYNC    = false;

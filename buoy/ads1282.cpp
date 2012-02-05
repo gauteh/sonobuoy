@@ -13,6 +13,8 @@
 
 # include "buoy.h"
 # include "ads1282.h"
+# include "gps.h"
+# include "rf.h"
 
 using namespace std;
 
@@ -46,8 +48,10 @@ namespace Buoy {
     // }}}
   }
 
-  void ADS1282::setup () {
+  void ADS1282::setup (BuoyMaster *b) {
     // Set up interface and ADS1282 {{{
+    rf = b->rf;
+    gps = b->gps;
 
     /* Setup AD and get ready for data */
 # if DIRECT_SERIAL
@@ -75,7 +79,7 @@ namespace Buoy {
 
     attachInterrupt (AD_nDRDY,&(ADS1282::drdy), FALLING);
 
-    Rf->send_debug ("[AD] ADS1282 subsystem initiated.");
+    rf->send_debug ("[AD] ADS1282 subsystem initiated.");
     // }}}
   }
 
@@ -481,7 +485,7 @@ namespace Buoy {
   // Acquire {{{
   void ADS1282::drdy () {
     /* Static wrapper function for interrupt */
-    bu->ad.acquire ();
+    bu->ad->acquire ();
   }
 
   void ADS1282::acquire () {
@@ -508,8 +512,8 @@ namespace Buoy {
      */
 
     /* Fill batch */
-    values[bu->ad.position] = value;
-    times [bu->ad.position] = micros(); // Does not change value within interrupt
+    values[position] = value;
+    times [position] = micros(); // Does not change value within interrupt
 
     position++;
     totalsamples++;
@@ -522,9 +526,9 @@ namespace Buoy {
       position %= QUEUE_LENGTH; // Roll over queue position
 
       /* Reset update_reference if it is in new active batch */
-      if (Gps->update_reference && (Gps->update_reference_position >= position &&
-          Gps->update_reference_position < (position + BATCH_LENGTH)))
-        Gps->update_reference = false;
+      if (gps->update_reference && (gps->update_reference_position >= position &&
+          gps->update_reference_position < (position + BATCH_LENGTH)))
+        gps->update_reference = false;
     }
   }
 

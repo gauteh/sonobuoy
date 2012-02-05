@@ -9,6 +9,7 @@
 # include <string.h>
 # include "wirish.h"
 
+# include "buoy.h"
 # include "rf.h"
 # include "ads1282.h"
 # include "gps.h"
@@ -23,7 +24,10 @@ namespace Buoy {
     rf = this;
   }
 
-  void RF::setup () {
+  void RF::setup (BuoyMaster *b) {
+    ad = b->ad;
+    gps = b->gps;
+
     RF_Serial.begin (RF_BAUDRATE);
     send_debug ("[RF] RF subsystem initiated.");
   }
@@ -34,9 +38,9 @@ namespace Buoy {
 
     /* Loop must run at least 2x speed (Nyquist) of batchfilltime */
     if (continuous_transfer) {
-      if (Ad->batchready != lastbatch) {
+      if (ad->batchready != lastbatch) {
        ad_message (AD_DATA_BATCH);
-       lastbatch = Ad->batchready;
+       lastbatch = ad->batchready;
       }
     }
   }
@@ -70,7 +74,7 @@ namespace Buoy {
     {
       case AD_STATUS:
         // $AD,S,[queue position], [queue fill time],[value],[config]*CS
-        sprintf (buf, "$AD,S,%lu,%lu,0x%08lX,0x%08hX*", Ad->position, Ad->batchfilltime, Ad->value, Ad->reg.raw[1]);
+        sprintf (buf, "$AD,S,%lu,%lu,0x%08lX,0x%08hX*", ad->position, ad->batchfilltime, ad->value, ad->reg.raw[1]);
         APPEND_CSUM (buf);
 
         RF_Serial.println (buf);
@@ -99,16 +103,16 @@ namespace Buoy {
 
          */
         {
-          uint32_t start =  ((Ad->batchready + BATCHES - 1) % BATCHES) * BATCH_LENGTH;
+          uint32_t start =  ((ad->batchready + BATCHES - 1) % BATCHES) * BATCH_LENGTH;
           uint32_t length = BATCH_LENGTH;
-          uint32_t ref = Gps->referencesecond;
+          uint32_t ref = gps->referencesecond;
           bool go = true;
           bool update_ref = false;
 
-          if (Gps->update_reference && Gps->update_reference_position > start && Gps->update_reference_position < (start + BATCH_LENGTH))
+          if (gps->update_reference && gps->update_reference_position > start && gps->update_reference_position < (start + BATCH_LENGTH))
           {
-            length = Gps->update_reference_position - start;
-            ref = Gps->previous_reference;
+            length = gps->update_reference_position - start;
+            ref = gps->previous_reference;
             update_ref = true;
           }
 
@@ -129,7 +133,7 @@ namespace Buoy {
 
             for (uint32_t i = 0; i < length; i++)
             {
-              s = Ad->values[start + i];
+              s = ad->values[start + i];
               /* MSB first (big endian), means concatenating bytes on RX will
                * result in LSB first; little endian. */
               RF_Serial.write ((byte*)(&s), 4);
@@ -148,7 +152,7 @@ namespace Buoy {
             uint32_t t = 0;
             for (uint32_t i = 0; i < length; i++)
             {
-              t = Ad->times[start + i];
+              t = ad->times[start + i];
 
               /* Writes MSB first */
               RF_Serial.write ((byte*)(&t), 4);
@@ -174,7 +178,7 @@ namespace Buoy {
             if (update_ref) {
               start = start + length;
               length = BATCH_LENGTH - length;
-              ref = Gps->referencesecond;
+              ref = gps->referencesecond;
               update_ref = false;
               send_debug ("[RF] Sending last part of batch (updated reference).");
             } else {
@@ -198,7 +202,7 @@ namespace Buoy {
       case GPS_STATUS:
         // $GPS,S,[lasttype],[telegrams received],[lasttelegram],Lat,Lon,unixtime,time,date,Valid,HAS_TIME,HAS_SYNC,HAS_SYNC_REFERENCE*CS
         // Valid: Y = Yes, N = No
-        sprintf (buf, "$GPS,S,%d,%d,%s,%c,%s,%c,%lu,%lu,%02d%02d%02d,%c,%c,%c,%c*", Gps->gps_data.lasttype, Gps->gps_data.received, Gps->gps_data.latitude, (Gps->gps_data.north ? 'N' : 'S'), Gps->gps_data.longitude, (Gps->gps_data.east ? 'E' : 'W'), Gps->lastsecond, Gps->gps_data.time, Gps->gps_data.day, Gps->gps_data.month, Gps->gps_data.year, (Gps->gps_data.valid ? 'Y' : 'N'), (Gps->HAS_TIME ? 'Y' : 'N'), (Gps->HAS_SYNC ? 'Y' : 'N'), (Gps->HAS_SYNC_REFERENCE ? 'Y' : 'N'));
+        sprintf (buf, "$GPS,S,%d,%d,%s,%c,%s,%c,%lu,%lu,%02d%02d%02d,%c,%c,%c,%c*", gps->gps_data.lasttype, gps->gps_data.received, gps->gps_data.latitude, (gps->gps_data.north ? 'N' : 'S'), gps->gps_data.longitude, (gps->gps_data.east ? 'E' : 'W'), gps->lastsecond, gps->gps_data.time, gps->gps_data.day, gps->gps_data.month, gps->gps_data.year, (gps->gps_data.valid ? 'Y' : 'N'), (gps->HAS_TIME ? 'Y' : 'N'), (gps->HAS_SYNC ? 'Y' : 'N'), (gps->HAS_SYNC_REFERENCE ? 'Y' : 'N'));
 
         break;
 

@@ -7,7 +7,8 @@
 
 # pragma once
 
-# include "ads1282.h"
+# include <stdint.h>
+# include "types.h"
 
 namespace Buoy {
 # define RF_BAUDRATE 115200
@@ -42,8 +43,8 @@ namespace Buoy {
     private:
       void *rf;
     public:
-      void *ad;
-      void *gps;
+      ADS1282 *ad;
+      GPS     *gps;
 
       typedef enum _RF_AD_MESSAGE {
         AD_STATUS = 0,
@@ -56,7 +57,7 @@ namespace Buoy {
       } RF_GPS_MESSAGE;
 
       RF ();
-      void setup ();
+      void setup (BuoyMaster *);
       void loop ();
 
       /* Send data as soon as a batch is ready */
@@ -79,8 +80,6 @@ namespace Buoy {
       bool test_checksum (char *);
   };
 }
-
-# define Rf (((RF*)rf))
 
 /* vim: set filetype=arduino :  */
 

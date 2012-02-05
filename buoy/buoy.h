@@ -8,10 +8,7 @@
 # pragma once
 
 # include "wirish.h"
-
-# include "gps.h"
-# include "rf.h"
-# include "ads1282.h"
+# include "types.h"
 
 /* Version and settings */
 
@@ -22,9 +19,10 @@ namespace Buoy {
   class BuoyMaster {
     public:
 
-      GPS gps;
-      ADS1282 ad;
-      RF rf;
+      GPS       *gps;
+      ADS1282   *ad;
+      RF        *rf;
+      Store     *store;
 
 
       BuoyMaster ();

@@ -76,8 +76,8 @@ namespace Buoy {
   class ADS1282 {
     private:
     public:
-      void * rf;
-      void * gps;
+      RF   * rf;
+      GPS  * gps;
 
       typedef struct _control {
         /* Control registers of U7 / PCA9535RGE {{{ */
@@ -219,7 +219,7 @@ namespace Buoy {
       volatile uint32_t totalsamples;
 
       ADS1282 ();
-      void setup ();
+      void setup (BuoyMaster *);
       void configure ();
       void reset ();
       void reset_spi ();
@@ -242,8 +242,6 @@ namespace Buoy {
 
   };
 }
-
-# define Ad (((ADS1282*)ad))
 
 /* vim: set filetype=arduino :  */
 
