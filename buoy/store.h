@@ -8,21 +8,24 @@
 # pragma once
 
 # include "wirish.h"
+# include "HardwareSPI.h"
 # include "types.h"
 # include "ads1282.h"
+# include "gps.h"
 # include "SdFat.h"
 
-/* SDIO, connected to SD socket.
- *
- * SDIO_D0          = 98
- * SDIO_D1          = 99
- * SDIO_D2          = 111
- * SDIO_D3          = 112
- *
- * SDIO_CK (clock)  = 113
- * SDIO_CMD         = 116
- *
- * SPI mode, pins:
+/* SDIO, connected to SD socket. */
+
+# define SDIO_D0   98
+# define SDIO_D1   99
+# define SDIO_D2  111
+# define SDIO_D3  112
+
+# define SDIO_CK  113
+# define SDIO_CMD 116
+
+
+/* SPI mode, pins:
  * CS     = CD (card detect) / SDIO_D3 (Data 3)
  * DI     = SDIO_CMD
  * SCLK   = SDIO_CK
@@ -38,6 +41,9 @@ namespace Buoy {
     public:
       RF      *rf;
       ADS1282 *ad;
+      GPS     *gps;
+
+      HardwareSPI *spi;
 
       SdFat sd;
       bool  SD_AVAILABLE;

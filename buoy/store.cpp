@@ -5,8 +5,14 @@
  *
  */
 
+# include "wirish.h"
+# include "HardwareSPI.h"
 # include "store.h"
 # include "buoy.h"
+# include "rf.h"
+# include "ads1282.h"
+
+# include <stdio.h>
 
 namespace Buoy {
   Store::Store () {
@@ -16,46 +22,50 @@ namespace Buoy {
   void Store::setup (BuoyMaster *b) {
     rf = b->rf;
     ad = b->ad;
+    gps = b->gps;
 
     pinMode (SD_CS, OUTPUT);
     pinMode (SD_MOSI, OUTPUT);
     pinMode (SD_MISO, INPUT);
     pinMode (SD_SCLK, OUTPUT);
 
+    spi = new HardwareSPI(1);
+    spi.begin (SPI_18MHZ, MSBFIRST, 0);
+
     lastsd = millis ();
-    sd_init ();
+    init ();
   }
 
   void Store::init ()
   {
-    SD_AVAILABLE = (sd.init (SPI_FULL_SPEED, SD_SS) & (sd.card()->cardSize() > 0));
+    SD_AVAILABLE = (sd.init (, SD_CS) & (sd.card()->cardSize() > 0));
     SD_AVAILABLE &= (sd.card()->errorCode () == 0);
 
     if (SD_AVAILABLE)
     {
-      rf_send_debug ("SD card ready.");
+      rf->send_debug ("SD card ready.");
 
       sd.chdir ("/", true);
-      sd_open_index ();
-      sd_open_data ();
+      open_index ();
+      open_data ();
 
     } else {
-      rf_send_debug ("Could not init SD.");
+      rf->send_debug ("Could not init SD.");
       current_index.id = 0;
     }
   }
 
   void Store::open_index ()
   {
-    int n = 0;
+    uint32_t n = 0;
 
-    rf_send_debug ("Opening index..");
+    rf->send_debug ("Opening index..");
 
-    ulong i;
+    uint32_t i;
     if (sd.exists("LASTID.LON")) {
       SdFile fl ("LASTID.LON", O_READ);
 
-      n = fl.read (reinterpret_cast<char*>(&i), sizeof(ulong));
+      n = fl.read (reinterpret_cast<char*>(&i), sizeof(uint32_t));
 
       if (n < sizeof(i)) i = 1;
 
@@ -65,11 +75,11 @@ namespace Buoy {
     }
 
     rf_send_debug_f ("Last id: %lu..", i);
-    sd_next_index (i);
+    next_index (i);
   }
 
   /* Open next index file */
-  void Store::next_index (ulong i)
+  void Store::next_index (uint32_t i)
   {
     // i is LASTID
 
@@ -98,8 +108,8 @@ namespace Buoy {
         newi = true; /* Found new index file at id I */
 
 # if DIRECT_SERIAL
-        Serial.print ("Found free index at: ");
-        Serial.println (i);
+        SerialUSB.print ("Found free index at: ");
+        SerialUSB.println (i);
 # endif
         rf_send_debug_f ("Next index: %lu", i);
 
@@ -155,7 +165,7 @@ namespace Buoy {
   /* Open new index and data file */
   void Store::roll_data_file ()
   {
-    rf_send_debug ("Syncing index and data and rolling..");
+    rf->send_debug ("Syncing index and data and rolling..");
 
     /* Truncate data file to actual size */
     //sd_data.truncate (sd_data.curPosition ());
@@ -182,22 +192,22 @@ namespace Buoy {
     }
 
     /* Check if we have room for samples in store */
-    if (current_index.samples > (MAX_SAMPLES_PER_FILE - (AD_QUEUE_LENGTH / 2)))
+    if (current_index.samples > (MAX_SAMPLES_PER_FILE - BATCH_LENGTH))
     {
       roll_data_file ();
     }
 
 
     /* Check if we have exceeeded this store */
-    if (sd_data.curPosition () > (SD_DATA_FILE_SIZE - (AD_QUEUE_LENGTH / 2 * (SAMPLE_LENGTH + TIMESTAMP_LENGTH))))
+    if (sd_data.curPosition () > (SD_DATA_FILE_SIZE - (BATCH_LENGTH * (SAMPLE_LENGTH + TIMESTAMP_LENGTH))))
     {
       roll_data_file ();
     }
 
     /* In case we are in update_reference, check if we have space for
      * one more reference */
-    if (update_reference) {
-      if (sd_data.curPosition () > (SD_DATA_FILE_SIZE - (AD_QUEUE_LENGTH / 2 * (SAMPLE_LENGTH + TIMESTAMP_LENGTH)) - SD_REFERENCE_LENGTH))
+    if (gps->update_reference) {
+      if (sd_data.curPosition () > (SD_DATA_FILE_SIZE - (BATCH_LENGTH * (SAMPLE_LENGTH + TIMESTAMP_LENGTH)) - SD_REFERENCE_LENGTH))
       {
         roll_data_file ();
       }
@@ -205,26 +215,25 @@ namespace Buoy {
 
     /* Write first reference since this is a new file */
     if (!referencewritten) {
-      write_reference (referencesecond);
+      write_reference (gps->referencesecond);
     }
 
     /* Writing entries */
     rf_send_debug_f ("Writing entries to data file from sample: %lu", current_index.samples);
-    uint s = (batchready == 1 ? 0 : (AD_QUEUE_LENGTH / 2));
-    for (uint i = s; i <  s + (AD_QUEUE_LENGTH / 2); i++)
+    uint32_t s = (ad->batchready == 1 ? 0 : (BATCH_LENGTH));
+    for (uint32_t i = s; i <  s + (BATCH_LENGTH); i++)
     {
       /* Write reference at correct position */
-      if (update_reference && i == update_reference_qposition) {
-        rf_send_debug_f ("In-loop reference queue: %d", update_reference_qposition);
-        write_reference (referencesecond);
-        update_reference = false;
+      if (gps->update_reference && i == gps->update_reference_position) {
+        rf_send_debug_f ("In-loop reference queue: %lu", gps->update_reference_position);
+        write_reference (gps->referencesecond);
       }
 
-      sd_data.write (reinterpret_cast<char*>((ulong*) &(ad_time[i])), sizeof(ulong));
-      sd_data.write (reinterpret_cast<char*>((byte*)  &(ad_queue[i])), sizeof(sample));
+      sd_data.write (reinterpret_cast<char*>((uint32_t*) &(ad->times[i])), sizeof(uint32_t));
+      sd_data.write (reinterpret_cast<char*>((uint32_t*)  &(ad->values[i])), sizeof(uint32_t));
     }
 
-    current_index.samples += (AD_QUEUE_LENGTH / 2);
+    current_index.samples += BATCH_LENGTH;
 
     sd_data.sync ();
     SD_AVAILABLE &= (sd.card()->errorCode () == 0);
@@ -242,7 +251,7 @@ namespace Buoy {
     referencewritten = false;
   }
 
-  void Store::write_reference (ulong ref)
+  void Store::write_reference (uint32_t ref)
   {
     rf_send_debug_f ("Write reference: %lu", ref);
     if (SD_AVAILABLE)
@@ -261,15 +270,15 @@ namespace Buoy {
       current_index.refs[current_index.nrefs] = sd_data.curPosition ();
 
       /* Pad with 0 */
-      for (int i = 0; i < (3 * (SAMPLE_LENGTH + TIMESTAMP_LENGTH)); i++)
+      for (uint32_t i = 0; i < (3 * (SAMPLE_LENGTH + TIMESTAMP_LENGTH)); i++)
         sd_data.write ((byte)0);
 
-      sd_data.write (reinterpret_cast<char*>(&(current_index.nrefs)), sizeof(ulong));
-      sd_data.write (reinterpret_cast<char*>(&(ref)), sizeof(ulong));
-      sd_data.write (reinterpret_cast<char*>(&(sd_status)), sizeof(ulong));
+      sd_data.write (reinterpret_cast<char*>(&(current_index.nrefs)), sizeof(uint32_t));
+      sd_data.write (reinterpret_cast<char*>(&(ref)), sizeof(uint32_t));
+      sd_data.write (reinterpret_cast<char*>(&(sd_status)), sizeof(uint32_t));
 
       /* Pad with 0 */
-      for (int i = 0; i < (3 * (SAMPLE_LENGTH + TIMESTAMP_LENGTH)); i++)
+      for (uint32_t i = 0; i < (3 * (SAMPLE_LENGTH + TIMESTAMP_LENGTH)); i++)
         sd_data.write ((byte)0);
 
       current_index.nrefs++;
@@ -282,7 +291,7 @@ namespace Buoy {
   void Store::loop ()
   {
     /* Try to set up SD card, 5 sec delay  */
-    if (!SD_AVAILABLE & (millis () - lastsd) > 5000) {
+    if (!SD_AVAILABLE && (millis () - lastsd) > 5000) {
       rf_send_debug_f ("SD error code: %02X.", sd.card ()->errorCode ());
       init ();
       lastsd = millis ();

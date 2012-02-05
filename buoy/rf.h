@@ -22,7 +22,7 @@ namespace Buoy {
 # define F_CSUM "%02hX"
 # define APPEND_CSUM(buf) sprintf(&buf[strlen(buf)], F_CSUM, gen_checksum(buf))
 
-# define rf_send_debug_f(args...) { char buf[RF_BUFLEN - 5 - 4]; sprintf(buf, args); Rf->send_debug (buf); }
+# define rf_send_debug_f(args...) { char buf[RF_BUFLEN - 5 - 4]; sprintf(buf, args); rf->send_debug (buf); }
 
 /* Protocol
  *
