@@ -24,15 +24,19 @@ namespace Buoy {
     ad = b->ad;
     gps = b->gps;
 
+    /*
     pinMode (SD_CS, OUTPUT);
     pinMode (SD_MOSI, OUTPUT);
     pinMode (SD_MISO, INPUT);
     pinMode (SD_SCLK, OUTPUT);
+    */
 
-    //spi = new HardwareSPI(1);
-    //spi.begin (SPI_18MHZ, MSBFIRST, 0);
+    spi = new HardwareSPI(SD_SPI);
+    spi->begin (SPI_281_250KHZ, MSBFIRST, 0);
 
     lastsd = millis ();
+    lastbatch = ad->batchready;
+    continuous_write = false;
     init ();
 
     rf->send_debug ("[SD] Store subsystem initiated.");
@@ -40,6 +44,8 @@ namespace Buoy {
 
   void Store::init ()
   {
+    rf->send_debug ("[SD] Init SD card.");
+    SerialUSB.println ("[SD] Init SD card.");
     SD_AVAILABLE = (sd.init (spi, SD_CS) & (sd.card()->cardSize() > 0));
     SD_AVAILABLE &= (sd.card()->errorCode () == 0);
 
@@ -221,7 +227,10 @@ namespace Buoy {
 
     /* Writing entries */
     rf_send_debug_f ("Writing entries to data file from sample: %lu", current_index.samples);
-    uint32_t s = (ad->batchready == 1 ? 0 : (BATCH_LENGTH));
+
+    uint32_t s =  lastbatch * BATCH_LENGTH;
+    lastbatch  =  (lastbatch + 1) % BATCHES;
+
     for (uint32_t i = s; i <  s + (BATCH_LENGTH); i++)
     {
       /* Write reference at correct position */
@@ -297,6 +306,22 @@ namespace Buoy {
       init ();
       lastsd = millis ();
     }
+
+    /* Check if new batch is ready */
+    /* Loop must run at least 2x speed (Nyquist) of batchfilltime */
+    if (SD_AVAILABLE && continuous_write) {
+      if (ad->batchready != lastbatch) {
+        write_batch ();
+      }
+    }
+  }
+
+  void Store::start_continuous_write () {
+    continuous_write = true;
+  }
+
+  void Store::stop_continuous_write () {
+    continuous_write = false;
   }
 }
 

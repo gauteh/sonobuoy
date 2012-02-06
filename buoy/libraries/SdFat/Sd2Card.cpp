@@ -60,7 +60,6 @@ static inline __attribute__((always_inline))
 /** SPI send a byte */
 static void spiSend (uint8_t b) {
   SPIn->send (b);
-
 }
 //------------------------------------------------------------------------------
 /** SPI send block - only one call so force inline */
@@ -114,6 +113,7 @@ uint8_t Sd2Card::cardCommand(uint8_t cmd, uint32_t arg) {
  *         or zero if an error occurs.
  */
 uint32_t Sd2Card::cardSize() {
+  SerialUSB.println ("[Sd2Card] cardSize");
   csd_t csd;
   if (!readCSD(&csd)) return 0;
   if (csd.v1.csd_ver == 0) {
@@ -210,6 +210,7 @@ bool Sd2Card::eraseSingleBlockEnable() {
  * can be determined by calling errorCode() and errorData().
  */
 bool Sd2Card::init(HardwareSPI *s, uint8_t chipSelectPin) {
+  SPIn = s;
   errorCode_ = type_ = 0;
   chipSelectPin_ = chipSelectPin;
   // 16-bit init start time allows over a minute
@@ -227,6 +228,7 @@ bool Sd2Card::init(HardwareSPI *s, uint8_t chipSelectPin) {
   chipSelectHigh ();
 
   // must supply min of 74 clock cycles with CS high.
+  SerialUSB.println ("[Sd2Card] Init");
   for (uint8_t i = 0; i < 10; i++) spiSend(0XFF);
 
   // command to go idle in SPI mode
@@ -270,9 +272,11 @@ bool Sd2Card::init(HardwareSPI *s, uint8_t chipSelectPin) {
   }
   chipSelectHigh();
 
+  SerialUSB.println ("[Sd2Card] Done.");
   return true;
 
  fail:
+  SerialUSB.println ("Fail!");
   chipSelectHigh();
   return false;
 }

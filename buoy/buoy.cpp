@@ -27,6 +27,7 @@ namespace Buoy {
       ad->loop ();
       rf->loop ();
       gps->loop ();
+      //store->loop ();
 
       delay (10);
 
@@ -48,13 +49,16 @@ namespace Buoy {
     ad = new ADS1282 ();
     ad->setup (this);
 
+    /*
     store = new Store ();
     store->setup(this);
+    */
 
     SerialUSB.println ("[Buoy] Initiating continuous transfer");
     rf->send_debug ("[Buoy] All subsystems initiated.");
-    rf->send_debug ("[Buoy] Initiating continuos transfer.");
+    rf->send_debug ("[Buoy] Initiating continuos transfer and write.");
     rf->start_continuous_transfer ();
+    //store->start_continuous_write ();
   }
 }
 

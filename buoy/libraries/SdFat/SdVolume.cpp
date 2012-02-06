@@ -18,6 +18,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 #include <SdVolume.h>
+#include "wirish.h"
 //------------------------------------------------------------------------------
 #if !USE_MULTIPLE_CARDS
 // raw block cache
@@ -319,6 +320,7 @@ int32_t SdVolume::freeClusterCount() {
  * FAT file system in the specified partition or an I/O error.
  */
 bool SdVolume::init(Sd2Card* dev, uint8_t part) {
+  SerialUSB.println ("[SdV] init");
   uint32_t totalBlocks;
   uint32_t volumeStartBlock = 0;
   fat32_boot_t* fbs;
@@ -360,6 +362,7 @@ bool SdVolume::init(Sd2Card* dev, uint8_t part) {
   while (blocksPerCluster_ != (1 << clusterSizeShift_)) {
     // error if not power of 2
     if (clusterSizeShift_++ > 7) goto fail;
+    SerialUSB.println ("loop");
   }
   blocksPerFat_ = fbs->sectorsPerFat16 ?
                     fbs->sectorsPerFat16 : fbs->sectorsPerFat32;
@@ -394,8 +397,10 @@ bool SdVolume::init(Sd2Card* dev, uint8_t part) {
     rootDirStart_ = fbs->fat32RootCluster;
     fatType_ = 32;
   }
+  SerialUSB.println ("[SdV] done");
   return true;
 
  fail:
+  SerialUSB.println ("[SdV] fail");
   return false;
 }

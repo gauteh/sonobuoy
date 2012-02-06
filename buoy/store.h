@@ -31,10 +31,16 @@
  * SCLK   = SDIO_CK
  * DO     = SDIO_D0 (Data 0)
  */
+/*
 # define SD_CS    SDIO_D3
 # define SD_MOSI  SDIO_CMD
 # define SD_MISO  SDIO_D0
 # define SD_SCLK  SDIO_CK
+*/
+
+/* SPI 2 */
+# define SD_SPI 2
+# define SD_CS  2
 
 namespace Buoy {
   class Store {
@@ -126,6 +132,9 @@ namespace Buoy {
       Index current_index;
       SdFile sd_data;
 
+      bool     continuous_write;
+      uint32_t lastbatch;
+
       Store ();
 
       void setup (BuoyMaster *);
@@ -140,6 +149,9 @@ namespace Buoy {
 
       void write_batch ();
       void write_reference (uint32_t);
+
+      void start_continuous_write ();
+      void stop_continuous_write ();
   };
 }
 
