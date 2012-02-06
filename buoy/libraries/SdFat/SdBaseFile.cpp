@@ -309,7 +309,9 @@ void SdBaseFile::getpos(fpos_t* pos) {
  * LS_R - Recursive list of subdirectories.
  */
 void SdBaseFile::ls(uint8_t flags) {
+# if DIRECT_SERIAL
   ls(&SerialUSB, flags, 0);
+# endif
 }
 //------------------------------------------------------------------------------
 /** List directory contents.
@@ -953,7 +955,9 @@ int SdBaseFile::peek() {
  */
 void SdBaseFile::printDirName(const dir_t& dir,
   uint8_t width, bool printSlash) {
+# if DIRECT_SERIAL
   printDirName(&SerialUSB, dir, width, printSlash);
+# endif
 }
 //------------------------------------------------------------------------------
 /** %Print the name field of a directory entry in 8.3 format.
@@ -997,7 +1001,9 @@ static void print2u(Print* pr, uint8_t v) {
  * \param[in] fatDate The date field from a directory entry.
  */
 void SdBaseFile::printFatDate(uint16_t fatDate) {
+# if DIRECT_SERIAL
   printFatDate(&SerialUSB, fatDate);
+# endif
 }
 //------------------------------------------------------------------------------
 /** %Print a directory date field.
@@ -1022,7 +1028,9 @@ void SdBaseFile::printFatDate(Print* pr, uint16_t fatDate) {
  * \param[in] fatTime The time field from a directory entry.
  */
 void SdBaseFile::printFatTime(uint16_t fatTime) {
+# if DIRECT_SERIAL
   printFatTime(&SerialUSB, fatTime);
+# endif
 }
 //------------------------------------------------------------------------------
 /** %Print a directory time field.
@@ -1048,7 +1056,9 @@ void SdBaseFile::printFatTime(Print* pr, uint16_t fatTime) {
 bool SdBaseFile::printName() {
   char name[13];
   if (!getFilename(name)) return false;
+# if DIRECT_SERIAL
   SerialUSB.print(name);
+# endif
   return true;
 }
 //------------------------------------------------------------------------------

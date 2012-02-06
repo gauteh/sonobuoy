@@ -107,7 +107,9 @@ void SdFat::errorHalt(char const* msg) {
 void SdFat::errorPrint() {
   if (!card_.errorCode()) return;
   PgmPrint("SD errorCode: 0X");
+# if DIRECT_SERIAL
   SerialUSB.println(card_.errorCode(), HEX);
+# endif
 }
 //------------------------------------------------------------------------------
 /** %Print msg, any SD error code.
@@ -116,7 +118,9 @@ void SdFat::errorPrint() {
  */
 void SdFat::errorPrint(char const* msg) {
   PgmPrint("error: ");
+# if DIRECT_SERIAL
   SerialUSB.println(msg);
+# endif
   errorPrint();
 }
 //------------------------------------------------------------------------------
@@ -162,7 +166,9 @@ void SdFat::initErrorHalt() {
  * \param[in] msg Message to print.
  */
 void SdFat::initErrorHalt(char const *msg) {
+# if DIRECT_SERIAL
   SerialUSB.println(msg);
+# endif
   initErrorHalt();
 }
 //------------------------------------------------------------------------------
@@ -193,7 +199,9 @@ void SdFat::initErrorPrint() {
  * \param[in] msg Message to print.
  */
 void SdFat::initErrorPrint(char const *msg) {
+# if DIRECT_SERIAL
   SerialUSB.println(msg);
+# endif
   initErrorPrint();
 }
 //------------------------------------------------------------------------------
@@ -213,7 +221,9 @@ void SdFat::initErrorPrint(char const *msg) {
  * LS_R - Recursive list of subdirectories.
  */
 void SdFat::ls(uint8_t flags) {
+# if DIRECT_SERIAL
   vwd_.ls(&SerialUSB, flags);
+# endif
 }
 //------------------------------------------------------------------------------
 /** List the directory contents of the volume working directory to Serial.

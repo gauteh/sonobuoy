@@ -113,7 +113,9 @@ uint8_t Sd2Card::cardCommand(uint8_t cmd, uint32_t arg) {
  *         or zero if an error occurs.
  */
 uint32_t Sd2Card::cardSize() {
+# if DIRECT_SERIAL
   SerialUSB.println ("[Sd2Card] cardSize");
+# endif
   csd_t csd;
   if (!readCSD(&csd)) return 0;
   if (csd.v1.csd_ver == 0) {
@@ -228,7 +230,9 @@ bool Sd2Card::init(HardwareSPI *s, uint8_t chipSelectPin) {
   chipSelectHigh ();
 
   // must supply min of 74 clock cycles with CS high.
+# if DIRECT_SERIAL
   SerialUSB.println ("[Sd2Card] Init");
+# endif
   for (uint8_t i = 0; i < 10; i++) spiSend(0XFF);
 
   // command to go idle in SPI mode
@@ -272,11 +276,15 @@ bool Sd2Card::init(HardwareSPI *s, uint8_t chipSelectPin) {
   }
   chipSelectHigh();
 
+# if DIRECT_SERIAL
   SerialUSB.println ("[Sd2Card] Done.");
+# endif
   return true;
 
  fail:
+# if DIRECT_SERIAL
   SerialUSB.println ("Fail!");
+# endif
   chipSelectHigh();
   return false;
 }

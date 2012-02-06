@@ -45,7 +45,9 @@ namespace Buoy {
   void Store::init ()
   {
     rf->send_debug ("[SD] Init SD card.");
+# if DIRECT_SERIAL
     SerialUSB.println ("[SD] Init SD card.");
+# endif
     SD_AVAILABLE = (sd.init (spi, SD_CS) & (sd.card()->cardSize() > 0));
     SD_AVAILABLE &= (sd.card()->errorCode () == 0);
 

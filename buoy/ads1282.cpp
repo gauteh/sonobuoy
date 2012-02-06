@@ -111,7 +111,9 @@ namespace Buoy {
 
   void ADS1282::configure () {
     // Configure {{{
+# if DIRECT_SERIAL
     SerialUSB.println ("[AD] Configuring ADS1282..");
+# endif
 
     int n = 0;
 
@@ -155,7 +157,9 @@ namespace Buoy {
     reset ();
     delay (100);
 
+# if DIRECT_SERIAL
     SerialUSB.println ("[AD] Reset by command and stop read data continuous..");
+# endif
     send_command (RESET);
     delay (100);
 
@@ -173,7 +177,9 @@ namespace Buoy {
     send_command (RDATAC);
 
 
+# if DIRECT_SERIAL
     SerialUSB.println ("[AD] Configuration done.");
+# endif
     // }}}
   }
 
@@ -205,34 +211,40 @@ namespace Buoy {
           r = Wire.receive ();
           //state.pmode = (r & AD_I2C_PMODE);
           state.reset = (r & AD_I2C_RESET);
+# if DIRECT_SERIAL
           SerialUSB.print   ("[AD] Sync: ");
           SerialUSB.print   ((state.sync ? "True " : "False"));
           SerialUSB.print   (", Reset: ");
           SerialUSB.print   ((state.reset ? "True " : "False"));
           SerialUSB.print   (", Power down: ");
           SerialUSB.println ((state.pdwn ? "True " : "False"));
+# endif
           break;
 
         case POLARITY0:
           state.polarity0 = Wire.receive ();
         case POLARITY1:
           state.polarity1 = Wire.receive ();
+# if DIRECT_SERIAL
           SerialUSB.print   ("[AD] PCA9535 polarity: (0)[0b");
           SerialUSB.print   (state.polarity0, BIN);
           SerialUSB.print   ("] (1)[0b");
           SerialUSB.print   (state.polarity1, BIN);
           SerialUSB.println ("]");
+# endif
           break;
 
         case CONTROL0:
           state.ports0 = Wire.receive ();
         case CONTROL1:
           state.ports1 = Wire.receive ();
+# if DIRECT_SERIAL
           SerialUSB.print   ("[AD] PCA9535 control:  (0)[0b");
           SerialUSB.print   (state.ports0, BIN);
           SerialUSB.print   ("] (1)[0b");
           SerialUSB.print   (state.ports1, BIN);
           SerialUSB.println ("]");
+# endif
           break;
 
         /* Skipping inputs and polarity inverts.. */
@@ -248,7 +260,9 @@ namespace Buoy {
 
   void ADS1282::reset_spi () {
     /* Reset SPI interface: Hold SCLK low for 64 nDRDY cycles  {{{*/
+# if DIRECT_SERIAL
     SerialUSB.println ("[AD] [SPI] Resetting SPI..");
+# endif
     digitalWrite (AD_SCLK, LOW);
 
     /* Make sure data is read continuously and nDRDY interrupt is detached */
@@ -263,7 +277,9 @@ namespace Buoy {
 
   void ADS1282::reset () {
     // Reset ADS1282 over I2C / U7 {{{
+# if DIRECT_SERIAL
     SerialUSB.println ("[AD] Resetting..");
+# endif
 
     digitalWrite (AD_SCLK, LOW); // Make sure SPI interface is reset
 
@@ -301,12 +317,15 @@ namespace Buoy {
     delay (100);
 
 
+# if DIRECT_SERIAL
     SerialUSB.println ("[AD] Reset done.");
+# endif
     // }}}
   }
 
   void ADS1282::send_command (COMMAND cmd, uint8_t start, uint8_t n) {
     /* Send SPI command to ADS1282 {{{ */
+# if DIRECT_SERIAL
     SerialUSB.print   ("[AD] [SPI] Sending command: [");
 
     // String representation of command {{{
@@ -348,6 +367,7 @@ namespace Buoy {
 
     SerialUSB.print   ("] 0b");
     SerialUSB.println ((uint8_t) (cmd + start), BIN);
+# endif
 
     switch (cmd) {
       case WAKEUP:
@@ -364,8 +384,10 @@ namespace Buoy {
 
       case RREG:
       case WREG:
+# if DIRECT_SERIAL
         SerialUSB.print   ("[AD] [SPI] Sending: 0b");
         SerialUSB.println ((uint8_t) (n), BIN);
+# endif
         shift_out ((uint8_t) (cmd + start));
         shift_out (n);
         break;
@@ -375,7 +397,9 @@ namespace Buoy {
 
   void ADS1282::read_registers () {
     /* Read registers of ADS1282, SDATAC must allready have been issued {{{ */
+# if DIRECT_SERIAL
     SerialUSB.println ("[AD] Reading registers..");
+# endif
     send_command (RREG, 0, 10);
 
     shift_in_n (reg.raw, 11);
@@ -386,6 +410,7 @@ namespace Buoy {
        * probably loosing MSB here though at the moment.. */
       //reg.raw[i] >>= 1;
 
+# if DIRECT_SERIAL
       SerialUSB.print   ("[AD] Register [");
       SerialUSB.print   (i);
       SerialUSB.print   ("] 0b");
@@ -393,6 +418,7 @@ namespace Buoy {
       SerialUSB.print   (" (0x");
       SerialUSB.print   (reg.raw[i], HEX);
       SerialUSB.println (")");
+# endif
 
       switch (i)
       {
@@ -448,14 +474,18 @@ namespace Buoy {
 
   void ADS1282::configure_registers () {
     /* Configure ADS1282 registers {{{ */
+# if DIRECT_SERIAL
     SerialUSB.println ("[AD] Configuring registers..");
+# endif
 
     // Config 0, changes from default:
     // - Sample rate: 250
 # define AD_CONFIG0 0b01000010
     send_command (WREG, 1, 0);
+# if DIRECT_SERIAL
     SerialUSB.print   ("[AD] [SPI] Sending: 0b");
     SerialUSB.println (AD_CONFIG0, BIN);
+# endif
     shift_out (AD_CONFIG0);
 
     // Config 1, changes from default:
@@ -472,11 +502,15 @@ namespace Buoy {
 # define AD_HPF1 0x03
 # define AD_HPF0 0x32
     send_command (WREG, 3, 1);
+# if DIRECT_SERIAL
     SerialUSB.print   ("[AD] [SPI] Sending: 0b");
     SerialUSB.println (AD_HPF0, BIN);
+# endif
     shift_out (AD_HPF0);
+# if DIRECT_SERIAL
     SerialUSB.print   ("[AD] [SPI] Sending: 0b");
     SerialUSB.println (AD_HPF1, BIN);
+# endif
     shift_out (AD_HPF1);
 
     // }}}
@@ -542,8 +576,10 @@ namespace Buoy {
     // Shift bits in (should wait min 100 ns)
     acquire ();
 
+# if DIRECT_SERIAL
     SerialUSB.print   ("[AD] Value: ");
     SerialUSB.println (value, HEX);
+# endif
   }
   // }}}
 

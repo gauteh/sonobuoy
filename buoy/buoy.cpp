@@ -54,7 +54,10 @@ namespace Buoy {
     store->setup(this);
     */
 
+
+# if DIRECT_SERIAL
     SerialUSB.println ("[Buoy] Initiating continuous transfer");
+# endif
     rf->send_debug ("[Buoy] All subsystems initiated.");
     rf->send_debug ("[Buoy] Initiating continuos transfer and write.");
     rf->start_continuous_transfer ();

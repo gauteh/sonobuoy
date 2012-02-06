@@ -320,7 +320,9 @@ int32_t SdVolume::freeClusterCount() {
  * FAT file system in the specified partition or an I/O error.
  */
 bool SdVolume::init(Sd2Card* dev, uint8_t part) {
+# if DIRECT_SERIAL
   SerialUSB.println ("[SdV] init");
+# endif
   uint32_t totalBlocks;
   uint32_t volumeStartBlock = 0;
   fat32_boot_t* fbs;
@@ -362,7 +364,9 @@ bool SdVolume::init(Sd2Card* dev, uint8_t part) {
   while (blocksPerCluster_ != (1 << clusterSizeShift_)) {
     // error if not power of 2
     if (clusterSizeShift_++ > 7) goto fail;
+# if DIRECT_SERIAL
     SerialUSB.println ("loop");
+# endif
   }
   blocksPerFat_ = fbs->sectorsPerFat16 ?
                     fbs->sectorsPerFat16 : fbs->sectorsPerFat32;
@@ -397,10 +401,14 @@ bool SdVolume::init(Sd2Card* dev, uint8_t part) {
     rootDirStart_ = fbs->fat32RootCluster;
     fatType_ = 32;
   }
+# if DIRECT_SERIAL
   SerialUSB.println ("[SdV] done");
+# endif
   return true;
 
  fail:
+# if DIRECT_SERIAL
   SerialUSB.println ("[SdV] fail");
+# endif
   return false;
 }

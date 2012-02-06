@@ -24,10 +24,18 @@
  * \brief Useful utility functions.
  */
 #include <WProgram.h>
+# if DIRECT_SERIAL
 /** Store and print a string in flash memory.*/
 #define PgmPrint(x) SerialUSB.print(x)
 /** Store and print a string in flash memory followed by a CR/LF.*/
 #define PgmPrintln(x) SerialUSB.println(x)
+# else
+/** Store and print a string in flash memory.*/
+#define PgmPrint(x) 
+/** Store and print a string in flash memory followed by a CR/LF.*/
+#define PgmPrintln(x)
+
+# endif
 
 namespace SdFatUtil {
   int FreeRam();
