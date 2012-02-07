@@ -1,5 +1,5 @@
 
-  * Upload 'snap/rf200.py' to each RF200 node through Synapse Portal
+  * Upload 'snap/rf200.py' to each RF200 node through Synapse Portal.
 
   * Maple C++ code goes on Maple Native, check Leaflaps Maple Native
     quickstart with Unix tools.
