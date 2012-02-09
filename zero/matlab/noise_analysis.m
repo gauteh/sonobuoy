@@ -1,6 +1,6 @@
 % Calculate noise
 
-data = load('One.log');
+%data = load('One.log');
 
 % Last bit is redundant sign bit
 
