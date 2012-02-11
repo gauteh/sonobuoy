@@ -50,8 +50,10 @@ namespace Buoy {
       GPS     *gps;
 
       HardwareSPI *spi;
+      Sd2Card     card;
+      SdVolume    volume;
+      SdFile      root;
 
-      SdFat sd;
       bool  SD_AVAILABLE;
       uint32_t lastsd;
       uint32_t sd_status;
