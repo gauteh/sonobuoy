@@ -27,7 +27,7 @@ namespace Buoy {
       ad->loop ();
       rf->loop ();
       gps->loop ();
-      //store->loop ();
+      store->loop ();
 
       delay (10);
 
@@ -49,10 +49,8 @@ namespace Buoy {
     ad = new ADS1282 ();
     ad->setup (this);
 
-    /*
     store = new Store ();
     store->setup(this);
-    */
 
 
 # if DIRECT_SERIAL

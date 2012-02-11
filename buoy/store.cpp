@@ -54,7 +54,7 @@ namespace Buoy {
     SD_AVAILABLE &= (card.errorCode () == 0);
 
     /* Beef up SPI after init is finished */
-    spi->begin (SPI_281_250KHZ, MSBFIRST, 0);
+    spi->begin (SPI_4_5MHZ, MSBFIRST, 0);
 
     /* Initialize FAT volume */
     SD_AVAILABLE &= volume.init (&card, 1);
