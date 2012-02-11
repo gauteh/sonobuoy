@@ -27,6 +27,7 @@
 #include "Sd2Card.h"
 #include "FatStructs.h"
 #include "Print.h"
+# include "../buoy.h"
 //------------------------------------------------------------------------------
 /**
  * Allow use of deprecated functions if non-zero

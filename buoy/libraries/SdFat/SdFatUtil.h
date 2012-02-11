@@ -24,11 +24,19 @@
  * Useful utility functions.
  */
 #include <WProgram.h>
+# include "../buoy.h"
 //#include <avr/pgmspace.h>
 /** Store and print a string in flash memory.*/
-#define PgmPrint(x) SerialPrint_P(PSTR(x))
+/*#define PgmPrint(x) SerialPrint_P(PSTR(x))*/
 /** Store and print a string in flash memory followed by a CR/LF.*/
-#define PgmPrintln(x) SerialPrintln_P(PSTR(x))
+/*#define PgmPrintln(x) SerialPrintln_P(PSTR(x))*/
+# if DIRECT_SERIAL
+  # define PgmPrint(x) SerialUSB.print(x)
+  # define PgmPrintln(x) SerialUSB.println(x)
+# else
+  # define PgmPrint(x)
+  # define PgmPrintln(x)
+# endif
 /** Defined so doxygen works for function definitions. */
 #define NOINLINE __attribute__((noinline))
 //------------------------------------------------------------------------------

@@ -22,6 +22,7 @@
 #include <WProgram.h>
 #include "HardwareSPI.h"
 #include <string.h>
+# include "../buoy.h"
 
 //------------------------------------------------------------------------------
 // callback function for date/time
@@ -202,6 +203,7 @@ void SdFile::dirName(const dir_t& dir, char* name) {
  * list to indicate subdirectory level.
  */
 void SdFile::ls(uint8_t flags, uint8_t indent) {
+# if DIRECT_SERIAL
   dir_t* p;
 
   rewind();
@@ -242,6 +244,7 @@ void SdFile::ls(uint8_t flags, uint8_t indent) {
       seekSet(32 * (index + 1));
     }
   }
+# endif
 }
 //------------------------------------------------------------------------------
 // format directory name field from a 8.3 name string
@@ -590,6 +593,7 @@ uint8_t SdFile::openRoot(SdVolume* vol) {
  * \param[in] width Blank fill name if length is less than \a width.
  */
 void SdFile::printDirName(const dir_t& dir, uint8_t width) {
+# if DIRECT_SERIAL
   uint8_t w = 0;
   for (uint8_t i = 0; i < 11; i++) {
     if (dir.name[i] == ' ')continue;
@@ -608,6 +612,7 @@ void SdFile::printDirName(const dir_t& dir, uint8_t width) {
     SerialUSB.print(' ');
     w++;
   }
+# endif
 }
 //------------------------------------------------------------------------------
 /** %Print a directory date field to Serial.
@@ -617,11 +622,13 @@ void SdFile::printDirName(const dir_t& dir, uint8_t width) {
  * \param[in] fatDate The date field from a directory entry.
  */
 void SdFile::printFatDate(uint16_t fatDate) {
+# if DIRECT_SERIAL
   SerialUSB.print(FAT_YEAR(fatDate));
   SerialUSB.print('-');
   printTwoDigits(FAT_MONTH(fatDate));
   SerialUSB.print('-');
   printTwoDigits(FAT_DAY(fatDate));
+# endif
 }
 //------------------------------------------------------------------------------
 /** %Print a directory time field to Serial.
@@ -631,11 +638,13 @@ void SdFile::printFatDate(uint16_t fatDate) {
  * \param[in] fatTime The time field from a directory entry.
  */
 void SdFile::printFatTime(uint16_t fatTime) {
+# if DIRECT_SERIAL
   printTwoDigits(FAT_HOUR(fatTime));
   SerialUSB.print(':');
   printTwoDigits(FAT_MINUTE(fatTime));
   SerialUSB.print(':');
   printTwoDigits(FAT_SECOND(fatTime));
+# endif
 }
 //------------------------------------------------------------------------------
 /** %Print a value as two digits to Serial.
@@ -643,11 +652,13 @@ void SdFile::printFatTime(uint16_t fatTime) {
  * \param[in] v Value to be printed, 0 <= \a v <= 99
  */
 void SdFile::printTwoDigits(uint8_t v) {
+# if DIRECT_SERIAL
   char str[3];
   str[0] = '0' + v/10;
   str[1] = '0' + v % 10;
   str[2] = 0;
   SerialUSB.print(str);
+# endif
 }
 //------------------------------------------------------------------------------
 /**

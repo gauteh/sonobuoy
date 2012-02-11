@@ -20,6 +20,8 @@
 #ifndef FatStructs_h
 #define FatStructs_h
 
+# include "../buoy.h"
+
 /**
  * \file
  * FAT file structures
