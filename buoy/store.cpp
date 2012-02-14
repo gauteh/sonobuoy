@@ -11,12 +11,13 @@
 # include "buoy.h"
 # include "rf.h"
 # include "ads1282.h"
+# include "gps.h"
 
 # include <stdio.h>
 
 namespace Buoy {
   Store::Store () {
-
+    logf_id = 0;
   }
 
   void Store::setup (BuoyMaster *b) {
@@ -69,6 +70,7 @@ namespace Buoy {
       open_index ();
       open_data ();
 
+      open_next_log ();
     } else {
       rf->send_debug ("[SD] [Error] Could not init SD.");
       current_index.id = 0;
@@ -96,6 +98,42 @@ namespace Buoy {
 
     rf_send_debug_f ("[SD] Last id: %lu..", i);
     next_index (i);
+  }
+
+  /* Open next available log file */
+  void Store::open_next_log ()
+  {
+    char buf[8+5];
+    sprintf (buf, "%lu.LOG", logf_id);
+
+    while (logf.open (&root, buf, O_READ)) {
+      logf.close ();
+      logf_id++;
+      sprintf (buf, "%lu.LOG", logf_id);
+    }
+    logf.close ();
+
+    logf.open (&root, buf, O_READ | O_CREAT | O_WRITE);
+    rf_send_debug_f ("[SD] Opened log: %lu.LOG", logf_id);
+  }
+
+  void Store::log (const char *s)
+  {
+    if (SD_AVAILABLE) {
+      /* Open next log file */
+      if (logf.curPosition () > MAX_LOG_SIZE) {
+        logf.close ();
+        open_next_log ();
+      }
+
+      if (!SD_AVAILABLE) return;
+
+      char buf[13];
+      sprintf (buf, "[%lu]", gps->lastsecond);
+      logf.write (buf);
+      logf.write (s);
+      logf.write ('\n');
+    }
   }
 
   /* Open next index file */

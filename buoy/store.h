@@ -136,9 +136,16 @@ namespace Buoy {
        * new index or if file is corrupt.
        */
 
+/* Log files */
+# define MAX_LOG_SIZE (1024 * 1024 * 1)
+
       /* Current storage */
       Index current_index;
       SdFile sd_data;
+
+      /* Logging */
+      uint32_t logf_id;
+      SdFile logf;
 
       bool     continuous_write;
       uint32_t lastbatch;
@@ -160,6 +167,9 @@ namespace Buoy {
 
       void start_continuous_write ();
       void stop_continuous_write ();
+
+      void open_next_log ();
+      void log (const char *);
   };
 }
 

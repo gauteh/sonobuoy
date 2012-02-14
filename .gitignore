@@ -8,10 +8,12 @@ buoy/build
 *.elf
 *.hex
 *.log
+*.dtt
 *.wav
 *.pyc
 zero/storereader/storereader
 *.DAT
+*.LOG
 *.LON
 *.IND
 *#

@@ -35,7 +35,7 @@ class Buoy:
     if not os.path.exists (self.logdir):
       os.mkdir (self.logdir)
 
-    self.logfile = os.path.join (self.logdir, self.node + '.log')
+    self.logfile = os.path.join (self.logdir, self.node + '.dtt')
     self.logger = self.zero.logger
 
     self.logger.info ('Starting Buoy ' + self.node + '..')

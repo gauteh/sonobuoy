@@ -37,7 +37,8 @@ namespace Buoy {
   void GPS::setup (BuoyMaster *b) {
     rf = b->rf;
     ad = b->ad;
-    
+    gps = this;
+
     gps_buf[0] = 0;
     gps_buf_pos = 0;
 
@@ -151,7 +152,7 @@ namespace Buoy {
     {
       /* Set new reference using internal clock */
       rf->send_debug ("[GPS] [**] Roll reference: Manual.");
-      referencesecond += time_from_reference () / 1e6;
+      referencesecond += TIME_FROM_REFERENCE / 1e6;
       update_reference = true; // Signal to store that new reference is available
       update_reference_position = ad->position;
       microdelta = micros ();
@@ -533,14 +534,6 @@ namespace Buoy {
       update_second ();
 
     /* Done parser }}} */
-  }
-
-  uint32_t inline GPS::time_from_reference () {
-    return (!IN_OVERFLOW ? (micros() - microdelta) : (micros () + (ULONG_MAX - microdelta)));
-  }
-
-  bool inline GPS::check_for_overflow () {
-    return (IN_OVERFLOW = (micros () < lastmicros));
   }
 }
 
