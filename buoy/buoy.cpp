@@ -50,16 +50,16 @@ namespace Buoy {
     ad->setup (this);
 
     store = new Store ();
-    store->setup(this);
+    store->setup (this);
 
 
 # if DIRECT_SERIAL
-    SerialUSB.println ("[Buoy] Initiating continuous transfer");
+    SerialUSB.println ("[Buoy] Initiating continuous transfer and write.");
 # endif
     rf->send_debug ("[Buoy] All subsystems initiated.");
     rf->send_debug ("[Buoy] Initiating continuos transfer and write.");
     rf->start_continuous_transfer ();
-    //store->start_continuous_write ();
+    store->start_continuous_write ();
   }
 }
 

@@ -64,13 +64,13 @@ namespace Buoy {
 
     if (SD_AVAILABLE)
     {
-      rf->send_debug ("SD card ready.");
+      rf->send_debug ("[SD] Card ready.");
 
       open_index ();
       open_data ();
 
     } else {
-      rf->send_debug ("Could not init SD.");
+      rf->send_debug ("[SD] [Error] Could not init SD.");
       current_index.id = 0;
     }
   }
@@ -79,7 +79,7 @@ namespace Buoy {
   {
     uint32_t n = 0;
 
-    rf->send_debug ("Opening index..");
+    rf->send_debug ("[SD] Opening index..");
 
     uint32_t i;
     SdFile fl;
@@ -94,7 +94,7 @@ namespace Buoy {
       i = 1;
     }
 
-    rf_send_debug_f ("Last id: %lu..", i);
+    rf_send_debug_f ("[SD] Last id: %lu..", i);
     next_index (i);
   }
 
@@ -112,7 +112,7 @@ namespace Buoy {
     bool newi = false;
 
 # if DIRECT_SERIAL
-    SerialUSB.print ("Checking for subseq. indexes from: ");
+    SerialUSB.print ("[SD] Checking for subseq. indexes from: ");
     SerialUSB.println (i);
 # endif
 
@@ -129,10 +129,10 @@ namespace Buoy {
         newi = true; /* Found new index file at id I */
 
 # if DIRECT_SERIAL
-        SerialUSB.print ("Found free index at: ");
+        SerialUSB.print ("[SD] Found free index at: ");
         SerialUSB.println (i);
 # endif
-        rf_send_debug_f ("Next index: %lu", i);
+        rf_send_debug_f ("[SD] Next index: %lu", i);
 
       } else {
         fi.close ();
@@ -155,7 +155,7 @@ namespace Buoy {
   void Store::write_index ()
   {
     char buf[8+5];
-    rf_send_debug_f ("Writing index: %lu..", current_index.id);
+    rf_send_debug_f ("[SD] Writing index: %lu..", current_index.id);
 
     if (current_index.id != 0) {
       sprintf (buf, "%lu.IND", current_index.id);
@@ -180,17 +180,13 @@ namespace Buoy {
       fl.close ();
     }
 
-# if DIRECT_SERIAL
-    root.ls ();
-# endif
-
     SD_AVAILABLE &= (card.errorCode () == 0);
   }
 
   /* Open new index and data file */
   void Store::roll_data_file ()
   {
-    rf->send_debug ("Syncing index and data and rolling..");
+    rf->send_debug ("[SD] Syncing index and data and rolling..");
 
     /* Truncate data file to actual size */
     //sd_data.truncate (sd_data.curPosition ());
@@ -212,7 +208,7 @@ namespace Buoy {
   void Store::write_batch ()
   {
     if (!SD_AVAILABLE) {
-      rf_send_debug_f ("No write: error: %02X.", card.errorCode ());
+      rf_send_debug_f ("[SD] No write: error: %02X.", card.errorCode ());
       return;
     }
 
@@ -244,7 +240,7 @@ namespace Buoy {
     }
 
     /* Writing entries */
-    rf_send_debug_f ("Writing entries to data file from sample: %lu", current_index.samples);
+    rf_send_debug_f ("[SD] Writing entries to data file from sample: %lu", current_index.samples);
 
     uint32_t s =  lastbatch * BATCH_LENGTH;
     lastbatch  =  (lastbatch + 1) % BATCHES;
@@ -253,7 +249,7 @@ namespace Buoy {
     {
       /* Write reference at correct position */
       if (gps->update_reference && i == gps->update_reference_position) {
-        rf_send_debug_f ("In-loop reference queue: %lu", gps->update_reference_position);
+        rf_send_debug_f ("[SD] In-loop reference queue: %lu", gps->update_reference_position);
         write_reference (gps->referencesecond);
       }
 
@@ -281,7 +277,7 @@ namespace Buoy {
 
   void Store::write_reference (uint32_t ref)
   {
-    rf_send_debug_f ("Write reference: %lu", ref);
+    rf_send_debug_f ("[SD] Write reference: %lu", ref);
     if (SD_AVAILABLE)
     {
       /* Check if we have exceeded MAX_REFERENCES */
@@ -320,7 +316,7 @@ namespace Buoy {
   {
     /* Try to set up SD card, 5 sec delay  */
     if (!SD_AVAILABLE && (millis () - lastsd) > 5000) {
-      rf_send_debug_f ("SD error code: %02X.", card.errorCode ());
+      rf_send_debug_f ("[SD] SD error code: %02X.", card.errorCode ());
       init ();
       lastsd = millis ();
     }

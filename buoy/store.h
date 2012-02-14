@@ -38,7 +38,13 @@
 # define SD_SCLK  SDIO_CK
 */
 
-/* SPI 2 */
+/* SPI 2
+ *
+ * NSS  = 2
+ * SCK  = 3
+ * MISO = 4
+ * MOSI = 5
+ */
 # define SD_SPI 2
 # define SD_CS  2
 
@@ -66,8 +72,8 @@ namespace Buoy {
       };
 
 /* Data format */
-# define STORE_VERSION 1uL
-# define SAMPLE_LENGTH 3uL
+# define STORE_VERSION 2uL
+# define SAMPLE_LENGTH 4uL
 # define TIMESTAMP_LENGTH 4uL
 
 /* Maximum number of timestamp, sample pairs for each datafile */
