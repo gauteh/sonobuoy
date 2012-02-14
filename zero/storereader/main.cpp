@@ -168,9 +168,7 @@ namespace Zero {
             break;
           }
 
-          s =  ((uint8_t)(ss[0]) << 16);
-          s += ((uint8_t)(ss[1]) << 8);
-          s +=  (uint8_t)(ss[2]);
+          s = ss;
 
           // TODO: Endianness probs?
           //timestamp = __builtin_bswap32 (tt);

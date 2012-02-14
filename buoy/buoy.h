@@ -7,6 +7,10 @@
 
 # pragma once
 
+# define VERSION "0.2"
+
+# ifndef ONLY_SPEC
+
 # include "wirish.h"
 # include "types.h"
 
@@ -35,6 +39,7 @@ namespace Buoy {
   extern BuoyMaster *bu;
 }
 
+# endif
 
 /* vim: set filetype=arduino :  */
 

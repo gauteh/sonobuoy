@@ -8,6 +8,8 @@
 
 # pragma once
 
+# ifndef ONLY_SPEC
+
 # include <stdint.h>
 # include "types.h"
 
@@ -28,7 +30,7 @@ namespace Buoy {
       volatile uint32_t lastsync;
 
       void parse ();
-      GPS * gps; 
+      GPS * gps;
 
     public:
       RF      * rf;
@@ -102,7 +104,12 @@ namespace Buoy {
        * ROLL_REFERENCE specifies how often the reference should be updated .
        */
       volatile uint32_t referencesecond;
+
+# endif
+
 # define ROLL_REFERENCE 60 // [s]
+
+# ifndef ONLY_SPEC
 
       /* For Store and RF to know reference has been changed at given
        * queue position.
@@ -184,6 +191,8 @@ namespace Buoy {
  * }}} */
   };
 }
+
+# endif
 
 /* vim: set filetype=arduino :  */
 

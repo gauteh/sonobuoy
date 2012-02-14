@@ -250,6 +250,9 @@ namespace Buoy {
       return;
     }
 
+    uint32_t s =  lastbatch * BATCH_LENGTH;
+    lastbatch  =  (lastbatch + 1) % BATCHES;
+
     /* Check if we have room for samples in store */
     if (current_index.samples > (MAX_SAMPLES_PER_FILE - BATCH_LENGTH))
     {
@@ -263,9 +266,10 @@ namespace Buoy {
       roll_data_file ();
     }
 
+    // TODO: Is this done in write_reference () ?
     /* In case we are in update_reference, check if we have space for
      * one more reference */
-    if (gps->update_reference) {
+    if (gps->update_reference && gps->update_reference_position > s && gps->update_reference_position < (s + BATCH_LENGTH)) {
       if (sd_data.curPosition () > (SD_DATA_FILE_SIZE - (BATCH_LENGTH * (SAMPLE_LENGTH + TIMESTAMP_LENGTH)) - SD_REFERENCE_LENGTH))
       {
         roll_data_file ();
@@ -280,8 +284,6 @@ namespace Buoy {
     /* Writing entries */
     rf_send_debug_f ("[SD] Writing entries to data file from sample: %lu", current_index.samples);
 
-    uint32_t s =  lastbatch * BATCH_LENGTH;
-    lastbatch  =  (lastbatch + 1) % BATCHES;
 
     for (uint32_t i = s; i <  s + (BATCH_LENGTH); i++)
     {

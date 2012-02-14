@@ -7,9 +7,12 @@
 
 # pragma once
 
+# ifndef ONLY_SPEC
+
 # include <stdint.h>
 # include <string>
 # include "wirish.h"
+# include "types.h"
 
 using namespace std;
 
@@ -203,10 +206,14 @@ namespace Buoy {
       bool disabled;
       int run;
 
+# endif
+
 # define FREQUENCY      250
 # define QUEUE_LENGTH 10000
 # define BATCHES          5 // _must_ be multiple of QUEUE_LENGTH
 # define BATCH_LENGTH (QUEUE_LENGTH / BATCHES)
+
+# ifndef ONLY_SPEC
       /* Samples are 24 bits, but 4 bytes are clocked out */
       volatile uint32_t value;
       volatile uint32_t values[QUEUE_LENGTH];
@@ -242,6 +249,7 @@ namespace Buoy {
 
   };
 }
+# endif
 
 /* vim: set filetype=arduino :  */
 

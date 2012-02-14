@@ -7,11 +7,15 @@
 
 # pragma once
 
+# include "ads1282.h"
+# include "gps.h"
+# include "buoy.h"
+
+# ifndef ONLY_SPEC
+
 # include "wirish.h"
 # include "HardwareSPI.h"
 # include "types.h"
-# include "ads1282.h"
-# include "gps.h"
 # include "SdFat.h"
 
 /* SDIO, connected to SD socket. */
@@ -48,6 +52,8 @@
 # define SD_SPI 2
 # define SD_CS  2
 
+
+
 namespace Buoy {
   class Store {
     public:
@@ -64,12 +70,15 @@ namespace Buoy {
       uint32_t lastsd;
       uint32_t sd_status;
 
+# endif
       enum SD_STATUS {
         SD_VALID_GPS    = 0b1,
         SD_HAS_TIME     = 0b10,
         SD_HAS_SYNC     = 0b100,
         SD_HAS_SYNC_REF = 0b1000,
       };
+
+      typedef uint32_t sample;
 
 /* Data format */
 # define STORE_VERSION 2uL
@@ -139,6 +148,8 @@ namespace Buoy {
 /* Log files */
 # define MAX_LOG_SIZE (1024 * 1024 * 1)
 
+# ifndef ONLY_SPEC
+
       /* Current storage */
       Index current_index;
       SdFile sd_data;
@@ -172,6 +183,8 @@ namespace Buoy {
       void log (const char *);
   };
 }
+
+# endif
 
 /* vim: set filetype=arduino :  */
 
