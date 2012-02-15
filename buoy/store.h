@@ -98,20 +98,21 @@ namespace Buoy {
  *
  * Reference:
  *  - 3 * (SAMPLE_LENGTH + TIMESTAMP_LENGTH) with 0
- *  - Reference id: ulong
- *  - Reference:    ulong referencesecond [unix time]
- *  - Status bit:   ulong status
+ *  - Reference id: uint32_t
+ *  - Reference:    uint32_t referencesecond [unix time]
+ *  - Status bit:   uint32_t status
  *  - 3 * (SAMPLE_LENGTH + TIMESTAMP_LENGTH) with 0
  *  Total length: 54 bytes.
  *
  * Entry:
  *  - TIMESTAMP (4 bytes)
- *  - SAMPLE    (3 bytes)
- *  Total length: 7 bytes.
+ *  - SAMPLE    (4 bytes)
+ *  Total length: 8 bytes.
  *
  * }}} */
 
-# define SD_REFERENCE_LENGTH 54uL
+# define SD_REFERENCE_PADN 3
+# define SD_REFERENCE_LENGTH (2 * 3 * (SAMPLE_LENGTH + TIMESTAMP_LENGTH) + 3 * 4)
 
       /* Last ID is one unsigned long */
       typedef uint32_t LASTID;

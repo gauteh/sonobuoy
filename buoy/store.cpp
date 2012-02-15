@@ -334,7 +334,7 @@ namespace Buoy {
       current_index.refs[current_index.nrefs] = sd_data.curPosition ();
 
       /* Pad with 0 */
-      for (uint32_t i = 0; i < (3 * (SAMPLE_LENGTH + TIMESTAMP_LENGTH)); i++)
+      for (uint32_t i = 0; i < (SD_REFERENCE_PADN * (SAMPLE_LENGTH + TIMESTAMP_LENGTH)); i++)
         sd_data.write ((byte)0);
 
       sd_data.write (reinterpret_cast<char*>(&(current_index.nrefs)), sizeof(uint32_t));
@@ -342,7 +342,7 @@ namespace Buoy {
       sd_data.write (reinterpret_cast<char*>(&(sd_status)), sizeof(uint32_t));
 
       /* Pad with 0 */
-      for (uint32_t i = 0; i < (3 * (SAMPLE_LENGTH + TIMESTAMP_LENGTH)); i++)
+      for (uint32_t i = 0; i < (SD_REFERENCE_PADN * (SAMPLE_LENGTH + TIMESTAMP_LENGTH)); i++)
         sd_data.write ((byte)0);
 
       current_index.nrefs++;

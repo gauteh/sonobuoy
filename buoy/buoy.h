@@ -7,7 +7,7 @@
 
 # pragma once
 
-# define VERSION "0.2"
+# define VERSION "0.2-dev"
 
 # ifndef ONLY_SPEC
 
