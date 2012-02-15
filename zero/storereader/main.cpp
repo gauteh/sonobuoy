@@ -12,6 +12,7 @@
 # include <stdlib.h>
 # include <getopt.h>
 # include <math.h>
+# include <time.h>
 
 using namespace std;
 
@@ -41,11 +42,21 @@ namespace Zero {
 
       int opt;
       bool opt_only_index = false;
+      bool twos = false;
+      bool references = false;
+      bool formatset = false;
+      bool converttime = false;
 
-# define DEFAULT_FORMAT "[%09lu] %07lu\n"
-      string format = DEFAULT_FORMAT;
+# define DEFAULT_FORMAT_TIME "[%09lu]"
+# define DEFAULT_FORMAT_TIME_S "[%Y-%m-%d %H:%M:%S."
+# define DEFAULT_FORMAT_TIME_REST "%lu]"
+# define DEFAULT_FORMAT_UNSIGNED "%10lu\n"
+# define DEFAULT_FORMAT_SIGNED "%10d\n"
+# define DEFAULT_FORMAT DEFAULT_FORMAT_TIME " " DEFAULT_FORMAT_UNSIGNED
+//# define DEFAULT_FORMAT "[%09lX] %08lu\n"
+      string format;
 
-      while ((opt = getopt(argc, argv, "iuhHvf:")) != -1) {
+      while ((opt = getopt(argc, argv, "icruhtHvf:")) != -1) {
         switch (opt)
         {
           case 'v':
@@ -60,13 +71,31 @@ namespace Zero {
           case 'i':
             opt_only_index = true;
             break;
+          case 'c':
+            converttime = true;
+            break;
           case 'f':
+            formatset = true;
             format = optarg;
+            break;
+          case 't':
+            twos = true;
+            break;
+          case 'r':
+            references = true;
             break;
           case '?':
             usage (self);
             exit (1);
         }
+      }
+
+      if (!formatset) {
+        if (!converttime) {
+          format = DEFAULT_FORMAT_TIME;
+        }
+        format += " ";
+        format += (twos ? DEFAULT_FORMAT_SIGNED : DEFAULT_FORMAT_UNSIGNED);
       }
 
       if (verbose) header ();
@@ -76,6 +105,15 @@ namespace Zero {
         exit (1);
       }
 
+      if (references && opt_only_index) {
+        cerr << "[ERROR] You can only specify either the -i or -r flag." << endl;
+        exit (1);
+      }
+
+      if (converttime && formatset) {
+        cerr << "[ERROR] You can only specify either the -c or -f flag." << endl;
+        exit (1);
+      }
 
       string indexfn (argv[optind]);
       string datafn (indexfn);
@@ -85,7 +123,7 @@ namespace Zero {
       print_index (i);
 
       if (i.samples > 0 && !opt_only_index) {
-        cerr << "=> Reading data..";
+        cerr << "=> Reading data.." << endl;
 
         /* Opening DATA */
         ifstream fd (datafn.c_str (), ios::binary);
@@ -106,13 +144,13 @@ namespace Zero {
 
         while (!fd.eof ())
         {
+          char timebuf[400];
+          string out;
+
           if (ref < i.nrefs) {
             if (fd.tellg() == i.refs[ref]) {
               /* On reference, reading.. */
               failref = false;
-
-              if (verbose)
-                cerr << "=> On reference: " << ref << "..";
 
               for (int k = 0; k < (3 * (SAMPLE_LENGTH + TIMESTAMP_LENGTH)); k++) {
                 int r = fd.get ();
@@ -155,7 +193,7 @@ namespace Zero {
           }
 
           /* On timestamp / sample pair */
-          uint32_t timestamp;
+          uint64_t timestamp;
           uint32_t tt;
           sample ss;
           uint32_t s = 0;
@@ -174,7 +212,27 @@ namespace Zero {
           //timestamp = __builtin_bswap32 (tt);
           timestamp = reft * exp10(6) + tt;
 
-          printf (format.c_str (), timestamp, s);
+          if (!references) {
+            out = "";
+            if (converttime) {
+              uint64_t ttime = timestamp / exp10(6);
+              struct tm *t = gmtime ((const long int *) (&ttime));
+              strftime (timebuf, 400, DEFAULT_FORMAT_TIME_S, t);
+              out+= timebuf;
+
+              ttime = timestamp - ttime * exp10(6);
+              sprintf (timebuf, DEFAULT_FORMAT_TIME_REST, ttime);
+              out+= timebuf;
+
+              out+= format;
+
+              printf (out.c_str (), s);
+            } else {
+              printf (format.c_str (), timestamp, s);
+            }
+
+
+          }
 
           sam++;
 
@@ -246,19 +304,22 @@ namespace Zero {
     void usage (string argv) {
       header ();
 
-      cerr << endl << "Usage: " << argv << " [-u|-h|-H] [-v] [-f format] [-i] INDEX_FILE.IND" << endl;
+      cerr << endl << "Usage: " << argv << " [-u|-h|-H] [-v] [-f format] [-i|-r] [-t] INDEX_FILE.IND" << endl;
       cerr << endl;
       cerr << " -u, -h or -H  Print this help text." << endl;
       cerr << " -v            Be verbose." << endl;
       cerr << " -i            Only print index." << endl;
+      cerr << " -r            Only print references." << endl;
+      cerr << "               (only one of -r or -i may be used at the same time)" << endl;
+      cerr << endl;
+      cerr << " -t            Take twos complement to value." << endl;
+      cerr << " -c            Convert unix time (cannot be used with -f)." << endl;
       cerr << endl;
       cerr << " -f format     Format specifies output format of data file, " \
               "follows" << endl;
       cerr << "               printf syntax, where the first argument will be " \
               "the" << endl;
-      cerr << "               the time stamp and second the sample. Both are of" \
-           << endl;
-      cerr << "               the type uint32_t." << endl;
+      cerr << "               the time stamp and second the sample." << endl;
       cerr << "               Default: " << DEFAULT_FORMAT; // Has newline at end
       cerr << endl;
       cerr << "  A datafile (.DAT) with the same name as the INDEX_FILE is " \
