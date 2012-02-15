@@ -71,6 +71,7 @@ namespace Buoy {
       uint32_t sd_status;
 
 # endif
+
       enum SD_STATUS {
         SD_VALID_GPS    = 0b1,
         SD_HAS_TIME     = 0b10,
