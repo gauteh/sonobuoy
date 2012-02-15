@@ -26,6 +26,7 @@ namespace Buoy {
 
     previous_reference = 0;
     referencesecond = 0;
+    lastsecond = 0;
     lastmicros = 0;
     microdelta = 0;
     lastsync = 0;

@@ -57,6 +57,8 @@
 namespace Buoy {
   class Store {
     private:
+
+      /* Current index and data file has reference */
       bool referencewritten;
 
     public:

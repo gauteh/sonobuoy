@@ -56,15 +56,13 @@ namespace Buoy {
     SerialUSB.println ("[Buoy] Initiating continuous transfer and write.");
 # endif
     rf->send_debug ("[Buoy] All subsystems initiated.");
-    store->log ("[Buoy] All subsystems initiated.");
+    //store->log ("[Buoy] All subsystems initiated.");
 
     rf->send_debug ("[Buoy] Initiating continuos transfer and write.");
-    store->log ("[Buoy] Initiating continuos transfer and write.");
+    //store->log ("[Buoy] Initiating continuos transfer and write.");
 
     rf->start_continuous_transfer ();
     store->start_continuous_write ();
-
-    store->logf.sync ();
   }
 }
 

@@ -64,7 +64,7 @@ namespace Buoy {
       open_index ();
       open_data ();
 
-      open_next_log ();
+      //open_next_log ();
     } else {
       rf->send_debug ("[SD] [Error] Could not init SD.");
       current_index.id = 0;
@@ -200,7 +200,10 @@ namespace Buoy {
       fi.write (reinterpret_cast<char*>(&current_index.timestamp_l), sizeof(current_index.timestamp_l));
       fi.write (reinterpret_cast<char*>(&current_index.samples), sizeof(current_index.samples));
       fi.write (reinterpret_cast<char*>(&current_index.nrefs), sizeof(current_index.nrefs));
-      fi.write (reinterpret_cast<char*>(&current_index.refs), current_index.nrefs * sizeof(uint32_t));
+
+      for (uint32_t i = 0; i < current_index.nrefs; i++)
+        fi.write (reinterpret_cast<char*>(&(current_index.refs[i])), sizeof(uint32_t));
+
       fi.sync ();
       fi.close ();
 
@@ -258,19 +261,13 @@ namespace Buoy {
       roll_data_file ();
     }
 
-    // TODO: Is this done in write_reference () ?
-    /* In case we are in update_reference, check if we have space for
-     * one more reference */
-    if (gps->update_reference && gps->update_reference_position > s && gps->update_reference_position < (s + BATCH_LENGTH)) {
-      if (sd_data.curPosition () > (SD_DATA_FILE_SIZE - (BATCH_LENGTH * (SAMPLE_LENGTH + TIMESTAMP_LENGTH)) - SD_REFERENCE_LENGTH))
-      {
-        roll_data_file ();
-      }
-    }
-
     /* Write first reference since this is a new file */
     if (!referencewritten) {
-      write_reference (gps->referencesecond);
+      if (gps->update_reference && gps->update_reference_position > s && gps->update_reference_position < (s + BATCH_LENGTH)) {
+        write_reference (gps->previous_reference);
+      } else {
+        write_reference (gps->referencesecond);
+      }
     }
 
     /* Writing entries */
@@ -283,6 +280,11 @@ namespace Buoy {
       if (gps->update_reference && i == gps->update_reference_position) {
         rf_send_debug_f ("[SD] In-loop reference queue: %lu", gps->update_reference_position);
         write_reference (gps->referencesecond);
+
+        if (!SD_AVAILABLE) {
+          rf_send_debug_f ("[SD] No write: error: %02X.", card.errorCode ());
+          return;
+        }
       }
 
       sd_data.write (reinterpret_cast<char*>((uint32_t*) &(ad->times[i])), sizeof(uint32_t));
@@ -310,38 +312,43 @@ namespace Buoy {
   void Store::write_reference (uint32_t ref)
   {
     rf_send_debug_f ("[SD] Write reference: %lu", ref);
-    if (SD_AVAILABLE)
-    {
-      /* Check if we have exceeded MAX_REFERENCES */
-      if (current_index.nrefs >= (MAX_REFERENCES - 1)) {
-        roll_data_file ();
-      }
 
-      /* Check if there is more space in data file */
-      if (sd_data.curPosition () > (SD_DATA_FILE_SIZE - SD_REFERENCE_LENGTH)) {
-        roll_data_file ();
-      }
-
-      /* Update index */
-      current_index.refs[current_index.nrefs] = sd_data.curPosition ();
-
-      /* Pad with 0 */
-      for (uint32_t i = 0; i < (SD_REFERENCE_PADN * (SAMPLE_LENGTH + TIMESTAMP_LENGTH)); i++)
-        sd_data.write ((byte)0);
-
-      sd_data.write (reinterpret_cast<char*>(&(current_index.nrefs)), sizeof(uint32_t));
-      sd_data.write (reinterpret_cast<char*>(&(ref)), sizeof(uint32_t));
-      sd_data.write (reinterpret_cast<char*>(&(sd_status)), sizeof(uint32_t));
-
-      /* Pad with 0 */
-      for (uint32_t i = 0; i < (SD_REFERENCE_PADN * (SAMPLE_LENGTH + TIMESTAMP_LENGTH)); i++)
-        sd_data.write ((byte)0);
-
-      current_index.nrefs++;
-      referencewritten = true;
-
-      SD_AVAILABLE &= (card.errorCode () == 0);
+    if (!SD_AVAILABLE) {
+      rf_send_debug_f ("[SD] No write: error: %02X.", card.errorCode ());
+      return;
     }
+
+    /* Check if we have exceeded MAX_REFERENCES */
+    if (current_index.nrefs >= (MAX_REFERENCES - 1)) {
+      roll_data_file ();
+    }
+
+    /* Check if there is more space in data file */
+    if (sd_data.curPosition () > (SD_DATA_FILE_SIZE - SD_REFERENCE_LENGTH)) {
+      roll_data_file ();
+    }
+
+    /* Update index */
+    current_index.refs[current_index.nrefs] = sd_data.curPosition ();
+
+    /* Pad with 0 */
+    for (uint32_t i = 0; i < (SD_REFERENCE_PADN * (SAMPLE_LENGTH + TIMESTAMP_LENGTH)); i++)
+      sd_data.write ((byte)0);
+
+    sd_data.write (reinterpret_cast<char*>(&(current_index.nrefs)), sizeof(uint32_t));
+    sd_data.write (reinterpret_cast<char*>(&(ref)), sizeof(uint32_t));
+    sd_data.write (reinterpret_cast<char*>(&(sd_status)), sizeof(uint32_t));
+
+    /* Pad with 0 */
+    for (uint32_t i = 0; i < (SD_REFERENCE_PADN * (SAMPLE_LENGTH + TIMESTAMP_LENGTH)); i++)
+      sd_data.write ((byte)0);
+
+    current_index.nrefs++;
+
+    /* Current index and data file has reference */
+    referencewritten = true;
+
+    SD_AVAILABLE &= (card.errorCode () == 0);
   }
 
   void Store::loop ()

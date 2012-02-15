@@ -558,8 +558,8 @@ namespace Buoy {
       batchfilltime = millis () - batchstart;
       batchstart    = millis ();
       batchready++;
-      batchready %= BATCHES;    // Increment batch or roll over
-      position %= QUEUE_LENGTH; // Roll over queue position
+      batchready  %= BATCHES;       // Increment batch or roll over
+      position    %= QUEUE_LENGTH;  // Roll over queue position
 
       /* Reset update_reference if it is in new active batch */
       if (gps->update_reference && (gps->update_reference_position >= position &&
