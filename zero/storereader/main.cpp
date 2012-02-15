@@ -49,7 +49,7 @@ namespace Zero {
 
 # define DEFAULT_FORMAT_TIME "[%09lu]"
 # define DEFAULT_FORMAT_TIME_S "[%Y-%m-%d %H:%M:%S."
-# define DEFAULT_FORMAT_TIME_REST "%lu]"
+# define DEFAULT_FORMAT_TIME_REST "%06lu]"
 # define DEFAULT_FORMAT_UNSIGNED "%10lu\n"
 # define DEFAULT_FORMAT_SIGNED "%10d\n"
 # define DEFAULT_FORMAT DEFAULT_FORMAT_TIME " " DEFAULT_FORMAT_UNSIGNED
