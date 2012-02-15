@@ -77,6 +77,7 @@ namespace Zero {
           case 'f':
             formatset = true;
             format = optarg;
+            format += '\n';
             break;
           case 't':
             twos = true;
@@ -319,7 +320,8 @@ namespace Zero {
               "follows" << endl;
       cerr << "               printf syntax, where the first argument will be " \
               "the" << endl;
-      cerr << "               the time stamp and second the sample." << endl;
+      cerr << "               the time stamp and second the sample. A newline" << endl;
+      cerr << "               will be added." << endl;
       cerr << "               Default: " << DEFAULT_FORMAT; // Has newline at end
       cerr << endl;
       cerr << "  A datafile (.DAT) with the same name as the INDEX_FILE is " \
