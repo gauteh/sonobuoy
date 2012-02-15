@@ -56,6 +56,9 @@
 
 namespace Buoy {
   class Store {
+    private:
+      bool referencewritten;
+
     public:
       RF      *rf;
       ADS1282 *ad;

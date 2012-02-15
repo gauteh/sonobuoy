@@ -545,11 +545,11 @@ namespace Buoy {
      * then it is 1 for +FS and 0 for -FS.
      */
 
-    CHECK_FOR_OVERFLOW ();
+    CHECK_FOR_OVERFLOW (gps);
 
     /* Fill batch */
     values[position] = value;
-    times [position] = TIME_FROM_REFERENCE; // Does not change value within interrupt
+    times [position] = TIME_FROM_REFERENCE (gps); // Does not change value within interrupt
 
     position++;
     totalsamples++;

@@ -30,7 +30,6 @@ namespace Buoy {
       volatile uint32_t lastsync;
 
       void parse ();
-      GPS * gps;
 
     public:
       RF      * rf;
@@ -159,8 +158,8 @@ namespace Buoy {
        */
 
 # define ULONG_MAX ((2^32) - 1)
-# define TIME_FROM_REFERENCE (!gps->IN_OVERFLOW ? (micros() - gps->microdelta) : (micros () + (ULONG_MAX - gps->microdelta)))
-# define CHECK_FOR_OVERFLOW() (gps->IN_OVERFLOW = (micros () < gps->lastmicros))
+# define TIME_FROM_REFERENCE(x) (!x->IN_OVERFLOW ? (micros() - x->microdelta) : (micros () + (ULONG_MAX - x->microdelta)))
+# define CHECK_FOR_OVERFLOW(x) (x->IN_OVERFLOW = (micros () < x->lastmicros))
 
 /* Overflow handling, the math.. {{{
  *

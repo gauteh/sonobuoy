@@ -18,19 +18,13 @@
 namespace Buoy {
   Store::Store () {
     logf_id = 0;
+    referencewritten = false;
   }
 
   void Store::setup (BuoyMaster *b) {
     rf = b->rf;
     ad = b->ad;
     gps = b->gps;
-
-    /*
-    pinMode (SD_CS, OUTPUT);
-    pinMode (SD_MOSI, OUTPUT);
-    pinMode (SD_MISO, INPUT);
-    pinMode (SD_SCLK, OUTPUT);
-    */
 
     spi = new HardwareSPI(SD_SPI);
 
@@ -100,7 +94,7 @@ namespace Buoy {
     next_index (i);
   }
 
-  /* Open next available log file */
+  /* Log to file {{{ */
   void Store::open_next_log ()
   {
     char buf[8+5];
@@ -134,7 +128,7 @@ namespace Buoy {
       logf.write (s);
       logf.write ('\n');
     }
-  }
+  } // }}}
 
   /* Open next index file */
   void Store::next_index (uint32_t i)
@@ -239,8 +233,6 @@ namespace Buoy {
     /* Open new data file */
     open_data ();
   }
-
-  bool referencewritten = false;
 
   /* Write new batch of samples */
   void Store::write_batch ()

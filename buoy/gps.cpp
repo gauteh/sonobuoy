@@ -37,7 +37,6 @@ namespace Buoy {
   void GPS::setup (BuoyMaster *b) {
     rf = b->rf;
     ad = b->ad;
-    gps = this;
 
     gps_buf[0] = 0;
     gps_buf_pos = 0;
@@ -152,7 +151,7 @@ namespace Buoy {
     {
       /* Set new reference using internal clock */
       rf->send_debug ("[GPS] [**] Roll reference: Manual.");
-      referencesecond += TIME_FROM_REFERENCE / 1e6;
+      referencesecond += TIME_FROM_REFERENCE(this) / 1e6;
       update_reference = true; // Signal to store that new reference is available
       update_reference_position = ad->position;
       microdelta = micros ();
