@@ -92,7 +92,7 @@ namespace Buoy {
 # define TIMESTAMP_LENGTH 4uL
 
 /* Maximum number of timestamp, sample pairs for each datafile */
-# define EST_MINUTES_PER_DATAFILE 1uL
+# define EST_MINUTES_PER_DATAFILE 5uL
 # define MAX_SAMPLES_PER_FILE (FREQUENCY * 60uL * EST_MINUTES_PER_DATAFILE)
 # define MAX_REFERENCES ((MAX_SAMPLES_PER_FILE / ( FREQUENCY * ROLL_REFERENCE)) + 20uL)
 

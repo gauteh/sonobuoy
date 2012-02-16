@@ -40,7 +40,6 @@ namespace Buoy {
     if (continuous_transfer) {
       if (ad->batchready != lastbatch) {
        ad_message (AD_DATA_BATCH);
-       lastbatch = ad->batchready;
       }
     }
   }
@@ -103,7 +102,8 @@ namespace Buoy {
 
          */
         {
-          uint32_t start =  ((ad->batchready + BATCHES - 1) % BATCHES) * BATCH_LENGTH;
+          uint32_t start =  (lastbatch * BATCH_LENGTH);
+          lastbatch      =  (lastbatch + 1) % BATCHES;
           uint32_t length = BATCH_LENGTH;
           uint32_t ref = gps->referencesecond;
           bool go = true;
