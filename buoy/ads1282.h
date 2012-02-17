@@ -225,6 +225,8 @@ namespace Buoy {
 
       volatile uint32_t totalsamples;
 
+      bool continuous_read;
+
       ADS1282 ();
       void setup (BuoyMaster *);
       void configure ();

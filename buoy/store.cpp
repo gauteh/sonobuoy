@@ -260,6 +260,8 @@ namespace Buoy {
       roll_data_file ();
     }
 
+    bool currentreferencewritten = false;
+
     /* Write first reference if this is a new file */
     if (!referencewritten) {
       /* Write previous reference if reference has been updated in this batch */
@@ -270,6 +272,7 @@ namespace Buoy {
         write_reference (gps->previous_reference);
       } else {
         write_reference (gps->referencesecond);
+        currentreferencewritten = true;
       }
     }
 
@@ -283,13 +286,20 @@ namespace Buoy {
       if (gps->update_reference &&
           i == gps->update_reference_position)
       {
-        rf_send_debug_f ("[SD] In-loop reference queue: %lu", gps->update_reference_position);
+        /* There will always have been written a reference already.
+         *
+         * Avoid writing reference doubly in case it is the first reference in
+         * this batch and file and it has already been written.
+         */
+        if (!currentreferencewritten) {
+          rf_send_debug_f ("[SD] In-loop reference queue: %lu", gps->update_reference_position);
 
-        write_reference (gps->referencesecond);
+          write_reference (gps->referencesecond);
 
-        if (!SD_AVAILABLE) {
-          rf_send_debug_f ("[SD] No write: error: %02X.", card.errorCode ());
-          return;
+          if (!SD_AVAILABLE) {
+            rf_send_debug_f ("[SD] No write: error: %02X.", card.errorCode ());
+            return;
+          }
         }
       }
 

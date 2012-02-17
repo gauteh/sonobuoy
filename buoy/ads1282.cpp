@@ -22,6 +22,7 @@ namespace Buoy {
   ADS1282::ADS1282 () {
     // Init class {{{
     disabled    = false;
+    continuous_read = false;
     run = 0;
 
     state.ports0 = 0;
@@ -187,6 +188,7 @@ namespace Buoy {
     delay (100);
 
     attachInterrupt (AD_nDRDY,&(ADS1282::drdy), FALLING);
+    continuous_read = true;
   }
 
   void ADS1282::stop_continuous_read () {
@@ -200,6 +202,7 @@ namespace Buoy {
 
     send_command (SDATAC);
     delay (100);
+    continuous_read = false;
   } // }}}
 
   void ADS1282::read_pca9535 (PCA9535REGISTER reg) {

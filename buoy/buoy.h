@@ -17,7 +17,7 @@
 /* Version and settings */
 
 /* Define to have debug messages sent to USB serial */
-# define DIRECT_SERIAL 0
+# define DIRECT_SERIAL 1
 
 namespace Buoy {
   class BuoyMaster {

@@ -7,7 +7,6 @@
 
 # include "wirish.h"
 # include "buoy.h"
-#
 # include "ads1282.h"
 # include "rf.h"
 # include "gps.h"
@@ -23,13 +22,23 @@ namespace Buoy {
     setup ();
 
 
+    uint32_t iter = 0;
+# define LOOP_DELAY 10
+
     while (true) {
       ad->loop ();
       rf->loop ();
       gps->loop ();
       store->loop ();
 
-      delay (10);
+      delay (LOOP_DELAY);
+
+      /* Give GPS a chance to get seconds or sync */
+      if (!ad->continuous_read && ((iter * LOOP_DELAY) > 1000)) {
+        ad->start_continuous_read ();
+      }
+
+      iter++;
     }
   }
 
@@ -64,10 +73,6 @@ namespace Buoy {
 
     rf->start_continuous_transfer ();
     store->start_continuous_write ();
-
-    /* Give GPS a chance to sync.. */
-    delay (1100);
-    ad->start_continuous_read ();
   }
 }
 

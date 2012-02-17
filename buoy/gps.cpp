@@ -94,7 +94,7 @@ namespace Buoy {
     if (referencerolled == 0) referencerolled = 1;
 
     /* Handle several references in same batch */
-    if (update_reference) {
+    if (update_reference && !ad->continuous_read) {
 
       // Start of current batch
       uint32_t currentbatch = ad->position; // volatile
@@ -176,17 +176,32 @@ namespace Buoy {
 
     if (IN_OVERFLOW && ((microdelta - micros()) > 20e6))
     {
-      /* Set new reference using internal clock */
-      rf->send_debug ("[GPS] [NOSYNC] Roll reference.");
+      /* Handle several references in same batch */
+      if (update_reference && !ad->continuous_read) {
 
-      /* Volatile */
-      referencesecond += TIME_FROM_REFERENCE(this) / 1e6;
-      update_reference = true; // Signal to store that new reference is available
-      update_reference_position = ad->position;
-      microdelta = micros ();
-      IN_OVERFLOW = false;
-      HAS_SYNC    = false;
-      HAS_SYNC_REFERENCE = false;
+        // Start of current batch
+        uint32_t currentbatch = ad->position; // volatile
+        currentbatch = currentbatch - (currentbatch % BATCH_LENGTH);
+
+        if (update_reference_position >= currentbatch &&
+            update_reference_position < (currentbatch + BATCH_LENGTH)) {
+
+          // There is already a reference in this batch, skip and wait until batch is finihsed
+          referencerolled = 6;
+        } else {
+          /* Set new reference using internal clock */
+          rf->send_debug ("[GPS] [NOSYNC] Roll reference.");
+
+          /* Volatile */
+          referencesecond += TIME_FROM_REFERENCE(this) / 1e6;
+          update_reference = true; // Signal to store that new reference is available
+          update_reference_position = ad->position;
+          microdelta = micros ();
+          IN_OVERFLOW = false;
+          HAS_SYNC    = false;
+          HAS_SYNC_REFERENCE = false;
+        }
+      }
     }
 
     /* Volatile */
