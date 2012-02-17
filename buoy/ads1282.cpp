@@ -565,6 +565,7 @@ namespace Buoy {
      */
 
     CHECK_FOR_OVERFLOW (gps);
+    gps->lastmicros = micros ();
 
     /* Fill batch */
     values[position] = value;
@@ -588,8 +589,6 @@ namespace Buoy {
         gps->update_reference = false;
       }
     }
-
-    gps->lastmicros = micros ();
   }
 
   void ADS1282::acquire_on_command () {

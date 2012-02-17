@@ -55,6 +55,7 @@ namespace Buoy {
 # if DIRECT_SERIAL
     SerialUSB.println ("[Buoy] Initiating continuous transfer and write.");
 # endif
+
     rf->send_debug ("[Buoy] All subsystems initiated.");
     //store->log ("[Buoy] All subsystems initiated.");
 
@@ -65,7 +66,7 @@ namespace Buoy {
     store->start_continuous_write ();
 
     /* Give GPS a chance to sync.. */
-    delay (1000);
+    delay (1100);
     ad->start_continuous_read ();
   }
 }

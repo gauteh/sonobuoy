@@ -214,7 +214,7 @@ namespace Buoy {
 # define BATCH_LENGTH (QUEUE_LENGTH / BATCHES)
 
 # ifndef ONLY_SPEC
-      /* Samples are 24 bits, but 4 bytes are clocked out */
+      /* Samples have 24 useful bits, but 4 bytes are clocked out */
       volatile uint32_t value;
       volatile uint32_t values[QUEUE_LENGTH];
       volatile uint32_t times [QUEUE_LENGTH];

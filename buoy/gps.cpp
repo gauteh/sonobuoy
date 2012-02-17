@@ -58,24 +58,25 @@ namespace Buoy {
   }
 
   void GPS::sync_pulse () {
+    /* Synchronize time stamp clock */
+    HAS_SYNC = true;
+    lastsync = millis ();
+
+    /* Last second should be received every second */
+    // TODO: Possibly off by +1
+    lastsecond++;
+
+    /* Update microdelta offset */
+    microdelta = micros () - (1e6 * (lastsecond - referencesecond));
+
+    /* Is reset because of new microdelta calculation */
+    IN_OVERFLOW = false;
+
+    /* Reset overrun handling */
+    lastmicros = micros ();
+
+    /* Check wether to update reference second */
     if (HAS_TIME) {
-      /* Synchronize time stamp clock */
-      HAS_SYNC = true;
-      lastsync = millis ();
-
-      /* Last second should be received every second */
-      lastsecond++;
-
-      /* Update microdelta offset */
-      microdelta = micros () - (1e6 * (lastsecond - referencesecond));
-
-      /* Is reset because of new microdelta calculation */
-      IN_OVERFLOW = false;
-
-      /* Reset overrun handling */
-      lastmicros = micros ();
-
-      /* Check wether to update reference second */
       if ((lastsecond - referencesecond) > ROLL_REFERENCE) {
         referencerolled = 2;
         roll_reference ();
@@ -92,7 +93,24 @@ namespace Buoy {
     /* Change referencesecond to latest */
     if (referencerolled == 0) referencerolled = 1;
 
-    microdelta = microdelta - (1e6 * (lastsecond - referencesecond));
+    /* Handle several references in same batch */
+    if (update_reference) {
+
+      // Start of current batch
+      uint32_t currentbatch = ad->position; // volatile
+      currentbatch = currentbatch - (currentbatch % BATCH_LENGTH);
+
+      if (update_reference_position >= currentbatch &&
+          update_reference_position < (currentbatch + BATCH_LENGTH)) {
+
+        // There is already a reference in this batch, skip and wait until batch is finihsed
+        referencerolled = 5;
+        return;
+      }
+
+    }
+
+    microdelta          = micros ();
     previous_reference  = referencesecond;
     referencesecond     = lastsecond;
     // Signal to store and rf that new reference is available
@@ -138,13 +156,12 @@ namespace Buoy {
 
     // }}}
 
-    /* Setting first time reference */
+    /* VOLATILE: Setting first time reference */
     if (referencesecond == 0 && lastsecond > 0) {
       rf->send_debug ("[GPS] Roll first time reference.");
       referencerolled = 4;
       roll_reference ();
-      update_reference = false;
-      HAS_SYNC_REFERENCE = false;
+      HAS_SYNC_REFERENCE  = false;
     }
   }
 
@@ -236,7 +253,7 @@ namespace Buoy {
     HAS_TIME = gps_data.valid;
 
     /* VOLATILE: Check if we still have synced clock */
-    if ( !(HAS_SYNC && (millis() - lastsync < 1000) && (millis () > lastsync))) {
+    if ( !(HAS_SYNC && (millis() - lastsync < 2000) && (millis () > lastsync))) {
       HAS_SYNC = false;
     }
   }
