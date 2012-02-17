@@ -105,9 +105,10 @@ namespace Buoy {
           uint32_t start  =  (lastbatch * BATCH_LENGTH);
           lastbatch       =  (lastbatch + 1) % BATCHES;
           uint32_t length = BATCH_LENGTH;
-          uint32_t ref    = gps->referencesecond;
+          uint32_t ref;
+          uint32_t nextref;
           bool go         = true;
-          bool update_ref = false;
+          bool update_ref;
 
           /* Reference updated in this batch */
           if (gps->update_reference &&
@@ -116,7 +117,13 @@ namespace Buoy {
           {
             length  = gps->update_reference_position - start;
             ref     = gps->previous_reference;
+            nextref = gps->referencesecond;
             update_ref = true;
+          } else {
+            ref       = gps->referencesecond;
+            nextref   = 0;
+            length    = BATCH_LENGTH;
+            update_ref = false;
           }
 
           while (go) {
@@ -180,9 +187,9 @@ namespace Buoy {
 
             /* Prepare for last part of batch in case reference has been updated */
             if (update_ref) {
-              start   = start + length;
-              length  = BATCH_LENGTH - length;
-              ref     = gps->referencesecond;
+              start   = start + length + 1;
+              length  = BATCH_LENGTH - length -1;
+              ref     = nextref;
               update_ref = false;
               send_debug ("[RF] Sending last part of batch (updated reference).");
             } else {

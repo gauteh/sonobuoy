@@ -139,6 +139,7 @@ class Zero:
 
     except Exception as e:
       self.logger.error ("General exception in main loop: " + str(e))
+      throw (e)
 
     finally:
       self.logger.info ("Main loop finished..")

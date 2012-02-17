@@ -261,6 +261,7 @@ namespace Buoy {
     }
 
     bool currentreferencewritten = false;
+    uint32_t nextref = 0;
 
     /* Write first reference if this is a new file */
     if (!referencewritten) {
@@ -269,6 +270,7 @@ namespace Buoy {
           gps->update_reference_position > s &&
           gps->update_reference_position < (s + BATCH_LENGTH))
       {
+        nextref = gps->referencesecond;
         write_reference (gps->previous_reference);
       } else {
         write_reference (gps->referencesecond);
@@ -294,7 +296,7 @@ namespace Buoy {
         if (!currentreferencewritten) {
           rf_send_debug_f ("[SD] In-loop reference queue: %lu", gps->update_reference_position);
 
-          write_reference (gps->referencesecond);
+          write_reference (nextref);
 
           if (!SD_AVAILABLE) {
             rf_send_debug_f ("[SD] No write: error: %02X.", card.errorCode ());

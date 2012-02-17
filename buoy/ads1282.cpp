@@ -545,6 +545,7 @@ namespace Buoy {
   }
 
   void ADS1282::acquire () {
+    gps->disable_sync ();
     /* In continuous mode: Must complete read operation before four
      *                     DRDY (ADS1282) periods. */
 
@@ -592,6 +593,7 @@ namespace Buoy {
         gps->update_reference = false;
       }
     }
+    gps->enable_sync ();
   }
 
   void ADS1282::acquire_on_command () {

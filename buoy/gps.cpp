@@ -48,7 +48,7 @@ namespace Buoy {
     GPS_Serial.begin (GPS_BAUDRATE);
 
     pinMode (GPS_SYNC_PIN, INPUT_PULLDOWN);
-    attachInterrupt (GPS_SYNC_PIN, &(GPS::sync_pulse_int), RISING);
+    enable_sync ();
 
     rf->send_debug ("[GPS] GPS subsystem initiated.");
   }
@@ -67,13 +67,12 @@ namespace Buoy {
     lastsecond++;
 
     /* Update microdelta offset */
-    microdelta = micros () - (1e6 * (lastsecond - referencesecond));
-
-    /* Is reset because of new microdelta calculation */
-    IN_OVERFLOW = false;
-
-    /* Reset overrun handling */
-    lastmicros = micros ();
+    if (micros () < (1e6 * (lastsecond - referencesecond))) {
+      referencerolled = 7;
+      roll_reference ();
+    } else {
+      microdelta = micros () - (1e6 * (lastsecond - referencesecond));
+    }
 
     /* Check wether to update reference second */
     if (HAS_TIME) {
@@ -117,6 +116,11 @@ namespace Buoy {
     update_reference = true;
     update_reference_position = ad->position;
     HAS_SYNC_REFERENCE = true;
+
+    /* Is reset because of new microdelta calculation */
+    IN_OVERFLOW = false;
+    /* Reset overrun handling */
+    lastmicros = micros ();
   }
 
   void GPS::update_second () {
@@ -157,7 +161,7 @@ namespace Buoy {
     // }}}
 
     /* VOLATILE: Setting first time reference */
-    if (referencesecond == 0 && lastsecond > 0) {
+    if (referencesecond == 0) {
       rf->send_debug ("[GPS] Roll first time reference.");
       referencerolled = 4;
       roll_reference ();
@@ -167,6 +171,7 @@ namespace Buoy {
 
 
   void GPS::loop () {
+    disable_sync ();
     /* Check if we are closing second overflow, fix by
      * setting new reference using internal clock.
      *
@@ -174,40 +179,10 @@ namespace Buoy {
      * an overflow has happened, handle within 20 seconds of
      * reaching microdelta */
 
-    if (IN_OVERFLOW && ((microdelta - micros()) > 20e6))
-    {
-      /* Handle several references in same batch */
-      if (update_reference && !ad->continuous_read) {
-
-        // Start of current batch
-        uint32_t currentbatch = ad->position; // volatile
-        currentbatch = currentbatch - (currentbatch % BATCH_LENGTH);
-
-        if (update_reference_position >= currentbatch &&
-            update_reference_position < (currentbatch + BATCH_LENGTH)) {
-
-          // There is already a reference in this batch, skip and wait until batch is finihsed
-          referencerolled = 6;
-        } else {
-          /* Set new reference using internal clock */
-          rf->send_debug ("[GPS] [NOSYNC] Roll reference.");
-
-          /* Volatile */
-          referencesecond += TIME_FROM_REFERENCE(this) / 1e6;
-          update_reference = true; // Signal to store that new reference is available
-          update_reference_position = ad->position;
-          microdelta = micros ();
-          IN_OVERFLOW = false;
-          HAS_SYNC    = false;
-          HAS_SYNC_REFERENCE = false;
-        }
-      }
-    }
-
     /* Volatile */
     uint8_t _referencerolled = referencerolled;
     if (_referencerolled > 0) {
-      rf_send_debug_f ("[GPS] Roll reference: '%u'", _referencerolled);
+      rf_send_debug_f ("[GPS] Roll reference: '%u' (%lu)", _referencerolled, (uint32_t) referencesecond);
       referencerolled = 0;
     }
 
@@ -268,9 +243,14 @@ namespace Buoy {
     HAS_TIME = gps_data.valid;
 
     /* VOLATILE: Check if we still have synced clock */
-    if ( !(HAS_SYNC && (millis() - lastsync < 2000) && (millis () > lastsync))) {
+    uint32_t t;
+    if (millis () < lastsync) t = millis() + (ULONG_MAX - lastsync);
+    else t = millis () - lastsync;
+
+    if (HAS_SYNC && (t > 2000)) {
       HAS_SYNC = false;
     }
+    enable_sync ();
   }
 
   void GPS::parse ()
@@ -586,6 +566,13 @@ namespace Buoy {
       update_second ();
 
     /* Done parser }}} */
+  }
+
+  void GPS::enable_sync () {
+    attachInterrupt (GPS_SYNC_PIN, &(GPS::sync_pulse_int), RISING);
+  }
+  void GPS::disable_sync () {
+    detachInterrupt (GPS_SYNC_PIN);
   }
 }
 

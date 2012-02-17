@@ -88,6 +88,9 @@ namespace Buoy {
       void        roll_reference ();
       void        update_second ();
 
+      void        enable_sync ();
+      void        disable_sync ();
+
       /* Timing */
 # define LEAP_SECONDS 19 // as of 2011
       bool HAS_LEAP_SECONDS;             // Has received leap seconds inf.
@@ -160,7 +163,7 @@ namespace Buoy {
 
 # define ULONG_MAX ((2^32) - 1)
 # define TIME_FROM_REFERENCE(x) (!x->IN_OVERFLOW ? (micros() - x->microdelta) : (micros () + (ULONG_MAX - x->microdelta)))
-# define CHECK_FOR_OVERFLOW(x) (x->IN_OVERFLOW = (micros () < x->lastmicros))
+# define CHECK_FOR_OVERFLOW(x) (x->IN_OVERFLOW = (x->IN_OVERFLOW || micros () < x->lastmicros))
 
 /* Overflow handling, the math.. {{{
  *
