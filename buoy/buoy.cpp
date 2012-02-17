@@ -63,6 +63,10 @@ namespace Buoy {
 
     rf->start_continuous_transfer ();
     store->start_continuous_write ();
+
+    /* Give GPS a chance to sync.. */
+    delay (1000);
+    ad->start_continuous_read ();
   }
 }
 

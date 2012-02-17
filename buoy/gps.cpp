@@ -47,8 +47,8 @@ namespace Buoy {
 
     GPS_Serial.begin (GPS_BAUDRATE);
 
-    pinMode (GPS_SYNC_PIN, INPUT);
-    //attachInterrupt (GPS_SYNC_PIN, &(GPS::sync_pulse_int), RISING);
+    pinMode (GPS_SYNC_PIN, INPUT_PULLDOWN);
+    attachInterrupt (GPS_SYNC_PIN, &(GPS::sync_pulse_int), RISING);
 
     rf->send_debug ("[GPS] GPS subsystem initiated.");
   }
@@ -58,7 +58,6 @@ namespace Buoy {
   }
 
   void GPS::sync_pulse () {
-    /* Assume data is valid if we have PPS */
     if (HAS_TIME) {
       /* Synchronize time stamp clock */
       HAS_SYNC = true;
@@ -80,10 +79,9 @@ namespace Buoy {
       if ((lastsecond - referencesecond) > ROLL_REFERENCE) {
         referencerolled = 2;
         roll_reference ();
-      }
 
+      } else if (!HAS_SYNC_REFERENCE) {
       /* Update reference in case reference has been set using local clock */
-      if (!HAS_SYNC_REFERENCE) {
         referencerolled = 3;
         roll_reference ();
       }
@@ -93,6 +91,7 @@ namespace Buoy {
   void GPS::roll_reference () {
     /* Change referencesecond to latest */
     if (referencerolled == 0) referencerolled = 1;
+
     microdelta = microdelta - (1e6 * (lastsecond - referencesecond));
     previous_reference  = referencesecond;
     referencesecond     = lastsecond;
@@ -157,10 +156,13 @@ namespace Buoy {
      * This can happen if we don't have valid GPS data and
      * an overflow has happened, handle within 20 seconds of
      * reaching microdelta */
+
     if (IN_OVERFLOW && ((microdelta - micros()) > 20e6))
     {
       /* Set new reference using internal clock */
       rf->send_debug ("[GPS] [NOSYNC] Roll reference.");
+
+      /* Volatile */
       referencesecond += TIME_FROM_REFERENCE(this) / 1e6;
       update_reference = true; // Signal to store that new reference is available
       update_reference_position = ad->position;
@@ -170,8 +172,10 @@ namespace Buoy {
       HAS_SYNC_REFERENCE = false;
     }
 
-    if (referencerolled > 0) {
-      rf_send_debug_f ("[GPS] Roll reference: '%u'", referencerolled);
+    /* Volatile */
+    uint8_t _referencerolled = referencerolled;
+    if (_referencerolled > 0) {
+      rf_send_debug_f ("[GPS] Roll reference: '%u'", _referencerolled);
       referencerolled = 0;
     }
 
@@ -231,8 +235,10 @@ namespace Buoy {
 
     HAS_TIME = gps_data.valid;
 
-    /* Check if we still have synced clock */
-    HAS_SYNC = (HAS_SYNC && gps_data.valid && (millis() - lastsync < 1000));
+    /* VOLATILE: Check if we still have synced clock */
+    if ( !(HAS_SYNC && (millis() - lastsync < 1000) && (millis () > lastsync))) {
+      HAS_SYNC = false;
+    }
   }
 
   void GPS::parse ()

@@ -81,12 +81,12 @@ namespace Buoy {
       GPS_DATA gps_data;
 
       GPS ();
-      void setup (BuoyMaster *);
-      void loop ();
+      void        setup (BuoyMaster *);
+      void        loop ();
       static void sync_pulse_int ();
-      void sync_pulse ();
-      void roll_reference ();
-      void update_second ();
+      void        sync_pulse ();
+      void        roll_reference ();
+      void        update_second ();
 
       /* Timing */
 # define LEAP_SECONDS 19 // as of 2011

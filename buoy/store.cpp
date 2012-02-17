@@ -22,13 +22,13 @@ namespace Buoy {
   }
 
   void Store::setup (BuoyMaster *b) {
-    rf = b->rf;
-    ad = b->ad;
+    rf  = b->rf;
+    ad  = b->ad;
     gps = b->gps;
 
     spi = new HardwareSPI(SD_SPI);
 
-    lastsd = millis ();
+    lastsd    = millis ();
     lastbatch = ad->batchready;
     continuous_write = false;
     init ();

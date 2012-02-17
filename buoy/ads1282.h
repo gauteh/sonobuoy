@@ -236,6 +236,9 @@ namespace Buoy {
       void read_registers ();
       void configure_registers ();
 
+      void start_continuous_read ();
+      void stop_continuous_read ();
+
       void loop ();
       void acquire ();
       void acquire_on_command ();

@@ -77,7 +77,6 @@ namespace Buoy {
     /* Configure AD */
     configure ();
 
-    attachInterrupt (AD_nDRDY,&(ADS1282::drdy), FALLING);
 
     rf->send_debug ("[AD] ADS1282 subsystem initiated.");
     // }}}
@@ -170,18 +169,38 @@ namespace Buoy {
     configure_registers (); // resets ADC, 63 data cycles are lost..
     delay (100);
     read_registers ();
-
     delay (400);
-
-    send_command (SYNC);
-    send_command (RDATAC);
-
 
 # if DIRECT_SERIAL
     SerialUSB.println ("[AD] Configuration done.");
 # endif
     // }}}
   }
+
+  /* Continuous read and write {{{ */
+  void ADS1282::start_continuous_read () {
+# if DIRECT_SERIAL
+    SerialUSB.println ("[AD] Sync and start read data continuous..");
+# endif
+    send_command (SYNC);
+    send_command (RDATAC);
+    delay (100);
+
+    attachInterrupt (AD_nDRDY,&(ADS1282::drdy), FALLING);
+  }
+
+  void ADS1282::stop_continuous_read () {
+# if DIRECT_SERIAL
+    SerialUSB.println ("[AD] Reset by command and stop read data continuous..");
+# endif
+    detachInterrupt (AD_nDRDY);
+
+    send_command (RESET);
+    delay (100);
+
+    send_command (SDATAC);
+    delay (100);
+  } // }}}
 
   void ADS1282::read_pca9535 (PCA9535REGISTER reg) {
     /* Read registers of PCA9535RGE {{{
@@ -566,7 +585,7 @@ namespace Buoy {
          (gps->update_reference_position >= position &&
           gps->update_reference_position < (position + BATCH_LENGTH)))
       {
-        //gps->update_reference = false;
+        gps->update_reference = false;
       }
     }
 
