@@ -21,7 +21,6 @@ namespace Buoy {
     delay (3000); // time to connect with serial before starting..
     setup ();
 
-
     uint32_t iter = 0;
 # define LOOP_DELAY 10
 
