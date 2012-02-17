@@ -562,10 +562,15 @@ namespace Buoy {
       position    %= QUEUE_LENGTH;  // Roll over queue position
 
       /* Reset update_reference if it is in new active batch */
-      if (gps->update_reference && (gps->update_reference_position >= position &&
+      if (gps->update_reference &&
+         (gps->update_reference_position >= position &&
           gps->update_reference_position < (position + BATCH_LENGTH)))
-        gps->update_reference = false;
+      {
+        //gps->update_reference = false;
+      }
     }
+
+    gps->lastmicros = micros ();
   }
 
   void ADS1282::acquire_on_command () {

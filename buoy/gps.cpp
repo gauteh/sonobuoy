@@ -30,6 +30,7 @@ namespace Buoy {
     lastmicros = 0;
     microdelta = 0;
     lastsync = 0;
+    referencerolled = 0;
 
     update_reference = false;
     update_reference = 0;
@@ -47,7 +48,7 @@ namespace Buoy {
     GPS_Serial.begin (GPS_BAUDRATE);
 
     pinMode (GPS_SYNC_PIN, INPUT);
-    attachInterrupt (GPS_SYNC_PIN, &(GPS::sync_pulse_int), RISING);
+    //attachInterrupt (GPS_SYNC_PIN, &(GPS::sync_pulse_int), RISING);
 
     rf->send_debug ("[GPS] GPS subsystem initiated.");
   }
@@ -58,39 +59,45 @@ namespace Buoy {
 
   void GPS::sync_pulse () {
     /* Assume data is valid if we have PPS */
+    if (HAS_TIME) {
+      /* Synchronize time stamp clock */
+      HAS_SYNC = true;
+      lastsync = millis ();
 
-    /* Synchronize time stamp clock */
-    HAS_SYNC = true;
-    lastsync = millis ();
+      /* Last second should be received every second */
+      lastsecond++;
 
-    /* Last second should be received every second */
-    lastsecond++;
+      /* Update microdelta offset */
+      microdelta = micros () - (1e6 * (lastsecond - referencesecond));
 
-    /* Update microdelta offset */
-    microdelta = micros () - (1e6 * (lastsecond - referencesecond));
+      /* Is reset because of new microdelta calculation */
+      IN_OVERFLOW = false;
 
-    /* Is reset because of new microdelta calculation */
-    IN_OVERFLOW = false;
+      /* Reset overrun handling */
+      lastmicros = micros ();
 
-    /* Reset overrun handling */
-    lastmicros = micros ();
+      /* Check wether to update reference second */
+      if ((lastsecond - referencesecond) > ROLL_REFERENCE) {
+        referencerolled = 2;
+        roll_reference ();
+      }
 
-    /* Check wether to update reference second */
-    if ((lastsecond - referencesecond) > ROLL_REFERENCE)
-      roll_reference ();
-
-    /* Update reference in case reference has been set using local clock */
-    if (!HAS_SYNC_REFERENCE)
-      roll_reference ();
+      /* Update reference in case reference has been set using local clock */
+      if (!HAS_SYNC_REFERENCE) {
+        referencerolled = 3;
+        roll_reference ();
+      }
+    }
   }
 
   void GPS::roll_reference () {
     /* Change referencesecond to latest */
-    rf->send_debug ("[GPS] Roll reference.");
+    if (referencerolled == 0) referencerolled = 1;
     microdelta = microdelta - (1e6 * (lastsecond - referencesecond));
-    previous_reference = referencesecond;
-    referencesecond = lastsecond;
-    update_reference = true; // Signal to store that new reference is available
+    previous_reference  = referencesecond;
+    referencesecond     = lastsecond;
+    // Signal to store and rf that new reference is available
+    update_reference = true;
     update_reference_position = ad->position;
     HAS_SYNC_REFERENCE = true;
   }
@@ -133,7 +140,9 @@ namespace Buoy {
     // }}}
 
     /* Setting first time reference */
-    if (referencesecond == 0) {
+    if (referencesecond == 0 && lastsecond > 0) {
+      rf->send_debug ("[GPS] Roll first time reference.");
+      referencerolled = 4;
       roll_reference ();
       update_reference = false;
       HAS_SYNC_REFERENCE = false;
@@ -151,7 +160,7 @@ namespace Buoy {
     if (IN_OVERFLOW && ((microdelta - micros()) > 20e6))
     {
       /* Set new reference using internal clock */
-      rf->send_debug ("[GPS] [**] Roll reference: Manual.");
+      rf->send_debug ("[GPS] [NOSYNC] Roll reference.");
       referencesecond += TIME_FROM_REFERENCE(this) / 1e6;
       update_reference = true; // Signal to store that new reference is available
       update_reference_position = ad->position;
@@ -159,6 +168,11 @@ namespace Buoy {
       IN_OVERFLOW = false;
       HAS_SYNC    = false;
       HAS_SYNC_REFERENCE = false;
+    }
+
+    if (referencerolled > 0) {
+      rf_send_debug_f ("[GPS] Roll reference: '%u'", referencerolled);
+      referencerolled = 0;
     }
 
     /* Handle incoming GPS telegrams on serial line {{{
@@ -239,7 +253,7 @@ namespace Buoy {
 
 
     /* Test checksum before parsing */
-    if (!((RF*)rf)->test_checksum (gps_buf)) return;
+    if (!rf->test_checksum (gps_buf)) return;
 
     /* Update time, should be set in case time data has been received */
     bool doseconds = false;

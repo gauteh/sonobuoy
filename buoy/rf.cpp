@@ -102,17 +102,20 @@ namespace Buoy {
 
          */
         {
-          uint32_t start =  (lastbatch * BATCH_LENGTH);
-          lastbatch      =  (lastbatch + 1) % BATCHES;
+          uint32_t start  =  (lastbatch * BATCH_LENGTH);
+          lastbatch       =  (lastbatch + 1) % BATCHES;
           uint32_t length = BATCH_LENGTH;
-          uint32_t ref = gps->referencesecond;
-          bool go = true;
+          uint32_t ref    = gps->referencesecond;
+          bool go         = true;
           bool update_ref = false;
 
-          if (gps->update_reference && gps->update_reference_position > start && gps->update_reference_position < (start + BATCH_LENGTH))
+          /* Reference updated in this batch */
+          if (gps->update_reference &&
+              gps->update_reference_position > start &&
+              gps->update_reference_position < (start + BATCH_LENGTH))
           {
-            length = gps->update_reference_position - start;
-            ref = gps->previous_reference;
+            length  = gps->update_reference_position - start;
+            ref     = gps->previous_reference;
             update_ref = true;
           }
 
@@ -175,10 +178,11 @@ namespace Buoy {
             rf_send_debug_f ("[RF] Last sample: 0x%lX", lasts);
             */
 
+            /* Prepare for last part of batch in case reference has been updated */
             if (update_ref) {
-              start = start + length;
-              length = BATCH_LENGTH - length;
-              ref = gps->referencesecond;
+              start   = start + length;
+              length  = BATCH_LENGTH - length;
+              ref     = gps->referencesecond;
               update_ref = false;
               send_debug ("[RF] Sending last part of batch (updated reference).");
             } else {
@@ -202,7 +206,7 @@ namespace Buoy {
       case GPS_STATUS:
         // $GPS,S,[lasttype],[telegrams received],[lasttelegram],Lat,Lon,unixtime,time,date,Valid,HAS_TIME,HAS_SYNC,HAS_SYNC_REFERENCE*CS
         // Valid: Y = Yes, N = No
-        sprintf (buf, "$GPS,S,%d,%d,%s,%c,%s,%c,%lu,%lu,%02d%02d%02d,%c,%c,%c,%c*", gps->gps_data.lasttype, gps->gps_data.received, gps->gps_data.latitude, (gps->gps_data.north ? 'N' : 'S'), gps->gps_data.longitude, (gps->gps_data.east ? 'E' : 'W'), gps->lastsecond, gps->gps_data.time, gps->gps_data.day, gps->gps_data.month, gps->gps_data.year, (gps->gps_data.valid ? 'Y' : 'N'), (gps->HAS_TIME ? 'Y' : 'N'), (gps->HAS_SYNC ? 'Y' : 'N'), (gps->HAS_SYNC_REFERENCE ? 'Y' : 'N'));
+        sprintf (buf, "$GPS,S,%d,%d,%s,%c,%s,%c,%lu,%lu,%02d%02d%02d,%c,%c,%c,%c*", gps->gps_data.lasttype, gps->gps_data.received, gps->gps_data.latitude, (gps->gps_data.north ? 'N' : 'S'), gps->gps_data.longitude, (gps->gps_data.east ? 'E' : 'W'), (uint32_t) gps->lastsecond, gps->gps_data.time, gps->gps_data.day, gps->gps_data.month, gps->gps_data.year, (gps->gps_data.valid ? 'Y' : 'N'), (gps->HAS_TIME ? 'Y' : 'N'), (gps->HAS_SYNC ? 'Y' : 'N'), (gps->HAS_SYNC_REFERENCE ? 'Y' : 'N'));
 
         break;
 

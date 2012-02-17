@@ -123,7 +123,7 @@ namespace Buoy {
       if (!SD_AVAILABLE) return;
 
       char buf[13];
-      sprintf (buf, "[%lu]", gps->lastsecond);
+      sprintf (buf, "[%lu]", (uint32_t) gps->lastsecond);
       logf.write (buf);
       logf.write (s);
       logf.write ('\n');
@@ -254,16 +254,19 @@ namespace Buoy {
       roll_data_file ();
     }
 
-
-    /* Check if we have exceeeded this store */
+    /* Check if we have room in size */
     if (sd_data.curPosition () > (SD_DATA_FILE_SIZE - (BATCH_LENGTH * (SAMPLE_LENGTH + TIMESTAMP_LENGTH))))
     {
       roll_data_file ();
     }
 
-    /* Write first reference since this is a new file */
+    /* Write first reference if this is a new file */
     if (!referencewritten) {
-      if (gps->update_reference && gps->update_reference_position > s && gps->update_reference_position < (s + BATCH_LENGTH)) {
+      /* Write previous reference if reference has been updated in this batch */
+      if (gps->update_reference &&
+          gps->update_reference_position > s &&
+          gps->update_reference_position < (s + BATCH_LENGTH))
+      {
         write_reference (gps->previous_reference);
       } else {
         write_reference (gps->referencesecond);
@@ -277,8 +280,11 @@ namespace Buoy {
     for (uint32_t i = s; i <  s + (BATCH_LENGTH); i++)
     {
       /* Write reference at correct position */
-      if (gps->update_reference && i == gps->update_reference_position) {
+      if (gps->update_reference &&
+          i == gps->update_reference_position)
+      {
         rf_send_debug_f ("[SD] In-loop reference queue: %lu", gps->update_reference_position);
+
         write_reference (gps->referencesecond);
 
         if (!SD_AVAILABLE) {

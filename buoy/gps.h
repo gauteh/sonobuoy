@@ -20,7 +20,7 @@ namespace Buoy {
 # define GPS_BAUDRATE 4800
 # define GPS_Serial Serial1
 
-# define GPS_SYNC_PIN 21
+# define GPS_SYNC_PIN 27 // Should be 5V tolerant
 
     private:
       char gps_buf [TELEGRAM_LEN + 2];
@@ -28,6 +28,7 @@ namespace Buoy {
 
       /* Keep track of last sync pulse */
       volatile uint32_t lastsync;
+      volatile uint8_t  referencerolled; // Pass debug message from main loop
 
       void parse ();
 
@@ -102,11 +103,11 @@ namespace Buoy {
        *
        * ROLL_REFERENCE specifies how often the reference should be updated .
        */
-      volatile uint32_t referencesecond;
+      volatile uint64_t referencesecond;
 
 # endif
 
-# define ROLL_REFERENCE 60 // [s]
+# define ROLL_REFERENCE 40 // [s]
 
 # ifndef ONLY_SPEC
 
@@ -119,7 +120,7 @@ namespace Buoy {
        * Is reset by ads1282.cpp when entering the batch interval again.
        */
 
-      volatile uint32_t previous_reference;
+      volatile uint64_t previous_reference;
       volatile bool     update_reference;
       volatile uint32_t update_reference_position;
 
@@ -130,14 +131,14 @@ namespace Buoy {
        * data.valid is set and gps_update_second has been run.
        *
        */
-      volatile uint32_t lastsecond;
+      volatile uint64_t lastsecond;
 
       /* The time in microseconds between Arduino micros() clock and reference second
        *
        * Synchronized with pulse from GPS.
        *
        */
-      volatile uint32_t microdelta;
+      volatile uint64_t microdelta;
 
       /*
        * For detecting overflow: lastmicros is result of last micros ()
@@ -146,7 +147,7 @@ namespace Buoy {
        * TODO: Check if we count the first step (0) correctly when in overflow.
        *
        */
-      volatile uint32_t lastmicros;
+      volatile uint64_t lastmicros;
 
       /* Get time related to reference
        *
