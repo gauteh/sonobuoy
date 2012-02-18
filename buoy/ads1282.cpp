@@ -21,7 +21,7 @@ using namespace std;
 namespace Buoy {
   ADS1282::ADS1282 () {
     // Init class {{{
-    disabled    = false;
+    disabled        = false;
     continuous_read = false;
     run = 0;
 
@@ -36,7 +36,7 @@ namespace Buoy {
 
     for (int i = 0; i < 11; i++) reg.raw[i] = 0;
 
-    batchready  = 0;
+    batch       = 0;
     value       = 0;
     memset ((void*) values, 0, QUEUE_LENGTH * sizeof (uint32_t));
     memset ((void*) times, 0, QUEUE_LENGTH * sizeof (uint32_t));
@@ -44,6 +44,11 @@ namespace Buoy {
     totalsamples = 0;
     batchstart    = millis ();
     batchfilltime = millis();
+
+    for (int i = 0; i < BATCHES; i++) {
+      references [i] = 0;
+      microdeltas[i] = 0;
+    }
 
     return;
     // }}}
@@ -545,7 +550,6 @@ namespace Buoy {
   }
 
   void ADS1282::acquire () {
-    gps->disable_sync ();
     /* In continuous mode: Must complete read operation before four
      *                     DRDY (ADS1282) periods. */
 
@@ -568,32 +572,25 @@ namespace Buoy {
      * then it is 1 for +FS and 0 for -FS.
      */
 
-    CHECK_FOR_OVERFLOW (gps);
-    gps->lastmicros = micros ();
-
     /* Fill batch */
     values[position] = value;
-    times [position] = TIME_FROM_REFERENCE (gps); // Does not change value within interrupt
+    times [position] = micros () - microdeltas[batch];
 
     position++;
     totalsamples++;
 
+    /* New batch */
     if (position % BATCH_LENGTH == 0) {
+      /* Stats */
       batchfilltime = millis () - batchstart;
       batchstart    = millis ();
-      batchready++;
-      batchready  %= BATCHES;       // Increment batch or roll over
-      position    %= QUEUE_LENGTH;  // Roll over queue position
 
-      /* Reset update_reference if it is in new active batch */
-      if (gps->update_reference &&
-         (gps->update_reference_position >= position &&
-          gps->update_reference_position < (position + BATCH_LENGTH)))
-      {
-        gps->update_reference = false;
-      }
+      batch++;
+      batch         %= BATCHES;       // Increment batch or roll over
+      position      %= QUEUE_LENGTH;  // Roll over queue position
+
+      /* Reference for new reference */
     }
-    gps->enable_sync ();
   }
 
   void ADS1282::acquire_on_command () {

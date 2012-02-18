@@ -83,87 +83,39 @@ namespace Buoy {
       GPS ();
       void        setup (BuoyMaster *);
       void        loop ();
+
       static void sync_pulse_int ();
       void        sync_pulse ();
-      void        roll_reference ();
-      void        update_second ();
-
       void        enable_sync ();
       void        disable_sync ();
 
+      void        update_second ();
+
+
       /* Timing */
-# define LEAP_SECONDS 19 // as of 2011
-      bool HAS_LEAP_SECONDS;             // Has received leap seconds inf.
       bool HAS_TIME;                     // Has valid time from GPS
+
       volatile bool HAS_SYNC;            // Has PPS synced
       volatile bool HAS_SYNC_REFERENCE;  // Reference is set using PPS
       volatile bool IN_OVERFLOW;         // micros () is overflowed
 
-      /* Current basis to calculate microsecond timestamp from
+      /* Leap seconds:
+       * Are not counted in lastseconds (unix time since epoch).
        *
-       * Needs to be logged as reference for microsecond resolution time stamps in
-       * data.
-       *
-       * ROLL_REFERENCE specifies how often the reference should be updated .
-       */
-      volatile uint64_t referencesecond;
-
-# endif
-
-# define ROLL_REFERENCE 40 // [s]
-
-# ifndef ONLY_SPEC
-
-      /* For Store and RF to know reference has been changed at given
-       * queue position.
-       *
-       * previous_reference contains the original reference. referencesecond
-       * contains the reference for all samples after update_reference_position.
-       *
-       * Is reset by ads1282.cpp when entering the batch interval again.
+       * TODO: Handle if receiver is including them in telegrams.
        */
 
-      volatile uint64_t previous_reference;
-      volatile bool     update_reference;
-      volatile uint32_t update_reference_position;
 
-      /* Last second received from GPS , the next pulse should indicate +1 second.
-       * UTC (HAS_LEAP_SECONDS indicate wether this includes leap seconds)
-       *
-       * This is updated even without valid data and can only be trusted if
-       * data.valid is set and gps_update_second has been run.
-       *
-       */
-      volatile uint64_t lastsecond;
+      /* The last unix time calculated from GPS telegram, with timestamp
+       * in millis (). Is also incremented by a PPS signal. */
+      uint64_t lastsecond;
+      uint64_t lastsecond_time;
 
-      /* The time in microseconds between Arduino micros() clock and reference second
-       *
-       * Synchronized with pulse from GPS.
-       *
-       */
-      volatile uint64_t microdelta;
-
-      /*
-       * For detecting overflow: lastmicros is result of last micros ()
-       *                         call in ad_drdy ()
-       *
-       * TODO: Check if we count the first step (0) correctly when in overflow.
-       *
-       */
-      volatile uint64_t lastmicros;
-
-      /* Get time related to reference
-       *
-       * ACCURACY:
-       *
-       * Accurate to (max(ulong) 2^32 - 1 ) % 4 for Arduino internal clock, micros()
-       * has steps of 4. And to accuracy of GPS sync pulse (if available), about 1
-       * us + delay for handling pulse.
-       */
+      /* The latest most reliable reference for picking by AD */
+      uint64_t reference;
+      uint64_t microdelta;
 
 # define ULONG_MAX ((2^32) - 1)
-# define TIME_FROM_REFERENCE(x) (!x->IN_OVERFLOW ? (micros() - x->microdelta) : (micros () + (ULONG_MAX - x->microdelta)))
-# define CHECK_FOR_OVERFLOW(x) (x->IN_OVERFLOW = (x->IN_OVERFLOW || micros () < x->lastmicros))
 
 /* Overflow handling, the math.. {{{
  *

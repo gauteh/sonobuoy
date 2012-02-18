@@ -218,10 +218,21 @@ namespace Buoy {
       volatile uint32_t value;
       volatile uint32_t values[QUEUE_LENGTH];
       volatile uint32_t times [QUEUE_LENGTH];
-      volatile uint8_t  batchready;
+      volatile uint8_t  batch;          // Current batch
       volatile uint32_t position;
       volatile uint32_t batchfilltime;
       volatile uint32_t batchstart;
+
+      /* Reference for batches, each batch has one reference and microdelta.
+       *
+       * The reference is the unix time used as reference for this batch.
+       * The microdelta is a delta in microseconds since that reference.
+       *
+       * Both may occur in calculations overflowing uint32_t.
+       */
+
+      volatile uint64_t references  [BATCHES];
+      volatile uint64_t microdeltas [BATCHES];
 
       volatile uint32_t totalsamples;
 
