@@ -129,16 +129,16 @@ namespace Buoy {
      * http://www.arduino.cc/playground/Code/Time */
 
 # define SECONDS_PER_DAY 86400L
-# define LEAP_YEAR(x) (!((1970 + x) % 4) && ( ((1970 + x) % 100) || !((1970 + x) % 400) ))
+# define LEAP_YEAR(x) !!(!((1970 + x) % 4) && ( ((1970 + x) % 100) || !((1970 + x) % 400) ))
 
-    uint32_t year = (2000 + gps_data.year) - 1970; // Offset 1970
+    uint32_t year = (2000 + gps_data.year) - 1970; // Offset 1970 (unix epoch)
 
     lastsecond = year * 365 * SECONDS_PER_DAY;
 
-    /* Add a day for each leap year */
-    for (uint32_t i = 0; i < year; i++)
-      if (LEAP_YEAR(i))
-        lastsecond += SECONDS_PER_DAY;
+    /* Add a day of seconds for each leap year */
+    lastsecond +=  (( (1970 + year) /   4 )
+                  - ( (1970 + year) / 100 )
+                  + ( (1970 + year) / 400 )) * SECONDS_PER_DAY;
 
     const int monthdays[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
     for (int i = 1; i < gps_data.month; i++) {
