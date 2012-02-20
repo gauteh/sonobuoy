@@ -122,6 +122,7 @@ namespace Buoy {
         TIME = 0b1,
         SYNC = 0b10,
         SYNC_REFERENCE = 0b100,
+        POSITION = 0b1000,
       };
       /* Leap seconds:
        * Are not counted in lastseconds (unix time since epoch).
@@ -147,7 +148,7 @@ namespace Buoy {
        * Included tolerance for millis () drift.
        *
        */
-# define REFERENCE_TIMEOUT 60
+# define REFERENCE_TIMEOUT 60 // [s]
 
       /* Maple Native Beta Crystal: 535-9721-1-ND from DigiKey */
 # define TIMING_PPM  10

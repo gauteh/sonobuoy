@@ -56,11 +56,6 @@
 
 namespace Buoy {
   class Store {
-    private:
-
-      /* Current index and data file has reference */
-      bool referencewritten;
-
     public:
       RF      *rf;
       ADS1282 *ad;
@@ -77,24 +72,18 @@ namespace Buoy {
 
 # endif
 
-      enum SD_STATUS {
-        SD_VALID_GPS    = 0b1,
-        SD_HAS_TIME     = 0b10,
-        SD_HAS_SYNC     = 0b100,
-        SD_HAS_SYNC_REF = 0b1000,
-      };
-
       typedef uint32_t sample;
 
 /* Data format */
-# define STORE_VERSION 2uL
+# define STORE_VERSION 3uL
 # define SAMPLE_LENGTH 4uL
 # define TIMESTAMP_LENGTH 4uL
 
 /* Maximum number of timestamp, sample pairs for each datafile */
-# define EST_MINUTES_PER_DATAFILE 5uL
-# define MAX_SAMPLES_PER_FILE (FREQUENCY * 60uL * EST_MINUTES_PER_DATAFILE)
-# define MAX_REFERENCES ((MAX_SAMPLES_PER_FILE / BATCH_LENGTH) + 20uL)
+# define MINUTES_PER_DATAFILE 5uL
+# define MAX_SAMPLES_PER_FILE (FREQUENCY * 60uL * MINUTES_PER_DATAFILE)
+# define MAX_REFERENCES (MAX_SAMPLES_PER_FILE / BATCH_LENGTH)
+
 
 # define _SD_DATA_FILE_SIZE (MAX_SAMPLES_PER_FILE * (SAMPLE_LENGTH + TIMESTAMP_LENGTH) + MAX_REFERENCES * 50uL)
 # define SD_DATA_FILE_SIZE (_SD_DATA_FILE_SIZE + (_SD_DATA_FILE_SIZE % 512uL))
@@ -181,7 +170,7 @@ namespace Buoy {
       void open_data ();
 
       void write_batch ();
-      void write_reference (uint32_t);
+      void write_reference (uint32_t, uint8_t);
 
       void start_continuous_write ();
       void stop_continuous_write ();

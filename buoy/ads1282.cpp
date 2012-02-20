@@ -573,6 +573,12 @@ namespace Buoy {
      * then it is 1 for +FS and 0 for -FS.
      */
 
+    /* EXPERIMENTAL: Sync microdelta if this reference was set with sync */
+    gps->assert_time ();
+    if ((reference_status[batch] & GPS::SYNC_REFERENCE) && gps->HAS_SYNC) {
+      microdeltas[batch] = ((gps->reference - references[batch]) * 1e6) + gps->microdelta;
+    }
+
     /* Fill batch */
     values[position] = value;
     times [position] = micros () - microdeltas[batch];
@@ -591,7 +597,6 @@ namespace Buoy {
       position      %= QUEUE_LENGTH;  // Roll over queue position
 
       /* Pick new reference for batch */
-      gps->assert_time ();
       references[batch] = gps->reference;
       microdeltas[batch] = gps->microdelta;
       reference_status[batch] = (gps->HAS_TIME & GPS::TIME) |

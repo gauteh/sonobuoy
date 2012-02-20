@@ -18,7 +18,6 @@
 namespace Buoy {
   Store::Store () {
     logf_id = 0;
-    referencewritten = false;
   }
 
   void Store::setup (BuoyMaster *b) {
@@ -29,7 +28,7 @@ namespace Buoy {
     spi = new HardwareSPI(SD_SPI);
 
     lastsd    = millis ();
-    lastbatch = ad->batchready;
+    lastbatch = 0;
     continuous_write = false;
     init ();
 
@@ -246,7 +245,6 @@ namespace Buoy {
     }
 
     uint32_t s =  lastbatch * BATCH_LENGTH;
-    lastbatch  =  (lastbatch + 1) % BATCHES;
 
     /* Check if we have room for samples in store */
     if (current_index.samples > (MAX_SAMPLES_PER_FILE - BATCH_LENGTH))
@@ -260,23 +258,9 @@ namespace Buoy {
       roll_data_file ();
     }
 
-    bool currentreferencewritten = false;
-    uint32_t nextref = 0;
+    write_reference (ad->references[lastbatch], ad->reference_status[lastbatch]);
 
-    /* Write first reference if this is a new file */
-    if (!referencewritten) {
-      /* Write previous reference if reference has been updated in this batch */
-      if (gps->update_reference &&
-          gps->update_reference_position > s &&
-          gps->update_reference_position < (s + BATCH_LENGTH))
-      {
-        nextref = gps->referencesecond;
-        write_reference (gps->previous_reference);
-      } else {
-        write_reference (gps->referencesecond);
-        currentreferencewritten = true;
-      }
-    }
+    if (!SD_AVAILABLE) return;
 
     /* Writing entries */
     rf_send_debug_f ("[SD] Writing entries to data file from sample: %lu", current_index.samples);
@@ -284,27 +268,6 @@ namespace Buoy {
 
     for (uint32_t i = s; i <  s + (BATCH_LENGTH); i++)
     {
-      /* Write reference at correct position */
-      if (gps->update_reference &&
-          i == gps->update_reference_position)
-      {
-        /* There will always have been written a reference already.
-         *
-         * Avoid writing reference doubly in case it is the first reference in
-         * this batch and file and it has already been written.
-         */
-        if (!currentreferencewritten) {
-          rf_send_debug_f ("[SD] In-loop reference queue: %lu", gps->update_reference_position);
-
-          write_reference (nextref);
-
-          if (!SD_AVAILABLE) {
-            rf_send_debug_f ("[SD] No write: error: %02X.", card.errorCode ());
-            return;
-          }
-        }
-      }
-
       sd_data.write (reinterpret_cast<char*>((uint32_t*) &(ad->times[i])), sizeof(uint32_t));
       sd_data.write (reinterpret_cast<char*>((uint32_t*)  &(ad->values[i])), sizeof(uint32_t));
     }
@@ -313,6 +276,8 @@ namespace Buoy {
 
     sd_data.sync ();
     SD_AVAILABLE &= (card.errorCode () == 0);
+
+    lastbatch  =  (lastbatch + 1) % BATCHES;
   }
 
   /* Open data file */
@@ -323,11 +288,9 @@ namespace Buoy {
 
     SD_AVAILABLE = sd_data.open (&root, fname, O_CREAT | O_WRITE | O_TRUNC);
     SD_AVAILABLE &= (card.errorCode () == 0);
-
-    referencewritten = false;
   }
 
-  void Store::write_reference (uint32_t ref)
+  void Store::write_reference (uint32_t ref, uint8_t refstat)
   {
     rf_send_debug_f ("[SD] Write reference: %lu", ref);
 
@@ -363,9 +326,6 @@ namespace Buoy {
 
     current_index.nrefs++;
 
-    /* Current index and data file has reference */
-    referencewritten = true;
-
     SD_AVAILABLE &= (card.errorCode () == 0);
   }
 
@@ -381,7 +341,7 @@ namespace Buoy {
     /* Check if new batch is ready */
     /* Loop must run at least 2x speed (Nyquist) of batchfilltime */
     if (SD_AVAILABLE && continuous_write) {
-      if (ad->batchready != lastbatch) {
+      if (ad->batch != lastbatch) {
         write_batch ();
       }
     }

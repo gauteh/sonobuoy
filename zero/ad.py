@@ -21,6 +21,7 @@ class AD:
   ad_k_remaining    = 0
   ad_k_samples      = 0
   ad_reference      = 0
+  ad_reference_status = 0
   ad_sample_csum    = '' # String rep of hex value
   ad_samples        = '' # Array of bytes (3 * byte / value)
   ad_time           = '' # Array of bytes (4 * byte / time stamp)
@@ -81,7 +82,7 @@ class AD:
       i += 1
       s.append(n)
 
-      #print "[AD] Sample[", i, "] : ", hex(n) 
+      #print "[AD] Sample[", i, "] : ", hex(n)
 
     i = 0
     while (i < self.ad_k_samples):

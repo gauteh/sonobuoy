@@ -22,7 +22,7 @@ namespace Buoy {
     setup ();
 
     uint32_t iter = 0;
-# define LOOP_DELAY 0 
+# define LOOP_DELAY 10 
 
     while (true) {
       ad->loop ();
@@ -30,9 +30,7 @@ namespace Buoy {
       gps->loop ();
       store->loop ();
 
-# if LOOP_DELAY
       delay (LOOP_DELAY);
-# endif
 
       /* Give GPS a chance to get seconds or sync */
       if (!ad->continuous_read && ((iter * LOOP_DELAY) > 1000)) {

@@ -38,7 +38,7 @@ namespace Buoy {
 
     /* Loop must run at least 2x speed (Nyquist) of batchfilltime */
     if (continuous_transfer) {
-      if (ad->batchready != lastbatch) {
+      if (ad->batch != lastbatch) {
        ad_message (AD_DATA_BATCH);
       }
     }
@@ -87,7 +87,7 @@ namespace Buoy {
 
          * 1. Initiate binary data stream:
 
-         $AD,D,[k = number of samples],[reference]*CC
+         $AD,D,[k = number of samples],[reference],[reference_status]*CC
 
          * 2. Send one $ to indicate start of data
 
@@ -97,105 +97,72 @@ namespace Buoy {
 
          * 5. Send end of data with checksum
 
-         ** In case reference has been updated in batch, two separate batches
-         ** are sent.
-
          */
         {
-          uint32_t start  =  (lastbatch * BATCH_LENGTH);
-          lastbatch       =  (lastbatch + 1) % BATCHES;
+          uint32_t start  = (lastbatch * BATCH_LENGTH);
           uint32_t length = BATCH_LENGTH;
-          uint32_t ref;
-          uint32_t nextref;
-          bool go         = true;
-          bool update_ref;
+          uint32_t ref    = ad->references[lastbatch];
+          uint8_t  refstat = ad->reference_status[lastbatch];
 
-          /* Reference updated in this batch */
-          if (gps->update_reference &&
-              gps->update_reference_position > start &&
-              gps->update_reference_position < (start + BATCH_LENGTH))
+          sprintf (buf, "$AD,D,%lu,%lu,%u*", length, ref, refstat);
+          APPEND_CSUM (buf);
+          RF_Serial.println (buf);
+
+          delayMicroseconds (100);
+
+          byte csum = 0;
+
+          /* Write '$' to signal start of binary data */
+          RF_Serial.write ('$');
+
+          //uint32_t lasts = 0;
+          uint32_t s;
+
+          for (uint32_t i = 0; i < length; i++)
           {
-            length  = gps->update_reference_position - start;
-            ref     = gps->previous_reference;
-            nextref = gps->referencesecond;
-            update_ref = true;
-          } else {
-            ref       = gps->referencesecond;
-            nextref   = 0;
-            length    = BATCH_LENGTH;
-            update_ref = false;
-          }
+            s = ad->values[start + i];
+            /* MSB first (big endian), means concatenating bytes on RX will
+             * result in LSB first; little endian. */
+            RF_Serial.write ((byte*)(&s), 4);
 
-          while (go) {
-            sprintf (buf, "$AD,D,%lu,%lu*", length, ref);
-            APPEND_CSUM (buf);
-            RF_Serial.println (buf);
+            csum = csum ^ ((byte*)&s)[0];
+            csum = csum ^ ((byte*)&s)[1];
+            csum = csum ^ ((byte*)&s)[2];
+            csum = csum ^ ((byte*)&s)[3];
+
+            //lasts = s;
 
             delayMicroseconds (100);
-
-            byte csum = 0;
-
-            /* Write '$' to signal start of binary data */
-            RF_Serial.write ('$');
-
-            //uint32_t lasts = 0;
-            uint32_t s;
-
-            for (uint32_t i = 0; i < length; i++)
-            {
-              s = ad->values[start + i];
-              /* MSB first (big endian), means concatenating bytes on RX will
-               * result in LSB first; little endian. */
-              RF_Serial.write ((byte*)(&s), 4);
-
-              csum = csum ^ ((byte*)&s)[0];
-              csum = csum ^ ((byte*)&s)[1];
-              csum = csum ^ ((byte*)&s)[2];
-              csum = csum ^ ((byte*)&s)[3];
-
-              //lasts = s;
-
-              delayMicroseconds (100);
-            }
-
-            /* Send time stamps */
-            uint32_t t = 0;
-            for (uint32_t i = 0; i < length; i++)
-            {
-              t = ad->times[start + i];
-
-              /* Writes MSB first */
-              RF_Serial.write ((byte*)(&t), 4);
-
-              csum = csum ^ ((byte*)&t)[0];
-              csum = csum ^ ((byte*)&t)[1];
-              csum = csum ^ ((byte*)&t)[2];
-              csum = csum ^ ((byte*)&t)[3];
-            }
-
-            /* Send end of data with Checksum */
-            sprintf (buf, "$AD,DE," F_CSUM "*", csum);
-            APPEND_CSUM (buf);
-            RF_Serial.println (buf);
-            delayMicroseconds (100);
-
-            /*
-            SerialUSB.print ("[RF] Last sample: 0x");
-            SerialUSB.println (lasts, HEX);
-            rf_send_debug_f ("[RF] Last sample: 0x%lX", lasts);
-            */
-
-            /* Prepare for last part of batch in case reference has been updated */
-            if (update_ref) {
-              start   = start + length + 1;
-              length  = BATCH_LENGTH - length -1;
-              ref     = nextref;
-              update_ref = false;
-              send_debug ("[RF] Sending last part of batch (updated reference).");
-            } else {
-              go = false;
-            }
           }
+
+          /* Send time stamps */
+          uint32_t t = 0;
+          for (uint32_t i = 0; i < length; i++)
+          {
+            t = ad->times[start + i];
+
+            /* Writes MSB first */
+            RF_Serial.write ((byte*)(&t), 4);
+
+            csum = csum ^ ((byte*)&t)[0];
+            csum = csum ^ ((byte*)&t)[1];
+            csum = csum ^ ((byte*)&t)[2];
+            csum = csum ^ ((byte*)&t)[3];
+          }
+
+          /* Send end of data with Checksum */
+          sprintf (buf, "$AD,DE," F_CSUM "*", csum);
+          APPEND_CSUM (buf);
+          RF_Serial.println (buf);
+          delayMicroseconds (100);
+
+          /*
+          SerialUSB.print ("[RF] Last sample: 0x");
+          SerialUSB.println (lasts, HEX);
+          rf_send_debug_f ("[RF] Last sample: 0x%lX", lasts);
+          */
+
+          lastbatch =  (lastbatch + 1) % BATCHES;
         }
         break;
 

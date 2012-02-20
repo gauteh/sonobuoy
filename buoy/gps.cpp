@@ -73,6 +73,37 @@ namespace Buoy {
     }
   }
 
+  void GPS::assert_time () {
+    /* Check state of timing and PPS */
+
+    /* We have a tolerance of 1 millisecond to catch sync loss */
+# define LOST_SYNC 1001
+
+    /* Check if we still have sync */
+    if ((millis () - lastsync) > LOST_SYNC) {
+      HAS_SYNC = false;
+
+      /* Check if we need to manually update reference:
+       *
+       * If micros () has overflowed since last microdelta and reference,
+       * a new reference and microdelta must be set before it reaches the second
+       * overflow.
+       *
+       * By ensuring that the reference is updated withing the roll over time for
+       * micros () this should not happen.
+       *
+       */
+
+      if (( (millis() - lastsync) > (REFERENCE_TIMEOUT * 1000) ) && ( (lastsecond - reference) > REFERENCE_TIMEOUT )) {
+        HAS_SYNC_REFERENCE = false;
+
+        /* Un-reliable, using time telegram */
+        reference  = lastsecond;
+        microdelta = micros () + ((millis () - lastsecond_time) * 1000);
+      }
+    }
+  }
+
   void GPS::update_second () {
     /* Calculate Unix time from UTC {{{
      * Based on makeTime () as of 2011-10-05 from:
@@ -120,17 +151,28 @@ namespace Buoy {
 
     HAS_TIME = gps_data.valid;
 
-    enable_sync ();
-
     /* Set first time reference */
     if (reference == 0) {
+# if DIRECT_SERIAL
+      SerialUSB.println ("[GPS] Setting first-time reference.");
+# endif
+      rf->send_debug ("[GPS] Setting first-time reference.");
+
       reference   = lastsecond;
       microdelta  = micros ();  // unreliable
       HAS_SYNC_REFERENCE  = false;
+
+      // Pick for ADS1282
+      ad->references[ad->batch] = reference;
+      ad->microdeltas[ad->batch] = microdelta;
+      ad->reference_status[ad->batch] = (HAS_TIME & GPS::TIME) |
+                                        (HAS_SYNC & GPS::SYNC) |
+                                        (HAS_SYNC_REFERENCE & GPS::SYNC_REFERENCE);
     }
+
+    enable_sync ();
     // }}}
   }
-
 
   void GPS::loop () {
     /* Handle incoming GPS telegrams on serial line (non-blocking) {{{
@@ -188,47 +230,6 @@ namespace Buoy {
 
     /* }}} Done telegram handler */
 
-  }
-
-  void inline GPS::assert_time () {
-    /* Check state of timing and PPS
-     *
-     * To be executed by ADS1282 interrupt.
-     *
-     */
-
-    /* Check if we need to manually update reference:
-     *
-     * If micros () has overflowed since last microdelta and reference,
-     * a new reference and microdelta must be set before it reaches the second
-     * overflow.
-     *
-     * By ensuring that the reference is updated withing the roll over time for
-     * micros () this should not happen.
-     *
-     */
-
-    if ((millis() - lastsync) > REFERENCE_TIMEOUT) {
-      HAS_SYNC_REFERENCE = false;
-
-      /* Un-reliable, using time telegram */
-      if (HAS_TIME) {
-        reference  = lastsecond;
-        microdelta = micros () + ((millis () - lastsecond_time) * 1000);
-
-      } else {
-        /* Even more un-reliable, using millis() since last sync */
-        reference += (millis() - lastsync) / 1000;
-        microdelta = micros ();
-      }
-    }
-
-    /* We have a tolerance of 1 millisecond to catch sync loss */
-# define LOST_SYNC 1001
-
-    /* Check if we still have sync */
-    if ((millis () - lastsync) > LOST_SYNC)
-      HAS_SYNC = false;
   }
 
   void GPS::parse ()

@@ -156,7 +156,7 @@ class Protocol:
 
               elif (tokeni == 12):
                 self.zero.current.gps.has_time = (token == 'Y')
-              
+
               elif (tokeni == 13):
                 self.zero.current.gps.has_sync = (token == 'Y')
 
@@ -190,6 +190,9 @@ class Protocol:
 
               elif (tokeni == 3):
                 self.zero.current.ad.ad_reference = int (token)
+
+              elif (tokeni == 4):
+                self.zero.current.ad.ad_reference_status = int (token)
 
                 #print "[AD] Initiating binary transfer.. samples: ", self.zero.current.ad.ad_k_samples
                 return
