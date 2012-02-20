@@ -105,9 +105,7 @@ namespace Buoy {
   }
 
   void GPS::update_second () {
-    /* Calculate Unix time from UTC {{{
-     * Based on makeTime () as of 2011-10-05 from:
-     * http://www.arduino.cc/playground/Code/Time */
+    /* Calculate Unix time from UTC {{{ */
 
 # define SECONDS_PER_DAY 86400L
 # define LEAP_YEAR(x) !!(!((1970 + x) % 4) && ( ((1970 + x) % 100) || !((1970 + x) % 400) ))
@@ -116,10 +114,12 @@ namespace Buoy {
 
     uint64_t newsecond = year * 365 * SECONDS_PER_DAY;
 
-    /* Add a day of seconds for each leap year */
-    newsecond     +=  (( (1970 + year) /   4 )
-                  - ( (1970 + year) / 100 )
-                  + ( (1970 + year) / 400 )) * SECONDS_PER_DAY;
+# define LEAP_YEARS_BEFORE_1970 ((1970 / 4) - (1970 / 100) + (1970 / 400))
+    /* Add a day of seconds for each leap year except this */
+    newsecond += (( (1970 + (year-1)) /   4 )
+               - (  (1970 + (year-1)) / 100 )
+               + (  (1970 + (year-1)) / 400 )) * SECONDS_PER_DAY;
+    newsecond -= LEAP_YEARS_BEFORE_1970        * SECONDS_PER_DAY;
 
     const int monthdays[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
     for (int i = 1; i < gps_data.month; i++) {
