@@ -21,10 +21,15 @@ namespace Buoy {
     HAS_TIME = false;
     HAS_SYNC = false;
     HAS_SYNC_REFERENCE = false;
-    IN_OVERFLOW = false;
 
     lastsecond      = 0;
     lastsecond_time = 0;
+
+    reference       = 0;
+    microdelta      = 0;
+
+    lastmicros      = micros ();
+    lastsync        = 0;
   }
 
   void GPS::setup (BuoyMaster *b) {
@@ -49,6 +54,23 @@ namespace Buoy {
   }
 
   void GPS::sync_pulse () {
+    if (HAS_TIME) {
+      /* If a PPS pulse is sent it must be for the second after the last
+       * received as a telegram */
+      lastsecond++;
+
+      /* New available reference */
+      reference  = lastsecond;
+
+      /* Update microdelta */
+      microdelta = micros ();
+
+      /* Reset last sync counter */
+      lastsync   = millis ();
+
+      HAS_SYNC            = true;
+      HAS_SYNC_REFERENCE  = true;
+    }
   }
 
   void GPS::update_second () {
@@ -56,49 +78,56 @@ namespace Buoy {
      * Based on makeTime () as of 2011-10-05 from:
      * http://www.arduino.cc/playground/Code/Time */
 
-    /* Make sure we are not interrupted */
-    disable_sync ();
-
-    lastsecond_time = millis ();
-
 # define SECONDS_PER_DAY 86400L
 # define LEAP_YEAR(x) !!(!((1970 + x) % 4) && ( ((1970 + x) % 100) || !((1970 + x) % 400) ))
 
     uint32_t year = (2000 + gps_data.year) - 1970; // Offset 1970 (unix epoch)
 
-    lastsecond = year * 365 * SECONDS_PER_DAY;
+    uint64_t newsecond = year * 365 * SECONDS_PER_DAY;
 
     /* Add a day of seconds for each leap year */
-    lastsecond +=  (( (1970 + year) /   4 )
+    newsecond     +=  (( (1970 + year) /   4 )
                   - ( (1970 + year) / 100 )
                   + ( (1970 + year) / 400 )) * SECONDS_PER_DAY;
 
     const int monthdays[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
     for (int i = 1; i < gps_data.month; i++) {
       if ((i == 2) && LEAP_YEAR(year))
-        lastsecond += SECONDS_PER_DAY * 29;
+        newsecond += SECONDS_PER_DAY * 29;
       else
-        lastsecond += SECONDS_PER_DAY * monthdays[i - 1];
+        newsecond += SECONDS_PER_DAY * monthdays[i - 1];
     }
 
-    lastsecond += SECONDS_PER_DAY * (gps_data.day - 1);
-    lastsecond += (uint32_t)gps_data.hour   * 60 * 60;
-    lastsecond += (uint32_t)gps_data.minute * 60;
-    lastsecond += (uint32_t)gps_data.second;
+    newsecond += SECONDS_PER_DAY * (gps_data.day - 1);
+    newsecond += (uint32_t)gps_data.hour   * 60 * 60;
+    newsecond += (uint32_t)gps_data.minute * 60;
+    newsecond += (uint32_t)gps_data.second;
 
     gps_data.time  = gps_data.hour    * 1e4;
     gps_data.time += gps_data.minute  * 1e2;
     gps_data.time += gps_data.second;
 
-    /* Set first time reference in case it */
+    /* Make sure lastsync is not changed while working */
+    disable_sync ();
+
+    /* Update last second if we don't have a valid time from before
+     * or there has been an increment in seconds (wheter the new second is
+     * valid or not). */
+    if (!HAS_TIME || newsecond > lastsecond) {
+      lastsecond_time = millis ();
+      lastsecond      = newsecond;
+    }
+
+    HAS_TIME = gps_data.valid;
+
+    enable_sync ();
+
+    /* Set first time reference */
     if (reference == 0) {
       reference   = lastsecond;
       microdelta  = micros ();  // unreliable
       HAS_SYNC_REFERENCE  = false;
-      HAS_SYNC            = false;
     }
-
-    enable_sync ();
     // }}}
   }
 
@@ -159,7 +188,47 @@ namespace Buoy {
 
     /* }}} Done telegram handler */
 
-    HAS_TIME = gps_data.valid;
+  }
+
+  void inline GPS::assert_time () {
+    /* Check state of timing and PPS
+     *
+     * To be executed by ADS1282 interrupt.
+     *
+     */
+
+    /* Check if we need to manually update reference:
+     *
+     * If micros () has overflowed since last microdelta and reference,
+     * a new reference and microdelta must be set before it reaches the second
+     * overflow.
+     *
+     * By ensuring that the reference is updated withing the roll over time for
+     * micros () this should not happen.
+     *
+     */
+
+    if ((millis() - lastsync) > REFERENCE_TIMEOUT) {
+      HAS_SYNC_REFERENCE = false;
+
+      /* Un-reliable, using time telegram */
+      if (HAS_TIME) {
+        reference  = lastsecond;
+        microdelta = micros () + ((millis () - lastsecond_time) * 1000);
+
+      } else {
+        /* Even more un-reliable, using millis() since last sync */
+        reference += (millis() - lastsync) / 1000;
+        microdelta = micros ();
+      }
+    }
+
+    /* We have a tolerance of 1 millisecond to catch sync loss */
+# define LOST_SYNC 1001
+
+    /* Check if we still have sync */
+    if ((millis () - lastsync) > LOST_SYNC)
+      HAS_SYNC = false;
   }
 
   void GPS::parse ()
@@ -477,10 +546,10 @@ namespace Buoy {
     /* Done parser }}} */
   }
 
-  void GPS::enable_sync () {
-    attachInterrupt (GPS_SYNC_PIN, &(GPS::sync_pulse_int), RISING);
+  void inline GPS::enable_sync () {
+    attachInterrupt (GPS_SYNC_PIN, &(GPS::sync_pulse_int), FALLING);
   }
-  void GPS::disable_sync () {
+  void inline GPS::disable_sync () {
     detachInterrupt (GPS_SYNC_PIN);
   }
 }

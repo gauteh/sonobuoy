@@ -27,7 +27,6 @@ namespace Buoy {
       int  gps_buf_pos;
 
       /* Keep track of last sync pulse */
-      volatile uint32_t lastsync;
       volatile uint8_t  referencerolled; // Pass debug message from main loop
 
       void parse ();
@@ -82,7 +81,7 @@ namespace Buoy {
 
       GPS ();
       void        setup (BuoyMaster *);
-      void        loop ();
+      void        loop  ();
 
       static void sync_pulse_int ();
       void        sync_pulse ();
@@ -90,15 +89,40 @@ namespace Buoy {
       void        disable_sync ();
 
       void        update_second ();
+      void        assert_time ();
 
-
-      /* Timing */
+      /* Timing
+       *
+       * Synchronization:
+       * - Telegrams with UTC time information and validity is received
+       *   continuously.
+       *
+       * - A PPS is received at the time of each second, this _must_ mean
+       *   that it is synchronized to the second _after_ the last time fix
+       *   received as a telegram.
+       *
+       * - The telegrams that are sent each second might continue to arrive
+       *   during the pulse. There _should_ then already have arrived one
+       *   time fix for the previous second.
+       *
+       * - This means that one series of telegrams might change to the next
+       *   second - but _only_ after the pulse!
+       *
+       * - Any exact reference or timing should only be done in the PPS
+       *   interrupt handler.
+       *
+       */
       bool HAS_TIME;                     // Has valid time from GPS
 
       volatile bool HAS_SYNC;            // Has PPS synced
       volatile bool HAS_SYNC_REFERENCE;  // Reference is set using PPS
-      volatile bool IN_OVERFLOW;         // micros () is overflowed
 
+      enum GPS_STATUS {
+        NOTHING = 0b0,
+        TIME = 0b1,
+        SYNC = 0b10,
+        SYNC_REFERENCE = 0b100,
+      };
       /* Leap seconds:
        * Are not counted in lastseconds (unix time since epoch).
        *
@@ -114,10 +138,26 @@ namespace Buoy {
       /* The latest most reliable reference for picking by AD */
       uint64_t reference;
       uint64_t microdelta;
+      uint64_t lastsync;
+      uint64_t lastmicros;
+
+
+      /* Time to wait before manually updating reference (in case of no sync)
+       *
+       * Included tolerance for millis () drift.
+       *
+       */
+# define REFERENCE_TIMEOUT 60
+
+      /* Maple Native Beta Crystal: 535-9721-1-ND from DigiKey */
+# define TIMING_PPM  10
 
 # define ULONG_MAX ((2^32) - 1)
 
 /* Overflow handling, the math.. {{{
+ *
+ * micros () overflow in about 70 minutes.
+ * millis () overflow in about 50 days.
  *
  * m   = micros
  * d   = delta
@@ -135,13 +175,16 @@ namespace Buoy {
  *
  * g is modulated m
  *
- * g = m - ULONG_MAX, we _will_ catch overrun/modulation before a second
- *                    modulation would have time to occur.
+ * g = m - ULONG_MAX, we _will_ catch the overflow before a second
+ *                    overflow would have time to occur.
  * t = ref + (m - d)
  *   = ref + (g + ULONG_MAX - d)
  *   = ref + (g + (ULONG_MAX - d))
  *
- * for d > g, this means we will have to recalculate ref before g >= d.
+ * for d > g, this means we will have to re-calculate ref before g >= d.
+ *
+ * The re-calculation should only be based on micros () so as to not loose
+ * any resolution.
  *
  * }}} */
   };

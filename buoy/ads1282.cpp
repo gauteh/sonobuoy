@@ -48,6 +48,7 @@ namespace Buoy {
     for (int i = 0; i < BATCHES; i++) {
       references [i] = 0;
       microdeltas[i] = 0;
+      reference_status[i] = GPS::NOTHING;
     }
 
     return;
@@ -589,7 +590,13 @@ namespace Buoy {
       batch         %= BATCHES;       // Increment batch or roll over
       position      %= QUEUE_LENGTH;  // Roll over queue position
 
-      /* Reference for new reference */
+      /* Pick new reference for batch */
+      gps->assert_time ();
+      references[batch] = gps->reference;
+      microdeltas[batch] = gps->microdelta;
+      reference_status[batch] = (gps->HAS_TIME & GPS::TIME) |
+                                (gps->HAS_SYNC & GPS::SYNC) |
+                                (gps->HAS_SYNC_REFERENCE & GPS::SYNC_REFERENCE);
     }
   }
 

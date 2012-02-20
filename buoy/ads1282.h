@@ -233,6 +233,7 @@ namespace Buoy {
 
       volatile uint64_t references  [BATCHES];
       volatile uint64_t microdeltas [BATCHES];
+      volatile uint8_t  reference_status [BATCHES];
 
       volatile uint32_t totalsamples;
 
