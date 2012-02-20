@@ -71,7 +71,7 @@ namespace Buoy {
     //store->log ("[Buoy] Initiating continuos transfer and write.");
 
     rf->start_continuous_transfer ();
-    //store->start_continuous_write ();
+    store->start_continuous_write ();
   }
 }
 

@@ -68,7 +68,6 @@ namespace Buoy {
 
       bool  SD_AVAILABLE;
       uint32_t lastsd;
-      uint32_t sd_status;
 
 # endif
 
@@ -125,7 +124,7 @@ namespace Buoy {
 
 
 /* Using 8.3 file names limits the ID */
-# define MAXID (10^8uL -1uL)
+# define MAXID ((10^8uL) -1uL)
 
       /* Files:
        * LASTID.LON     - file with current index id (not to be trusted..)
@@ -170,7 +169,7 @@ namespace Buoy {
       void open_data ();
 
       void write_batch ();
-      void write_reference (uint32_t, uint8_t);
+      void write_reference (uint32_t, uint32_t);
 
       void start_continuous_write ();
       void stop_continuous_write ();

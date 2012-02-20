@@ -136,7 +136,7 @@ namespace Buoy {
 
     // TODO: Check if we have reached MAXID
 
-    if (i > 100) i = 1;  // DEBUG
+    if (i > MAXID ) i = 1;  // DEBUG
 
     /* Walk through subsequent indexes above lastid and take next free */
     char buf[8+5];
@@ -290,7 +290,7 @@ namespace Buoy {
     SD_AVAILABLE &= (card.errorCode () == 0);
   }
 
-  void Store::write_reference (uint32_t ref, uint8_t refstat)
+  void Store::write_reference (uint32_t ref, uint32_t refstat)
   {
     rf_send_debug_f ("[SD] Write reference: %lu", ref);
 
@@ -318,7 +318,7 @@ namespace Buoy {
 
     sd_data.write (reinterpret_cast<char*>(&(current_index.nrefs)), sizeof(uint32_t));
     sd_data.write (reinterpret_cast<char*>(&(ref)), sizeof(uint32_t));
-    sd_data.write (reinterpret_cast<char*>(&(sd_status)), sizeof(uint32_t));
+    sd_data.write (reinterpret_cast<char*>(&(refstat)), sizeof(uint32_t));
 
     /* Pad with 0 */
     for (uint32_t i = 0; i < (SD_REFERENCE_PADN * (SAMPLE_LENGTH + TIMESTAMP_LENGTH)); i++)

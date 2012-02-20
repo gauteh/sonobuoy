@@ -102,9 +102,9 @@ namespace Buoy {
           uint32_t start  = (lastbatch * BATCH_LENGTH);
           uint32_t length = BATCH_LENGTH;
           uint32_t ref    = ad->references[lastbatch];
-          uint8_t  refstat = ad->reference_status[lastbatch];
+          uint32_t  refstat = ad->reference_status[lastbatch];
 
-          sprintf (buf, "$AD,D,%lu,%lu,%u*", length, ref, refstat);
+          sprintf (buf, "$AD,D,%lu,%lu,%lu*", length, ref, refstat);
           APPEND_CSUM (buf);
           RF_Serial.println (buf);
 
