@@ -124,7 +124,7 @@ namespace Buoy {
 
 
 /* Using 8.3 file names limits the ID */
-# define MAXID ((10^8uL) -1uL)
+# define MAXID (100000000L -1L)
 
       /* Files:
        * LASTID.LON     - file with current index id (not to be trusted..)

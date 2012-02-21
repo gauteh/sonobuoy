@@ -136,7 +136,14 @@ namespace Buoy {
 
     // TODO: Check if we have reached MAXID
 
-    if (i > MAXID ) i = 1;  // DEBUG
+    if (i > MAXID ) {
+# if DIRECT_SERIAL
+    SerialUSB.print ("[SD] Reached maximum ID:");
+    SerialUSB.println (i);
+    SerialUSB.println (MAXID);
+# endif
+      i = 1;  // DEBUG
+    }
 
     /* Walk through subsequent indexes above lastid and take next free */
     char buf[8+5];
