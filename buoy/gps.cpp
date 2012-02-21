@@ -118,8 +118,8 @@ namespace Buoy {
     /* Add a day of seconds for each leap year except this */
     newsecond += (( (1970 + (year-1)) /   4 )
                - (  (1970 + (year-1)) / 100 )
-               + (  (1970 + (year-1)) / 400 )) * SECONDS_PER_DAY;
-    newsecond -= LEAP_YEARS_BEFORE_1970        * SECONDS_PER_DAY;
+               + (  (1970 + (year-1)) / 400 )
+               - LEAP_YEARS_BEFORE_1970     ) * SECONDS_PER_DAY;
 
     const int monthdays[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
     for (int i = 1; i < gps_data.month; i++) {
