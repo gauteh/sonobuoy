@@ -23,8 +23,8 @@ if ~exist('nf', 'var')
 end
 
 %% Normalize the values vector
-% 24 bit
-y = v - 2^23;
+% 31 bit
+y = v - 2^30;
 y = y / max(abs(y));
 %%
 
