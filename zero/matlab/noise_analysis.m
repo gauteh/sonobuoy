@@ -2,7 +2,9 @@
 
 %data = load('One.log');
 
-% Last bit is redundant sign bit
+% Data is 32 bits twos complement:
+% - Last bit is redundant sign bit
+% - AD is specified to maximum 24 bits
 
 d = bitshift(twos_comp(data(:,2)),-1);
 
@@ -10,7 +12,7 @@ noiserange = max(d) - min(d);
 
 fsr = 2^31 - 1;
 
-snr = 20 * log10(fsr / noiserange);
+snr  = 20 * log10(fsr / noiserange);
 bits = log2(fsr / noiserange);
 fprintf ('SNR (FSR / range): %4.7f dB\n', snr);
 fprintf ('Bits: %1.2f\n', bits);
