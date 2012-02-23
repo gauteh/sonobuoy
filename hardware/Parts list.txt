@@ -14,6 +14,7 @@
 - 3 pin terminal for hydrophone
 - 1 pin connector for output ref to GND
 - Capacitors:
+  - 1x 380 pF
   - 2x 0.1 uF
   - 2x 2.2 uF
   - 1x 100 uF
