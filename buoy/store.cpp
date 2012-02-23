@@ -237,7 +237,7 @@ namespace Buoy {
 
     /* Open new index */
     write_index ();
-    next_index (current_index.id);
+    next_index (current_index.id + 1);
 
     /* Open new data file */
     open_data ();
