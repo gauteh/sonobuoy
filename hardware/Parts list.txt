@@ -1,0 +1,29 @@
+= Power supply =
+
+- Connector DC/DC (2 pin)
+- DC/DC 12V -> +/- 12V              TEN 15-1222
+- Voltage regulator: +12V -> +5V    L7805CV
+- Voltage regulator: -12V -> -5V    MC79L05ACPRAG
+- Capacitors:
+  - 2x 0.1 uF
+  - 2x 0.3 uF
+- 1 to 3 connectors for regulated output (5 pins)
+
+= Pre amplifier and buffer =
+- Connector regulated power
+- 3 pin terminal for hydrophone
+- 1 pin connector for output ref to GND
+- Capacitors:
+  - 2x 0.1 uF
+  - 2x 2.2 uF
+  - 1x 100 uF
+  - 1x  47 uF
+- Resistors:
+  - 1x 41.67 kOhm
+  - 1x 58.33 kOhm
+- Opamp as buffer
+  - LM833N
+  Alternatives:
+    - OPA637 / OPA627 ??
+    - AD743           ??
+
