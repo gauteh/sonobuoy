@@ -79,7 +79,7 @@ namespace Buoy {
     uint32_t i;
     SdFile fl;
 
-    if (fl.open (&root, "LASTID.LONG", O_READ)) {
+    if (!fl.open (&root, "LASTID.LONG", O_READ)) {
       n = fl.read (reinterpret_cast<char*>(&i), sizeof(uint32_t));
 
       if (n < sizeof(i)) i = 1;
@@ -90,7 +90,7 @@ namespace Buoy {
     }
 
     rf_send_debug_f ("[SD] Last id: %lu..", i);
-    next_index (i);
+    next_index (i + 1);
   }
 
   /* Log to file {{{ */
@@ -132,9 +132,9 @@ namespace Buoy {
   /* Open next index file */
   void Store::next_index (uint32_t i)
   {
-    // i is LASTID
+    // i is LASTID or LASTID + 1
 
-    // TODO: Check if we have reached MAXID
+    // TODO: Handle better MAXID
 
     if (i > MAXID ) {
 # if DIRECT_SERIAL
