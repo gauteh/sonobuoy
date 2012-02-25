@@ -33,21 +33,21 @@ C 48400 48400 1 0 0 resistor-2.sym
 T 48800 48750 5 10 0 0 0 0 1
 device=RESISTOR
 T 48600 48700 5 10 1 1 0 0 1
-refdes=R?
+refdes=41.67kOhm
 }
 C 50500 48400 1 0 0 resistor-2.sym
 {
 T 50900 48750 5 10 0 0 0 0 1
 device=RESISTOR
 T 50700 48700 5 10 1 1 0 0 1
-refdes=R?
+refdes=58.33kOhm
 }
 C 51700 48300 1 0 0 capacitor-1.sym
 {
 T 51900 49000 5 10 0 0 0 0 1
 device=CAPACITOR
 T 51900 48800 5 10 1 1 0 0 1
-refdes=C?
+refdes=47uF
 T 51900 49200 5 10 0 0 0 0 1
 symversion=0.1
 }
@@ -56,7 +56,7 @@ C 52900 49900 1 270 0 capacitor-2.sym
 T 53600 49700 5 10 0 0 270 0 1
 device=POLARIZED_CAPACITOR
 T 53400 49700 5 10 1 1 270 0 1
-refdes=C?
+refdes=100uF
 T 53800 49700 5 10 0 0 270 0 1
 symversion=0.1
 }
@@ -110,3 +110,21 @@ refdes=AD
 N 54800 48500 52600 48500 4
 N 51400 44800 48100 44800 4
 N 48100 44800 48100 48500 4
+C 48400 47500 1 0 0 capacitor-1.sym
+{
+T 48600 48200 5 10 0 0 0 0 1
+device=CAPACITOR
+T 48600 48000 5 10 1 1 0 0 1
+refdes=381pF
+T 48600 48400 5 10 0 0 0 0 1
+symversion=0.1
+}
+N 48400 47700 48100 47700 4
+N 49300 47700 49600 47700 4
+C 43900 49900 1 0 0 12V-plus-1.sym
+C 44100 46000 1 0 0 gnd-1.sym
+C 47900 48500 1 0 0 generic-power.sym
+{
+T 48100 48750 5 10 1 1 0 3 1
+net=+6V
+}
