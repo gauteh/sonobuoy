@@ -128,3 +128,7 @@ C 47900 48500 1 0 0 generic-power.sym
 T 48100 48750 5 10 1 1 0 3 1
 net=+6V
 }
+T 50100 40700 9 10 1 0 0 0 1
+Pre-amplifier with hydrophone decoupling and ADC buffer
+T 54000 40100 9 10 1 0 0 0 1
+G. Hope

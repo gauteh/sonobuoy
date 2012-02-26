@@ -181,3 +181,7 @@ device=CONNECTOR_4
 T 56800 43500 5 10 1 1 180 0 1
 refdes=ADS1282EVM
 }
+T 50100 40700 9 10 1 0 0 0 1
+Power supply and voltage regulation
+T 54000 40100 9 10 1 0 0 0 1
+G. Hope

@@ -24,15 +24,27 @@ dBre0 = 20 * log10(p0/reWater);
 p1  = 25 * 100000; % uPa (mb = 1)
 dBre1 = 20 * log10(p1/reWater);
 
+p2  = 250 * 100000; % uPa (mb = 2)
+dBre2 = 20 * log10(p2/reWater);
+
+p3  = 250 * 100000 * (10^2) / (50^2); % uPa (mb = 2 @ 50km)
+dBre3 = 20 * log10(p3/reWater);
+
 A0  = 10^((Ha + dBre0) / 20);
 A1  = 10^((Ha + dBre1) / 20);
+A2  = 10^((Ha + dBre2) / 20);
+A3  = 10^((Ha + dBre3) / 20);
 
+plot ([data(1,1) data(end,1)],  [1 1] * (A3/5*(2^30-1)) + mean(d), 'c');
+plot ([data(1,1) data(end,1)],  [1 1] * (A2/5*(2^30-1)) + mean(d), 'k');
 plot ([data(1,1) data(end,1)],  [1 1] * (A1/5*(2^30-1)) + mean(d), 'r');
 plot ([data(1,1) data(end,1)],  [1 1] * (A0/5*(2^30-1)) + mean(d), 'g');
 
+plot ([data(1,1) data(end,1)], -[1 1] * (A3/5*(2^30-1)) + mean(d), 'c');
+plot ([data(1,1) data(end,1)], -[1 1] * (A2/5*(2^30-1)) + mean(d), 'k');
 plot ([data(1,1) data(end,1)], -[1 1] * (A1/5*(2^30-1)) + mean(d), 'r');
 plot ([data(1,1) data(end,1)], -[1 1] * (A0/5*(2^30-1)) + mean(d), 'g');
 
-legend ('Data', 'mb = 1 @ 10km threshold', 'mb = 0 @ 10km threshold');
+legend ('Data', 'mb = 2 @ 50km threshold', 'mb = 2 @ 10km threshold', 'mb = 1 @ 10km threshold', 'mb = 0 @ 10km threshold');
 
 end
