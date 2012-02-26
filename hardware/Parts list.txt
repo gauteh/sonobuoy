@@ -1,22 +1,27 @@
 = Power supply =
 
-- Connector DC/DC (2 pin)
-- DC/DC 12V -> +/- 12V              TEN 15-1222
-- Voltage regulator: +12V -> +5V    L7805CV
-- Voltage regulator: -12V -> -5V    MC79L05ACPRAG
+- Connector power supply, 2 pin
+- DC/DC 9-36V -> 12V                TEN 15-1222
+- Voltage regulator: +5V            L7805CV
+- Voltage regulator: -6V            L7906CV
 - Capacitors:
   - 2x 0.1 uF
   - 2x 0.3 uF
-- 1 to 3 connectors for regulated output (5 pins)
+  - 1x 100 uF
+- Resistors:
+  - 2 x 4.7 kOhm
+- 5 x 2 pin output connectors
+- 1 x 3 pin output connector
+- 1 x 4 pin output connector
 
 = Pre amplifier and buffer =
-- Connector regulated power
+- Connector regulated power, 2 pin
 - 3 pin terminal for hydrophone
-- 1 pin connector for output ref to GND
+- Connector 2 pin for buffer output
 - Capacitors:
   - 1x 380 pF
   - 2x 0.1 uF
-  - 2x 2.2 uF
+  - 3x 2.2 uF
   - 1x 100 uF
   - 1x  47 uF
 - Resistors:
