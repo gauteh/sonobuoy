@@ -1,4 +1,4 @@
-function [F, Ft] = frequence_analysis (d)
+function [F, Ft] = frequency_analysis (d)
 % Do fourier transform of data d (signed input), normalize and plot
 % Returns:
 % F  = Frequency scale
