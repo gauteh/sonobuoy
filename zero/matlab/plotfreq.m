@@ -17,12 +17,12 @@ if removemean, d = d - mean(d); end % Remove DC component
 n = length (d);
 N = 2^nextpow2 (n);
 
-Ft = fft (d, N);
+Ft = fft (d, N)/n;
 
 freq = 250; % Sample rate
 
-X = abs (fftshift (Ft));
-X = X / max(X);          % Normalize
+X = 2*abs (fftshift (Ft));
+%X = X / max(X);          % Normalize
 
 F = freq * [ -N/2 : (N/2 -1)] / N;
 
@@ -31,7 +31,6 @@ clf ('reset');
 plot (F, X);
 title ('Frequency domain');
 xlabel ('Frequency [Hz]');
-ylabel ('Amplitude (normalized)');
-ylim ([-.1 1.1]);
+ylabel ('Amplitude');
 
 end
