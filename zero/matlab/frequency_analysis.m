@@ -12,7 +12,7 @@ Ft = fft (d, N);
 freq = 250; % Sample rate
 
 X = abs (fftshift (Ft));
-X = X / norm(X);          % Normalize
+X = X / max(X);          % Normalize
 
 F = freq * [ -N/2 : (N/2 -1)] / N;
 
