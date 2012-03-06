@@ -1,12 +1,20 @@
 function [t, d] = plotdtt (data, magnitudes)
 % Converts and shifts dtt file before plotting
 % Returns timestamps and data values in the range of [-2^30-1 2^30-1]
+%
+% Arguments:
+% data (unprocessed from dtt file, in twos complement, 32bits)
+% magnitudes, plot some common magnitude thresholds
+
+[m, n] = size(data);
+assert (m > 1 && n == 2, 'No data.');
 
 if (~exist('magnitudes', 'var')), magnitudes = false; end
 
 t = data(:,1);
 d = bitshift(twos_comp (data(:,2)), -1);
 
+figure (1);
 clf('reset');
 plot (t,d);
 
