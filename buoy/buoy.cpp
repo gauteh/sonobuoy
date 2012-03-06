@@ -59,7 +59,6 @@ namespace Buoy {
     store = new Store ();
     store->setup (this);
 
-
 # if DIRECT_SERIAL
     SerialUSB.println ("[Buoy] Initiating continuous transfer and write.");
 # endif
