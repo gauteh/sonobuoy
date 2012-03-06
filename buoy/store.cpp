@@ -79,12 +79,12 @@ namespace Buoy {
     uint32_t i;
     SdFile fl;
 
-    if (!fl.open (&root, "LASTID.LONG", O_READ)) {
+    if (fl.open (&root, "LASTID.LON", O_READ)) {
+
       n = fl.read (reinterpret_cast<char*>(&i), sizeof(uint32_t));
-
       if (n < sizeof(i)) i = 1;
-
       fl.close ();
+
     } else {
       i = 1;
     }

@@ -7,6 +7,7 @@
 
 # pragma once
 
+/* Version and settings */
 # define VERSION "0.6-dev"
 
 # ifndef ONLY_SPEC
@@ -14,20 +15,16 @@
 # include "wirish.h"
 # include "types.h"
 
-/* Version and settings */
-
 /* Define to have debug messages sent to USB serial */
-# define DIRECT_SERIAL 0
+# define DIRECT_SERIAL 1
 
 namespace Buoy {
   class BuoyMaster {
     public:
-
       GPS       *gps;
       ADS1282   *ad;
       RF        *rf;
       Store     *store;
-
 
       BuoyMaster ();
       void main ();
@@ -36,6 +33,7 @@ namespace Buoy {
       void setup ();
   };
 
+  /* Globally available instance of BuoyMaster */
   extern BuoyMaster *bu;
 }
 

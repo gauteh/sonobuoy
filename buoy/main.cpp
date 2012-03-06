@@ -11,17 +11,19 @@
 using namespace Buoy;
 
 
-// Force init to be called *first*, i.e. before static object allocation.
-// Otherwise, statically allocated objects that need libmaple may fail.
+/* Force init to be called *first*, i.e. before static object allocation.
+ * Otherwise, statically allocated objects that need libmaple may fail.   */
 __attribute__((constructor)) void premain() {
-    init();
+  init();
 }
 
 
+/* Declared in buoy.h */
 BuoyMaster * (Buoy::bu);
+
 int main(void) {
   Buoy::bu = new BuoyMaster ();
-  Buoy::bu->main (); // defined in buoy.h
+  Buoy::bu->main ();
 
   return 0;
 }
