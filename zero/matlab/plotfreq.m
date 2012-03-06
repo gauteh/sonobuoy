@@ -1,4 +1,4 @@
-function [F, Ft] = frequency_analysis (data, removemean)
+function [F, Ft] = plotfreq (data, removemean)
 % Do fourier transform of data d (signed input), normalize and plot
 % Returns:
 % F  = Frequency scale
