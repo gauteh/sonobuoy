@@ -159,9 +159,11 @@ namespace Buoy {
     while (!newi)
     {
       sprintf (buf, "%lu.IND", i);
+/*
 # if DIRECT_SERIAL
       SerialUSB.println(buf);
 # endif
+*/
 
       if (!fi.open(&root, buf, O_READ)) {
         newi = true; /* Found new index file at id I */
