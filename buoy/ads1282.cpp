@@ -84,7 +84,6 @@ namespace Buoy {
     /* Configure AD */
     configure ();
 
-
     rf->send_debug ("[AD] ADS1282 subsystem initiated.");
     // }}}
   }
@@ -191,7 +190,7 @@ namespace Buoy {
 # endif
     send_command (SYNC);
     send_command (RDATAC);
-    delay (100);
+    delay (400);
 
     attachInterrupt (AD_nDRDY,&(ADS1282::drdy), FALLING);
     continuous_read = true;
