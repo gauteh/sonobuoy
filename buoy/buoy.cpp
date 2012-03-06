@@ -22,7 +22,7 @@ namespace Buoy {
     setup ();
 
     uint32_t iter = 0;
-# define LOOP_DELAY 10 
+# define LOOP_DELAY 10
 
     while (true) {
       ad->loop ();
