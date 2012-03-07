@@ -186,6 +186,7 @@ namespace Buoy {
   /* Continuous read and write {{{ */
   void ADS1282::start_continuous_read () {
     continuous_read = true;
+    rf->send_debug ("[AD] Sync and start read data continuous..");
 # if DIRECT_SERIAL
     SerialUSB.println ("[AD] Sync and start read data continuous..");
 # endif
@@ -197,6 +198,7 @@ namespace Buoy {
   }
 
   void ADS1282::stop_continuous_read () {
+    rf->send_debug ("[AD] Reset by command and stop read data continuous..");
 # if DIRECT_SERIAL
     SerialUSB.println ("[AD] Reset by command and stop read data continuous..");
 # endif
