@@ -25,9 +25,10 @@ namespace Buoy {
 # define LOOP_DELAY 10
 
     while (true) {
-      ad->loop ();
-      rf->loop ();
       gps->loop ();
+      ad->loop ();
+
+      rf->loop ();
       store->loop ();
 
       delay (LOOP_DELAY);

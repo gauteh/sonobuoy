@@ -163,11 +163,13 @@ namespace Buoy {
       HAS_SYNC_REFERENCE  = false;
 
       // Pick for ADS1282
-      ad->references[ad->batch] = reference;
-      ad->microdeltas[ad->batch] = microdelta;
-      ad->reference_status[ad->batch] = (HAS_TIME & GPS::TIME) |
-                                        (HAS_SYNC & GPS::SYNC) |
-                                        (HAS_SYNC_REFERENCE & GPS::SYNC_REFERENCE);
+      if (!ad->continuous_read) {
+        ad->references[ad->batch] = reference;
+        ad->microdeltas[ad->batch] = microdelta;
+        ad->reference_status[ad->batch] = (HAS_TIME & GPS::TIME) |
+                                          (HAS_SYNC & GPS::SYNC) |
+                                          (HAS_SYNC_REFERENCE & GPS::SYNC_REFERENCE);
+      }
     }
 
     enable_sync ();

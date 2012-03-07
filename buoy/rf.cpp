@@ -101,6 +101,9 @@ namespace Buoy {
 
          */
         {
+# if DIRECT_SERIAL
+          SerialUSB.println ("[RF] Sending data batch..");
+# endif
           uint32_t start  = (lastbatch * BATCH_LENGTH);
           uint32_t length = BATCH_LENGTH;
           uint32_t ref    = ad->references[lastbatch];

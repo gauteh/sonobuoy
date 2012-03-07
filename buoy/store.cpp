@@ -197,6 +197,11 @@ namespace Buoy {
     char buf[8+5];
     rf_send_debug_f ("[SD] Writing index: %lu..", current_index.id);
 
+# if DIRECT_SERIAL
+    SerialUSB.print   ("[SD] Writing index: ");
+    SerialUSB.println (current_index.id);
+# endif
+
     if (current_index.id != 0) {
       sprintf (buf, "%lu.IND", current_index.id);
 
@@ -273,6 +278,10 @@ namespace Buoy {
 
     /* Writing entries */
     rf_send_debug_f ("[SD] Writing entries to data file from sample: %lu", current_index.samples);
+
+# if DIRECT_SERIAL
+    SerialUSB.println ("[SD] Writing entries to data file.");
+# endif
 
 
     for (uint32_t i = s; i <  s + (BATCH_LENGTH); i++)
