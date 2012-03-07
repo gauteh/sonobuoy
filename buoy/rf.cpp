@@ -29,6 +29,8 @@ namespace Buoy {
     gps = b->gps;
 
     RF_Serial.begin (RF_BAUDRATE);
+
+    b->send_greeting ();
     send_debug ("[RF] RF subsystem initiated.");
   }
 

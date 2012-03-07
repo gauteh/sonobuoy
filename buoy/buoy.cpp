@@ -72,6 +72,10 @@ namespace Buoy {
     rf->start_continuous_transfer ();
     store->start_continuous_write ();
   }
+
+  void BuoyMaster::send_greeting () {
+    rf->send_debug ("[Buoy] Initializing Gautebuoy [ " BUOY_ID_S ": " BUOY_NAME " ] ( version " VERSION " )");
+  }
 }
 
 /* vim: set filetype=arduino :  */

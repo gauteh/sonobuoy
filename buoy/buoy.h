@@ -8,7 +8,12 @@
 # pragma once
 
 /* Version and settings */
-# define VERSION "0.6-dev"
+# define VERSION GIT_DESC
+
+/* ID for this Buoy */
+# define BUOY_ID    1
+# define BUOY_ID_S  "1"
+# define BUOY_NAME  "One"
 
 # ifndef ONLY_SPEC
 
@@ -28,6 +33,7 @@ namespace Buoy {
 
       BuoyMaster ();
       void main ();
+      void send_greeting ();
 
     private:
       void setup ();
