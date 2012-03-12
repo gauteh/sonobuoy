@@ -1,4 +1,4 @@
-function [passed, blocked] = bandstop (d, low, high)
+function [passed, blocked] = bandfilter (d, low, high)
 % Filter d for frequencies between low and high and return passed and
 % blocked
 
@@ -13,13 +13,13 @@ assert (high >= 0 && high <= (freq / 2), 'Bad high frequency');
 Ft = fft (d, N);
 F  = freq * [ - N/2 : (N / 2 - 1) ] / N;
 
-lown  = floor((low / freq) * (N-1));
-highn = ceil((high / freq) * (N-1));
+lown  = floor((low / freq) * N);
+highn = ceil((high / freq) * N);
 
-Blocked = zeros (N,1);
+Blocked = zeros (1,N);
 
-Blocked((lown+1):(highn+1)) = Ft((lown+1):(highn+1));
-Blocked(end-highn:end-lown) = Ft(end-highn:end-lown);
+Blocked((lown+1):(highn)) = Ft(lown+1:highn);
+Blocked(end-(highn):end-(lown)) = Ft(end-(highn):end-(lown));
 
 Passed = Ft - Blocked;
 
