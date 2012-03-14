@@ -15,8 +15,9 @@
 
 # include "wirish.h"
 # include "HardwareSPI.h"
-# include "types.h"
 # include "SdFat.h"
+
+# include "types.h"
 
 /* SDIO, connected to SD socket. */
 
