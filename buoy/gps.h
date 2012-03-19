@@ -181,7 +181,9 @@ namespace Buoy {
  * t = ref + (m - d)
  *   = ref + (g + ULONG_MAX - d)
  *   = ref + (g + (ULONG_MAX - d))
+ *   = ref + (g - d)
  *
+ * for d > g, (g - d) is clocked around backwards
  * for d > g, this means we will have to re-calculate ref before g >= d.
  *
  * The re-calculation should only be based on micros () so as to not loose
