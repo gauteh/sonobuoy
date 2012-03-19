@@ -22,7 +22,7 @@ freq = 250; % Sample rate
 X = 2*abs (fftshift (Ft));
 %X = X / max(X);          % Normalize
 
-F = freq * [ -N/2 : (N/2 -1)] / N;
+F = freq * linspace (-.5, .5, N);
 
 figure (2);
 clf ('reset');

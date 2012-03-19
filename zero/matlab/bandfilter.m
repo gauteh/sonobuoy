@@ -11,7 +11,7 @@ assert (low >= 0 && low <= (freq /2 ), 'Bad low frequency');
 assert (high >= 0 && high <= (freq / 2), 'Bad high frequency');
 
 Ft = fft (d, N);
-F  = freq * [ - N/2 : (N / 2 - 1) ] / N;
+F  = freq * linspace (-.5, .5, N);
 
 lown  = floor((low / freq) * N);
 highn = ceil((high / freq) * N);
