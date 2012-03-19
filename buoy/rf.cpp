@@ -19,13 +19,13 @@ using namespace std;
 namespace Buoy {
   RF::RF () {
     laststatus = 0;
-    lastbatch = 0;
+    lastbatch  = 0;
     continuous_transfer = false;
     rf = this;
   }
 
   void RF::setup (BuoyMaster *b) {
-    ad = b->ad;
+    ad  = b->ad;
     gps = b->gps;
 
     RF_Serial.begin (RF_BAUDRATE);
@@ -60,7 +60,6 @@ namespace Buoy {
      *
      */
 
-    char buf[RF_BUFLEN];
     sprintf(buf, "$DBG,%s*", msg);
     APPEND_CSUM (buf);
 
@@ -69,15 +68,12 @@ namespace Buoy {
 
   void RF::ad_message (RF_AD_MESSAGE messagetype)
   {
-    char buf[RF_BUFLEN];
-
     switch (messagetype)
     {
       case AD_STATUS:
         // $AD,S,[queue position], [queue fill time],[value],[config]*CS
         sprintf (buf, "$AD,S,%lu,%lu,0x%08lX,0x%08hX*", ad->position, ad->batchfilltime, ad->value, ad->reg.raw[1]);
         APPEND_CSUM (buf);
-
         RF_Serial.println (buf);
 
         break;
@@ -101,9 +97,6 @@ namespace Buoy {
 
          */
         {
-# if DIRECT_SERIAL
-          SerialUSB.println ("[RF] Sending data batch..");
-# endif
           uint32_t start  = (lastbatch * BATCH_LENGTH);
           uint32_t length = BATCH_LENGTH;
           uint32_t ref    = ad->references[lastbatch];
@@ -178,8 +171,6 @@ namespace Buoy {
 
   void RF::gps_message (RF_GPS_MESSAGE messagetype)
   {
-    char buf[RF_BUFLEN];
-
     switch (messagetype)
     {
       case GPS_STATUS:

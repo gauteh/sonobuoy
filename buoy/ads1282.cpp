@@ -40,10 +40,10 @@ namespace Buoy {
     value       = 0;
     memset ((void*) values, 0, QUEUE_LENGTH * sizeof (uint32_t));
     memset ((void*) times, 0, QUEUE_LENGTH * sizeof (uint32_t));
-    position    = 0;
-    totalsamples = 0;
+    position      = 0;
+    totalsamples  = 0;
     batchstart    = millis ();
-    batchfilltime = millis();
+    batchfilltime = millis () + 1000;
 
     for (int i = 0; i < BATCHES; i++) {
       references [i] = 0;

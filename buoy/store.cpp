@@ -280,9 +280,11 @@ namespace Buoy {
     /* Writing entries */
     rf_send_debug_f ("[SD] Writing entries to data file from sample: %lu", current_index.samples);
 
+    /*
 # if DIRECT_SERIAL
     SerialUSB.println ("[SD] Writing entries to data file.");
 # endif
+    */
 
 
     for (uint32_t i = s; i <  s + (BATCH_LENGTH); i++)

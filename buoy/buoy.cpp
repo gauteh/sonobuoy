@@ -21,7 +21,6 @@ namespace Buoy {
     delay (3000); // time to connect with serial before starting..
     setup ();
 
-    uint32_t iter = 0;
 # define LOOP_DELAY 10
 
     while (true) {
@@ -32,13 +31,6 @@ namespace Buoy {
       store->loop ();
 
       delay (LOOP_DELAY);
-
-      /* Give GPS a chance to get seconds or sync */
-      if (!ad->continuous_read && ((iter * LOOP_DELAY) > 1000)) {
-        ad->start_continuous_read ();
-      }
-
-      iter++;
     }
   }
 
@@ -49,15 +41,13 @@ namespace Buoy {
 
     /* Set up devices */
     rf = new RF ();
-    rf->setup (this);
-
     gps = new GPS ();
-    gps->setup (this);
-
     ad = new ADS1282 ();
-    ad->setup (this);
-
     store = new Store ();
+
+    rf->setup (this);
+    gps->setup (this);
+    ad->setup (this);
     store->setup (this);
 
 # if DIRECT_SERIAL
@@ -69,6 +59,8 @@ namespace Buoy {
 
     rf->send_debug ("[Buoy] Initiating continuos transfer and write.");
     //store->log ("[Buoy] Initiating continuos transfer and write.");
+
+    ad->start_continuous_read ();
 
     rf->start_continuous_transfer ();
     store->start_continuous_write ();

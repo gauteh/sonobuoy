@@ -42,6 +42,7 @@ namespace Buoy {
   class RF {
     private:
       void *rf;
+      char buf[RF_BUFLEN];
     public:
       ADS1282 *ad;
       GPS     *gps;
