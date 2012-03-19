@@ -43,6 +43,27 @@ namespace Buoy {
 
     GPS_Serial.begin (GPS_BAUDRATE);
 
+
+    rf->send_debug ("[GPS] Waiting for first (un-reliable) reference..");
+    uint n = 0;
+    while (lastsecond == 0) {
+      loop ();
+      delay (100);
+
+      /* Break after 100 secs */
+      if (n > 1000) {
+        rf->send_debug ("[GPS] [Error] No initial reference received for 100 sec.");
+        break;
+      }
+      n++;
+    }
+
+    /* Setting initial un-reliable reference */
+    reference   = lastsecond;
+    microdelta  = micros ();
+    lastsync    = millis ();
+    lastmicros  = micros ();
+
     pinMode (GPS_SYNC_PIN, INPUT_PULLDOWN);
     enable_sync ();
 
@@ -150,27 +171,6 @@ namespace Buoy {
     }
 
     HAS_TIME = gps_data.valid;
-
-    /* Set first time reference */
-    if (reference == 0) {
-# if DIRECT_SERIAL
-      SerialUSB.println ("[GPS] Setting first-time reference.");
-# endif
-      rf->send_debug ("[GPS] Setting first-time reference.");
-
-      reference   = lastsecond;
-      microdelta  = micros ();  // unreliable
-      HAS_SYNC_REFERENCE  = false;
-
-      // Pick for ADS1282
-      if (!ad->continuous_read) {
-        ad->references[ad->batch] = reference;
-        ad->microdeltas[ad->batch] = microdelta;
-        ad->reference_status[ad->batch] = (HAS_TIME & GPS::TIME) |
-                                          (HAS_SYNC & GPS::SYNC) |
-                                          (HAS_SYNC_REFERENCE & GPS::SYNC_REFERENCE);
-      }
-    }
 
     enable_sync ();
     // }}}
