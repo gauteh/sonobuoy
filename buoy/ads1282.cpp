@@ -43,7 +43,7 @@ namespace Buoy {
     position      = 0;
     totalsamples  = 0;
     batchstart    = millis ();
-    batchfilltime = millis () + 1000;
+    batchfilltime = millis ();
 
     for (int i = 0; i < BATCHES; i++) {
       references [i] = 0;
@@ -81,6 +81,14 @@ namespace Buoy {
     digitalWrite (AD_SCLK, LOW);
     digitalWrite (AD_DIN, LOW);
 
+    /* Pick initial reference for batch, counting on GPS to have waited
+     * for some initial reference.
+     */
+    references[batch] = gps->reference;
+    microdeltas[batch] = gps->microdelta;
+    reference_status[batch] = (gps->HAS_TIME & GPS::TIME) |
+                              (gps->HAS_SYNC & GPS::SYNC) |
+                              (gps->HAS_SYNC_REFERENCE & GPS::SYNC_REFERENCE);
     /* Configure AD */
     configure ();
 
