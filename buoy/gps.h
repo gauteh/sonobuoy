@@ -118,11 +118,11 @@ namespace Buoy {
       volatile bool HAS_SYNC_REFERENCE;  // Reference is set using PPS
 
       enum GPS_STATUS {
-        NOTHING = 0b0,
-        TIME = 0b1,
-        SYNC = 0b10,
-        SYNC_REFERENCE = 0b100,
-        POSITION = 0b1000,
+        NOTHING         = 0b0,
+        TIME            = 0b1,
+        SYNC            = 0b10,
+        SYNC_REFERENCE  = 0b100,
+        POSITION        = 0b1000,
       };
       /* Leap seconds:
        * Are not counted in lastseconds (unix time since epoch).
