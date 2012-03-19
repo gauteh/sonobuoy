@@ -17,9 +17,9 @@ namespace Buoy {
 
 # define RF_BUFLEN 512
 
-  /* Format for printing checksum and macro for appending checksum
-   * to NULL terminated buffer with string encapsulated in $ and *.
-   */
+/* Format for printing checksum and macro for appending checksum
+ * to NULL terminated buffer with string encapsulated in $ and *.
+ */
 # define F_CSUM "%02hX"
 # define APPEND_CSUM(buf) sprintf(&buf[strlen(buf)], F_CSUM, RF::gen_checksum(buf))
 
