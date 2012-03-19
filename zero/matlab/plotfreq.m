@@ -29,7 +29,7 @@ F = freq * [ -N/2 : (N/2 -1)] / N;
 figure (2);
 clf ('reset');
 plot (F, X);
-title ('Frequency domain');
+title ('Frequency components');
 xlabel ('Frequency [Hz]');
 ylabel ('Amplitude');
 
