@@ -1,16 +1,14 @@
-function [F, Ft] = plotfreq (data, removemean)
+function [F, Ft] = plotfreq (d, removemean)
 % Do fourier transform of data d (signed input), normalize and plot
 % Returns:
 % F  = Frequency scale
 % Ft = Fourier space values
 %
 % Arguments:
-% data (unprocessed from dtt file, in twos complement, 32bits)
+% d data samples, as returned by readdtt
 % removemean, set to true to remove DC component
 
 if (~exist('removemean', 'var')), removemean = false; end
-
-d = bitshift(twos_comp (data(:,2)), -1);
 
 if removemean, d = d - mean(d); end % Remove DC component
 

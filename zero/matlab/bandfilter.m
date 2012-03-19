@@ -16,7 +16,7 @@ F  = freq * [ - N/2 : (N / 2 - 1) ] / N;
 lown  = floor((low / freq) * N);
 highn = ceil((high / freq) * N);
 
-Blocked = zeros (1,N);
+Blocked = zeros (N, 1);
 
 Blocked((lown+1):(highn)) = Ft(lown+1:highn);
 Blocked(end-(highn):end-(lown)) = Ft(end-(highn):end-(lown));
