@@ -26,9 +26,6 @@ namespace Buoy {
       char gps_buf [TELEGRAM_LEN + 2];
       int  gps_buf_pos;
 
-      /* Keep track of last sync pulse */
-      volatile uint8_t  referencerolled; // Pass debug message from main loop
-
       void parse ();
 
     public:
