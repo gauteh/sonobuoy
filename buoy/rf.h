@@ -8,6 +8,7 @@
 # pragma once
 
 # include <stdint.h>
+# include <string.h>
 # include "types.h"
 
 namespace Buoy {
@@ -20,9 +21,19 @@ namespace Buoy {
    * to NULL terminated buffer with string encapsulated in $ and *.
    */
 # define F_CSUM "%02hX"
-# define APPEND_CSUM(buf) sprintf(&buf[strlen(buf)], F_CSUM, gen_checksum(buf))
+# define APPEND_CSUM(buf) sprintf(&buf[strlen(buf)], F_CSUM, RF::gen_checksum(buf))
 
-# define rf_send_debug_f(args...) { char buf[RF_BUFLEN - 5 - 4]; sprintf(buf, args); rf->send_debug (buf); }
+/* Macro for sending formatted debug strings, follows format of sprintf
+ * will overflow if message is bigger than (RF_BUFLEN - 6 - 3)
+ */
+
+# define rf_send_debug_f(args...) \
+ { strcpy (rf->buf, "$DBG,"); \
+   uint n = sprintf(&(rf->buf[5]), args); \
+   rf->buf[5 + n] = '*'; \
+   rf->buf[5 + n+1] = 0; \
+   APPEND_CSUM (rf->buf); \
+   RF_Serial.println (rf->buf); }
 
 /* Protocol
  *
@@ -42,10 +53,11 @@ namespace Buoy {
   class RF {
     private:
       void *rf;
-      char buf[RF_BUFLEN];
     public:
       ADS1282 *ad;
       GPS     *gps;
+
+      char buf[RF_BUFLEN];
 
       typedef enum _RF_AD_MESSAGE {
         AD_STATUS = 0,
@@ -77,8 +89,8 @@ namespace Buoy {
       void start_continuous_transfer ();
       void stop_continuous_transfer ();
 
-      byte gen_checksum (char *);
-      bool test_checksum (char *);
+      static byte gen_checksum (char *);
+      static bool test_checksum (char *);
   };
 }
 
