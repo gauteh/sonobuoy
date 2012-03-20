@@ -57,11 +57,14 @@ class Zero:
   current  = property(get_current, set_current) # Current Buoy
 
   def __init__ (self):
+    multiprocessing.process.current_process ().name = 'Main'
+
     logging.config.fileConfig ('zero.logging.conf')
+    self.logger = logging.getLogger ('root')
 
-    self.logger = logging.getLogger ('root') 
-
-    self.logger.info( "[Zero] Starting Zero..")
+    self.logger.info ("==================================================")
+    self.logger.info ("[Zero] Starting Zero..")
+    self.logger.info ("[Zero] Logging to console and to file log/zero.log.")
 
     # Currently receiving buoy object, hardcode to 'One'.
     # TODO: Do multicast to map available buoys, also do every now and then.
@@ -104,7 +107,7 @@ class Zero:
           self.ser = serial.Serial (self.port, self.baud)
           self.logger.info ("[Zero] Serial port open.")
         except serial.SerialException as e:
-          self.logger.info ("[Zero] Failed to open serial port.. retrying in 5 seconds.")
+          self.logger.error ("[Zero] Failed to open serial port.. retrying in 5 seconds.")
           self.ser = None
           time.sleep (5)
       except:
