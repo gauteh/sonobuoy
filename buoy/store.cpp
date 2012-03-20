@@ -211,7 +211,6 @@ namespace Buoy {
     current_index.version = STORE_VERSION;
     current_index.id = i;
     current_index.sample_l = SAMPLE_LENGTH;
-    current_index.timestamp_l = TIMESTAMP_LENGTH;
     current_index.samples = 0;
     current_index.nrefs = 0;
 
@@ -238,12 +237,14 @@ namespace Buoy {
       fi.write (reinterpret_cast<char*>(&current_index.version), sizeof(current_index.version));
       fi.write (reinterpret_cast<char*>(&current_index.id), sizeof(current_index.id));
       fi.write (reinterpret_cast<char*>(&current_index.sample_l), sizeof(current_index.sample_l));
-      fi.write (reinterpret_cast<char*>(&current_index.timestamp_l), sizeof(current_index.timestamp_l));
       fi.write (reinterpret_cast<char*>(&current_index.samples), sizeof(current_index.samples));
       fi.write (reinterpret_cast<char*>(&current_index.nrefs), sizeof(current_index.nrefs));
 
       for (uint32_t i = 0; i < current_index.nrefs; i++)
-        fi.write (reinterpret_cast<char*>(&(current_index.refs[i])), sizeof(uint32_t));
+        fi.write (reinterpret_cast<char*>(&(current_index.refpos[i])), sizeof(uint32_t));
+
+      for (uint32_t i = 0; i < current_index.nrefs; i++)
+        fi.write (reinterpret_cast<char*>(&(current_index.refs[i])), sizeof(uint64_t));
 
       fi.sync ();
       fi.close ();
@@ -299,7 +300,7 @@ namespace Buoy {
     }
 
     /* Check if we have room in size */
-    if (sd_data->curPosition () > (SD_DATA_FILE_SIZE - (BATCH_LENGTH * (SAMPLE_LENGTH + TIMESTAMP_LENGTH))))
+    if (sd_data->curPosition () > (SD_DATA_FILE_SIZE - (BATCH_LENGTH * (SAMPLE_LENGTH))))
     {
       roll_data_file ();
     }
@@ -317,13 +318,10 @@ namespace Buoy {
 # endif
     */
 
-
-    int r = 8;
-
-    for (uint32_t i = s; i <  s + (BATCH_LENGTH) && r == 8; i++)
+    for (uint32_t i = s; i <  s + (BATCH_LENGTH); i++)
     {
-      r  = sd_data->write (reinterpret_cast<char*>((uint32_t*) &(ad->times[i])), sizeof(uint32_t));
-      r += sd_data->write (reinterpret_cast<char*>((uint32_t*) &(ad->values[i])), sizeof(uint32_t));
+      if (sd_data->write (reinterpret_cast<char*>((uint32_t*) &(ad->values[i])), sizeof(uint32_t)))
+        break;
     }
 
     current_index.samples += BATCH_LENGTH;
@@ -368,18 +366,19 @@ namespace Buoy {
     }
 
     /* Update index */
-    current_index.refs[current_index.nrefs] = sd_data->curPosition ();
+    current_index.refpos[current_index.nrefs] = sd_data->curPosition ();
+    current_index.refs[current_index.nrefs]   = ref;
 
     /* Pad with 0 */
-    for (uint32_t i = 0; i < (SD_REFERENCE_PADN * (SAMPLE_LENGTH + TIMESTAMP_LENGTH)); i++)
+    for (uint32_t i = 0; i < (SD_REFERENCE_PADN * (SAMPLE_LENGTH)); i++)
       sd_data->write ((byte)0);
 
     sd_data->write (reinterpret_cast<char*>(&(current_index.nrefs)), sizeof(uint32_t));
-    sd_data->write (reinterpret_cast<char*>(&(ref)), sizeof(uint32_t));
+    sd_data->write (reinterpret_cast<char*>(&(ref)), sizeof(uint64_t));
     sd_data->write (reinterpret_cast<char*>(&(refstat)), sizeof(uint32_t));
 
     /* Pad with 0 */
-    for (uint32_t i = 0; i < (SD_REFERENCE_PADN * (SAMPLE_LENGTH + TIMESTAMP_LENGTH)); i++)
+    for (uint32_t i = 0; i < (SD_REFERENCE_PADN * (SAMPLE_LENGTH)); i++)
       sd_data->write ((byte)0);
 
     current_index.nrefs++;

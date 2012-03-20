@@ -25,11 +25,11 @@ class AD:
   ad_reference_status = 0
   ad_sample_csum    = '' # String rep of hex value
   ad_samples        = '' # Array of bytes (3 * byte / value)
-  ad_time           = '' # Array of bytes (4 * byte / time stamp)
-
 
   # AD storage, swap before storing
   storelock = None
+  referencesa = []
+  referencesb = []
   samplesa = []
   samplesb = []
   store    = 0 # 0 = a, 1 = b
@@ -80,25 +80,11 @@ class AD:
       csum = csum ^ ord(self.ad_samples[i * 4 + 1])
       csum = csum ^ ord(self.ad_samples[i * 4])
 
-      i += 1
       s.append(n)
 
-      #print "[AD] Sample[", i, "] : ", hex(n)
-
-    i = 0
-    while (i < self.ad_k_samples):
-      n  = ord(self.ad_time[i * 4 + 3]) << 8 * 3
-      n += ord(self.ad_time[i * 4 + 2]) << 8 * 2
-      n += ord(self.ad_time[i * 4 + 1]) << 8
-      n += ord(self.ad_time[i * 4 + 0])
-
-      csum = csum ^ ord(self.ad_time[i * 4 + 3])
-      csum = csum ^ ord(self.ad_time[i * 4 + 2])
-      csum = csum ^ ord(self.ad_time[i * 4 + 1])
-      csum = csum ^ ord(self.ad_time[i * 4])
-
       i += 1
-      t.append (int(self.ad_reference * math.pow(10,6)) + n)
+
+      #print "[AD] Sample[", i, "] : ", hex(n)
 
     if (hex2 (csum) != self.ad_sample_csum):
       self.logger.error ("[AD] Checksum mismatch in received binary samples (length: " + str(l) + ").")
@@ -106,12 +92,21 @@ class AD:
     else:
       # Successfully received samples and time stamps
       self.storelock.acquire ()
+
+      # Write reference line as described in buoy.py, log ()
+      r = "R," + str(self.ad_k_samples) + "," + str(self.ad_reference) + "," + str(self.ad_reference_status)
+
+      if self.store == 0:
+        self.referencesa.append ((r, len(self.samplesa)))
+      else:
+        self.referencesb.append ((r, len(self.samplesb)))
+
       i = 0
       while i < self.ad_k_samples:
         if self.store == 0:
-          self.samplesa.append ((t[i], s[i]))
+          self.samplesa.append (s[i])
         else:
-          self.samplesb.append ((t[i], s[i]))
+          self.samplesb.append (s[i])
 
         i += 1
 

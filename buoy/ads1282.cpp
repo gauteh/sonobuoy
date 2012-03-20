@@ -47,7 +47,6 @@ namespace Buoy {
 
     for (int i = 0; i < BATCHES; i++) {
       references [i] = 0;
-      microdeltas[i] = 0;
       reference_status[i] = GPS::NOTHING;
     }
 
@@ -84,8 +83,7 @@ namespace Buoy {
     /* Pick initial reference for batch, counting on GPS to have waited
      * for some initial reference.
      */
-    references[batch] = gps->reference;
-    microdeltas[batch] = gps->microdelta;
+    references[batch] = (gps->reference * 1e6) + (micros () - gps->microdelta);
     reference_status[batch] = (gps->HAS_TIME & GPS::TIME) |
                               (gps->HAS_SYNC & GPS::SYNC) |
                               (gps->HAS_SYNC_REFERENCE & GPS::SYNC_REFERENCE);
@@ -563,6 +561,23 @@ namespace Buoy {
     /* In continuous mode: Must complete read operation before four
      *                     DRDY (ADS1282) periods. */
 
+    /* New batch */
+    if (position % BATCH_LENGTH == 0) {
+      /* Stats */
+      batchfilltime = millis () - batchstart;
+      batchstart    = millis ();
+
+      batch++;
+      batch         %= BATCHES;       // Increment batch or roll over
+      position      %= QUEUE_LENGTH;  // Roll over queue position
+
+      /* Pick new reference for batch */
+      references[batch] = (gps->reference * 1e6) + (micros () - gps->microdelta);
+      reference_status[batch] = (gps->HAS_TIME & GPS::TIME) |
+                                (gps->HAS_SYNC & GPS::SYNC) |
+                                (gps->HAS_SYNC_REFERENCE & GPS::SYNC_REFERENCE);
+    }
+
     uint8_t v[4];
     shift_in_n (v, 4);
 
@@ -582,36 +597,11 @@ namespace Buoy {
      * then it is 1 for +FS and 0 for -FS.
      */
 
-    /* EXPERIMENTAL: Sync microdelta if this reference was set with sync */
-    gps->assert_time ();
-    if ((reference_status[batch] & GPS::SYNC_REFERENCE) && gps->HAS_SYNC) {
-      microdeltas[batch] = ((gps->reference - references[batch]) * 1e6) + gps->microdelta;
-    }
-
     /* Fill batch */
     values[position] = value;
-    times [position] = micros () - microdeltas[batch];
 
     position++;
     totalsamples++;
-
-    /* New batch */
-    if (position % BATCH_LENGTH == 0) {
-      /* Stats */
-      batchfilltime = millis () - batchstart;
-      batchstart    = millis ();
-
-      batch++;
-      batch         %= BATCHES;       // Increment batch or roll over
-      position      %= QUEUE_LENGTH;  // Roll over queue position
-
-      /* Pick new reference for batch */
-      references[batch] = gps->reference;
-      microdeltas[batch] = gps->microdelta;
-      reference_status[batch] = (gps->HAS_TIME & GPS::TIME) |
-                                (gps->HAS_SYNC & GPS::SYNC) |
-                                (gps->HAS_SYNC_REFERENCE & GPS::SYNC_REFERENCE);
-    }
   }
 
   void ADS1282::acquire_on_command () {

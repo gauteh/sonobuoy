@@ -65,22 +65,42 @@ class Buoy:
     self.ad.swapstore ()
     self.ad.storelock.release ()
 
+    # Data format:
+    # Reference is written as:
+    # R,[length],[reference],[reference_status] (soon to contain GPS information)
+    # Samples are put on at the line in twos complement, there should be
+    # the same number as in length, but confirm when reading.
+
     # Write data from inactive store
     l = len(self.ad.samplesb) if (self.ad.store == 0) else len(self.ad.samplesa)
+    rl = len(self.ad.referencesb) if (self.ad.store == 0) else len(self.ad.referencesa)
     i = 0
+    r = 0
+
     while i < l:
       if self.ad.store == 0:
-        self.logfilef.write (str(self.ad.samplesb[i][0]) + ',' + str(self.ad.samplesb[i][1]) + '\n')
+        if (r < rl and i == self.referenceb[r][1]):
+          self.logfilef.write (self.referenceb[r][0] + '\n')
+          r += 1
+
+        self.logfilef.write (str(self.ad.samplesb[i][0]) + '\n')
+
       else:
-        self.logfilef.write (str(self.ad.samplesa[i][0]) + ',' + str(self.ad.samplesa[i][1]) + '\n')
+        if (r < rl and i == self.referencea[r][1]):
+          self.logfilef.write (self.referencea[r][0] + '\n')
+          r += 1
+
+        self.logfilef.write (str(self.ad.samplesa[i][0]) + '\n')
 
       i += 1
 
     # Clear inactive store
     if self.ad.store == 0:
       self.ad.samplesb = []
+      self.ad.referencesb = []
     else:
       self.ad.samplesa = []
+      self.ad.referencesa = []
 
     self.logfilef.flush ()
 

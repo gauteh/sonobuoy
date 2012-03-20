@@ -91,18 +91,16 @@ namespace Buoy {
 
          * 3. Send k number of samples: 4 bytes * k
 
-         * 4. Send k number of timestamps: 4 bytes * k
-
-         * 5. Send end of data with checksum
+         * 4. Send end of data with checksum
 
          */
         {
-          uint32_t start  = (lastbatch * BATCH_LENGTH);
-          uint32_t length = BATCH_LENGTH;
-          uint32_t ref    = ad->references[lastbatch];
-          uint32_t  refstat = ad->reference_status[lastbatch];
+          uint32_t start    = (lastbatch * BATCH_LENGTH);
+          uint32_t length   = BATCH_LENGTH;
+          uint64_t ref      = ad->references[lastbatch];
+          uint32_t refstat  = ad->reference_status[lastbatch];
 
-          sprintf (buf, "$AD,D,%lu,%lu,%lu*", length, ref, refstat);
+          sprintf (buf, "$AD,D,%lu,%llu,%lu*", length, ref, refstat);
           APPEND_CSUM (buf);
           RF_Serial.println (buf);
 
@@ -131,21 +129,6 @@ namespace Buoy {
             //lasts = s;
 
             delayMicroseconds (100);
-          }
-
-          /* Send time stamps */
-          uint32_t t = 0;
-          for (uint32_t i = 0; i < length; i++)
-          {
-            t = ad->times[start + i];
-
-            /* Writes MSB first */
-            RF_Serial.write ((byte*)(&t), 4);
-
-            csum = csum ^ ((byte*)&t)[0];
-            csum = csum ^ ((byte*)&t)[1];
-            csum = csum ^ ((byte*)&t)[2];
-            csum = csum ^ ((byte*)&t)[3];
           }
 
           /* Send end of data with Checksum */

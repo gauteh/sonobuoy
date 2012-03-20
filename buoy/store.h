@@ -75,9 +75,8 @@ namespace Buoy {
       typedef uint32_t sample;
 
 /* Data format */
-# define STORE_VERSION 3uL
+# define STORE_VERSION 4uL
 # define SAMPLE_LENGTH 4uL
-# define TIMESTAMP_LENGTH 4uL
 
 /* Maximum number of timestamp, sample pairs for each datafile */
 # define MINUTES_PER_DATAFILE 5uL
@@ -85,28 +84,27 @@ namespace Buoy {
 # define MAX_REFERENCES (MAX_SAMPLES_PER_FILE / BATCH_LENGTH)
 
 
-# define _SD_DATA_FILE_SIZE (MAX_SAMPLES_PER_FILE * (SAMPLE_LENGTH + TIMESTAMP_LENGTH) + MAX_REFERENCES * 50uL)
+# define _SD_DATA_FILE_SIZE (MAX_SAMPLES_PER_FILE * (SAMPLE_LENGTH) + MAX_REFERENCES * 50uL)
 # define SD_DATA_FILE_SIZE (_SD_DATA_FILE_SIZE + (_SD_DATA_FILE_SIZE % 512uL))
 
 /* Data file format {{{
  *
  * Reference:
- *  - 3 * (SAMPLE_LENGTH + TIMESTAMP_LENGTH) with 0
+ *  - 3 * (SAMPLE_LENGTH) with 0
  *  - Reference id: uint32_t
- *  - Reference:    uint32_t referencesecond [unix time]
+ *  - Reference:    uint64_t referencesecond [unix time + microdelta]
  *  - Status bit:   uint32_t status
- *  - 3 * (SAMPLE_LENGTH + TIMESTAMP_LENGTH) with 0
+ *  - 3 * (SAMPLE_LENGTH) with 0
  *  Total length: 54 bytes.
  *
  * Entry:
- *  - TIMESTAMP (4 bytes)
  *  - SAMPLE    (4 bytes)
  *  Total length: 8 bytes.
  *
  * }}} */
 
 # define SD_REFERENCE_PADN 3
-# define SD_REFERENCE_LENGTH (2 * 3 * (SAMPLE_LENGTH + TIMESTAMP_LENGTH) + 3 * 4)
+# define SD_REFERENCE_LENGTH (2 * 3 * (SAMPLE_LENGTH) + 4 * 4)
 
       /* Last ID is one unsigned long */
       typedef uint32_t LASTID;
@@ -116,11 +114,13 @@ namespace Buoy {
         uint32_t id;          // Id of index (limited by MAXID)
 
         uint16_t sample_l;    // Length of sample (bytes)
-        uint16_t timestamp_l; // Length of time stamp (bytes)
 
         uint32_t samples;     // Can maximum reach MAX_SAMPLES_PER_FILE
         uint32_t nrefs;       // Current number of references
-        uint32_t refs[MAX_REFERENCES]; // List with position of reference points.
+
+        /* Only nrefs will be written out for each of the following arrays */
+        uint32_t refpos[MAX_REFERENCES]; // List with position of reference points.
+        uint64_t refs[MAX_REFERENCES];   // A re
       } Index;
 
 

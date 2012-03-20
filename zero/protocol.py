@@ -26,7 +26,6 @@ class Protocol:
 
   # 4 = Waiting for '$' to signal start of binary data
   # 5 = Receiving AD binary sample data
-  # 6 = Receiving AD binary time stamp data
 
   a_receive_state = 0
   a_buf           = ''
@@ -66,13 +65,6 @@ class Protocol:
 
       elif (self.a_receive_state == 5):
         self.zero.current.ad.ad_samples += c
-        self.zero.current.ad.ad_k_remaining -= 1
-        if (self.zero.current.ad.ad_k_remaining < 1):
-          self.zero.current.ad.ad_k_remaining = self.zero.current.ad.ad_k_samples * 4
-          self.a_receive_state = 6
-
-      elif (self.a_receive_state == 6):
-        self.zero.current.ad.ad_time += c
         self.zero.current.ad.ad_k_remaining -= 1
         if (self.zero.current.ad.ad_k_remaining < 1):
           self.a_receive_state = 0
@@ -187,7 +179,6 @@ class Protocol:
                 self.zero.current.ad.ad_k_samples = int (token)
                 self.zero.current.ad.ad_k_remaining = self.zero.current.ad.ad_k_samples * 4
                 self.zero.current.ad.ad_samples = ''
-                self.zero.current.ad.ad_time = ''
                 self.a_receive_state = 4
 
               elif (tokeni == 3):
