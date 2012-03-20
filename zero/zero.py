@@ -68,9 +68,9 @@ class Zero:
     #
     # Each node should register now and then as well..
 
-    self.buoys.append (Buoy(self, 'One'))
-    #self.buoys.append (Buoy(self, 'Two'))
-    #self.buoys.append (Buoy(self, 'Three'))
+    self.buoys.append (Buoy(self, 1, 'One'))
+    self.buoys.append (Buoy(self, 2, 'Two'))
+    self.buoys.append (Buoy(self, 3, 'Three'))
     self.set_current (self.buoys[0])
 
     # Protocol handler; receives data from ZeroNode
@@ -80,7 +80,6 @@ class Zero:
     self.uimanagerthread = Thread (target = self.run_ui_service, name = 'ZeroUIService')
     self.uimanagerthread.daemon = True
     self.uimanagerthread.start ()
-    #self.run_ui_service ()
 
     # Start thread reading stdin
     t = Thread (target = self.stdin, name = 'StdinHandler')
@@ -92,7 +91,6 @@ class Zero:
   def run_ui_service (self):
     self.uimanager = ZeroUIManager ()
     self.uimanager.setup_server (self)
-    #self.uimanager.start ()
     self.uimanagerserver = self.uimanager.get_server ()
     self.uimanagerserver.serve_forever ()
 
@@ -161,7 +159,11 @@ class Zero:
     self.stop (True)
 
   def stop (self, manual = False):
-    self.logger.info ("[Zero] Stopping Zero..")
+    if manual:
+      self.logger.info ("[Zero] Stopping Zero on request..")
+    else:
+      self.logger.info ("[Zero] Stopping Zero..")
+
     self.go = False
 
     # Stop all Buoys..
@@ -172,13 +174,7 @@ class Zero:
     for i in self.buoys:
       i.stop ()
 
-    if not manual:
-      try:
-        self.uimanager.shutdown ()
-      except Exception as e:
-        self.logger.error ("[Zero] Could not stop UI service, stale service running?")
-
-    self.logger.info ("[Zero] stopped.")
+    self.logger.info ("[Zero] Stopped.")
 
 if __name__ == '__main__':
   z = Zero ()

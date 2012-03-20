@@ -16,8 +16,10 @@ class Buoy:
   gps  = None
   ad   = None
 
-  node = ''
-  logdir  = 'log'
+  id      = -1
+  name    = ''
+  BASEDIR = 'log'
+  logdir  = ''
   logfile = ''
   logfilef = None
 
@@ -28,28 +30,28 @@ class Buoy:
 
   LOG_TIME_DELAY = 2
 
-  def __init__ (self, z, n):
-    self.zero = z
-    self.node = n
+  def __init__ (self, z, id, n):
+    self.zero   = z
+    self.id     = id
+    self.name   = n
+    self.logdir = os.path.join (self.BASEDIR, self.logdir)
 
     if not os.path.exists (self.logdir):
-      os.mkdir (self.logdir)
+      os.makedirs (self.logdir)
 
-    self.logfile = os.path.join (self.logdir, self.node + '.dtt')
-    self.logger = self.zero.logger
+    self.logfile  = os.path.join (self.logdir, self.name + '.dtt')
+    self.logger   = self.zero.logger
 
-    self.logger.info ('[' + self.node + '] Initializing Buoy..')
+    self.logger.info ('[' + self.name + '] Initializing Buoy..')
 
-    self.gps = Gps (self)
-    self.ad = AD (self)
+    self.gps  = Gps (self)
+    self.ad   = AD (self)
 
     # Open file
     self.logfilef = open (self.logfile, 'a')
 
-    self.name = self.node
-
     # Starting log thread
-    self.runthread = threading.Thread (target = self.run, name = 'Buoy' + self.node)
+    self.runthread = threading.Thread (target = self.run, name = 'Buoy' + self.name)
     self.runthread.start ()
 
   def log (self):
@@ -80,11 +82,10 @@ class Buoy:
     self.logfilef.flush ()
 
   def stop (self):
-    self.logger.info ("[" + self.name + "] stopping..")
+    self.logger.info ("[" + self.name + "] Stopping..")
     self.keeprun = False
     self.runthread.join ()
     self.logfilef.close ()
-
 
   def activate (self):
     self.active = True
@@ -105,5 +106,5 @@ class Buoy:
 
       time.sleep (0.1)
 
-    self.logger.info ("[" + self.name + "] stopped.")
+    self.logger.info ("[" + self.name + "] Stopped.")
 
