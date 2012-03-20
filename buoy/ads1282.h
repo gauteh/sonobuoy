@@ -217,7 +217,6 @@ namespace Buoy {
       /* Samples have 24 useful bits, but 4 bytes are clocked out */
       volatile uint32_t value;
       volatile uint32_t values[QUEUE_LENGTH];
-      volatile uint32_t times [QUEUE_LENGTH];
       volatile uint8_t  batch;          // Current batch
       volatile uint32_t position;
       volatile uint32_t batchfilltime;
