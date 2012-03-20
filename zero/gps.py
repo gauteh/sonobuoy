@@ -1,6 +1,7 @@
 
 class Gps ():
   buoy = None
+  logger = None
 
 
   lasttype = ''         # Last type received
@@ -19,7 +20,8 @@ class Gps ():
 
   def __init__ (self, b):
     self.buoy = b
+    self.logger = b.logger
 
   def gps_status (self):
-    print "[GPS] [", ("valid" if self.valid else "invalid"), "] Time: ", self.gps_time, "[", self.unix_time, "]", " Position: ", self.latitude, ('N' if self.north else 'S'),  ", ", self.longitude, ('E' if self.east else 'W')
+    self.logger.debug ("[GPS] [" + ("valid" if self.valid else "invalid") + "] Time: " + str(self.gps_time) + " [" + str(self.unix_time) + "] Position: " + str(self.latitude) + ('N' if self.north else 'S') +  ", " + str(self.longitude) + ('E' if self.east else 'W'))
 

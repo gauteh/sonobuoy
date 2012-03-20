@@ -28,7 +28,8 @@ class Buoy:
   runthread = None
   logger  = None
 
-  LOG_TIME_DELAY = 2
+  LOG_TIME_DELAY = 15
+  LOG_ON_RECEIVE = True # write data when batch of samples have been received
 
   def __init__ (self, z, id, n):
     self.zero   = z
@@ -51,11 +52,13 @@ class Buoy:
     self.logfilef = open (self.logfile, 'a')
 
     # Starting log thread
-    self.runthread = threading.Thread (target = self.run, name = 'Buoy' + self.name)
-    self.runthread.start ()
+    if not self.LOG_ON_RECEIVE:
+      self.runthread = threading.Thread (target = self.run, name = 'Buoy' + self.name)
+      self.runthread.start ()
+      self.logger.info ("[" + self.name + "] Writing data file every " + str(self.LOG_TIME_DELAY) + " seconds.")
 
   def log (self):
-    self.logger.debug ('[' + self.name + '] Writing data file.. (every ' + str(self.LOG_TIME_DELAY) + ' seconds)')
+    self.logger.debug ('[' + self.name + '] Writing data file..')
 
     # Acquire lock and swap stores
     self.ad.storelock.acquire ()
@@ -84,7 +87,10 @@ class Buoy:
   def stop (self):
     self.logger.info ("[" + self.name + "] Stopping..")
     self.keeprun = False
-    self.runthread.join ()
+
+    if not self.LOG_ON_RECEIVE:
+      self.runthread.join ()
+
     self.logfilef.close ()
 
   def activate (self):

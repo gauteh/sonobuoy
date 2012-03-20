@@ -117,6 +117,9 @@ class AD:
 
       self.storelock.release ()
 
+      if self.buoy.LOG_ON_RECEIVE:
+        self.buoy.log ()
+
       #print "[AD] Successfully received ", self.ad_k_samples, " samples.. (time of first: " + str(self.ad_time_of_first) + ")"
       #print "[AD] Frequency: " + str(self.freq) + "[Hz]"
 
