@@ -35,7 +35,7 @@ namespace Buoy {
   }
 
   void RF::loop () {
-    /* Status should be send every second */
+    /* Status is sent every second */
     if (millis () - laststatus > 1000) send_status ();
 
     /* Loop must run at least 2x speed (Nyquist) of batchfilltime */

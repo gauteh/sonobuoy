@@ -77,7 +77,7 @@ namespace Buoy {
       uint8_t lastbatch;
       bool    continuous_transfer;
 
-      /* Status should be sent every second */
+      /* Status is sent every second */
       uint32_t laststatus;
 
       void send_status ();
