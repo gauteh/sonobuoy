@@ -46,6 +46,7 @@ namespace Zero {
       bool references = false;
       bool formatset = false;
       bool converttime = false;
+      bool dtt = false; // Output file in .dtt format
 
 # define DEFAULT_FORMAT_TIME "[%09lu]"
 # define DEFAULT_FORMAT_TIME_S "[%Y-%m-%d %H:%M:%S."
@@ -56,7 +57,7 @@ namespace Zero {
 //# define DEFAULT_FORMAT "[%09lX] %08lu\n"
       string format;
 
-      while ((opt = getopt(argc, argv, "icruhtHvf:")) != -1) {
+      while ((opt = getopt(argc, argv, "idcruhtHvf:")) != -1) {
         switch (opt)
         {
           case 'v':
@@ -84,6 +85,9 @@ namespace Zero {
             break;
           case 'r':
             references = true;
+            break;
+          case 'd':
+            dtt = true;
             break;
           case '?':
             usage (self);
@@ -116,6 +120,13 @@ namespace Zero {
         exit (1);
       }
 
+      if (dtt) {
+        if (converttime || formatset || opt_only_index || twos || references) {
+          cerr << "[ERROR] You cannot combine the -d flag with any other flag." << endl;
+          exit (1);
+        }
+      }
+
       string indexfn (argv[optind]);
       string datafn (indexfn);
       datafn.replace (indexfn.rfind (".IND"), 4, ".DAT");
@@ -137,10 +148,11 @@ namespace Zero {
 
         int ref = 0;
         int sam = 0;
+        int sam_ref = 0; // sample since current reference
 
         bool failref        = false;
         uint32_t refid      = 0;
-        uint32_t reft       = 0;
+        uint64_t reft       = 0;
         uint32_t refstatus  = 0;
 
         while (!fd.eof ())
@@ -149,11 +161,11 @@ namespace Zero {
           string out;
 
           if (ref < i.nrefs) {
-            if (fd.tellg() == i.refs[ref]) {
+            if (fd.tellg() == i.refpos[ref]) {
               /* On reference, reading.. */
               failref = false;
 
-              for (int k = 0; k < (3 * (SAMPLE_LENGTH + TIMESTAMP_LENGTH)); k++) {
+              for (int k = 0; k < (3 * (SAMPLE_LENGTH)); k++) {
                 int r = fd.get ();
                 if (r != 0) {
                   failref = true;
@@ -161,10 +173,10 @@ namespace Zero {
               }
 
               fd.read (reinterpret_cast<char*>(&refid), sizeof(uint32_t));
-              fd.read (reinterpret_cast<char*>(&reft), sizeof(uint32_t));
+              fd.read (reinterpret_cast<char*>(&reft), sizeof(uint64_t));
               fd.read (reinterpret_cast<char*>(&refstatus), sizeof(uint32_t));
 
-              for (int k = 0; k < (3 * (SAMPLE_LENGTH + TIMESTAMP_LENGTH)); k++) {
+              for (int k = 0; k < (3 * (SAMPLE_LENGTH)); k++) {
                 int r = fd.get ();
                 if (r != 0) {
                   failref = true;
@@ -189,17 +201,28 @@ namespace Zero {
                 corrupt = true;
               }
 
+              if (reft != i.refs[ref]) {
+                cerr << "=> [ERROR] Reference does not match reference in index." << endl;
+                failref = true;
+                corrupt = true;
+              }
+
+              /* Output DTT format */
+# define SAMPLES_PER_REFERENCE (i.samples / i.nrefs)
+              if (dtt) {
+                cout << "R," << SAMPLES_PER_REFERENCE << "," << reft << "," << refstatus << endl;
+              }
+
               ref++;
+              sam_ref = 0; // reset sample on reference count
             }
           }
 
           /* On timestamp / sample pair */
           uint64_t timestamp;
-          uint32_t tt;
           sample ss;
           uint32_t s = 0;
 
-          fd.read (reinterpret_cast<char*>(&tt), sizeof(tt));
           fd.read (reinterpret_cast<char*>(&ss), sizeof(sample));
 
           if (fd.eof ()) {
@@ -211,9 +234,10 @@ namespace Zero {
 
           // TODO: Endianness probs?
           //timestamp = __builtin_bswap32 (tt);
-          timestamp = reft * exp10(6) + tt;
+# define MICROS_PER_SAMPLE (1e6 / FREQUENCY)
+          timestamp = reft + (sam_ref * MICROS_PER_SAMPLE);
 
-          if (!references) {
+          if (!references && !dtt) {
             out = "";
             if (converttime) {
               uint64_t ttime = timestamp / exp10(6);
@@ -232,7 +256,9 @@ namespace Zero {
               printf (format.c_str (), timestamp, s);
             }
 
-
+          } else if (dtt) {
+            /* Output DTT format */
+            cout << s << endl;
           }
 
           sam++;
@@ -279,10 +305,10 @@ namespace Zero {
       fi.read (reinterpret_cast<char*>(&i.version), sizeof(i.version));
       fi.read (reinterpret_cast<char*>(&i.id), sizeof(i.id));
       fi.read (reinterpret_cast<char*>(&i.sample_l), sizeof(i.sample_l));
-      fi.read (reinterpret_cast<char*>(&i.timestamp_l), sizeof(i.timestamp_l));
       fi.read (reinterpret_cast<char*>(&i.samples), sizeof(i.samples));
       fi.read (reinterpret_cast<char*>(&i.nrefs), sizeof(i.nrefs));
-      fi.read (reinterpret_cast<char*>(&i.refs), i.nrefs * sizeof(uint32_t));
+      fi.read (reinterpret_cast<char*>(&i.refpos), i.nrefs * sizeof(uint32_t));
+      fi.read (reinterpret_cast<char*>(&i.refs), i.nrefs * sizeof(uint64_t));
 
       if (verbose)
         cerr << "done." << endl;
@@ -294,11 +320,10 @@ namespace Zero {
       cerr << "=> Index:             " << i.id << endl;
       cerr << "=> Version:           " << i.version << endl;
       cerr << "=> Sample length:     " << i.sample_l << endl;
-      cerr << "=> Timestamp length:  " << i.timestamp_l << endl;
       cerr << "=> Samples:           " << i.samples << endl;
       cerr << "=> References:        " << i.nrefs << endl;
       for (int j = 0; j < i.nrefs; j++) {
-        cerr << "=>        [" << j << "]: " << (i.refs[j]) << endl;
+        cerr << "=>        [" << j << "]: " << (i.refs[j]) << "(filepos: " << i.refpos[j] << ")" << endl;
       }
     }
 
@@ -323,6 +348,8 @@ namespace Zero {
       cerr << "               the time stamp and second the sample. A newline" << endl;
       cerr << "               will be added." << endl;
       cerr << "               Default: " << DEFAULT_FORMAT; // Has newline at end
+      cerr << endl;
+      cerr << " -d            Output in DTT format to stdout (may not be used with other flags)." << endl;
       cerr << endl;
       cerr << "  A datafile (.DAT) with the same name as the INDEX_FILE is " \
               "expected." << endl;
