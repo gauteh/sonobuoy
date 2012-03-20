@@ -1,12 +1,12 @@
 import os, sys
 from subprocess import *
 
-def getGitSha():
-  return Popen('git rev-parse --short=7 HEAD', stdout=PIPE, shell=True).stdout.read ().strip ()
+def getGitDesc():
+  return Popen('git describe --tags --always', stdout=PIPE, shell=True).stdout.read ().strip ()
 
 
-GIT_SHA = getGitSha ()
-print "Building " + getGitSha () + ".."
+GIT_DESC = getGitDesc ()
+print "Building " + getGitDesc () + ".."
 env = Environment ()
 
 # Verbose / Non-verbose output{{{
@@ -63,6 +63,6 @@ if not GetOption("verbose_flag"):
 
 # Verbose }}}
 
-env.Append (CPPPATH = '../../buoy/', CPPDEFINES = { 'GIT_SHA' : ('\\"%s\\"' % GIT_SHA) }, CPPFLAGS = '-g' )
+env.Append (CPPPATH = '../../buoy/', CPPDEFINES = { 'GIT_DESC' : ('\\"%s\\"' % GIT_DESC) }, CPPFLAGS = '-g' )
 env.Program ('storereader', 'main.cpp')
 
