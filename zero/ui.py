@@ -1,21 +1,17 @@
 from multiprocessing.managers import BaseManager, BaseProxy
 from zero import *
 from buoy import *
-from ad import *
+from ad   import *
 
 ''' Provides queryable methods for zCLI '''
 class ZeroCliService:
   zero = None
 
-  def __init__(self, z):
-    self.zero = z
+  def __init__(self):
+    pass
 
   def bouy_count (self):
     return len(self.zero.buoys)
-
-  def stop (self):
-    time.sleep (1)
-    self.zero.stop ()
 
   def buoy_statuses (self):
     s = []
@@ -38,13 +34,19 @@ class ZeroCliService:
 class ZeroUIManager (BaseManager):
   AUTHKEY = u'sdfaf2faeoidfasdfiasdufoasdiyfa'
 
+  zcliservice = None
+
   def __init__ (self):
     BaseManager.__init__ (self, address = ('127.0.0.1', 50002), authkey = self.AUTHKEY)
 
   def setup_server (self, z):
-    self.zcliservice = ZeroCliService (z)
+    self.zcliservice = ZeroCliService ()
+    self.zcliservice.zero = z
+
     self.register ('get_zcliservice', callable = lambda: self.zcliservice)
+    self.register ('stop', z.stop_manual)
 
   def setup_client (self):
     self.register ('get_zcliservice')
+    self.register ('stop')
 

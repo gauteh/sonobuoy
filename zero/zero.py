@@ -2,7 +2,7 @@
 #
 # Author: Gaute Hope <eg@gaute.vetsj.com> / 2011-09-26
 #
-# Central logging and managing point 
+# Central logging and managing point
 #
 # Requires:
 #  - pyserial
@@ -25,7 +25,8 @@ class Zero:
   baud = 115200
   ser  = None
 
-  uimanager = None
+  uimanager       = None
+  uimanagerserver = None
   uiservicethread = None
 
   logger = None
@@ -51,7 +52,7 @@ class Zero:
     self.currenti = self.buoys.index(b)
 
     self.current.active = True
-    self.logger.info ("Setting current Buoy to: " + b.name)
+    self.logger.info ("[Zero] Setting current Buoy to: " + b.name)
 
   current  = property(get_current, set_current) # Current Buoy
 
@@ -59,7 +60,7 @@ class Zero:
     self.logger = multiprocessing.log_to_stderr ()
     self.logger.setLevel (logging.INFO)
 
-    self.logger.info( "Starting Zero..")
+    self.logger.info( "[Zero] Starting Zero..")
 
     # Currently receiving buoy object, hardcode to 'One'.
     # TODO: Do multicast to map available buoys, also do every now and then.
@@ -79,32 +80,36 @@ class Zero:
     self.uimanagerthread = Thread (target = self.run_ui_service, name = 'ZeroUIService')
     self.uimanagerthread.daemon = True
     self.uimanagerthread.start ()
+    #self.run_ui_service ()
 
     # Start thread reading stdin
     t = Thread (target = self.stdin, name = 'StdinHandler')
     t.daemon = True
-    t.start ()
+    #t.start ()
 
     self.main ()
 
   def run_ui_service (self):
     self.uimanager = ZeroUIManager ()
     self.uimanager.setup_server (self)
+    #self.uimanager.start ()
     self.uimanagerserver = self.uimanager.get_server ()
     self.uimanagerserver.serve_forever ()
 
 
   def openserial (self):
-    while (self.ser == None or not self.ser.isOpen ()):
-      self.logger.info ("Opening serial port " + str(self.port) + "..")
+    while ((self.ser == None or not self.ser.isOpen ()) and self.go):
+      self.logger.info ("[Zero] Opening serial port " + str(self.port) + "..")
       try:
-        self.ser = serial.Serial (self.port, self.baud)
-        self.logger.info ("Serial port open.")
+        try:
+          self.ser = serial.Serial (self.port, self.baud)
+          self.logger.info ("[Zero] Serial port open.")
+        except serial.SerialException as e:
+          self.logger.info ("[Zero] Failed to open serial port.. retrying in 5 seconds.")
+          self.ser = None
+          time.sleep (5)
       except:
-        self.logger.info ("Failed to open serial port.. retrying in 5 seconds.")
-        self.ser = None
-        #self.stop ()
-        time.sleep(5)
+        self.stop ()
 
   def closeserial (self):
     try:
@@ -120,7 +125,7 @@ class Zero:
 
   def main (self):
     try:
-      self.logger.info ("Entering main loop..")
+      self.logger.info ("[Zero] Entering main loop..")
       self.openserial ()
 
       while self.go:
@@ -132,28 +137,31 @@ class Zero:
 
           time.sleep (0.01)
         except serial.SerialException as e:
-          self.logger.error ("Exception with serial link, reconnecting..: " + str(e))
+          self.logger.error ("[Zero] Exception with serial link, reconnecting..: " + str(e))
           self.closeserial ()
           self.openserial ()
 
 
+
     except Exception as e:
-      self.logger.error ("General exception in main loop: " + str(e))
+      self.logger.error ("[Zero] General exception in main loop: " + str(e))
+      self.stop ()
       throw (e)
 
     finally:
-      self.logger.info ("Main loop finished..")
-      self.closeserial ()
-      self.stop ()
+      self.logger.info ("[Zero] Main loop finished..")
 
   def stdin (self):
     # Wait for input on stdin, then exit..
 
     raw_input ()
-    self.go = False
+    self.stop ()
 
-  def stop (self):
-    self.logger.info ("Stopping Zero..")
+  def stop_manual (self):
+    self.stop (True)
+
+  def stop (self, manual = False):
+    self.logger.info ("[Zero] Stopping Zero..")
     self.go = False
 
     # Stop all Buoys..
@@ -164,8 +172,13 @@ class Zero:
     for i in self.buoys:
       i.stop ()
 
+    if not manual:
+      try:
+        self.uimanager.shutdown ()
+      except Exception as e:
+        self.logger.error ("[Zero] Could not stop UI service, stale service running?")
 
-    sys.exit (0)
+    self.logger.info ("[Zero] stopped.")
 
 if __name__ == '__main__':
   z = Zero ()

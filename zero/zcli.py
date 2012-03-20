@@ -21,23 +21,39 @@ class zCLI:
   m         = None
   z         = None
 
+  # For monitor function
+  r_monitor = True
+
   def __init__ (self):
-    self.m = ZeroUIManager ()
-    self.m.setup_client ()
+    try:
+      self.m = ZeroUIManager ()
+      self.m.setup_client ()
+    except:
+      print "Error: Could not connect to Zero manager. Is the service running?"
+      sys.exit (1)
 
     try:
       self.m.connect ()
     except:
       print "Error: Could not connect to Zero manager. Is the service running?"
+      sys.exit (1)
 
-    self.z = self.m.get_zcliservice ()
+    try:
+      self.z = self.m.get_zcliservice ()
+    except:
+      print "Error: Could not connect to Zero manager. Is the service running?"
+      sys.exit (1)
+
     self.go ()
 
   def summary (self):
     print "Summary of known buoys:"
-    #print "=" * 80
 
-    q_length = self.z.ad_queue_length ()
+    try:
+      q_length = self.z.ad_queue_length ()
+    except:
+      print "Error: Lost connection to Zero"
+      sys.exit (1)
 
     t = Texttable ()
     t.header (['A', 'Name', 'Last value', 'Config', 'Queue pos.', 'Sample rate', 'Total samples'])
@@ -45,18 +61,34 @@ class zCLI:
     t.set_cols_valign (["m", "m", "m", "m", "m", "m", "m"])
     t.set_cols_width  ([1, 10, 8, 8, 8, 12, 10,])
 
-    for s in self.z.buoy_statuses ():
-      f = "{0:.2f} Hz".format(0 if s[5] == 0 else q_length * 1000 / s[5])
-      t.add_row ([("X" if s[0] else ""),] + s[1:5] + [f,] + [s[6]])
+    try:
+      for s in self.z.buoy_statuses ():
+        f = "{0:.2f} Hz".format(0 if s[5] == 0 else q_length * 1000 / s[5])
+        t.add_row ([("X" if s[0] else ""),] + s[1:5] + [f,] + [s[6]])
+    except:
+      print "Error: Lost connection to Zero"
+      sys.exit (1)
 
     print t.draw ()
 
-    print "Total: ", self.z.bouy_count ()
+    try:
+      print "Total: ", self.z.bouy_count ()
+    except:
+      print "Error: Lost connection to Zero"
+      sys.exit (1)
 
   def show (self, b):
     t = Texttable ()
 
-    s = self.z.buoy_status_by_name (b)
+    try:
+      s = self.z.buoy_status_by_name (b)
+    except Exception as e:
+      print "Error: Lost connection to Zero"
+      self.r_monitor = False
+      #self.m.close ()
+      sys.exit (1)
+      throw (e)
+
     if s is None:
       print "Error: No such buoy."
       sys.exit (1)
@@ -81,7 +113,7 @@ class zCLI:
     print t.draw ()
 
   def monitor (self, b):
-    while True:
+    while self.r_monitor:
       #print chr(27) + "[2J" # Clear screen
       os.system ('clear')
       print "Monitoring buoy:"
@@ -90,7 +122,12 @@ class zCLI:
 
   def stop (self):
     print "Stopping Zero Manager.."
-    self.z.stop ()
+    try:
+      self.m.stop ()
+      #self.z.stop ()
+    except:
+      print "Error: Lost connection to Zero."
+      sys.exit (1)
 
   ''' Usage output '''
   def help (self):

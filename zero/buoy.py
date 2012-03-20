@@ -38,7 +38,7 @@ class Buoy:
     self.logfile = os.path.join (self.logdir, self.node + '.dtt')
     self.logger = self.zero.logger
 
-    self.logger.info ('Starting Buoy ' + self.node + '..')
+    self.logger.info ('[' + self.node + '] Initializing Buoy..')
 
     self.gps = Gps (self)
     self.ad = AD (self)
@@ -49,7 +49,7 @@ class Buoy:
     self.name = self.node
 
     # Starting log thread
-    self.runthread = threading.Thread (target = self.run, name = 'Buoy' + self.node )
+    self.runthread = threading.Thread (target = self.run, name = 'Buoy' + self.node)
     self.runthread.start ()
 
   def log (self):
@@ -80,7 +80,7 @@ class Buoy:
     self.logfilef.flush ()
 
   def stop (self):
-    self.logger.info ("Stopping " + self.name + "..")
+    self.logger.info ("[" + self.name + "] stopping..")
     self.keeprun = False
     self.runthread.join ()
     self.logfilef.close ()
@@ -104,4 +104,6 @@ class Buoy:
         i += 0.1
 
       time.sleep (0.1)
+
+    self.logger.info ("[" + self.name + "] stopped.")
 
