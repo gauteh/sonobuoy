@@ -320,10 +320,10 @@ namespace Buoy {
 # endif
     */
 
-    for (uint32_t i = s; i <  s + (BATCH_LENGTH); i++)
+    int r = 4;
+    for (uint32_t i = s; i <  s + (BATCH_LENGTH) && r == 4; i++)
     {
-      if (sd_data->write (reinterpret_cast<char*>((uint32_t*) &(ad->values[i])), sizeof(uint32_t)))
-        break;
+      r = sd_data->write (reinterpret_cast<char*>((uint32_t*) &(ad->values[i])), sizeof(uint32_t));
     }
 
     current_index.samples += BATCH_LENGTH;
