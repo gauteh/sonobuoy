@@ -11,6 +11,7 @@ from util import *
 
 class AD:
   buoy = None
+  logger = None
 
   ad_qposition  = 0
   ad_queue_time = 0 # Time to fill up queue
@@ -39,26 +40,26 @@ class AD:
 
   def __init__ (self, b):
     self.buoy = b
+    self.logger = b.logger
     self.storelock = threading.Lock ()
 
   ''' Print some AD stats '''
   def ad_status (self):
     # Gets called when an AD status message has been received and interpreted
-    #print "[AD] Sample rate: ", (self.AD_QUEUE_LENGTH * 1000 / float(self.ad_queue_time if self.ad_queue_time > 0 else 1)), " [Hz], value: ", self.ad_value, ", Queue postion: ", self.ad_qposition, ", Config: " + self.ad_config
-    pass
+    self.logger.debug ("[AD] Sample rate: " + str((self.ad_k_samples * 1000 / float(self.ad_queue_time if self.ad_queue_time > 0 else 1))) + " [Hz], value: " + str(self.ad_value) + ", Queue postion: " + str(self.ad_qposition) + ", Config: " + self.ad_config)
 
   def swapstore (self):
     self.store = 1 if (self.store == 0) else 0
 
   ''' Handle received binary samples '''
   def ad_handle_samples (self):
-    print "[AD] Got ", self.ad_k_samples, " samples starting at: ", self.ad_reference
+    self.logger.info ("[AD] Got " + str(self.ad_k_samples) + " samples starting at: " + str(self.ad_reference))
 
     self.nsamples += self.ad_k_samples
 
     l = len(self.ad_samples)
     if (l != (self.ad_k_samples * 4)):
-      print "[AD] Wrong length of binary data."
+      self.logger.error ("[AD] Wrong length of binary data.")
       return
 
     # Check checksum
@@ -100,7 +101,7 @@ class AD:
       t.append (int(self.ad_reference * math.pow(10,6)) + n)
 
     if (hex2 (csum) != self.ad_sample_csum):
-      print "[AD] Checksum mismatch: Received binary samples.", hex2(csum), ",", self.ad_sample_csum, ",", l
+      self.logger.error ("[AD] Checksum mismatch in received binary samples (length: " + str(l) + ").")
 
     else:
       # Successfully received samples and time stamps

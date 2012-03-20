@@ -9,9 +9,11 @@ from util import *
 
 class Protocol:
   zero = None
+  logger = None
 
   def __init__ (self, z):
-    self.zero = z
+    self.zero     = z
+    self.logger   = z.logger
 
   # Last type received
   lasttype = ''
@@ -89,8 +91,8 @@ class Protocol:
   def a_parse (self, buf):
     # Test checksum
     if (not test_checksum (buf)):
-      print "[Protocol] Message discarded, checksum failed."
-      print buf
+      self.logger.info ("[Protocol] Message discarded, checksum failed.")
+      self.logger.info ("[Protocol] Discarded: " + buf)
       return
 
     # Parse message
@@ -207,7 +209,7 @@ class Protocol:
 
         elif (msgtype == 'DBG'):
           if (tokeni == 1):
-            print "[Debug] ", token
+            self.logger.info ("[Buoy] " + token)
 
       tokeni += 1
 

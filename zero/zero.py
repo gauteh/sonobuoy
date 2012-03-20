@@ -143,13 +143,22 @@ class Zero:
           self.closeserial ()
           self.openserial ()
 
+        except Exception as e:
+          self.logger.error ("[Zero] General exception in inner main loop: " + str(e))
+          self.stop ()
+
         except:
+          self.logger.error ("[Zero] General exception in inner main loop")
           self.stop ()
 
     except Exception as e:
       self.logger.error ("[Zero] General exception in main loop: " + str(e))
       self.stop ()
-      throw (e)
+      raise (e)
+
+    except:
+      self.logger.error ("[Zero] General exception in main loop")
+      self.stop ()
 
     finally:
       self.logger.info ("[Zero] Main loop finished..")
