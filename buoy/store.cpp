@@ -32,6 +32,8 @@ namespace Buoy {
     lastsd    = millis ();
     lastbatch = 0;
     continuous_write = false;
+
+    /* Initialize card */
     init ();
 
     rf->send_debug ("[SD] Store subsystem initiated.");
@@ -51,35 +53,45 @@ namespace Buoy {
 
     /* Initialize SD card */
     spi->begin (SPI_281_250KHZ, MSBFIRST, 0);
-    SD_AVAILABLE = (card->init (spi, SD_CS) & (card->cardSize() > 0));
+    SD_AVAILABLE = card->init (spi, SD_CS);
 
-    SD_AVAILABLE &= (card->errorCode () == 0);
+    if (SD_AVAILABLE)
+      SD_AVAILABLE = card->cardSize() > 0;
+
+    if (SD_AVAILABLE)
+      SD_AVAILABLE = (card->errorCode () == 0);
 
     /* Beef up SPI after init is finished */
-    spi->begin (SPI_4_5MHZ, MSBFIRST, 0);
+    if (SD_AVAILABLE)
+      spi->begin (SPI_4_5MHZ, MSBFIRST, 0);
 
     /* Initialize FAT volume */
-    SD_AVAILABLE &= volume->init (card, 1);
+    if (SD_AVAILABLE)
+      SD_AVAILABLE = volume->init (card, 1);
 
     /* Open root directory */
-    SD_AVAILABLE &= root->openRoot (volume);
+    if (SD_AVAILABLE)
+      SD_AVAILABLE = root->openRoot (volume);
 
     if (SD_AVAILABLE)
     {
-      rf->send_debug ("[SD] Card ready.");
+      rf->send_debug ("[SD] Card initialized.");
 
       open_index ();
       open_data ();
 
       //open_next_log ();
+
     } else {
-      rf->send_debug ("[SD] [Error] Could not init SD.");
+      rf->send_debug ("[SD] [Error] Could not inititialize SD card.");
       current_index.id = 0;
     }
   }
 
   void Store::open_index ()
   {
+    if (!SD_AVAILABLE) return;
+
     uint32_t n = 0;
 
     rf->send_debug ("[SD] Opening index..");
@@ -98,6 +110,7 @@ namespace Buoy {
     }
 
     rf_send_debug_f ("[SD] Last id: %lu..", i);
+    SD_AVAILABLE &= (card->errorCode () == 0);
     next_index (i + 1);
   }
 
@@ -140,6 +153,7 @@ namespace Buoy {
   /* Open next index file */
   void Store::next_index (uint32_t i)
   {
+    if (!SD_AVAILABLE) return;
     // i is LASTID or LASTID + 1
 
     // TODO: Handle better MAXID
@@ -186,6 +200,10 @@ namespace Buoy {
         fi.close ();
       }
       i++;
+
+      // TODO: Check if trying to open non-existent file sets errorCode()
+      SD_AVAILABLE &= (card->errorCode () == 0);
+      if (!SD_AVAILABLE) return;
     }
     i--;
 
@@ -197,11 +215,13 @@ namespace Buoy {
     current_index.samples = 0;
     current_index.nrefs = 0;
 
+    SD_AVAILABLE &= (card->errorCode () == 0);
     write_index ();
   }
 
   void Store::write_index ()
   {
+    if (!SD_AVAILABLE) return;
     char buf[8+5];
     rf_send_debug_f ("[SD] Writing index: %lu..", current_index.id);
 
@@ -242,6 +262,7 @@ namespace Buoy {
   /* Open new index and data file */
   void Store::roll_data_file ()
   {
+    if (!SD_AVAILABLE) return;
     rf->send_debug ("[SD] Syncing index and data and rolling..");
 
     /* Truncate data file to actual size */
@@ -249,6 +270,7 @@ namespace Buoy {
 
     sd_data->sync ();
     sd_data->close ();
+    SD_AVAILABLE &= (card->errorCode () == 0);
 
     /* Write current index */
     write_index ();
@@ -317,10 +339,12 @@ namespace Buoy {
   /* Open data file */
   void Store::open_data ()
   {
+    if (!SD_AVAILABLE) return;
+
     char fname[13];
     sprintf (fname, "%lu.DAT", current_index.id);
 
-    SD_AVAILABLE = sd_data->open (root, fname, O_CREAT | O_WRITE | O_TRUNC);
+    SD_AVAILABLE &= sd_data->open (root, fname, O_CREAT | O_WRITE | O_TRUNC);
     SD_AVAILABLE &= (card->errorCode () == 0);
   }
 
