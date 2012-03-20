@@ -19,6 +19,7 @@
 namespace Buoy {
   Store::Store () {
     logf_id = 0;
+    sd_data = NULL;
   }
 
   void Store::setup (BuoyMaster *b) {
@@ -43,19 +44,25 @@ namespace Buoy {
     SerialUSB.println ("[SD] Init SD card.");
 # endif
 
+    card    = new Sd2Card ();
+    volume  = new SdVolume ();
+    root    = new SdFile ();
+    sd_data = new SdFile ();
+
     /* Initialize SD card */
     spi->begin (SPI_281_250KHZ, MSBFIRST, 0);
-    SD_AVAILABLE = (card.init (spi, SD_CS) & (card.cardSize() > 0));
-    SD_AVAILABLE &= (card.errorCode () == 0);
+    SD_AVAILABLE = (card->init (spi, SD_CS) & (card->cardSize() > 0));
+
+    SD_AVAILABLE &= (card->errorCode () == 0);
 
     /* Beef up SPI after init is finished */
     spi->begin (SPI_4_5MHZ, MSBFIRST, 0);
 
     /* Initialize FAT volume */
-    SD_AVAILABLE &= volume.init (&card, 1);
+    SD_AVAILABLE &= volume->init (card, 1);
 
     /* Open root directory */
-    SD_AVAILABLE &= root.openRoot (&volume);
+    SD_AVAILABLE &= root->openRoot (volume);
 
     if (SD_AVAILABLE)
     {
@@ -80,7 +87,7 @@ namespace Buoy {
     uint32_t i;
     SdFile fl;
 
-    if (fl.open (&root, "LASTID.LON", O_READ)) {
+    if (fl.open (root, "LASTID.LON", O_READ)) {
 
       n = fl.read (reinterpret_cast<char*>(&i), sizeof(uint32_t));
       if (n < sizeof(i)) i = 1;
@@ -100,14 +107,14 @@ namespace Buoy {
     char buf[8+5];
     sprintf (buf, "%lu.LOG", logf_id);
 
-    while (logf.open (&root, buf, O_READ)) {
+    while (logf.open (root, buf, O_READ)) {
       logf.close ();
       logf_id++;
       sprintf (buf, "%lu.LOG", logf_id);
     }
     logf.close ();
 
-    logf.open (&root, buf, O_READ | O_CREAT | O_WRITE);
+    logf.open (root, buf, O_READ | O_CREAT | O_WRITE);
     rf_send_debug_f ("[SD] Opened log: %lu.LOG", logf_id);
   }
 
@@ -166,7 +173,7 @@ namespace Buoy {
 # endif
 */
 
-      if (!fi.open(&root, buf, O_READ)) {
+      if (!fi.open(root, buf, O_READ)) {
         newi = true; /* Found new index file at id I */
 
 # if DIRECT_SERIAL
@@ -207,7 +214,7 @@ namespace Buoy {
       sprintf (buf, "%lu.IND", current_index.id);
 
       SdFile fi;
-      fi.open (&root, buf, O_CREAT | O_WRITE | O_TRUNC);
+      fi.open (root, buf, O_CREAT | O_WRITE | O_TRUNC);
       fi.write (reinterpret_cast<char*>(&current_index.version), sizeof(current_index.version));
       fi.write (reinterpret_cast<char*>(&current_index.id), sizeof(current_index.id));
       fi.write (reinterpret_cast<char*>(&current_index.sample_l), sizeof(current_index.sample_l));
@@ -223,13 +230,13 @@ namespace Buoy {
 
       /* Write back last index */
       SdFile fl;
-      fl.open (&root, "LASTID.LON", O_CREAT | O_WRITE | O_TRUNC);
+      fl.open (root, "LASTID.LON", O_CREAT | O_WRITE | O_TRUNC);
       fl.write (reinterpret_cast<char*>(&(current_index.id)), sizeof(current_index.id));
       fl.sync ();
       fl.close ();
     }
 
-    SD_AVAILABLE &= (card.errorCode () == 0);
+    SD_AVAILABLE &= (card->errorCode () == 0);
   }
 
   /* Open new index and data file */
@@ -240,11 +247,13 @@ namespace Buoy {
     /* Truncate data file to actual size */
     //sd_data.truncate (sd_data.curPosition ());
 
-    sd_data.sync ();
-    sd_data.close ();
+    sd_data->sync ();
+    sd_data->close ();
+
+    /* Write current index */
+    write_index ();
 
     /* Open new index */
-    write_index ();
     next_index (current_index.id + 1);
 
     /* Open new data file */
@@ -255,7 +264,7 @@ namespace Buoy {
   void Store::write_batch ()
   {
     if (!SD_AVAILABLE) {
-      rf_send_debug_f ("[SD] No write: error: %02X.", card.errorCode ());
+      rf_send_debug_f ("[SD] No write: error: %02X.", card->errorCode ());
       return;
     }
 
@@ -268,7 +277,7 @@ namespace Buoy {
     }
 
     /* Check if we have room in size */
-    if (sd_data.curPosition () > (SD_DATA_FILE_SIZE - (BATCH_LENGTH * (SAMPLE_LENGTH + TIMESTAMP_LENGTH))))
+    if (sd_data->curPosition () > (SD_DATA_FILE_SIZE - (BATCH_LENGTH * (SAMPLE_LENGTH + TIMESTAMP_LENGTH))))
     {
       roll_data_file ();
     }
@@ -287,18 +296,22 @@ namespace Buoy {
     */
 
 
-    for (uint32_t i = s; i <  s + (BATCH_LENGTH); i++)
+    int r = 8;
+
+    for (uint32_t i = s; i <  s + (BATCH_LENGTH) && r == 8; i++)
     {
-      sd_data.write (reinterpret_cast<char*>((uint32_t*) &(ad->times[i])), sizeof(uint32_t));
-      sd_data.write (reinterpret_cast<char*>((uint32_t*)  &(ad->values[i])), sizeof(uint32_t));
+      r  = sd_data->write (reinterpret_cast<char*>((uint32_t*) &(ad->times[i])), sizeof(uint32_t));
+      r += sd_data->write (reinterpret_cast<char*>((uint32_t*) &(ad->values[i])), sizeof(uint32_t));
     }
 
     current_index.samples += BATCH_LENGTH;
 
-    sd_data.sync ();
-    SD_AVAILABLE &= (card.errorCode () == 0);
+    sd_data->sync ();
+    SD_AVAILABLE &= (card->errorCode () == 0);
 
-    lastbatch  =  (lastbatch + 1) % BATCHES;
+    /* Ready for next batch if successful write */
+    if (SD_AVAILABLE)
+      lastbatch  =  (lastbatch + 1) % BATCHES;
   }
 
   /* Open data file */
@@ -307,8 +320,8 @@ namespace Buoy {
     char fname[13];
     sprintf (fname, "%lu.DAT", current_index.id);
 
-    SD_AVAILABLE = sd_data.open (&root, fname, O_CREAT | O_WRITE | O_TRUNC);
-    SD_AVAILABLE &= (card.errorCode () == 0);
+    SD_AVAILABLE = sd_data->open (root, fname, O_CREAT | O_WRITE | O_TRUNC);
+    SD_AVAILABLE &= (card->errorCode () == 0);
   }
 
   void Store::write_reference (uint32_t ref, uint32_t refstat)
@@ -316,7 +329,7 @@ namespace Buoy {
     rf_send_debug_f ("[SD] Write reference: %lu", ref);
 
     if (!SD_AVAILABLE) {
-      rf_send_debug_f ("[SD] No write: error: %02X.", card.errorCode ());
+      rf_send_debug_f ("[SD] No write: error: %02X.", card->errorCode ());
       return;
     }
 
@@ -326,36 +339,45 @@ namespace Buoy {
     }
 
     /* Check if there is more space in data file */
-    if (sd_data.curPosition () > (SD_DATA_FILE_SIZE - SD_REFERENCE_LENGTH)) {
+    if (sd_data->curPosition () > (SD_DATA_FILE_SIZE - SD_REFERENCE_LENGTH)) {
       roll_data_file ();
     }
 
     /* Update index */
-    current_index.refs[current_index.nrefs] = sd_data.curPosition ();
+    current_index.refs[current_index.nrefs] = sd_data->curPosition ();
 
     /* Pad with 0 */
     for (uint32_t i = 0; i < (SD_REFERENCE_PADN * (SAMPLE_LENGTH + TIMESTAMP_LENGTH)); i++)
-      sd_data.write ((byte)0);
+      sd_data->write ((byte)0);
 
-    sd_data.write (reinterpret_cast<char*>(&(current_index.nrefs)), sizeof(uint32_t));
-    sd_data.write (reinterpret_cast<char*>(&(ref)), sizeof(uint32_t));
-    sd_data.write (reinterpret_cast<char*>(&(refstat)), sizeof(uint32_t));
+    sd_data->write (reinterpret_cast<char*>(&(current_index.nrefs)), sizeof(uint32_t));
+    sd_data->write (reinterpret_cast<char*>(&(ref)), sizeof(uint32_t));
+    sd_data->write (reinterpret_cast<char*>(&(refstat)), sizeof(uint32_t));
 
     /* Pad with 0 */
     for (uint32_t i = 0; i < (SD_REFERENCE_PADN * (SAMPLE_LENGTH + TIMESTAMP_LENGTH)); i++)
-      sd_data.write ((byte)0);
+      sd_data->write ((byte)0);
 
     current_index.nrefs++;
 
-    SD_AVAILABLE &= (card.errorCode () == 0);
+    SD_AVAILABLE &= (card->errorCode () == 0);
   }
 
   void Store::loop ()
   {
-    /* Try to set up SD card, 5 sec delay  */
+    /* Try to set up SD card, 1 sec delay  */
     if (!SD_AVAILABLE && (millis () - lastsd) > 5000) {
-      rf_send_debug_f ("[SD] SD error code: %02X.", card.errorCode ());
+      rf_send_debug_f ("[SD] [Error] SD error code: %02X. Trying to reset.", card->errorCode ());
+
+      /* Reset SPI */
+      spi->end ();
+
+      /* Clean up stale file references */
+      sd_data = NULL;
+
+      /* Reinitiate SD card */
       init ();
+
       lastsd = millis ();
     }
 

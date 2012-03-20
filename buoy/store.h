@@ -63,9 +63,9 @@ namespace Buoy {
       GPS     *gps;
 
       HardwareSPI *spi;
-      Sd2Card     card;
-      SdVolume    volume;
-      SdFile      root;
+      Sd2Card     *card;
+      SdVolume    *volume;
+      SdFile      *root;
 
       bool  SD_AVAILABLE;
       uint32_t lastsd;
@@ -148,7 +148,7 @@ namespace Buoy {
 
       /* Current storage */
       Index current_index;
-      SdFile sd_data;
+      SdFile *sd_data;
 
       /* Logging */
       uint32_t logf_id;
