@@ -11,7 +11,7 @@ import serial
 import signal
 import time
 from threading import Thread
-import multiprocessing, logging
+import multiprocessing, logging, logging.config
 import sys
 
 from ad import *
@@ -57,8 +57,9 @@ class Zero:
   current  = property(get_current, set_current) # Current Buoy
 
   def __init__ (self):
-    self.logger = multiprocessing.log_to_stderr ()
-    self.logger.setLevel (logging.INFO)
+    logging.config.fileConfig ('zero.logging.conf')
+
+    self.logger = logging.getLogger ('root') 
 
     self.logger.info( "[Zero] Starting Zero..")
 
