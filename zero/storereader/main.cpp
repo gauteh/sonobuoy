@@ -208,9 +208,8 @@ namespace Zero {
               }
 
               /* Output DTT format */
-# define SAMPLES_PER_REFERENCE (i.samples / i.nrefs)
               if (dtt) {
-                cout << "R," << SAMPLES_PER_REFERENCE << "," << reft << "," << refstatus << endl;
+                cout << "R," << i.samples_per_reference << "," << reft << "," << refstatus << endl;
               }
 
               ref++;
@@ -233,7 +232,8 @@ namespace Zero {
           s = ss;
 
           // TODO: Endianness probs?
-          //timestamp = __builtin_bswap32 (tt);
+          // __builtin_bswap32 (tt);
+
 # define MICROS_PER_SAMPLE (1e6 / FREQUENCY)
           timestamp = reft + (sam_ref * MICROS_PER_SAMPLE);
 
@@ -241,15 +241,15 @@ namespace Zero {
             out = "";
             if (converttime) {
               uint64_t ttime = timestamp / exp10(6);
-              struct tm *t = gmtime ((const long int *) (&ttime));
+              struct tm *t = gmtime ((const long int32_t *) (&ttime));
               strftime (timebuf, 400, DEFAULT_FORMAT_TIME_S, t);
-              out+= timebuf;
+              out += timebuf;
 
               ttime = timestamp - ttime * exp10(6);
               sprintf (timebuf, DEFAULT_FORMAT_TIME_REST, ttime);
-              out+= timebuf;
+              out += timebuf;
 
-              out+= format;
+              out += format;
 
               printf (out.c_str (), s);
             } else {
@@ -262,6 +262,7 @@ namespace Zero {
           }
 
           sam++;
+          sam_ref++;
 
           if (s == 0) {
             cerr << "=> [ERROR] Sample == 0" << endl;
@@ -323,7 +324,7 @@ namespace Zero {
       cerr << "=> Samples:           " << i.samples << endl;
       cerr << "=> References:        " << i.nrefs << endl;
       for (int j = 0; j < i.nrefs; j++) {
-        cerr << "=>        [" << j << "]: " << (i.refs[j]) << "(filepos: " << i.refpos[j] << ")" << endl;
+        cerr << "=>        [" << j << "]: " << (i.refs[j]) << " (filepos: " << i.refpos[j] << ")" << endl;
       }
     }
 

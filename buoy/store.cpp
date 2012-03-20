@@ -212,6 +212,7 @@ namespace Buoy {
     current_index.id = i;
     current_index.sample_l = SAMPLE_LENGTH;
     current_index.samples = 0;
+    current_index.samples_per_reference = BATCH_LENGTH;
     current_index.nrefs = 0;
 
     SD_AVAILABLE &= (card->errorCode () == 0);
@@ -238,6 +239,7 @@ namespace Buoy {
       fi.write (reinterpret_cast<char*>(&current_index.id), sizeof(current_index.id));
       fi.write (reinterpret_cast<char*>(&current_index.sample_l), sizeof(current_index.sample_l));
       fi.write (reinterpret_cast<char*>(&current_index.samples), sizeof(current_index.samples));
+      fi.write (reinterpret_cast<char*>(&current_index.samples_per_reference), sizeof(current_index.samples_per_reference));
       fi.write (reinterpret_cast<char*>(&current_index.nrefs), sizeof(current_index.nrefs));
 
       for (uint32_t i = 0; i < current_index.nrefs; i++)

@@ -116,6 +116,7 @@ namespace Buoy {
         uint16_t sample_l;    // Length of sample (bytes)
 
         uint32_t samples;     // Can maximum reach MAX_SAMPLES_PER_FILE
+        uint32_t samples_per_reference; // Is defined by BATCH_LENGTH
         uint32_t nrefs;       // Current number of references
 
         /* Only nrefs will be written out for each of the following arrays */
