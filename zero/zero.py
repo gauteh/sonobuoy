@@ -139,7 +139,8 @@ class Zero:
           self.closeserial ()
           self.openserial ()
 
-
+        except:
+          self.stop ()
 
     except Exception as e:
       self.logger.error ("[Zero] General exception in main loop: " + str(e))

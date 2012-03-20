@@ -16,10 +16,10 @@ class Buoy:
   gps  = None
   ad   = None
 
-  id      = -1
-  name    = ''
+  id      = -1    # Unique ID
+  name    = ''    # Unique friendly name
   BASEDIR = 'log'
-  logdir  = ''
+  logdir  = ''    # Will be BASEDIR/name
   logfile = ''
   logfilef = None
 
@@ -34,7 +34,7 @@ class Buoy:
     self.zero   = z
     self.id     = id
     self.name   = n
-    self.logdir = os.path.join (self.BASEDIR, self.logdir)
+    self.logdir = os.path.join (self.BASEDIR, self.name)
 
     if not os.path.exists (self.logdir):
       os.makedirs (self.logdir)

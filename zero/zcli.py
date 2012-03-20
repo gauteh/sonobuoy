@@ -49,20 +49,15 @@ class zCLI:
   def summary (self):
     print "Summary of known buoys:"
 
-    try:
-      q_length = self.z.ad_queue_length ()
-    except:
-      print "Error: Lost connection to Zero"
-      sys.exit (1)
-
     t = Texttable ()
     t.header (['A', 'Name', 'Last value', 'Config', 'Queue pos.', 'Sample rate', 'Total samples'])
     t.set_cols_align  (["c", "l", "l", "l", "c", "c", "c"])
     t.set_cols_valign (["m", "m", "m", "m", "m", "m", "m"])
-    t.set_cols_width  ([1, 10, 8, 8, 8, 12, 10,])
+    t.set_cols_width  ([1, 6, 10, 10, 8, 12, 10,])
 
     try:
       for s in self.z.buoy_statuses ():
+        q_length = s[18]
         f = "{0:.2f} Hz".format(0 if s[5] == 0 else q_length * 1000 / s[5])
         t.add_row ([("X" if s[0] else ""),] + s[1:5] + [f,] + [s[6]])
     except:
