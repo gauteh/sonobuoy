@@ -560,16 +560,8 @@ namespace Buoy {
     /* In continuous mode: Must complete read operation before four
      *                     DRDY (ADS1282) periods. */
 
-    /* New batch */
+    /* On new batch, pick reference */
     if (position % BATCH_LENGTH == 0) {
-      /* Stats */
-      batchfilltime = millis () - batchstart;
-      batchstart    = millis ();
-
-      batch++;
-      batch         %= BATCHES;       // Increment batch or roll over
-      position      %= QUEUE_LENGTH;  // Roll over queue position
-
       /* Pick new reference for batch */
       references[batch] = (gps->reference * 1e6) + (micros () - gps->microdelta);
       reference_status[batch] = (gps->HAS_TIME & GPS::TIME) |
@@ -601,6 +593,17 @@ namespace Buoy {
 
     position++;
     totalsamples++;
+
+    /* Rolled out of batch, new batch */
+    if (position % BATCH_LENGTH == 0) {
+      /* Stats */
+      batchfilltime = millis () - batchstart;
+      batchstart    = millis ();
+
+      batch++;
+      batch         %= BATCHES;       // Increment batch or roll over
+      position      %= QUEUE_LENGTH;  // Roll over queue position
+    }
   }
 
   void ADS1282::acquire_on_command () {
