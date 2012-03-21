@@ -320,10 +320,15 @@ namespace Buoy {
 # endif
     */
 
-    int r = 4;
-    for (uint32_t i = s; i <  s + (BATCH_LENGTH) && r == 4; i++)
-    {
-      r = sd_data->write (reinterpret_cast<char*>((uint32_t*) &(ad->values[i])), sizeof(uint32_t));
+    int r = sd_data->write (reinterpret_cast<char*>((uint32_t*) &(ad->values[s])), sizeof(uint32_t) * BATCH_LENGTH);
+
+    if (r != sizeof(uint32_t) * BATCH_LENGTH) {
+# if DIRECT_SERIAL
+      SerialUSB.println ("[SD] [Error] Failed while writing samples.");
+# endif
+      rf->send_debug ("[SD] [Error] Card failed while writing samples.");
+
+      SD_AVAILABLE = false;
     }
 
     current_index.samples += BATCH_LENGTH;
@@ -348,9 +353,9 @@ namespace Buoy {
     SD_AVAILABLE &= (card->errorCode () == 0);
   }
 
-  void Store::write_reference (uint32_t ref, uint32_t refstat)
+  void Store::write_reference (uint64_t ref, uint32_t refstat)
   {
-    rf_send_debug_f ("[SD] Write reference: %lu", ref);
+    rf_send_debug_f ("[SD] Write reference: %llu", ref);
 
     if (!SD_AVAILABLE) {
       rf_send_debug_f ("[SD] No write: error: %02X.", card->errorCode ());

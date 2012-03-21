@@ -171,7 +171,7 @@ namespace Buoy {
       void open_data ();
 
       void write_batch ();
-      void write_reference (uint32_t, uint32_t);
+      void write_reference (uint64_t, uint32_t);
 
       void start_continuous_write ();
       void stop_continuous_write ();
