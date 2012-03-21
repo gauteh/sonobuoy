@@ -110,6 +110,11 @@ class Zero:
           self.logger.error ("[Zero] Failed to open serial port.. retrying in 5 seconds.")
           self.ser = None
           time.sleep (5)
+
+        except KeyboardInterrupt as e:
+          self.logger.info ("[Zero] Shutting down by local request.")
+          self.stop ()
+
       except:
         self.stop ()
 
@@ -139,25 +144,23 @@ class Zero:
 
           time.sleep (0.01)
         except serial.SerialException as e:
-          self.logger.error ("[Zero] Exception with serial link, reconnecting..: " + str(e))
+          self.logger.exception ("[Zero] Exception with serial link, reconnecting..: " + str(e))
           self.closeserial ()
           self.openserial ()
 
-        except Exception as e:
-          self.logger.error ("[Zero] General exception in inner main loop: " + str(e))
+        except KeyboardInterrupt as e:
+          self.logger.info ("[Zero] Shutting down by local request.")
           self.stop ()
-
         except:
-          self.logger.error ("[Zero] General exception in inner main loop")
+          self.logger.exception ("[Zero] General exception in inner main loop")
           self.stop ()
 
-    except Exception as e:
-      self.logger.error ("[Zero] General exception in main loop: " + str(e))
+    except KeyboardInterrupt as e:
+      self.logger.info ("[Zero] Shutting down by local request.")
       self.stop ()
-      raise (e)
 
     except:
-      self.logger.error ("[Zero] General exception in main loop")
+      self.logger.exception ("[Zero] General exception in main loop")
       self.stop ()
 
     finally:

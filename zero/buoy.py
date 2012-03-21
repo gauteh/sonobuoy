@@ -79,18 +79,18 @@ class Buoy:
 
     while i < l:
       if self.ad.store == 0:
-        if (r < rl and i == self.referenceb[r][1]):
-          self.logfilef.write (self.referenceb[r][0] + '\n')
+        if (r < rl and i == self.ad.referencesb[r][1]):
+          self.logfilef.write (self.ad.referencesb[r][0] + '\n')
           r += 1
 
-        self.logfilef.write (str(self.ad.samplesb[i][0]) + '\n')
+        self.logfilef.write (str(self.ad.samplesb[i]) + '\n')
 
       else:
-        if (r < rl and i == self.referencea[r][1]):
-          self.logfilef.write (self.referencea[r][0] + '\n')
+        if (r < rl and i == self.ad.referencesa[r][1]):
+          self.logfilef.write (self.ad.referencesa[r][0] + '\n')
           r += 1
 
-        self.logfilef.write (str(self.ad.samplesa[i][0]) + '\n')
+        self.logfilef.write (str(self.ad.samplesa[i]) + '\n')
 
       i += 1
 
