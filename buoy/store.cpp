@@ -390,9 +390,13 @@ namespace Buoy {
 
   void Store::loop ()
   {
-    /* Try to set up SD card, 1 sec delay  */
+    /* Try to set up SD card, 5 sec delay  */
     if (!SD_AVAILABLE && (millis () - lastsd) > 5000) {
       rf_send_debug_f ("[SD] [Error] SD error code: %02X. Trying to reset.", card->errorCode ());
+
+# if DIRECT_SERIAL
+      SerialUSB.println ("[SD] [Error] Trying to reset.");
+# endif
 
       /* Reset SPI */
       spi->end ();
