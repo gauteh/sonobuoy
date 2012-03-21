@@ -191,9 +191,8 @@ namespace Zero {
                 break;
               }
 
-              cerr << "=> Reference id: " << refid << endl;
-              cerr << "=> Reference   : " << reft << endl;
-              cerr << "=> Status      : " << refstatus << endl;
+              cerr << "=> Reference [" << refid << "]: "
+                   << reft << " (status: " << refstatus << ")" << endl;
 
               if (reft == 0) {
                 cerr << "=> [WARNING] Reference is 0, store has no time reference." << endl;
