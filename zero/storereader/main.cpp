@@ -307,6 +307,7 @@ namespace Zero {
       fi.read (reinterpret_cast<char*>(&i.id), sizeof(i.id));
       fi.read (reinterpret_cast<char*>(&i.sample_l), sizeof(i.sample_l));
       fi.read (reinterpret_cast<char*>(&i.samples), sizeof(i.samples));
+      fi.read (reinterpret_cast<char*>(&i.samples_per_reference), sizeof(i.samples_per_reference));
       fi.read (reinterpret_cast<char*>(&i.nrefs), sizeof(i.nrefs));
       fi.read (reinterpret_cast<char*>(&i.refpos), i.nrefs * sizeof(uint32_t));
       fi.read (reinterpret_cast<char*>(&i.refs), i.nrefs * sizeof(uint64_t));
@@ -322,6 +323,7 @@ namespace Zero {
       cerr << "=> Version:           " << i.version << endl;
       cerr << "=> Sample length:     " << i.sample_l << endl;
       cerr << "=> Samples:           " << i.samples << endl;
+      cerr << "=> Samples per ref:   " << i.samples_per_reference << endl;
       cerr << "=> References:        " << i.nrefs << endl;
       for (int j = 0; j < i.nrefs; j++) {
         cerr << "=>        [" << j << "]: " << (i.refs[j]) << " (filepos: " << i.refpos[j] << ")" << endl;
