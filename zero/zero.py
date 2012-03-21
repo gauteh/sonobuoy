@@ -111,10 +111,6 @@ class Zero:
           self.ser = None
           time.sleep (5)
 
-        except KeyboardInterrupt as e:
-          self.logger.info ("[Zero] Shutting down by local request.")
-          self.stop ()
-
       except:
         self.stop ()
 
