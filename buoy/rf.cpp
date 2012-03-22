@@ -99,10 +99,6 @@ namespace Buoy {
 
          */
         {
-# if DIRECT_SERIAL
-          SerialUSB.print   ("[RF] Sending batch, current: ");
-          SerialUSB.println (ad->batch);
-# endif
           uint32_t start    = (lastbatch * BATCH_LENGTH);
           uint32_t length   = BATCH_LENGTH;
           uint64_t ref      = ad->references[lastbatch];
@@ -152,10 +148,6 @@ namespace Buoy {
           */
 
           lastbatch =  (lastbatch + 1) % BATCHES;
-# if DIRECT_SERIAL
-          SerialUSB.print   ("[RF] Batch sent, current: ");
-          SerialUSB.println (ad->batch);
-# endif
           if (lastbatch != ad->batch) {
             send_debug ("[RF] [Error] Did not finish sending batch before it was swapped.");
 # if DIRECT_SERIAL

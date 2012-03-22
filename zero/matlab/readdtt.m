@@ -40,8 +40,8 @@ while ~feof(fh)
   ref = ref + 1;
   samples = samples + L;
 
-  fprintf ('Reading %d samples for reference %d at %d (status: %d)\n', ...
-           L, ref, T, S);
+  %fprintf ('Reading %d samples for reference %d at %d (status: %d)\n', ...
+  %         L, ref, T, S);
   [batch, l] = fscanf (fh, '%u', L);
 
   assert (l == L, 'Number of samples does not match length of batch.');
