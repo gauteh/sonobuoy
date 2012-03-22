@@ -16,6 +16,8 @@ d = [];
 ref = 0;
 samples = 0;
 
+T = 0;
+
 fh = fopen (f);
 while ~feof(fh)
   % Search for next reference
@@ -34,6 +36,10 @@ while ~feof(fh)
   % Got referenceline in l
   R = sscanf (l, '%c,%u,%lu,%u');
   L = R(2); % Length of samples
+  
+  if (T>R(3))
+    fprintf ('[Warning] Time going backwards: %lu -> %lu\n', T, R(3));
+  end
   T = R(3); % Reference (microseconds)
   S = R(4); % Status
 
