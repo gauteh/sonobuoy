@@ -15,7 +15,7 @@ namespace Buoy {
 # define RF_BAUDRATE 115200
 # define RF_Serial Serial3
 
-# define RF_BUFLEN 512
+# define RF_BUFLEN 90
 
 /* Format for printing checksum and macro for appending checksum
  * to NULL terminated buffer with string encapsulated in $ and *.
@@ -28,12 +28,10 @@ namespace Buoy {
  */
 
 # define rf_send_debug_f(args...) \
- { strcpy (rf->buf, "$DBG,"); \
-   uint n = sprintf(&(rf->buf[5]), args); \
-   rf->buf[5 + n] = '*'; \
-   rf->buf[5 + n+1] = 0; \
-   APPEND_CSUM (rf->buf); \
-   RF_Serial.println (rf->buf); }
+ { uint n = sprintf(rf->buf, args); \
+   if (n > RF_BUFLEN) rf->send_debug ("[RF] [Error] DEBUG message to big."); \
+   else rf->send_debug (rf->buf); \
+   }
 
 /* Protocol
  *
@@ -89,7 +87,7 @@ namespace Buoy {
       void start_continuous_transfer ();
       void stop_continuous_transfer ();
 
-      static byte gen_checksum (char *);
+      static byte gen_checksum (const char *, bool skip = true);
       static bool test_checksum (char *);
   };
 }

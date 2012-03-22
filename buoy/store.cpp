@@ -288,6 +288,10 @@ namespace Buoy {
   /* Write new batch of samples */
   void Store::write_batch ()
   {
+# if DIRECT_SERIAL
+    SerialUSB.print   ("[SD] Writing batch, current: ");
+    SerialUSB.println (ad->batch);
+# endif
     if (!SD_AVAILABLE) {
       rf_send_debug_f ("[SD] No write: error: %02X.", card->errorCode ());
       return;
@@ -339,6 +343,18 @@ namespace Buoy {
     /* Ready for next batch if successful write */
     if (SD_AVAILABLE)
       lastbatch  =  (lastbatch + 1) % BATCHES;
+
+    if (lastbatch != ad->batch) {
+      rf->send_debug ("[SD] [Error] Did not finish writing batch before it was swapped.");
+# if DIRECT_SERIAL
+      SerialUSB.println ("[SD] [Error] Did not finish writing batch before it was swapped.");
+# endif
+    }
+
+# if DIRECT_SERIAL
+    SerialUSB.print   ("[SD] Batch written, current: ");
+    SerialUSB.println (ad->batch);
+# endif
   }
 
   /* Open data file */

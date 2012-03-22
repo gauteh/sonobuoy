@@ -60,10 +60,14 @@ namespace Buoy {
      *
      */
 
-    sprintf(buf, "$DBG,%s*", msg);
-    APPEND_CSUM (buf);
+    byte cs = gen_checksum ("DBG,", false);
+    cs ^= gen_checksum (msg, false);
 
-    RF_Serial.println (buf);
+    RF_Serial.print   ("$DBG,");
+    RF_Serial.print   (msg);
+    RF_Serial.print   ("*");
+    RF_Serial.print   (cs>>4, HEX);
+    RF_Serial.println (cs&0xf, HEX);
   }
 
   void RF::ad_message (RF_AD_MESSAGE messagetype)
@@ -95,6 +99,10 @@ namespace Buoy {
 
          */
         {
+# if DIRECT_SERIAL
+          SerialUSB.print   ("[RF] Sending batch, current: ");
+          SerialUSB.println (ad->batch);
+# endif
           uint32_t start    = (lastbatch * BATCH_LENGTH);
           uint32_t length   = BATCH_LENGTH;
           uint64_t ref      = ad->references[lastbatch];
@@ -144,6 +152,16 @@ namespace Buoy {
           */
 
           lastbatch =  (lastbatch + 1) % BATCHES;
+# if DIRECT_SERIAL
+          SerialUSB.print   ("[RF] Batch sent, current: ");
+          SerialUSB.println (ad->batch);
+# endif
+          if (lastbatch != ad->batch) {
+            send_debug ("[RF] [Error] Did not finish sending batch before it was swapped.");
+# if DIRECT_SERIAL
+            SerialUSB.println ("[RF] [Error] Did not finish sending batch before it was swapped.");
+# endif
+          }
         }
         break;
 
@@ -171,15 +189,21 @@ namespace Buoy {
     RF_Serial.println (buf);
   }
 
-  byte RF::gen_checksum (char *buf)
+  byte RF::gen_checksum (const char *buf, bool skip)
   {
   /* Generate checksum for NULL terminated string
-   * (skipping first and last char) */
+   * (skipping first and last char if skip (default)) */
 
     byte csum = 0;
     int len = strlen(buf);
 
-    for (int i = 1; i < (len-1); i++)
+    int i = 0;
+    if (skip) {
+      i = 1;
+      len--;
+    }
+
+    for (; i < len; i++)
       csum = csum ^ ((byte)buf[i]);
 
     return csum;
