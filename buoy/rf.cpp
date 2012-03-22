@@ -209,7 +209,7 @@ namespace Buoy {
     return csum;
   }
 
-  bool RF::test_checksum (char *buf)
+  bool RF::test_checksum (const char *buf)
   {
     /* Input: String including $ and * with HEX decimal checksum
      *        to test. NULL terminated.
@@ -217,7 +217,7 @@ namespace Buoy {
     int len = strlen(buf);
 
     uint16_t csum = 0;
-    sscanf (&(buf[len-2]), F_CSUM, &csum);
+    if (sscanf (&(buf[len-2]), F_CSUM, &csum) != 1) return false;
 
     uint32_t tsum = 0;
     for (int i = 1; i < (len - 3); i++)

@@ -88,7 +88,7 @@ namespace Buoy {
       void stop_continuous_transfer ();
 
       static byte gen_checksum (const char *, bool skip = true);
-      static bool test_checksum (char *);
+      static bool test_checksum (const char *);
   };
 }
 
