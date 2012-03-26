@@ -110,7 +110,7 @@ namespace Buoy {
        * a new reference and microdelta must be set before it reaches the second
        * overflow.
        *
-       * By ensuring that the reference is updated withing the roll over time for
+       * By ensuring that the reference is updated within the roll over time for
        * micros () this should not happen.
        *
        */
@@ -121,6 +121,8 @@ namespace Buoy {
         /* Un-reliable, using time telegram */
         reference  = lastsecond;
         microdelta = micros () + ((millis () - lastsecond_time) * 1000);
+
+        rf_send_debug_f ("[GPS] [Error] Setting reference manually: %llu", reference);
       }
     }
   }
