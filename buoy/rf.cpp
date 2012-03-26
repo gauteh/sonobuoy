@@ -47,13 +47,13 @@ namespace Buoy {
   }
 
   void RF::send_status () {
-    static int sid = 0;
+    static int sid;
 
     ad_message (AD_STATUS);
     gps_message (GPS_STATUS);
 
-    /* Every 100 status */
-    if (sid % 100) {
+    /* Every 10 status */
+    if (sid % 10 == 0) {
       rf_send_debug_f ("Uptime micros %u", micros ());
     }
 

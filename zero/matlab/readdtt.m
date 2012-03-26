@@ -15,6 +15,7 @@ d = [];
 
 ref = 0;
 samples = 0;
+pl = '';
 
 T = 0;
 
@@ -39,8 +40,10 @@ while ~feof(fh)
   
   if (T>R(3))
     fprintf ('[%d] [Warning] Time going backwards: %lu -> %lu\n', ref, T, R(3));
+    disp (pl);
     disp (l);
   end
+  pl = l;
   T = R(3); % Reference (microseconds)
   S = R(4); % Status
 
