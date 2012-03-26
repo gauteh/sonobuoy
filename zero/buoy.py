@@ -22,6 +22,7 @@ class Buoy:
   logdir  = ''    # Will be BASEDIR/name
   logfile = ''
   logfilef = None
+  filelock = None
 
   keeprun = True
   active  = False
@@ -37,6 +38,8 @@ class Buoy:
     self.name   = n
     self.logdir = os.path.join (self.BASEDIR, self.name)
 
+    self.filelock = threading.Lock ()
+
     if not os.path.exists (self.logdir):
       os.makedirs (self.logdir)
 
@@ -48,8 +51,7 @@ class Buoy:
     self.gps  = Gps (self)
     self.ad   = AD (self)
 
-    # Open file
-    self.logfilef = open (self.logfile, 'a')
+    self.rollfile ()
 
     # Starting log thread
     if not self.LOG_ON_RECEIVE:
@@ -57,7 +59,42 @@ class Buoy:
       self.runthread.start ()
       self.logger.info ("[" + self.name + "] Writing data file every " + str(self.LOG_TIME_DELAY) + " seconds.")
 
+  def rollfile (self):
+    self.filelock.acquire ()
+    self.logger.info ("[" + self.name +"] Rolling data files..")
+    if self.logfilef != None:
+      self.logfilef.close ()
+
+    # Find next file
+    l = os.path.join (self.logdir, self.name + '.dtt')
+    lnext = os.path.join (self.logdir, self.name + '.1.dtt')
+
+    if os.path.exists (l):
+      if os.path.exists (lnext):
+        # move files backwards (recursively)
+        self.__rollfilebackwards__ (1)
+
+      os.rename (l, lnext)
+
+    self.logfile = l
+
+    # Open file
+    self.logfilef = open (self.logfile, 'a')
+    self.filelock.release()
+
+  def __rollfilebackwards__ (self, i):
+    l = os.path.join (self.logdir, self.name + '.' + str(i) + '.dtt')
+    lnext = os.path.join (self.logdir, self.name + '.' + str(i+1) + '.dtt')
+
+    # Recursively move files backwards, previous first.
+    if (os.path.exists (lnext)):
+      self.__rollfilebackwards__ (i+1)
+
+    os.rename (l, lnext)
+
+
   def log (self):
+    self.filelock.acquire ()
     self.logger.debug ('[' + self.name + '] Writing data file..')
 
     # Acquire lock and swap stores
@@ -103,15 +140,18 @@ class Buoy:
       self.ad.referencesa = []
 
     self.logfilef.flush ()
+    self.filelock.release ()
 
   def stop (self):
     self.logger.info ("[" + self.name + "] Stopping..")
+    self.filelock.acquire ()
     self.keeprun = False
 
     if not self.LOG_ON_RECEIVE:
       self.runthread.join ()
 
     self.logfilef.close ()
+    self.filelock.release ()
 
   def activate (self):
     self.active = True

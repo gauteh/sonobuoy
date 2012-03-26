@@ -10,6 +10,9 @@ class ZeroCliService:
   def __init__(self):
     pass
 
+  def rollfile (self):
+    self.zero.current.rollfile ()
+
   def bouy_count (self):
     return len(self.zero.buoys)
 
