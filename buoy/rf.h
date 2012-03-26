@@ -28,9 +28,9 @@ namespace Buoy {
  */
 
 # define rf_send_debug_f(args...) \
- { uint n = sprintf(rf->buf, args); \
-   if (n > RF_BUFLEN) rf->send_debug ("[RF] [Error] DEBUG message to big."); \
-   else rf->send_debug (rf->buf); \
+ { uint n = sprintf(((RF*)rf)->buf, args); \
+   if (n > RF_BUFLEN) ((RF*)rf)->send_debug ("[RF] [Error] DEBUG message to big."); \
+   else ((RF*)rf)->send_debug (((RF*)rf)->buf); \
    }
 
 /* Protocol

@@ -47,9 +47,17 @@ namespace Buoy {
   }
 
   void RF::send_status () {
+    static int sid = 0;
+
     ad_message (AD_STATUS);
     gps_message (GPS_STATUS);
 
+    /* Every 100 status */
+    if (sid % 100) {
+      rf_send_debug_f ("Uptime micros %u", micros ());
+    }
+
+    sid++;
     laststatus = millis ();
   }
 
@@ -99,6 +107,7 @@ namespace Buoy {
 
          */
         {
+          rf_send_debug_f ("On batch %d sending batch %d", ad->batch, lastbatch);
           uint32_t start    = (lastbatch * BATCH_LENGTH);
           uint32_t length   = BATCH_LENGTH;
           uint64_t ref      = ad->references[lastbatch];

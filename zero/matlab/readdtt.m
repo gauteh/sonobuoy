@@ -38,7 +38,8 @@ while ~feof(fh)
   L = R(2); % Length of samples
   
   if (T>R(3))
-    fprintf ('[Warning] Time going backwards: %lu -> %lu\n', T, R(3));
+    fprintf ('[%d] [Warning] Time going backwards: %lu -> %lu\n', ref, T, R(3));
+    disp (l);
   end
   T = R(3); % Reference (microseconds)
   S = R(4); % Status
