@@ -119,7 +119,7 @@ namespace Buoy {
         HAS_SYNC_REFERENCE = false;
 
         /* Un-reliable, using time telegram */
-        reference  = lastsecond;
+        reference = lastsecond;
         microdelta = micros () + ((millis () - lastsecond_time) * 1000);
 
         rf_send_debug_f ("[GPS] [Error] Setting reference manually: %llu", reference);
