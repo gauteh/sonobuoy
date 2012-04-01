@@ -31,6 +31,7 @@ class Buoy:
 
   LOG_TIME_DELAY = 15
   LOG_ON_RECEIVE = True # write data when batch of samples have been received
+  LOG_MAX_FILE_SIZE = 50 * 1024 * 1024 # 50 MB
 
   def __init__ (self, z, id, n):
     self.zero   = z
@@ -95,6 +96,12 @@ class Buoy:
 
   def log (self):
     self.filelock.acquire ()
+    if (self.logfilef.tell () > self.LOG_MAX_FILE_SIZE):
+      self.logger.info ('[' + self.name + '] Log file maximum size reached: ' + str(self.logfilef.tell ()) + 'B')
+      self.filelock.release ()
+      self.rollfile ()
+      self.filelock.acquire ()
+
     self.logger.debug ('[' + self.name + '] Writing data file..')
 
     # Acquire lock and swap stores
