@@ -61,7 +61,7 @@ namespace Buoy {
     if (SD_AVAILABLE)
       SD_AVAILABLE = (card->errorCode () == 0);
 
-    /* Beef up SPI after init is finished */
+    /* Beef up SPI speed after init is finished */
     if (SD_AVAILABLE)
       spi->begin (SPI_4_5MHZ, MSBFIRST, 0);
 
@@ -181,11 +181,6 @@ namespace Buoy {
     while (!newi)
     {
       sprintf (buf, "%lu.IND", i);
-/*
-# if DIRECT_SERIAL
-      SerialUSB.println(buf);
-# endif
-*/
 
       if (!fi.open(root, buf, O_READ)) {
         newi = true; /* Found new index file at id I */
