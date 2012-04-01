@@ -25,10 +25,11 @@ class Protocol:
   # 3 = On second CS digit
   # 4 = Waiting for '$' to signal start of binary data
   # 5 = Receiving AD binary sample data
-  # 6 = Waiting for DE, receipt
 
   a_receive_state = 0
   a_buf           = ''
+  waitforreceipt  = False # Have just got a AD data batch and is waiting for
+                          # a DE receipt message
 
   def handle (self, buf):
     i = 0
@@ -68,11 +69,13 @@ class Protocol:
         self.zero.current.ad.ad_k_remaining -= 1
         if (self.zero.current.ad.ad_k_remaining < 1):
           self.a_receive_state = 0
+          self.waitforreceipt = True
 
       else:
         # Something went terribly wrong..
         self.a_buf = ''
         self.a_receive_state = 0
+        self.waitforreceipt = False
 
       # Check if we're receiving sane amounts of data..
       if len(self.a_buf) > 80:
@@ -114,6 +117,14 @@ class Protocol:
       if (tokeni == 0):
         msgtype = token[1:]
       else:
+        if self.waitforreceipt:
+          if msgtype != 'AD' or (tokeni > 1 and subtype != 'DE'):
+            self.logger.error ("[Protocol] Did not receive receipt immediately after data batch. Discarding data batch.")
+            self.waitforreceipt = False
+            self.zero.current.ad.ad_k_samples = ''
+            self.zero.current.ad.ad_reference = 0
+
+
         if (msgtype == 'GPS'):
           if (tokeni == 1): subtype = token
           elif (tokeni > 1):
@@ -225,10 +236,18 @@ class Protocol:
                 return
 
             elif (subtype == 'DE'):
+              if not self.waitforreceipt:
+                self.logger.error ("[Protocol] Got end of batch data without getting data first.")
+                self.zero.current.ad.ad_k_samples = ''
+                self.zero.current.ad.ad_reference = 0
+                self.waitforreceipt = False
+                return
+
               if (tokeni == 2):
                 #print "[AD] Binay data transfer complete."
                 self.zero.current.ad.ad_sample_csum = token
                 self.zero.current.ad.ad_handle_samples ()
+                self.waitforreceipt = False
 
               return
 
