@@ -71,11 +71,12 @@ class Buoy:
     lnext = os.path.join (self.logdir, self.name + '.1.dtt')
 
     if os.path.exists (l):
-      if os.path.exists (lnext):
-        # move files backwards (recursively)
-        self.__rollfilebackwards__ (1)
+      if os.stat(l).st_size > 0:
+        if os.path.exists (lnext):
+          # move files backwards (recursively)
+          self.__rollfilebackwards__ (1)
 
-      os.rename (l, lnext)
+        os.rename (l, lnext)
 
     self.logfile = l
 
@@ -89,7 +90,8 @@ class Buoy:
 
     # Recursively move files backwards, previous first.
     if (os.path.exists (lnext)):
-      self.__rollfilebackwards__ (i+1)
+      if os.stat(lnext).st_size > 0:
+        self.__rollfilebackwards__ (i+1)
 
     os.rename (l, lnext)
 
