@@ -136,14 +136,14 @@ class Protocol:
                 try:
                   self.zero.current.gps.telegramsreceived = int(token)
                 except ValueError:
-                  self.logger.exception ("[Protocol] Could not convert to token to int. Discarding rest of message.")
+                  self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
                   return
 
               elif (tokeni == 4):
                 try:
                   self.zero.current.gps.latitude = float(token) if len(token) else 0
                 except ValueError:
-                  self.logger.exception ("[Protocol] Could not convert to token to float. Discarding rest of message.")
+                  self.logger.exception ("[Protocol] Could not convert token to float. Discarding rest of message.")
                   return
 
               elif (tokeni == 5):
@@ -153,7 +153,7 @@ class Protocol:
                 try:
                   self.zero.current.gps.longitude = float(token) if len(token) > 0 else 0
                 except ValueError:
-                  self.logger.exception ("[Protocol] Could not convert to token to float. Discarding rest of message.")
+                  self.logger.exception ("[Protocol] Could not convert token to float. Discarding rest of message.")
                   return
 
               elif (tokeni == 7):
@@ -198,7 +198,7 @@ class Protocol:
                   self.zero.current.ad.ad_status ()
                   return
               except ValueError:
-                self.logger.exception ("[Protocol] Could not convert to token to int. Discarding rest of message.")
+                self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
                 return
 
             elif (subtype == 'D'):
@@ -206,7 +206,7 @@ class Protocol:
                 try:
                   self.zero.current.ad.ad_k_samples = int (token)
                 except ValueError:
-                  self.logger.exception ("[Protocol] Could not convert to token to int. Discarding rest of message.")
+                  self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
                   return
 
                 if (self.zero.current.ad.ad_k_samples > self.zero.current.ad.AD_K_SAMPLES_MAX):
@@ -222,14 +222,14 @@ class Protocol:
                 try:
                   self.zero.current.ad.ad_reference = int (token)
                 except ValueError:
-                  self.logger.exception ("[Protocol] Could not convert to token to int. Discarding rest of message.")
+                  self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
                   return
 
               elif (tokeni == 4):
                 try:
                   self.zero.current.ad.ad_reference_status = int (token)
                 except ValueError:
-                  self.logger.exception ("[Protocol] Could not convert to token to int. Discarding rest of message.")
+                  self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
                   return
 
                 #print "[AD] Initiating binary transfer.. samples: ", self.zero.current.ad.ad_k_samples
