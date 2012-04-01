@@ -15,7 +15,7 @@ namespace Buoy {
 # define RF_BAUDRATE 115200
 # define RF_Serial Serial3
 
-# define RF_BUFLEN 90
+# define RF_BUFLEN 200 
 
 /* Format for printing checksum and macro for appending checksum
  * to NULL terminated buffer with string encapsulated in $ and *.

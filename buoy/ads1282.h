@@ -230,8 +230,8 @@ namespace Buoy {
        * It may occur in calculations overflowing uint32_t.
        */
 
-      volatile uint64_t references  [BATCHES];
-      volatile uint32_t reference_status [BATCHES];
+      volatile uint64_t references[BATCHES];
+      volatile uint32_t reference_status[BATCHES];
 
       volatile uint32_t totalsamples;
 
