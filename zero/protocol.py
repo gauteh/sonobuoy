@@ -23,9 +23,9 @@ class Protocol:
   # 1 = Between '$' and '*'
   # 2 = On first CS digit
   # 3 = On second CS digit
-
   # 4 = Waiting for '$' to signal start of binary data
   # 5 = Receiving AD binary sample data
+  # 6 = Waiting for DE, receipt
 
   a_receive_state = 0
   a_buf           = ''
@@ -177,9 +177,14 @@ class Protocol:
             elif (subtype == 'D'):
               if (tokeni == 2):
                 self.zero.current.ad.ad_k_samples = int (token)
-                self.zero.current.ad.ad_k_remaining = self.zero.current.ad.ad_k_samples * 4
-                self.zero.current.ad.ad_samples = ''
-                self.a_receive_state = 4
+                if (self.zero.current.ad.ad_k_samples > self.zero.current.ad.AD_K_SAMPLES_MAX):
+                  self.logger.error ("[Protocol] Too large batch, resetting protocol.")
+                  self.a_receive_state = 0
+                else:
+
+                  self.zero.current.ad.ad_k_remaining = self.zero.current.ad.ad_k_samples * 4
+                  self.zero.current.ad.ad_samples = ''
+                  self.a_receive_state = 4
 
               elif (tokeni == 3):
                 self.zero.current.ad.ad_reference = int (token)

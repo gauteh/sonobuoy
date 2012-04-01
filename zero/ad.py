@@ -21,6 +21,7 @@ class AD:
   # Receving binary data
   ad_k_remaining    = 0
   ad_k_samples      = 0
+  AD_K_SAMPLES_MAX  = 10000 # protect from erronous infinite large batches
   ad_reference      = 0
   ad_reference_status = 0
   ad_sample_csum    = '' # String rep of hex value
