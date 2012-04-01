@@ -11,7 +11,8 @@ class ZeroCliService:
     pass
 
   def rollfile (self):
-    self.zero.current.rollfile ()
+    for b in self.zero.buoys:
+      b.rollfile ()
 
   def bouy_count (self):
     return len(self.zero.buoys)
