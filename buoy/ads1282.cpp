@@ -562,7 +562,7 @@ namespace Buoy {
 
     /* On new batch, pick reference */
     if (position % BATCH_LENGTH == 0) {
-      gps->assert_time ();
+      //gps->assert_time ();
 
       /* Pick new reference for batch */
       references[batch] = (gps->reference * 1e6) + (micros () - gps->microdelta);

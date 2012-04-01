@@ -107,11 +107,6 @@ namespace Buoy {
 
          */
         {
-          for (int i = 0; i < BATCHES; i++) {
-            SerialUSB.println (ad->references[i]);
-
-          }
-
           rf_send_debug_f ("On batch %d sending batch %d", ad->batch, lastbatch);
           uint32_t start    = (lastbatch * BATCH_LENGTH);
           uint32_t length   = BATCH_LENGTH;

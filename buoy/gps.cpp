@@ -95,7 +95,7 @@ namespace Buoy {
   }
 
   void GPS::assert_time () {
-    /* Check state of timing and PPS */
+    /* Check state of timing and PPS, is called from within interrupt - may not output */
 
     /* We have a tolerance of 1 millisecond to catch sync loss */
 # define LOST_SYNC 1001
@@ -122,7 +122,7 @@ namespace Buoy {
         reference = lastsecond;
         microdelta = micros () + ((millis () - lastsecond_time) * 1000);
 
-        rf_send_debug_f ("[GPS] [Error] Setting reference manually: %llu", reference);
+        //rf_send_debug_f ("[GPS] [Error] Setting reference manually: %llu", reference);
       }
     }
   }
