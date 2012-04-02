@@ -22,7 +22,8 @@ namespace Buoy {
     sd_data = NULL;
   }
 
-  void Store::setup (BuoyMaster *b) {
+  void Store::setup (BuoyMaster *b) // {{{
+  {
     rf  = b->rf;
     ad  = b->ad;
     gps = b->gps;
@@ -37,9 +38,9 @@ namespace Buoy {
     init ();
 
     rf->send_debug ("[SD] Store subsystem initiated.");
-  }
+  } // }}}
 
-  void Store::init ()
+  void Store::init () // {{{
   {
     rf->send_debug ("[SD] Init SD card.");
 # if DIRECT_SERIAL
@@ -86,9 +87,9 @@ namespace Buoy {
       rf->send_debug ("[SD] [Error] Could not inititialize SD card.");
       current_index.id = 0;
     }
-  }
+  } // }}}
 
-  void Store::open_index ()
+  void Store::open_index () // {{{
   {
     if (!SD_AVAILABLE) return;
 
@@ -112,7 +113,7 @@ namespace Buoy {
     rf_send_debug_f ("[SD] Last id: %lu..", i);
     SD_AVAILABLE &= (card->errorCode () == 0);
     next_index (i + 1);
-  }
+  } // }}}
 
   /* Log to file {{{ */
   void Store::open_next_log ()
@@ -151,7 +152,7 @@ namespace Buoy {
   } // }}}
 
   /* Open next index file */
-  void Store::next_index (uint32_t i)
+  void Store::next_index (uint32_t i) // {{{
   {
     if (!SD_AVAILABLE) return;
     // i is LASTID or LASTID + 1
@@ -212,9 +213,9 @@ namespace Buoy {
 
     SD_AVAILABLE &= (card->errorCode () == 0);
     write_index ();
-  }
+  } // }}}
 
-  void Store::write_index ()
+  void Store::write_index ()  // {{{
   {
     if (!SD_AVAILABLE) return;
     char buf[8+5];
@@ -255,10 +256,10 @@ namespace Buoy {
     }
 
     SD_AVAILABLE &= (card->errorCode () == 0);
-  }
+  } // }}}
 
   /* Open new index and data file */
-  void Store::roll_data_file ()
+  void Store::roll_data_file () // {{{
   {
     if (!SD_AVAILABLE) return;
     rf->send_debug ("[SD] Syncing index and data and rolling..");
@@ -278,10 +279,10 @@ namespace Buoy {
 
     /* Open new data file */
     open_data ();
-  }
+  } // }}}
 
   /* Write new batch of samples */
-  void Store::write_batch ()
+  void Store::write_batch () // {{{
   {
     if (!SD_AVAILABLE) {
       rf_send_debug_f ("[SD] No write: error: %02X.", card->errorCode ());
@@ -341,10 +342,10 @@ namespace Buoy {
       SerialUSB.println ("[SD] [Error] Did not finish writing batch before it was swapped.");
 # endif
     }
-  }
+  } // }}}
 
   /* Open data file */
-  void Store::open_data ()
+  void Store::open_data () // {{{
   {
     if (!SD_AVAILABLE) return;
 
@@ -353,9 +354,9 @@ namespace Buoy {
 
     SD_AVAILABLE &= sd_data->open (root, fname, O_CREAT | O_WRITE | O_TRUNC);
     SD_AVAILABLE &= (card->errorCode () == 0);
-  }
+  } // }}}
 
-  void Store::write_reference (uint64_t ref, uint32_t refstat)
+  void Store::write_reference (uint64_t ref, uint32_t refstat) // {{{
   {
     rf_send_debug_f ("[SD] Write reference: %llu", ref);
 
@@ -393,7 +394,7 @@ namespace Buoy {
     current_index.nrefs++;
 
     SD_AVAILABLE &= (card->errorCode () == 0);
-  }
+  } // }}}
 
   void Store::loop ()
   {

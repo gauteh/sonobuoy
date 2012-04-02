@@ -29,7 +29,7 @@ namespace Buoy {
 
 # define rf_send_debug_f(args...) \
  { uint n = sprintf(((RF*)rf)->buf, args); \
-   if (n > RF_BUFLEN) ((RF*)rf)->send_debug ("[RF] [Error] DEBUG message to big."); \
+   if (n > RF_BUFLEN) ((RF*)rf)->send_debug ("[RF] [Error] DEBUG message to big. MEMORY possibly corrupted."); \
    else ((RF*)rf)->send_debug (((RF*)rf)->buf); \
    }
 
@@ -55,17 +55,57 @@ namespace Buoy {
       ADS1282 *ad;
       GPS     *gps;
 
+      bool      isactive;
+      bool      stayactive;
+      uint32_t  activated; // millis () at time of activation
+# define ACTIVE_TIMEOUT 60 // seconds before exiting active mode
+# define STAYACTIVE_TIMEOUT (20 * 60) // seconds before exiting stay active mode
+
+# define GET_IDS_N 10 // no of ids to send in one go
+
+      /* Information about batch, ids or id about to be sent */
+      uint32_t id;
+      uint32_t ref;
+      uint32_t sample;
+      uint32_t length;
+
+# define RF_SERIAL_BUFLEN 80
+      char rf_buf[RF_SERIAL_BUFLEN];
+      uint8_t rf_buf_pos;
+
       char buf[RF_BUFLEN];
 
       typedef enum _RF_AD_MESSAGE {
         AD_STATUS = 0,
         AD_DATA_BATCH,
+        AD_IDS,
+        AD_ID,
       } RF_AD_MESSAGE;
 
       typedef enum _RF_GPS_MESSAGE {
         GPS_STATUS = 0,
         GPS_POSITION,
       } RF_GPS_MESSAGE;
+
+      /* Incoming telegrams */
+      typedef enum _RF_TELEGRAM {
+        UNSPECIFIED = 0,
+        UNKNOWN,
+        ACTIVATE,
+        DEACTIVATE,
+        GETSTATUS,
+        STAYACTIVE,
+        GETIDS,
+        GETID,
+        GETBATCH,
+      } RF_TELEGRAM;
+
+      /* Error codes */
+      typedef enum _RF_ERROR {
+        E_CONFIRM = 0,
+        E_BADCOMMAND,
+        E_UNKNOWNCOMMAND,
+      } RF_ERROR;
 
       RF ();
       void setup (BuoyMaster *);
@@ -79,13 +119,15 @@ namespace Buoy {
       uint32_t laststatus;
 
       void send_status ();
-
       void send_debug (const char *);
       void ad_message (RF_AD_MESSAGE);
       void gps_message (RF_GPS_MESSAGE);
+      void send_error (RF_ERROR code);
 
       void start_continuous_transfer ();
       void stop_continuous_transfer ();
+
+      void parse ();
 
       static byte gen_checksum (const char *, bool skip = true);
       static bool test_checksum (const char *);

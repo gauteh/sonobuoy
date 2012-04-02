@@ -121,7 +121,7 @@ namespace Buoy {
 
         /* Only nrefs will be written out for each of the following arrays */
         uint32_t refpos[MAX_REFERENCES]; // List with position of reference points.
-        uint64_t refs[MAX_REFERENCES];   // A re
+        uint64_t refs[MAX_REFERENCES];   // List with references, matches list of positions.
       } Index;
 
 

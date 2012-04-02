@@ -22,6 +22,12 @@ namespace Buoy {
     lastbatch  = 0;
     continuous_transfer = false;
     rf = this;
+
+    isactive = false;
+    stayactive = false;
+    activated = 0;
+
+    rf_buf_pos = 0;
   }
 
   void RF::setup (BuoyMaster *b) {
@@ -35,17 +41,262 @@ namespace Buoy {
   }
 
   void RF::loop () {
-    /* Status is sent every second */
-    if (millis () - laststatus > 1000) send_status ();
+    /* Handle incoming RF telegrams on serial line (non-blocking) {{{
+     *
+     *
+     * States:
+     * 0 = Waiting for start of telegram $
+     * 1 = Receiving (between $ and *)
+     * 2 = Waiting for Checksum digit 1
+     * 3 = Waiting for Checksum digit 2
+     */
+    static int state = 0;
 
-    /* Loop must run at least 2x speed (Nyquist) of batchfilltime */
-    if (continuous_transfer) {
-      if (ad->batch != lastbatch) {
-       ad_message (AD_DATA_BATCH);
+    /* Time out activeness.. */
+    if (isactive) {
+      if ((millis () - activated) >
+         ((stayactive ? STAYACTIVE_TIMEOUT : ACTIVE_TIMEOUT) * 1000)) {
+        isactive = false;
+        stayactive = false;
       }
     }
+
+    int ca = RF_Serial.available ();
+
+    while (ca > 0) {
+      char c = (char)RF_Serial.read ();
+
+      if (rf_buf_pos >= RF_SERIAL_BUFLEN) {
+        state = 0;
+        rf_buf_pos = 0;
+      }
+
+      switch (state)
+      {
+        case 0:
+          if (c == '$') {
+            rf_buf[0] = '$';
+            rf_buf_pos = 1;
+            state = 1;
+          }
+          break;
+
+        case 2:
+          state = 3;
+        case 1:
+          if (c == '*') state = 2;
+
+          rf_buf[rf_buf_pos] = c;
+          rf_buf_pos++;
+          break;
+
+        case 3:
+          rf_buf[rf_buf_pos] = c;
+          rf_buf_pos++;
+          rf_buf[rf_buf_pos] = 0;
+
+          parse (); // Complete telegram received
+          state = 0;
+          break;
+
+        /* Should not be reached. */
+        default:
+          state = 0;
+          break;
+      }
+
+      ca--;
+    }
+
+    /* }}} Done telegram handler */
   }
 
+  void RF::parse ()
+  {
+    /* RF parser (non-blocking) {{{
+     *
+     *
+     */
+
+    RF_TELEGRAM type = UNSPECIFIED;
+    int tokeni = 0;
+    int len    = rf_buf_pos; // Excluding NULL terminator
+    int i      = 0;
+
+    /* Test checksum before parsing */
+    if (!test_checksum (rf_buf)) goto cmderror;
+
+    /* Parse */
+    while (i < len)
+    {
+      /*
+      uint32_t ltmp = 0;
+      uint32_t remainder = 0;
+      */
+
+      char token[80]; // Max length of token
+      int j = 0;
+      /* Get next token */
+      while ((rf_buf[i] != ',' && rf_buf[i] != '*') && i < len) {
+        token[j] = rf_buf[i];
+
+        i++;
+        j++;
+      }
+      i++; /* Skip delimiter */
+
+      token[j] = 0;
+
+      if (i < len) {
+        if (tokeni == 0) {
+          /* Determine telegram type */
+          if (strcmp(token, "$A") == 0)
+            type = ACTIVATE;
+          else if (strcmp(token, "$DA") == 0)
+            type = DEACTIVATE;
+          else if (strcmp(token, "$GS") == 0)
+            type = GETSTATUS;
+          else if (strcmp(token, "$SA") == 0)
+            type = STAYACTIVE;
+          else if (strcmp(token, "$GIDS") == 0)
+            type = GETIDS;
+          else if (strcmp(token, "$GID") == 0)
+            type = GETID;
+          else if (strcmp(token, "$GB") == 0)
+            type = GETBATCH;
+          else {
+            /* Cancel parsing */
+            type = UNKNOWN;
+            send_error (E_UNKNOWNCOMMAND);
+            return;
+          }
+        } else {
+          /* Must be activated first */
+          if (isactive || (type == ACTIVATE) || (type == STAYACTIVE)) {
+            switch (type)
+            {
+              // ACTIVATE {{{
+              case ACTIVATE:
+                isactive = true;
+                stayactive = false;
+                activated = millis ();
+                break;
+              // }}}
+
+              // DEACTIVATE {{{
+              case DEACTIVATE:
+                isactive = false;
+                stayactive = false;
+                break;
+              // }}}
+
+              // STAYACTIVE {{{
+              case STAYACTIVE:
+                isactive = true;
+                stayactive = true;
+                activated = millis ();
+                break;
+              // }}}
+
+              // GETSTATUS {{{
+              case GETSTATUS:
+                send_status ();
+                break;
+              // }}}
+
+              // GETIDS {{{
+              case GETIDS:
+                switch (tokeni)
+                {
+                  /* first token specifies starting id to send */
+                  case 1:
+                    {
+                    int r = sscanf (token, "%lu", &(id));
+                    if (r != 1) goto cmderror;
+
+                    ad_message (AD_IDS);
+                    }
+                    break;
+                }
+                break;
+                // }}}
+
+              // GETID {{{
+              case GETID:
+                switch (tokeni)
+                {
+                  /* first token specifies starting id to send */
+                  case 1:
+                    {
+                    int r = sscanf (token, "%lu", &(id));
+                    if (r != 1) goto cmderror;
+
+                    ad_message (AD_ID);
+                    }
+                    break;
+                }
+                break;
+                // }}}
+
+              // GETBATCH {{{
+              case GETBATCH:
+                switch (tokeni)
+                {
+                  case 1:
+                    {
+                    int r = sscanf (token, "%lu", &(id));
+                    if (r != 1) goto cmderror;
+                    }
+                    break;
+
+                  case 2:
+                    {
+                    int r = sscanf (token, "%lu", &(ref));
+                    if (r != 1) goto cmderror;
+                    }
+                    break;
+
+                  case 3:
+                    {
+                    int r = sscanf (token, "%lu", &(sample));
+                    if (r != 1) goto cmderror;
+                    }
+                    break;
+
+                  case 4:
+                    {
+                    int r = sscanf (token, "%lu", &(length));
+                    if (r != 1) goto cmderror;
+
+                    ad_message (AD_DATA_BATCH);
+                    }
+                    break;
+                }
+                break;
+                // }}}
+
+              default:
+                /* Having reached here on an unknown or unspecified telegram
+                 * parsing is cancelled. */
+                return;
+            }
+          }
+        }
+      } else {
+        /* Last token: Check sum */
+      }
+      tokeni++;
+    }
+
+    return;
+cmderror:
+    if (isactive) send_error (E_BADCOMMAND);
+    return;
+
+    /* Done parser }}} */
+  }
+
+  /* Status, debug and error messages {{{ */
   void RF::send_status () {
     static int sid;
 
@@ -59,6 +310,12 @@ namespace Buoy {
 
     sid++;
     laststatus = millis ();
+  }
+
+  void RF::send_error (RF_ERROR code) {
+    sprintf (buf, "$ERR,%d*", code);
+    APPEND_CSUM (buf);
+    RF_Serial.println (buf);
   }
 
   void RF::send_debug (const char * msg)
@@ -76,10 +333,10 @@ namespace Buoy {
     RF_Serial.print   ("*");
     RF_Serial.print   (cs>>4, HEX);
     RF_Serial.println (cs&0xf, HEX);
-  }
+  } // }}}
 
   void RF::ad_message (RF_AD_MESSAGE messagetype)
-  {
+  { // Send AD related message {{{
     switch (messagetype)
     {
       case AD_STATUS:
@@ -169,10 +426,10 @@ namespace Buoy {
       default:
         return;
     }
-  }
+  } // }}}
 
   void RF::gps_message (RF_GPS_MESSAGE messagetype)
-  {
+  { // Send GPS related message {{{
     switch (messagetype)
     {
       case GPS_STATUS:
@@ -188,8 +445,9 @@ namespace Buoy {
 
     APPEND_CSUM (buf);
     RF_Serial.println (buf);
-  }
+  } // }}}
 
+  /* Checksum {{{ */
   byte RF::gen_checksum (const char *buf, bool skip)
   {
   /* Generate checksum for NULL terminated string
@@ -225,7 +483,7 @@ namespace Buoy {
       tsum = tsum ^ (uint8_t)buf[i];
 
     return tsum == csum;
-  }
+  } // }}}
 
   void RF::start_continuous_transfer () {
     continuous_transfer = true;
