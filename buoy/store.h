@@ -67,6 +67,8 @@ namespace Buoy {
       SdVolume    *volume;
       SdFile      *root;
 
+      char buf[8+5]; // used for file names
+
       bool  SD_AVAILABLE;
       uint32_t lastsd;
 
@@ -175,6 +177,11 @@ namespace Buoy {
 
       void start_continuous_write ();
       void stop_continuous_write ();
+
+      void send_indexes (uint32_t, uint32_t);
+      void send_index (uint32_t);
+      void send_batch (uint32_t id, uint32_t ref, uint32_t sample, uint32_t length);
+      void send_lastid ();
 
       void open_next_log ();
       void log (const char *);

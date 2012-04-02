@@ -118,7 +118,6 @@ namespace Buoy {
   /* Log to file {{{ */
   void Store::open_next_log ()
   {
-    char buf[8+5];
     sprintf (buf, "%lu.LOG", logf_id);
 
     while (logf.open (root, buf, O_READ)) {
@@ -143,7 +142,6 @@ namespace Buoy {
 
       if (!SD_AVAILABLE) return;
 
-      char buf[13];
       sprintf (buf, "[%lu]", (uint32_t) gps->lastsecond);
       logf.write (buf);
       logf.write (s);
@@ -169,7 +167,6 @@ namespace Buoy {
     }
 
     /* Walk through subsequent indexes above lastid and take next free */
-    char buf[8+5];
     bool newi = false;
 
 # if DIRECT_SERIAL
@@ -218,7 +215,6 @@ namespace Buoy {
   void Store::write_index ()  // {{{
   {
     if (!SD_AVAILABLE) return;
-    char buf[8+5];
     rf_send_debug_f ("[SD] Writing index: %lu..", current_index.id);
 
 # if DIRECT_SERIAL
@@ -433,6 +429,65 @@ namespace Buoy {
 
   void Store::stop_continuous_write () {
     continuous_write = false;
+  }
+
+  /* ID list and retrieval */
+  void Store::send_indexes (uint32_t start, uint32_t length) {
+    if (!SD_AVAILABLE) {
+      rf->send_error (RF::E_SDUNAVAILABLE);
+      return;
+    }
+
+    /* Search on disk through indexes from start up to length nos */
+    SdFile fi;
+    while (length > 0) {
+      sprintf (buf, "%lu.IND", start);
+      if (!!fi.open (root, buf, O_READ)) {
+        fi.close ();
+        sprintf (rf->buf, "$IDS,%lu*", start);
+        APPEND_CSUM(rf->buf);
+        RF_Serial.println (rf->buf);
+      }
+
+      start++;
+      length--;
+    }
+  }
+
+  void Store::send_index (uint32_t id) {
+    if (!SD_AVAILABLE) {
+      rf->send_error (RF::E_SDUNAVAILABLE);
+      return;
+    }
+
+    SdFile fi;
+    sprintf (buf, "%lu.IND", id);
+    if (!! fi.open (root, buf, O_READ)) {
+
+
+    } else {
+      rf->send_error (RF::E_NOSUCHID);
+      return;
+    }
+
+  }
+
+  void Store::send_batch (uint32_t id, uint32_t ref, uint32_t sample, uint32_t length) {
+    if (!SD_AVAILABLE) {
+      rf->send_error (RF::E_SDUNAVAILABLE);
+      return;
+    }
+  }
+
+  void Store::send_lastid () {
+    if (!SD_AVAILABLE) {
+      rf->send_error (RF::E_SDUNAVAILABLE);
+      return;
+    }
+
+    sprintf (rf->buf, "$LID,%lu*", current_index.id);
+    APPEND_CSUM (rf->buf);
+    RF_Serial.println (rf->buf);
   }
 }
 

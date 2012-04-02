@@ -13,6 +13,7 @@
 # include "rf.h"
 # include "ads1282.h"
 # include "gps.h"
+# include "store.h"
 
 using namespace std;
 
@@ -33,6 +34,7 @@ namespace Buoy {
   void RF::setup (BuoyMaster *b) {
     ad  = b->ad;
     gps = b->gps;
+    store = b->store;
 
     RF_Serial.begin (RF_BAUDRATE);
 
@@ -214,7 +216,7 @@ namespace Buoy {
                     int r = sscanf (token, "%lu", &(id));
                     if (r != 1) goto cmderror;
 
-                    ad_message (AD_IDS);
+                    store->send_indexes (id, GET_IDS_N);
                     }
                     break;
                 }
@@ -231,10 +233,16 @@ namespace Buoy {
                     int r = sscanf (token, "%lu", &(id));
                     if (r != 1) goto cmderror;
 
-                    ad_message (AD_ID);
+                    store->send_index (id);
                     }
                     break;
                 }
+                break;
+                // }}}
+
+              // GETLASTID {{{
+              case GETLASTID:
+                store->send_lastid ();
                 break;
                 // }}}
 
@@ -268,7 +276,7 @@ namespace Buoy {
                     int r = sscanf (token, "%lu", &(length));
                     if (r != 1) goto cmderror;
 
-                    ad_message (AD_DATA_BATCH);
+                    store->send_batch (id, ref, sample, length);
                     }
                     break;
                 }
@@ -335,8 +343,8 @@ cmderror:
     RF_Serial.println (cs&0xf, HEX);
   } // }}}
 
-  void RF::ad_message (RF_AD_MESSAGE messagetype)
-  { // Send AD related message {{{
+  void RF::ad_message (RF_AD_MESSAGE messagetype) // {{{
+  {
     switch (messagetype)
     {
       case AD_STATUS:

@@ -54,6 +54,7 @@ namespace Buoy {
     public:
       ADS1282 *ad;
       GPS     *gps;
+      Store   *store;
 
       bool      isactive;
       bool      stayactive;
@@ -78,8 +79,6 @@ namespace Buoy {
       typedef enum _RF_AD_MESSAGE {
         AD_STATUS = 0,
         AD_DATA_BATCH,
-        AD_IDS,
-        AD_ID,
       } RF_AD_MESSAGE;
 
       typedef enum _RF_GPS_MESSAGE {
@@ -97,6 +96,7 @@ namespace Buoy {
         STAYACTIVE,
         GETIDS,
         GETID,
+        GETLASTID,
         GETBATCH,
       } RF_TELEGRAM;
 
@@ -105,6 +105,8 @@ namespace Buoy {
         E_CONFIRM = 0,
         E_BADCOMMAND,
         E_UNKNOWNCOMMAND,
+        E_SDUNAVAILABLE,
+        E_NOSUCHID,
       } RF_ERROR;
 
       RF ();
