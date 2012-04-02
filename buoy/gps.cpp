@@ -195,6 +195,11 @@ namespace Buoy {
     while (ca > 0) {
       char c = (char)GPS_Serial.read ();
 
+      if (gps_buf_pos >= (TELEGRAM_LEN + 2)) {
+        state = 0;
+        gps_buf_pos = 0;
+      }
+
       switch (state)
       {
         case 0:
