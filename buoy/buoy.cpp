@@ -62,7 +62,6 @@ namespace Buoy {
 
     ad->start_continuous_read ();
 
-    rf->start_continuous_transfer ();
     store->start_continuous_write ();
   }
 
