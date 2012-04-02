@@ -121,7 +121,7 @@ class Protocol:
           if msgtype != 'AD' or (tokeni > 1 and subtype != 'DE'):
             self.logger.error ("[Protocol] Did not receive receipt immediately after data batch. Discarding data batch.")
             self.waitforreceipt = False
-            self.zero.current.ad.ad_k_samples = ''
+            self.zero.current.ad.ad_k_samples = 0
             self.zero.current.ad.ad_reference = 0
 
 
@@ -238,7 +238,7 @@ class Protocol:
             elif (subtype == 'DE'):
               if not self.waitforreceipt:
                 self.logger.error ("[Protocol] Got end of batch data without getting data first.")
-                self.zero.current.ad.ad_k_samples = ''
+                self.zero.current.ad.ad_k_samples = 0
                 self.zero.current.ad.ad_reference = 0
                 self.waitforreceipt = False
                 return
