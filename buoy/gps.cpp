@@ -6,8 +6,8 @@
  *
  */
 
-# include <stdio.h>
-# include <string.h>
+# include <stdint.h>
+# include <stdlib.h>
 # include "buoy.h"
 
 # include "gps.h"
@@ -45,7 +45,7 @@ namespace Buoy {
 
 
     rf->send_debug ("[GPS] Waiting for first (un-reliable) reference..");
-    uint n = 0;
+    uint8_t n = 0;
     while (lastsecond == 0) {
       loop ();
       delay (100);
@@ -319,10 +319,19 @@ namespace Buoy {
               {
                 case 1:
                   {
-                    int r = sscanf (token, "%02d%02d%02d.%d", &(gps_data.hour), &(gps_data.minute), &(gps_data.second), &(gps_data.seconds_part));
+                    char * s = token;
+                    char * n = token + 2;
+                    gps_data.hour   = strtod (s, &n);
+                    s = n; n = s + 2;
+                    gps_data.minute = strtod (s, &n);
+                    s = n; n = s + 2;
+                    gps_data.second = strtod (s, &n);
+                    n++; // skip delimiter
+                    s = n;
+                    gps_data.seconds_part = strtod (s, NULL);
 
-                    // Update if we got all values
-                    doseconds = (r == 4) && gps_data.day > 0;
+                    // Update seconds
+                    doseconds = (gps_data.day  > 0);
                   }
                   break;
 
@@ -356,9 +365,16 @@ namespace Buoy {
 
                 case 9:
                   {
-                    int r = sscanf (token, "%02d%02d%02d", &(gps_data.day), &(gps_data.month), &(gps_data.year));
-                    // Update if we got all values, and got time
-                    doseconds = (r == 3) && gps_data.day > 0;
+                    char * s = token;
+                    char * n = token + 2;
+                    gps_data.day   = strtod (s, &n);
+                    s = n; n = s + 2;
+                    gps_data.month = strtod (s, &n);
+                    s = n; n = s + 2;
+                    gps_data.year = strtod (s, &n);
+
+                    // Update if we got time
+                    doseconds = (gps_data.day > 0);
                   }
                   break;
 
