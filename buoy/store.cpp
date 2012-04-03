@@ -426,7 +426,10 @@ namespace Buoy {
         sd_data = NULL;
       }
 
-      send_id = 0;
+      s_id = 0;
+      s_samples = 0;
+      s_nrefs   = 0;
+      s_currentref = 0;
 
       if (send_i != NULL) {
         delete send_i;
@@ -490,11 +493,16 @@ namespace Buoy {
       return;
     }
 
-    if (send_id != id || send_i == NULL) {
+    if (s_id != id || send_i == NULL) {
       if (send_i != NULL) {
         send_i->close ();
         delete send_i;
       }
+
+      s_id = id;
+      s_samples = 0;
+      s_nrefs   = 0;
+      s_currentref = 0;
 
       sprintf (buf, "%lu.IND", id);
       send_i = new SdFile ();
@@ -508,18 +516,15 @@ namespace Buoy {
     if (send_i->curPosition () > 0) send_i->seekSet (0);
 
     /* Reading first part of Index */
-    uint32_t samples, samples_per_reference, nrefs, id_;
-    uint16_t version, sample_l;
-
-    send_i->read (reinterpret_cast<char*>(&version), sizeof(version));
-    send_i->read (reinterpret_cast<char*>(&id_), sizeof(id_));
-    send_i->read (reinterpret_cast<char*>(&sample_l), sizeof(sample_l));
-    send_i->read (reinterpret_cast<char*>(&samples), sizeof(samples));
-    send_i->read (reinterpret_cast<char*>(&samples_per_reference), sizeof(samples_per_reference));
-    send_i->read (reinterpret_cast<char*>(&nrefs), sizeof(nrefs));
+    send_i->seekCur ( sizeof(Index::version)
+                    + sizeof(Index::id)
+                    + sizeof(Index::sample_l));
+    send_i->read (reinterpret_cast<char*>(&s_samples), sizeof(s_samples));
+    send_i->seekCur (sizeof(Index::samples_per_reference));
+    send_i->read (reinterpret_cast<char*>(&s_nrefs), sizeof(s_nrefs));
 
     // format: $IND,version,id,sample_l,samples,samples_per_reference,nrefs*CS
-    sprintf(rf->buf, "$IND,%u,%lu,%u,%lu,%lu,%lu*", version, id_, sample_l, samples, samples_per_reference, nrefs);
+    sprintf(rf->buf, "$IND,%u,%lu,%u,%lu,%d,%lu*", STORE_VERSION, id, SAMPLE_LENGTH, s_samples, BATCH_LENGTH, s_nrefs);
     APPEND_CSUM (rf->buf);
     RF_Serial.println (rf->buf);
   }

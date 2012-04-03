@@ -77,8 +77,8 @@ namespace Buoy {
       typedef uint32_t sample;
 
 /* Data format */
-# define STORE_VERSION 4uL
-# define SAMPLE_LENGTH 4uL
+# define STORE_VERSION 4u
+# define SAMPLE_LENGTH 4u
 
 /* Maximum number of timestamp, sample pairs for each datafile */
 # define MINUTES_PER_DATAFILE 5uL
@@ -179,7 +179,10 @@ namespace Buoy {
       void stop_continuous_write ();
 
       /* ID and files currently being sent */
-      uint32_t send_id;
+      uint32_t s_id;
+      uint32_t s_samples;
+      uint32_t s_nrefs;
+      uint32_t s_currentref;
       SdFile *send_i;
       SdFile *send_d;
 
