@@ -578,10 +578,10 @@ namespace Buoy {
     /* Done parser }}} */
   }
 
-  void inline GPS::enable_sync () {
+  void GPS::enable_sync () {
     attachInterrupt (GPS_SYNC_PIN, &(GPS::sync_pulse_int), FALLING);
   }
-  void inline GPS::disable_sync () {
+  void GPS::disable_sync () {
     detachInterrupt (GPS_SYNC_PIN);
   }
 }
