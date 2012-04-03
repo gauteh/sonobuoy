@@ -291,6 +291,7 @@ namespace Buoy {
           /* Determine telegram type */
           if (strcmp(token, "$GPRMC") == 0)
             type = GPRMC;
+          /*
           else if (strcmp(token, "$GPGGA") == 0)
             type = GPGGA;
           else if (strcmp(token, "$GPGLL") == 0)
@@ -301,6 +302,7 @@ namespace Buoy {
             type = GPGSV;
           else if (strcmp(token, "$GPVTG") == 0)
             type = GPVTG;
+          */
           else {
             /* Cancel parsing */
             type = UNKNOWN;
@@ -368,6 +370,7 @@ namespace Buoy {
               break;
               // }}}
 
+# if 0
             // GPGGA {{{
             case GPGGA:
               switch (tokeni)
@@ -537,6 +540,7 @@ namespace Buoy {
               }
               break;
             // }}}
+# endif
 
             default:
               /* Having reached here on an unknown or unspecified telegram
