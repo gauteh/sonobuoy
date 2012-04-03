@@ -524,7 +524,7 @@ namespace Buoy {
     send_i->read (reinterpret_cast<char*>(&s_nrefs), sizeof(s_nrefs));
 
     // format: $IND,version,id,sample_l,samples,samples_per_reference,nrefs*CS
-    sprintf(rf->buf, "$IND,%u,%lu,%u,%lu,%d,%lu*", STORE_VERSION, id, SAMPLE_LENGTH, s_samples, BATCH_LENGTH, s_nrefs);
+    sprintf(rf->buf, "$IND," STRINGIFY(STORE_VERSION) ",%lu," STRINGIFY(SAMPLE_LENGTH) ",%lu," STRINGIFY(BATCH_LENGTH) ",%lu*", id, s_samples, s_nrefs);
     APPEND_CSUM (rf->buf);
     RF_Serial.println (rf->buf);
   }

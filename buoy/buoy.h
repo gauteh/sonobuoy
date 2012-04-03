@@ -23,6 +23,10 @@
 /* Define to have debug messages sent to USB serial */
 # define DIRECT_SERIAL 1
 
+/* Helpers to stringify defines */
+# define STRINGIFY_I(s) #s
+# define STRINGIFY(s) STRINGIFY_I(s)
+
 namespace Buoy {
   class BuoyMaster {
     public:
