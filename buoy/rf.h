@@ -78,7 +78,6 @@ namespace Buoy {
 
       typedef enum _RF_AD_MESSAGE {
         AD_STATUS = 0,
-        AD_DATA_BATCH,
       } RF_AD_MESSAGE;
 
       typedef enum _RF_GPS_MESSAGE {
@@ -107,15 +106,15 @@ namespace Buoy {
         E_UNKNOWNCOMMAND,
         E_SDUNAVAILABLE,
         E_NOSUCHID,
+        E_NOSUCHREF,
+        E_NOSUCHSAMPLE,
+        E_NOSUCHDAT,
       } RF_ERROR;
 
       RF ();
       void setup (BuoyMaster *);
       void loop ();
-
-      /* Send data as soon as a batch is ready */
-      uint8_t lastbatch;
-      bool    continuous_transfer;
+      void parse ();
 
       /* Status is sent every second */
       uint32_t laststatus;
@@ -125,11 +124,6 @@ namespace Buoy {
       void ad_message (RF_AD_MESSAGE);
       void gps_message (RF_GPS_MESSAGE);
       void send_error (RF_ERROR code);
-
-      void start_continuous_transfer ();
-      void stop_continuous_transfer ();
-
-      void parse ();
 
       static byte gen_checksum (const char *, bool skip = true);
       static bool test_checksum (const char *);

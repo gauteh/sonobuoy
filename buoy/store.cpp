@@ -32,6 +32,7 @@ namespace Buoy {
 
     lastsd    = millis ();
     lastbatch = 0;
+    s_lastbatch = 0;
     continuous_write = false;
 
     /* Initialize card */
@@ -429,7 +430,6 @@ namespace Buoy {
       s_id = 0;
       s_samples = 0;
       s_nrefs   = 0;
-      s_currentref = 0;
 
       if (send_i != NULL) {
         delete send_i;
@@ -487,10 +487,10 @@ namespace Buoy {
     }
   }
 
-  void Store::send_index (uint32_t id) {
+  bool Store::_check_index (uint32_t id) {
     if (!SD_AVAILABLE) {
       rf->send_error (RF::E_SDUNAVAILABLE);
-      return;
+      return false;
     }
 
     if (s_id != id || send_i == NULL) {
@@ -499,29 +499,40 @@ namespace Buoy {
         delete send_i;
       }
 
+      if (send_d != NULL) {
+        send_d->close ();
+        delete send_d;
+      }
+
       s_id = id;
       s_samples = 0;
       s_nrefs   = 0;
-      s_currentref = 0;
 
       sprintf (buf, "%lu.IND", id);
       send_i = new SdFile ();
       if (!send_i->open (root, buf, O_READ)) {
         rf->send_error (RF::E_NOSUCHID);
         delete send_i;
-        return;
+        return false;
       }
+
+      /* Open and read index if we just opened it */
+      if (send_i->curPosition () > 0) send_i->seekSet (0);
+
+      /* Reading first part of Index */
+      send_i->seekCur ( sizeof(Index::version)
+                      + sizeof(Index::id)
+                      + sizeof(Index::sample_l));
+      send_i->read (reinterpret_cast<char*>(&s_samples), sizeof(s_samples));
+      send_i->seekCur (sizeof(Index::samples_per_reference));
+      send_i->read (reinterpret_cast<char*>(&s_nrefs), sizeof(s_nrefs));
     }
 
-    if (send_i->curPosition () > 0) send_i->seekSet (0);
+    return true;
+  }
 
-    /* Reading first part of Index */
-    send_i->seekCur ( sizeof(Index::version)
-                    + sizeof(Index::id)
-                    + sizeof(Index::sample_l));
-    send_i->read (reinterpret_cast<char*>(&s_samples), sizeof(s_samples));
-    send_i->seekCur (sizeof(Index::samples_per_reference));
-    send_i->read (reinterpret_cast<char*>(&s_nrefs), sizeof(s_nrefs));
+  void Store::send_index (uint32_t id) {
+    if (!_check_index (id)) return;
 
     // format: $IND,version,id,sample_l,samples,samples_per_reference,nrefs*CS
     sprintf(rf->buf, "$IND," STRINGIFY(STORE_VERSION) ",%lu," STRINGIFY(SAMPLE_LENGTH) ",%lu," STRINGIFY(BATCH_LENGTH) ",%lu*", id, s_samples, s_nrefs);
@@ -530,14 +541,144 @@ namespace Buoy {
   }
 
   void Store::send_refs (uint32_t id, uint32_t start, uint32_t length) {
-    /* Send references, _not_ reference positions */
+    if (!_check_index (id)) return;
 
+    if ((start + length) >= s_nrefs) {
+      rf->send_error (RF::E_NOSUCHREF);
+      return;
+    }
+
+    /* Send references, _not_ reference positions */
+    uint32_t pos = REFPOS_START + s_nrefs * sizeof(uint32_t) + start * sizeof(uint64_t);
+    send_i->seekSet (pos);
+
+    uint64_t ref;
+    while (length > 0) {
+      // format: $REF,id,refnumber,ref*CS
+      send_i->read (reinterpret_cast<char*>(&ref), sizeof(uint64_t));
+
+      sprintf (rf->buf, "$REF,%lu,%lu,%llu*", id, start, ref);
+      APPEND_CSUM (rf->buf);
+      RF_Serial.println (rf->buf);
+
+      start++;
+      length--;
+    }
   }
 
-  void Store::send_batch (uint32_t id, uint32_t ref, uint32_t sample, uint32_t length) {
-    if (!SD_AVAILABLE) {
-      rf->send_error (RF::E_SDUNAVAILABLE);
+  void Store::send_batch (uint32_t id, uint32_t refno, uint32_t start, uint32_t length) {
+    if (!_check_index (id)) return;
+    // refno is ref number
+
+    if (refno >= s_nrefs) {
+      rf->send_error (RF::E_NOSUCHREF);
       return;
+    }
+
+    if ((start + length) >= s_samples) {
+      rf->send_error (RF::E_NOSUCHSAMPLE);
+      return;
+    }
+
+    /* Open data file, otherwise assume it is previously open */
+    if (send_d == NULL) {
+
+      sprintf (buf, "%lu.DAT", id);
+      send_d = new SdFile ();
+      if (!send_d->open (root, buf, O_READ)) {
+        rf->send_error (RF::E_NOSUCHDAT);
+        delete send_d;
+        return;
+      }
+    }
+
+    /* Search to beginning of desired ref */
+    uint32_t pos = (SD_REFERENCE_LENGTH * refno) + (BATCH_LENGTH * SAMPLE_LENGTH * refno);
+
+    if (start > 0)
+      pos += SD_REFERENCE_LENGTH + (SAMPLE_LENGTH * start);
+
+    send_d->seekSet (pos);
+
+    /* Send BATCH_LENGTH samples */
+
+    /* Format and protocol:
+
+     * 1. Initiate binary data stream:
+
+     if start = 0, send reference
+     $AD,D,[k = number of samples],[reference],[reference_status]*CC
+
+     else send empty:
+     $AD,D,[k = number of samples],0,0*CC
+
+     * 2. Send one $ to indicate start of data
+
+     * 3. Send k number of samples: 4 bytes * k
+
+     * 4. Send end of data with checksum
+
+     */
+
+    uint64_t ref      = 0;
+    uint32_t refstat  = 0;
+
+    if (start == 0) {
+      send_d->seekCur (SD_REFERENCE_PADN * SAMPLE_LENGTH); // seek past padding
+      send_d->read (reinterpret_cast<char*>(&ref), sizeof(ref));
+      send_d->read (reinterpret_cast<char*>(&refstat), sizeof(refstat));
+      send_d->seekCur (SD_REFERENCE_PADN * SAMPLE_LENGTH); // seek to first sample
+    }
+
+    sprintf (buf, "$AD,D,%lu,%llu,%lu*", length, ref, refstat);
+    APPEND_CSUM (buf);
+    RF_Serial.println (buf);
+
+    delayMicroseconds (100);
+
+    byte csum = 0;
+
+    /* Write '$' to signal start of binary data */
+    RF_Serial.write ('$');
+
+    //uint32_t lasts = 0;
+    uint32_t s;
+
+    for (uint32_t i = 0; i < length; i++)
+    {
+      sd_data->read (reinterpret_cast<char*>(&s), sizeof (s));
+      /* MSB first (big endian), means concatenating bytes on RX will
+       * result in LSB first; little endian. */
+      RF_Serial.write ((byte*)(&s), 4);
+
+      csum = csum ^ ((byte*)&s)[0];
+      csum = csum ^ ((byte*)&s)[1];
+      csum = csum ^ ((byte*)&s)[2];
+      csum = csum ^ ((byte*)&s)[3];
+
+      //lasts = s;
+
+      delayMicroseconds (100);
+    }
+
+    /* Send end of data with Checksum */
+    sprintf (buf, "$AD,DE," F_CSUM "*", csum);
+    APPEND_CSUM (buf);
+    RF_Serial.println (buf);
+    delayMicroseconds (100);
+
+    /*
+    SerialUSB.print ("[RF] Last sample: 0x");
+    SerialUSB.println (lasts, HEX);
+    rf_send_debug_f ("[RF] Last sample: 0x%lX", lasts);
+    */
+
+    lastbatch =  (lastbatch + 1) % BATCHES;
+    if (lastbatch != ad->batch) {
+      //send_debug ("[RF] [Error] Did not finish sending batch before it was swapped.");
+# if DIRECT_SERIAL
+      SerialUSB.println ("[RF] [Error] Did not finish sending batch before it was swapped.");
+# endif
     }
   }
 

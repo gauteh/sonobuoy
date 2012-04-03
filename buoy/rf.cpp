@@ -20,8 +20,6 @@ using namespace std;
 namespace Buoy {
   RF::RF () {
     laststatus = 0;
-    lastbatch  = 0;
-    continuous_transfer = false;
     rf = this;
 
     isactive = false;
@@ -355,82 +353,6 @@ cmderror:
 
         break;
 
-      case AD_DATA_BATCH:
-        /* Send BATCH_LENGTH samples */
-
-        /* Format and protocol:
-
-         * 1. Initiate binary data stream:
-
-         $AD,D,[k = number of samples],[reference],[reference_status]*CC
-
-         * 2. Send one $ to indicate start of data
-
-         * 3. Send k number of samples: 4 bytes * k
-
-         * 4. Send end of data with checksum
-
-         */
-        {
-          rf_send_debug_f ("On batch %d sending batch %d", ad->batch, lastbatch);
-          uint32_t start    = (lastbatch * BATCH_LENGTH);
-          uint32_t length   = BATCH_LENGTH;
-          uint64_t ref      = ad->references[lastbatch];
-          uint32_t refstat  = ad->reference_status[lastbatch];
-
-          sprintf (buf, "$AD,D,%lu,%llu,%lu*", length, ref, refstat);
-          APPEND_CSUM (buf);
-          RF_Serial.println (buf);
-
-          delayMicroseconds (100);
-
-          byte csum = 0;
-
-          /* Write '$' to signal start of binary data */
-          RF_Serial.write ('$');
-
-          //uint32_t lasts = 0;
-          uint32_t s;
-
-          for (uint32_t i = 0; i < length; i++)
-          {
-            s = ad->values[start + i];
-            /* MSB first (big endian), means concatenating bytes on RX will
-             * result in LSB first; little endian. */
-            RF_Serial.write ((byte*)(&s), 4);
-
-            csum = csum ^ ((byte*)&s)[0];
-            csum = csum ^ ((byte*)&s)[1];
-            csum = csum ^ ((byte*)&s)[2];
-            csum = csum ^ ((byte*)&s)[3];
-
-            //lasts = s;
-
-            delayMicroseconds (100);
-          }
-
-          /* Send end of data with Checksum */
-          sprintf (buf, "$AD,DE," F_CSUM "*", csum);
-          APPEND_CSUM (buf);
-          RF_Serial.println (buf);
-          delayMicroseconds (100);
-
-          /*
-          SerialUSB.print ("[RF] Last sample: 0x");
-          SerialUSB.println (lasts, HEX);
-          rf_send_debug_f ("[RF] Last sample: 0x%lX", lasts);
-          */
-
-          lastbatch =  (lastbatch + 1) % BATCHES;
-          if (lastbatch != ad->batch) {
-            send_debug ("[RF] [Error] Did not finish sending batch before it was swapped.");
-# if DIRECT_SERIAL
-            SerialUSB.println ("[RF] [Error] Did not finish sending batch before it was swapped.");
-# endif
-          }
-        }
-        break;
-
       default:
         return;
     }
@@ -492,14 +414,6 @@ cmderror:
 
     return tsum == csum;
   } // }}}
-
-  void RF::start_continuous_transfer () {
-    continuous_transfer = true;
-  }
-
-  void RF::stop_continuous_transfer () {
-    continuous_transfer = false;
-  }
 }
 
 /* vim: set filetype=arduino :  */
