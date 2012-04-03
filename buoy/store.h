@@ -178,8 +178,14 @@ namespace Buoy {
       void start_continuous_write ();
       void stop_continuous_write ();
 
+      /* ID and files currently being sent */
+      uint32_t send_id;
+      SdFile *send_i;
+      SdFile *send_d;
+
       void send_indexes (uint32_t, uint32_t);
       void send_index (uint32_t);
+      void send_refs (uint32_t, uint32_t, uint32_t);
       void send_batch (uint32_t id, uint32_t ref, uint32_t sample, uint32_t length);
       void send_lastid ();
 

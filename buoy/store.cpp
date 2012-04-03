@@ -406,7 +406,37 @@ namespace Buoy {
       spi->end ();
 
       /* Clean up stale file references */
-      sd_data = NULL;
+      if (card != NULL) {
+        delete card;
+        card = NULL;
+      }
+
+      if (volume != NULL) {
+        delete volume;
+        volume = NULL;
+      }
+
+      if (root != NULL) {
+        delete root;
+        root = NULL;
+      }
+
+      if (sd_data != NULL) {
+        delete sd_data;
+        sd_data = NULL;
+      }
+
+      send_id = 0;
+
+      if (send_i != NULL) {
+        delete send_i;
+        send_i  = NULL;
+      }
+
+      if (send_d != NULL) {
+        delete send_d;
+        send_d  = NULL;
+      }
 
       /* Reinitiate SD card */
       init ();
@@ -460,15 +490,42 @@ namespace Buoy {
       return;
     }
 
-    SdFile fi;
-    sprintf (buf, "%lu.IND", id);
-    if (!! fi.open (root, buf, O_READ)) {
+    if (send_id != id || send_i == NULL) {
+      if (send_i != NULL) {
+        send_i->close ();
+        delete send_i;
+      }
 
-
-    } else {
-      rf->send_error (RF::E_NOSUCHID);
-      return;
+      sprintf (buf, "%lu.IND", id);
+      send_i = new SdFile ();
+      if (!send_i->open (root, buf, O_READ)) {
+        rf->send_error (RF::E_NOSUCHID);
+        delete send_i;
+        return;
+      }
     }
+
+    if (send_i->curPosition () > 0) send_i->seekSet (0);
+
+    /* Reading first part of Index */
+    uint32_t samples, samples_per_reference, nrefs, id_;
+    uint16_t version, sample_l;
+
+    send_i->read (reinterpret_cast<char*>(&version), sizeof(version));
+    send_i->read (reinterpret_cast<char*>(&id_), sizeof(id_));
+    send_i->read (reinterpret_cast<char*>(&sample_l), sizeof(sample_l));
+    send_i->read (reinterpret_cast<char*>(&samples), sizeof(samples));
+    send_i->read (reinterpret_cast<char*>(&samples_per_reference), sizeof(samples_per_reference));
+    send_i->read (reinterpret_cast<char*>(&nrefs), sizeof(nrefs));
+
+    // format: $IND,version,id,sample_l,samples,samples_per_reference,nrefs*CS
+    sprintf(rf->buf, "$IND,%u,%lu,%u,%lu,%lu,%lu*", version, id_, sample_l, samples, samples_per_reference, nrefs);
+    APPEND_CSUM (rf->buf);
+    RF_Serial.println (rf->buf);
+  }
+
+  void Store::send_refs (uint32_t id, uint32_t start, uint32_t length) {
+    /* Send references, _not_ reference positions */
 
   }
 
