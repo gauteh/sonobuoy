@@ -21,7 +21,7 @@
 # include "types.h"
 
 /* Define to have debug messages sent to USB serial */
-# define DIRECT_SERIAL 1
+# define DIRECT_SERIAL 0
 
 /* Helpers to stringify defines */
 # define STRINGIFY_I(s) #s
