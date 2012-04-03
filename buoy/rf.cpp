@@ -6,6 +6,7 @@
  */
 
 # include <stdio.h>
+# include <stdlib.h>
 # include <string.h>
 # include "wirish.h"
 
@@ -19,7 +20,6 @@ using namespace std;
 
 namespace Buoy {
   RF::RF () {
-    laststatus = 0;
     rf = this;
 
     isactive = false;
@@ -200,7 +200,16 @@ namespace Buoy {
 
               // GETSTATUS {{{
               case GETSTATUS:
-                send_status ();
+                // $GPS,S,[lasttype],[telegrams received],[lasttelegram],Lat,Lon,unixtime,time,date,Valid,HAS_TIME,HAS_SYNC,HAS_SYNC_REFERENCE*CS
+                // Valid: Y = Yes, N = No
+                sprintf (buf, "$GPS,S,%d,%d,%s,%c,%s,%c,%lu,%lu,%02d%02d%02d,%c,%c,%c,%c*", gps->gps_data.lasttype, gps->gps_data.received, gps->gps_data.latitude, (gps->gps_data.north ? 'N' : 'S'), gps->gps_data.longitude, (gps->gps_data.east ? 'E' : 'W'), (uint32_t) gps->lastsecond, gps->gps_data.time, gps->gps_data.day, gps->gps_data.month, gps->gps_data.year, (gps->gps_data.valid ? 'Y' : 'N'), (gps->HAS_TIME ? 'Y' : 'N'), (gps->HAS_SYNC ? 'Y' : 'N'), (gps->HAS_SYNC_REFERENCE ? 'Y' : 'N'));
+                APPEND_CSUM (buf);
+                RF_Serial.println (buf);
+
+                // $AD,S,[queue position], [queue fill time],[value],[config]*CS
+                sprintf (buf, "$AD,S,%lu,%lu,0x%08lX,0x%08hX*", ad->position, ad->batchfilltime, ad->value, ad->reg.raw[1]);
+                APPEND_CSUM (buf);
+                RF_Serial.println (buf);
                 break;
               // }}}
 
@@ -211,8 +220,8 @@ namespace Buoy {
                   /* first token specifies starting id to send */
                   case 1:
                     {
-                    int r = sscanf (token, "%lu", &(id));
-                    if (r != 1) goto cmderror;
+                    id = atoi (token);
+                    if (id < 1) goto cmderror;
 
                     store->send_indexes (id, GET_IDS_N);
                     }
@@ -228,8 +237,8 @@ namespace Buoy {
                   /* first token specifies starting id to send */
                   case 1:
                     {
-                    int r = sscanf (token, "%lu", &(id));
-                    if (r != 1) goto cmderror;
+                    id = atoi (token);
+                    if (id < 1) goto cmderror;
 
                     store->send_index (id);
                     }
@@ -250,29 +259,29 @@ namespace Buoy {
                 {
                   case 1:
                     {
-                    int r = sscanf (token, "%lu", &(id));
-                    if (r != 1) goto cmderror;
+                    id = atoi (token);
+                    if (id < 1) goto cmderror;
                     }
                     break;
 
                   case 2:
                     {
-                    int r = sscanf (token, "%lu", &(ref));
-                    if (r != 1) goto cmderror;
+                    ref = atoi (token);
+                    if (ref < 1) goto cmderror;
                     }
                     break;
 
                   case 3:
                     {
-                    int r = sscanf (token, "%lu", &(sample));
-                    if (r != 1) goto cmderror;
+                    sample = atoi (token);
+                    if (sample < 1) goto cmderror;
                     }
                     break;
 
                   case 4:
                     {
-                    int r = sscanf (token, "%lu", &(length));
-                    if (r != 1) goto cmderror;
+                    length = atoi (token);
+                    if (length < 1) goto cmderror;
 
                     store->send_batch (id, ref, sample, length);
                     }
@@ -302,22 +311,7 @@ cmderror:
     /* Done parser }}} */
   }
 
-  /* Status, debug and error messages {{{ */
-  void RF::send_status () {
-    static int sid;
-
-    ad_message (AD_STATUS);
-    gps_message (GPS_STATUS);
-
-    /* Every 10 status */
-    if (sid % 10 == 0) {
-      rf_send_debug_f ("Uptime micros %u", micros ());
-    }
-
-    sid++;
-    laststatus = millis ();
-  }
-
+  /* Debug and error messages {{{ */
   void RF::send_error (RF_ERROR code) {
     sprintf (buf, "$ERR,%d*", code);
     APPEND_CSUM (buf);
@@ -339,42 +333,6 @@ cmderror:
     RF_Serial.print   ("*");
     RF_Serial.print   (cs>>4, HEX);
     RF_Serial.println (cs&0xf, HEX);
-  } // }}}
-
-  void RF::ad_message (RF_AD_MESSAGE messagetype) // {{{
-  {
-    switch (messagetype)
-    {
-      case AD_STATUS:
-        // $AD,S,[queue position], [queue fill time],[value],[config]*CS
-        sprintf (buf, "$AD,S,%lu,%lu,0x%08lX,0x%08hX*", ad->position, ad->batchfilltime, ad->value, ad->reg.raw[1]);
-        APPEND_CSUM (buf);
-        RF_Serial.println (buf);
-
-        break;
-
-      default:
-        return;
-    }
-  } // }}}
-
-  void RF::gps_message (RF_GPS_MESSAGE messagetype)
-  { // Send GPS related message {{{
-    switch (messagetype)
-    {
-      case GPS_STATUS:
-        // $GPS,S,[lasttype],[telegrams received],[lasttelegram],Lat,Lon,unixtime,time,date,Valid,HAS_TIME,HAS_SYNC,HAS_SYNC_REFERENCE*CS
-        // Valid: Y = Yes, N = No
-        sprintf (buf, "$GPS,S,%d,%d,%s,%c,%s,%c,%lu,%lu,%02d%02d%02d,%c,%c,%c,%c*", gps->gps_data.lasttype, gps->gps_data.received, gps->gps_data.latitude, (gps->gps_data.north ? 'N' : 'S'), gps->gps_data.longitude, (gps->gps_data.east ? 'E' : 'W'), (uint32_t) gps->lastsecond, gps->gps_data.time, gps->gps_data.day, gps->gps_data.month, gps->gps_data.year, (gps->gps_data.valid ? 'Y' : 'N'), (gps->HAS_TIME ? 'Y' : 'N'), (gps->HAS_SYNC ? 'Y' : 'N'), (gps->HAS_SYNC_REFERENCE ? 'Y' : 'N'));
-
-        break;
-
-      default:
-        return;
-    }
-
-    APPEND_CSUM (buf);
-    RF_Serial.println (buf);
   } // }}}
 
   /* Checksum {{{ */

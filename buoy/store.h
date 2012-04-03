@@ -180,6 +180,7 @@ namespace Buoy {
       void stop_continuous_write ();
 
       /* ID and files currently being sent */
+# define GET_IDS_N 10 // no of ids to send in one go
       uint32_t s_id;
       uint32_t s_samples;
       uint32_t s_nrefs;

@@ -62,8 +62,6 @@ namespace Buoy {
 # define ACTIVE_TIMEOUT 60 // seconds before exiting active mode
 # define STAYACTIVE_TIMEOUT (20 * 60) // seconds before exiting stay active mode
 
-# define GET_IDS_N 10 // no of ids to send in one go
-
       /* Information about batch, ids or id about to be sent */
       uint32_t id;
       uint32_t ref;
@@ -75,15 +73,6 @@ namespace Buoy {
       uint8_t rf_buf_pos;
 
       char buf[RF_BUFLEN];
-
-      typedef enum _RF_AD_MESSAGE {
-        AD_STATUS = 0,
-      } RF_AD_MESSAGE;
-
-      typedef enum _RF_GPS_MESSAGE {
-        GPS_STATUS = 0,
-        GPS_POSITION,
-      } RF_GPS_MESSAGE;
 
       /* Incoming telegrams */
       typedef enum _RF_TELEGRAM {
@@ -116,13 +105,7 @@ namespace Buoy {
       void loop ();
       void parse ();
 
-      /* Status is sent every second */
-      uint32_t laststatus;
-
-      void send_status ();
       void send_debug (const char *);
-      void ad_message (RF_AD_MESSAGE);
-      void gps_message (RF_GPS_MESSAGE);
       void send_error (RF_ERROR code);
 
       static byte gen_checksum (const char *, bool skip = true);
