@@ -33,7 +33,7 @@ class Zero:
   protocol = None # Serial protocol to ZeroNode
 
   buoys    = []   # List of Buoys
-  currenti = 0 # Current buoy index
+  currenti = 0    # Current buoy index
 
   # Reading thread
   go       = True
