@@ -10,15 +10,14 @@
 import serial
 import signal
 import time
-from threading import Thread
+from   threading import Thread
 import multiprocessing, logging, logging.config
 import sys
 
-from ad import *
+from ad       import *
 from protocol import *
-from buoy import *
-
-from ui import *
+from buoy     import *
+from ui       import *
 
 class Zero:
   port = '/dev/ttyUSB0'
