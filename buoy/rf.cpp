@@ -5,9 +5,8 @@
  *
  */
 
-# include <stdio.h>
 # include <stdlib.h>
-# include <string.h>
+# include <stdio.h>
 # include "wirish.h"
 
 # include "buoy.h"
@@ -364,7 +363,8 @@ cmderror:
     int len = strlen(buf);
 
     uint16_t csum = 0;
-    if (sscanf (&(buf[len-2]), F_CSUM, &csum) != 1) return false;
+    //if (sscanf (&(buf[len-2]), F_CSUM, &csum) != 1) return false;
+    csum = strtoul (&(buf[len-2]), NULL, 16);
 
     uint32_t tsum = 0;
     for (int i = 1; i < (len - 3); i++)

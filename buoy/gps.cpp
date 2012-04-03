@@ -321,14 +321,14 @@ namespace Buoy {
                   {
                     char * s = token;
                     char * n = token + 2;
-                    gps_data.hour   = strtod (s, &n);
+                    gps_data.hour   = strtol (s, &n, 10);
                     s = n; n = s + 2;
-                    gps_data.minute = strtod (s, &n);
+                    gps_data.minute = strtol (s, &n, 10);
                     s = n; n = s + 2;
-                    gps_data.second = strtod (s, &n);
+                    gps_data.second = strtol (s, &n, 10);
                     n++; // skip delimiter
                     s = n;
-                    gps_data.seconds_part = strtod (s, NULL);
+                    gps_data.seconds_part = strtol (s, NULL, 10);
 
                     // Update seconds
                     doseconds = (gps_data.day  > 0);
@@ -367,11 +367,11 @@ namespace Buoy {
                   {
                     char * s = token;
                     char * n = token + 2;
-                    gps_data.day   = strtod (s, &n);
+                    gps_data.day   = strtol (s, &n, 10);
                     s = n; n = s + 2;
-                    gps_data.month = strtod (s, &n);
+                    gps_data.month = strtol (s, &n, 10);
                     s = n; n = s + 2;
-                    gps_data.year = strtod (s, &n);
+                    gps_data.year = strtol (s, &n, 10);
 
                     // Update if we got time
                     doseconds = (gps_data.day > 0);
