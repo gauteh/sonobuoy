@@ -86,7 +86,6 @@ namespace Buoy {
     /* Configure AD */
     configure ();
 
-    rf->send_debug ("[AD] ADS1282 subsystem initiated.");
     // }}}
   }
 

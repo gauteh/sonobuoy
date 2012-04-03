@@ -53,8 +53,10 @@ namespace Buoy {
     spi->begin (SPI_281_250KHZ, MSBFIRST, 0);
     SD_AVAILABLE = card->init (spi, SD_CS);
 
+    /*
     if (SD_AVAILABLE)
       SD_AVAILABLE = card->cardSize() > 0;
+    */
 
     if (SD_AVAILABLE)
       SD_AVAILABLE = (card->errorCode () == 0);

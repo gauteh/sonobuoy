@@ -70,8 +70,6 @@ namespace Buoy {
 
     pinMode (GPS_SYNC_PIN, INPUT_PULLDOWN);
     enable_sync ();
-
-    rf->send_debug ("[GPS] GPS subsystem initiated.");
   }
 
   void GPS::sync_pulse_int () {

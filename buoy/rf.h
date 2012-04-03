@@ -15,7 +15,7 @@ namespace Buoy {
 # define RF_BAUDRATE 115200
 # define RF_Serial Serial3
 
-# define RF_BUFLEN 90
+//# define RF_BUFLEN 90
 
 /* Format for printing checksum and macro for appending checksum
  * to NULL terminated buffer with string encapsulated in $ and *.
@@ -76,7 +76,7 @@ namespace Buoy {
       char rf_buf[RF_SERIAL_BUFLEN];
       uint8_t rf_buf_pos;
 
-      char buf[RF_BUFLEN];
+      //char buf[RF_BUFLEN];
 
       /* Incoming telegrams */
       typedef enum _RF_TELEGRAM {
