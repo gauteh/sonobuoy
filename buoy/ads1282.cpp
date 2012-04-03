@@ -5,9 +5,6 @@
  *
  */
 
-# include <stdio.h>
-# include <string.h>
-
 # include "wirish.h"
 # include "Wire.h"
 
@@ -687,7 +684,6 @@ namespace Buoy {
 # if DIRECT_SERIAL
     SerialUSB.println ("[AD] Error. Disabling.");
 # endif
-    rf->send_debug ("[AD] Error. Disabling.");
 
     disabled = true;
     detachInterrupt (AD_nDRDY);

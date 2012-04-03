@@ -5,7 +5,6 @@
  *
  */
 
-# include <stdio.h>
 # include "wirish.h"
 # include "HardwareSPI.h"
 
@@ -37,13 +36,10 @@ namespace Buoy {
 
     /* Initialize card */
     init ();
-
-    rf->send_debug ("[SD] Store subsystem initiated.");
   } // }}}
 
   void Store::init () // {{{
   {
-    rf->send_debug ("[SD] Init SD card.");
 # if DIRECT_SERIAL
     SerialUSB.println ("[SD] Init SD card.");
 # endif
@@ -77,7 +73,9 @@ namespace Buoy {
 
     if (SD_AVAILABLE)
     {
-      rf->send_debug ("[SD] Card initialized.");
+# if DIRECT_SERIAL
+      SerialUSB.println ("[SD] Card initialized.");
+# endif
 
       open_index ();
       open_data ();
@@ -85,7 +83,9 @@ namespace Buoy {
       //open_next_log ();
 
     } else {
-      rf->send_debug ("[SD] [Error] Could not inititialize SD card.");
+# if DIRECT_SERIAL
+      SerialUSB.println ("[SD] Could not initialize SD card.");
+# endif
       current_index.id = 0;
     }
   } // }}}
@@ -95,8 +95,6 @@ namespace Buoy {
     if (!SD_AVAILABLE) return;
 
     uint32_t n = 0;
-
-    rf->send_debug ("[SD] Opening index..");
 
     uint32_t i;
     SdFile fl;
@@ -111,12 +109,16 @@ namespace Buoy {
       i = 1;
     }
 
-    rf_send_debug_f ("[SD] Last id: %lu..", i);
+# if DIRECT_SERIAL
+    SerialUSB.print ("[SD] Last id: ");
+    SerialUSB.println (i);
+# endif
     SD_AVAILABLE &= (card->errorCode () == 0);
     next_index (i + 1);
   } // }}}
 
   /* Log to file {{{ */
+# if 0
   void Store::open_next_log ()
   {
     sprintf (buf, "%lu.LOG", logf_id);
@@ -148,7 +150,9 @@ namespace Buoy {
       logf.write (s);
       logf.write ('\n');
     }
-  } // }}}
+  }
+# endif // }}}
+
 
   /* Open next index file */
   void Store::next_index (uint32_t i) // {{{
@@ -179,7 +183,9 @@ namespace Buoy {
 
     while (!newi)
     {
-      sprintf (buf, "%lu.IND", i);
+      int p = itoa (i, 10, buf);
+      strcpy (&(buf[p]), ".IND");
+      //sprintf (buf, "%lu.IND", i);
 
       if (!fi.open(root, buf, O_READ)) {
         newi = true; /* Found new index file at id I */
@@ -216,7 +222,6 @@ namespace Buoy {
   void Store::write_index ()  // {{{
   {
     if (!SD_AVAILABLE) return;
-    rf_send_debug_f ("[SD] Writing index: %lu..", current_index.id);
 
 # if DIRECT_SERIAL
     SerialUSB.print   ("[SD] Writing index: ");
@@ -224,7 +229,9 @@ namespace Buoy {
 # endif
 
     if (current_index.id != 0) {
-      sprintf (buf, "%lu.IND", current_index.id);
+      int p = itoa (current_index.id, 10, buf);
+      strcpy (&(buf[p]), ".IND");
+      //sprintf (buf, "%lu.IND", current_index.id);
 
       SdFile fi;
       fi.open (root, buf, O_CREAT | O_WRITE | O_TRUNC);
@@ -259,7 +266,9 @@ namespace Buoy {
   void Store::roll_data_file () // {{{
   {
     if (!SD_AVAILABLE) return;
-    rf->send_debug ("[SD] Syncing index and data and rolling..");
+# if DIRECT_SERIAL
+    SerialUSB.println ("[SD] Syncing index and data and rolling..");
+# endif
 
     /* Truncate data file to actual size */
     //sd_data.truncate (sd_data.curPosition ());
@@ -282,7 +291,6 @@ namespace Buoy {
   void Store::write_batch () // {{{
   {
     if (!SD_AVAILABLE) {
-      rf_send_debug_f ("[SD] No write: error: %02X.", card->errorCode ());
       return;
     }
 
@@ -305,8 +313,6 @@ namespace Buoy {
     if (!SD_AVAILABLE) return;
 
     /* Writing entries */
-    rf_send_debug_f ("[SD] Writing entries to data file from sample: %lu", current_index.samples);
-
     /*
 # if DIRECT_SERIAL
     SerialUSB.println ("[SD] Writing entries to data file.");
@@ -319,7 +325,6 @@ namespace Buoy {
 # if DIRECT_SERIAL
       SerialUSB.println ("[SD] [Error] Failed while writing samples.");
 # endif
-      rf->send_debug ("[SD] [Error] Card failed while writing samples.");
 
       SD_AVAILABLE = false;
     }
@@ -334,7 +339,6 @@ namespace Buoy {
       lastbatch  =  (lastbatch + 1) % BATCHES;
 
     if (lastbatch != ad->batch) {
-      rf->send_debug ("[SD] [Error] Did not finish writing batch before it was swapped.");
 # if DIRECT_SERIAL
       SerialUSB.println ("[SD] [Error] Did not finish writing batch before it was swapped.");
 # endif
@@ -347,7 +351,9 @@ namespace Buoy {
     if (!SD_AVAILABLE) return;
 
     char fname[13];
-    sprintf (fname, "%lu.DAT", current_index.id);
+    int p = itoa (current_index.id, 10, fname);
+    strcpy (&(fname[p]), ".DAT");
+    //sprintf (fname, "%lu.DAT", current_index.id);
 
     SD_AVAILABLE &= sd_data->open (root, fname, O_CREAT | O_WRITE | O_TRUNC);
     SD_AVAILABLE &= (card->errorCode () == 0);
@@ -355,10 +361,7 @@ namespace Buoy {
 
   void Store::write_reference (uint64_t ref, uint32_t refstat) // {{{
   {
-    rf_send_debug_f ("[SD] Write reference: %llu", ref);
-
     if (!SD_AVAILABLE) {
-      rf_send_debug_f ("[SD] No write: error: %02X.", card->errorCode ());
       return;
     }
 
@@ -397,10 +400,9 @@ namespace Buoy {
   {
     /* Try to set up SD card, 5 sec delay  */
     if (!SD_AVAILABLE && (millis () - lastsd) > 5000) {
-      rf_send_debug_f ("[SD] [Error] SD error code: %02X. Trying to reset.", card->errorCode ());
-
 # if DIRECT_SERIAL
       SerialUSB.println ("[SD] [Error] Trying to reset.");
+      SerialUSB.println (card->errorCode ());
 # endif
 
       /* Reset SPI */
@@ -474,12 +476,19 @@ namespace Buoy {
     /* Search on disk through indexes from start up to length nos */
     SdFile fi;
     while (length > 0) {
-      sprintf (buf, "%lu.IND", start);
+      int p = itoa (start, 10, buf);
+      strcpy (&(buf[p]), ".IND");
+      //sprintf (buf, "%lu.IND", start);
       if (!!fi.open (root, buf, O_READ)) {
         fi.close ();
+        RF_Serial.print ("$IDS,");
+        RF_Serial.print (start);
+        RF_Serial.println ("*NN");
+        /*
         sprintf (rf->buf, "$IDS,%lu*", start);
         APPEND_CSUM(rf->buf);
         RF_Serial.println (rf->buf);
+        */
       }
 
       start++;
@@ -508,7 +517,9 @@ namespace Buoy {
       s_samples = 0;
       s_nrefs   = 0;
 
-      sprintf (buf, "%lu.IND", id);
+      int p = itoa (id, 10, buf);
+      strcpy (&(buf[p]), ".IND");
+      //sprintf (buf, "%lu.IND", id);
       send_i = new SdFile ();
       if (!send_i->open (root, buf, O_READ)) {
         rf->send_error (RF::E_NOSUCHID);
@@ -535,9 +546,20 @@ namespace Buoy {
     if (!_check_index (id)) return;
 
     // format: $IND,version,id,sample_l,samples,samples_per_reference,nrefs*CS
+    RF_Serial.print ("$IND,");
+    RF_Serial.print (STRINGIFY(STORE_VERSION) ",");
+    RF_Serial.print (id);
+    RF_Serial.print ("," STRINGIFY(SAMPLE_LENGTH) ",");
+    RF_Serial.print (s_samples);
+    RF_Serial.print ("," STRINGIFY(BATCH_LENGTH) ",");
+    RF_Serial.print (s_nrefs);
+    RF_Serial.println ("*NN");
+
+    /*
     sprintf(rf->buf, "$IND," STRINGIFY(STORE_VERSION) ",%lu," STRINGIFY(SAMPLE_LENGTH) ",%lu," STRINGIFY(BATCH_LENGTH) ",%lu*", id, s_samples, s_nrefs);
     APPEND_CSUM (rf->buf);
     RF_Serial.println (rf->buf);
+    */
   }
 
   void Store::send_refs (uint32_t id, uint32_t start, uint32_t length) {
@@ -557,9 +579,19 @@ namespace Buoy {
       // format: $REF,id,refnumber,ref*CS
       send_i->read (reinterpret_cast<char*>(&ref), sizeof(uint64_t));
 
+      RF_Serial.print ("$REF,");
+      RF_Serial.print (id);
+      RF_Serial.print (",");
+      RF_Serial.print (start);
+      RF_Serial.print (",");
+      RF_Serial.print (ref);
+      RF_Serial.println ("*NN");
+
+      /*
       sprintf (rf->buf, "$REF,%lu,%lu,%llu*", id, start, ref);
       APPEND_CSUM (rf->buf);
       RF_Serial.println (rf->buf);
+      */
 
       start++;
       length--;
@@ -583,7 +615,9 @@ namespace Buoy {
     /* Open data file, otherwise assume it is previously open */
     if (send_d == NULL) {
 
-      sprintf (buf, "%lu.DAT", id);
+      int p = itoa (id, 10, buf);
+      strcpy (&(buf[p]), ".DAT");
+      //sprintf (buf, "%lu.DAT", id);
       send_d = new SdFile ();
       if (!send_d->open (root, buf, O_READ)) {
         rf->send_error (RF::E_NOSUCHDAT);
@@ -630,9 +664,19 @@ namespace Buoy {
       send_d->seekCur (SD_REFERENCE_PADN * SAMPLE_LENGTH); // seek to first sample
     }
 
+    RF_Serial.print ("$AD,D");
+    RF_Serial.print (length);
+    RF_Serial.print (",");
+    RF_Serial.print (ref);
+    RF_Serial.print (",");
+    RF_Serial.print (refstat);
+    RF_Serial.println ("*NN");
+
+    /*
     sprintf (buf, "$AD,D,%lu,%llu,%lu*", length, ref, refstat);
     APPEND_CSUM (buf);
     RF_Serial.println (buf);
+    */
 
     delayMicroseconds (100);
 
@@ -662,9 +706,14 @@ namespace Buoy {
     }
 
     /* Send end of data with Checksum */
+    RF_Serial.print ("$AD,DE,");
+    RF_Serial.print (csum, HEX);
+    RF_Serial.println ("*NN");
+    /*
     sprintf (buf, "$AD,DE," F_CSUM "*", csum);
     APPEND_CSUM (buf);
     RF_Serial.println (buf);
+    */
     delayMicroseconds (100);
 
     /*
@@ -683,6 +732,7 @@ namespace Buoy {
   }
 
   void Store::send_lastid () {
+    /*
     if (!SD_AVAILABLE) {
       rf->send_error (RF::E_SDUNAVAILABLE);
       return;
@@ -691,6 +741,7 @@ namespace Buoy {
     sprintf (rf->buf, "$LID,%lu*", current_index.id);
     APPEND_CSUM (rf->buf);
     RF_Serial.println (rf->buf);
+    */
   }
 }
 

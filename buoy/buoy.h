@@ -17,6 +17,8 @@
 
 # ifndef ONLY_SPEC
 
+# include <stdint.h>
+
 # include "wirish.h"
 # include "types.h"
 
@@ -37,15 +39,20 @@ namespace Buoy {
 
       BuoyMaster ();
       void main ();
-      void send_greeting ();
+      /*void send_greeting ();*/
+
+
 
     private:
       void setup ();
   };
 
+  int itoa (uint32_t, uint8_t, char *);
+
   /* Globally available instance of BuoyMaster */
   extern BuoyMaster *bu;
 }
+
 
 # endif
 

@@ -11,6 +11,7 @@
 # ifndef ONLY_SPEC
 
 # include <stdint.h>
+# include <limits.h>
 # include "types.h"
 
 namespace Buoy {
@@ -149,8 +150,6 @@ namespace Buoy {
 
       /* Maple Native Beta Crystal: 535-9721-1-ND from DigiKey */
 # define TIMING_PPM  10
-
-# define ULONG_MAX ((2^32) - 1)
 
 /* Overflow handling, the math.. {{{
  *

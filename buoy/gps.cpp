@@ -44,7 +44,9 @@ namespace Buoy {
     GPS_Serial.begin (GPS_BAUDRATE);
 
 
-    rf->send_debug ("[GPS] Waiting for first (un-reliable) reference..");
+# if DIRECT_SERIAL
+    SerialUSB.println ("[GPS] Waiting for first (un-reliable) reference..");
+# endif
     uint8_t n = 0;
     while (lastsecond == 0) {
       loop ();
@@ -52,7 +54,9 @@ namespace Buoy {
 
       /* Break after 100 secs */
       if (n > 1000) {
-        rf->send_debug ("[GPS] [Error] No initial reference received for 100 sec.");
+# if DIRECT_SERIAL
+        SerialUSB.println ("[GPS] [Error] No initial reference received for 100 sec.");
+# endif
         break;
       }
       n++;

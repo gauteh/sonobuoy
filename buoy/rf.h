@@ -27,11 +27,15 @@ namespace Buoy {
  * will overflow if message is bigger than (RF_BUFLEN - 6 - 3)
  */
 
+# define rf_send_debug_f(args...)
+
+/*
 # define rf_send_debug_f(args...) \
  { uint n = sprintf(((RF*)rf)->buf, args); \
    if (n > RF_BUFLEN) ((RF*)rf)->send_debug ("[RF] [Error] DEBUG message to big. MEMORY possibly corrupted."); \
    else ((RF*)rf)->send_debug (((RF*)rf)->buf); \
    }
+*/
 
 /* Protocol
  *
