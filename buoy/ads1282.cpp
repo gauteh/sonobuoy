@@ -292,6 +292,7 @@ namespace Buoy {
     // }}}
   }
 
+# if 0
   void ADS1282::reset_spi () {
     /* Reset SPI interface: Hold SCLK low for 64 nDRDY cycles  {{{*/
 # if DIRECT_SERIAL
@@ -308,6 +309,7 @@ namespace Buoy {
 
     // }}}
   }
+# endif
 
   void ADS1282::reset () {
     // Reset ADS1282 over I2C / U7 {{{

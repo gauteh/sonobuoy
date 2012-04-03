@@ -241,7 +241,7 @@ namespace Buoy {
       void setup (BuoyMaster *);
       void configure ();
       void reset ();
-      void reset_spi ();
+      //void reset_spi ();
       void read_pca9535 (PCA9535REGISTER);
 
       void send_command (COMMAND cmd, uint8_t start = 0, uint8_t n = 0);
@@ -257,7 +257,7 @@ namespace Buoy {
       static void drdy ();
 
       void    shift_out (uint8_t v, bool delay = true);
-      uint8_t shift_in  ();
+      //uint8_t shift_in  ();
       void    shift_in_n (uint8_t *, int);
 
       void error ();
