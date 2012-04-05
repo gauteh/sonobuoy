@@ -87,8 +87,6 @@ namespace Buoy {
       open_index ();
       open_data ();
 
-      SerialUSB.println (sd_data->curPosition ());
-
       //open_next_log ();
 
     } else {

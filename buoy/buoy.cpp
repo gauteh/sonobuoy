@@ -71,7 +71,7 @@ namespace Buoy {
     unsigned long i = 0;
 
     if (n == 0) {
-      buf[i++] = 0;
+      buf[i++] = '0';
     }
 
     while (n > 0) {
@@ -81,7 +81,18 @@ namespace Buoy {
       i++;
     }
 
-    buf[i] = 0;
+    /* swap */
+    i--;
+    char c;
+    while ( n < (i/2) ) {
+      c = buf[i-n];
+      buf[i-n] = buf[n];
+      buf[n] = c;
+
+      n++;
+    }
+
+    buf[++i] = 0;
     return i;
   }
 }
