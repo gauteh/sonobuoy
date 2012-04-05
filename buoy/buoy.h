@@ -23,7 +23,7 @@
 # include "types.h"
 
 /* Define to have debug messages sent to USB serial */
-# define DIRECT_SERIAL 0
+# define DIRECT_SERIAL 1
 
 /* Helpers to stringify defines */
 # define STRINGIFY_I(s) #s
@@ -48,8 +48,6 @@ namespace Buoy {
   };
 
   int itoa (uint32_t, uint8_t, char *);
-  bool strcmp (const char *a, const char *b);
-  void strcpy (char *dst, const char *src);
 
   /* Globally available instance of BuoyMaster */
   extern BuoyMaster *bu;

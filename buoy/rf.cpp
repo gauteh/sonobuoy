@@ -6,6 +6,7 @@
  */
 
 # include <stdlib.h>
+# include <string.h>
 # include "wirish.h"
 
 # include "buoy.h"
@@ -395,7 +396,7 @@ cmderror:
     byte csum = 0;
     buf++; // skip $
 
-    while (*buf != '*') {
+    while (*buf != '*' && *buf != 0) {
       csum = csum ^ ((byte)*buf);
       buf++;
     }
@@ -410,7 +411,7 @@ cmderror:
      */
     uint32_t tsum = 0;
     buf++; // skip $
-    while (*buf != '*') {
+    while (*buf != '*' && *buf != 0) {
       tsum = tsum ^ (uint8_t)*buf;
       buf++;
     }

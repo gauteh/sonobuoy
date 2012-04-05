@@ -5,6 +5,8 @@
  *
  */
 
+# include <string.h>
+
 # include "wirish.h"
 # include "HardwareSPI.h"
 
@@ -18,6 +20,9 @@
 namespace Buoy {
   Store::Store () {
     logf_id = 0;
+    card    = NULL;
+    volume  = NULL;
+    root    = NULL;
     sd_data = NULL;
   }
 
@@ -81,6 +86,8 @@ namespace Buoy {
 
       open_index ();
       open_data ();
+
+      SerialUSB.println (sd_data->curPosition ());
 
       //open_next_log ();
 
@@ -298,14 +305,17 @@ namespace Buoy {
     uint32_t s =  lastbatch * BATCH_LENGTH;
 
     /* Check if we have room for samples in store */
+    /*
     if (current_index.samples > (MAX_SAMPLES_PER_FILE - BATCH_LENGTH))
     {
       roll_data_file ();
     }
+    */
 
     /* Check if we have room in size */
     if (sd_data->curPosition () > (SD_DATA_FILE_SIZE - (BATCH_LENGTH * (SAMPLE_LENGTH))))
     {
+      SerialUSB.println ("[SD] Rolling because of SD_DATA_FILE_SIZE.");
       roll_data_file ();
     }
 
@@ -341,7 +351,7 @@ namespace Buoy {
 
     if (lastbatch != ad->batch) {
 # if DIRECT_SERIAL
-      SerialUSB.println ("[SD] [Error] Did not finish writing batch before it was swapped.");
+      SerialUSB.println ("[SD] [Error] Out of sync with AD, might not finish writing batch before it is swapped.");
 # endif
     }
   } // }}}
@@ -353,8 +363,12 @@ namespace Buoy {
 
     char fname[13];
     int p = itoa (current_index.id, 10, fname);
+    SerialUSB.println (fname);
     strcpy (&(fname[p]), ".DAT");
     //sprintf (fname, "%lu.DAT", current_index.id);
+
+    SerialUSB.print ("[SD] Opening: ");
+    SerialUSB.println (fname);
 
     SD_AVAILABLE &= sd_data->open (root, fname, O_CREAT | O_WRITE | O_TRUNC);
     SD_AVAILABLE &= (card->errorCode () == 0);
@@ -364,16 +378,6 @@ namespace Buoy {
   {
     if (!SD_AVAILABLE) {
       return;
-    }
-
-    /* Check if we have exceeded MAX_REFERENCES */
-    if (current_index.nrefs >= (MAX_REFERENCES - 1)) {
-      roll_data_file ();
-    }
-
-    /* Check if there is more space in data file */
-    if (sd_data->curPosition () > (SD_DATA_FILE_SIZE - SD_REFERENCE_LENGTH)) {
-      roll_data_file ();
     }
 
     /* Update index */
@@ -410,6 +414,7 @@ namespace Buoy {
       spi->end ();
 
       /* Clean up stale file references */
+      SerialUSB.println ("[SD] Cleaning up..");
       if (card != NULL) {
         delete card;
         card = NULL;
@@ -445,6 +450,7 @@ namespace Buoy {
       }
 
       /* Reinitiate SD card */
+      SerialUSB.println ("[SD] Re-init..");
       init ();
 
       lastsd = millis ();

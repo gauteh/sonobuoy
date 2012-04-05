@@ -8,6 +8,7 @@
 
 # include <stdint.h>
 # include <stdlib.h>
+# include <string.h>
 # include "buoy.h"
 
 # include "gps.h"

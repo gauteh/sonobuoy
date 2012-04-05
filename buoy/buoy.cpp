@@ -53,9 +53,7 @@ namespace Buoy {
     ad->setup (this);
     store->setup (this);
 
-# if DIRECT_SERIAL
     SerialUSB.println ("[Buoy] Initiating continuous transfer and write.");
-# endif
 
     ad->start_continuous_read ();
     store->start_continuous_write ();
@@ -73,36 +71,18 @@ namespace Buoy {
     unsigned long i = 0;
 
     if (n == 0) {
-      buf[i++] = '0';
+      buf[i++] = 0;
     }
 
     while (n > 0) {
-      buf[i++] = (n % base);
+      buf[i] = (n % base);
       buf[i]  += (buf[i] < 10 ? '0' : 'A');
       n /= base;
+      i++;
     }
 
     buf[i] = 0;
     return i;
-  }
-
-  /* un-safe strcmp */
-  bool strcmp (const char *a, const char *b) {
-    while (*a != 0 && *b != 0) {
-      if (*a != *b) return false;
-      a++;
-      b++;
-    }
-    return true;
-  }
-
-  /* un-safe strcpy */
-  void strcpy (char *dst, const char *src) {
-    while (*src != 0) {
-      *dst = *src;
-      dst++;
-      src++;
-    }
   }
 }
 

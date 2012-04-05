@@ -81,13 +81,16 @@ namespace Buoy {
 # define SAMPLE_LENGTH 4u
 
 /* Maximum number of timestamp, sample pairs for each datafile */
+/*
 # define MINUTES_PER_DATAFILE 5uL
 # define MAX_SAMPLES_PER_FILE (FREQUENCY * 60uL * MINUTES_PER_DATAFILE)
 # define MAX_REFERENCES (MAX_SAMPLES_PER_FILE / BATCH_LENGTH)
 
-
 # define _SD_DATA_FILE_SIZE (MAX_SAMPLES_PER_FILE * (SAMPLE_LENGTH) + MAX_REFERENCES * 50uL)
 # define SD_DATA_FILE_SIZE (_SD_DATA_FILE_SIZE + (_SD_DATA_FILE_SIZE % 512uL))
+*/
+# define SD_DATA_FILE_SIZE (5 * 1024 * 1024)
+# define MAX_REFERENCES (SD_DATA_FILE_SIZE / BATCH_LENGTH)
 
 /* Data file format {{{
  *
