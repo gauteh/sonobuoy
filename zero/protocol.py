@@ -85,7 +85,9 @@ class Protocol:
 
   def a_parse (self, buf):
     # Test checksum
-    if (not test_checksum (buf)):
+    if (buf[-2:] == 'NN'):
+      self.logger.debug ("[Protocol] Checksum not provided on received message.")
+    elif (not test_checksum (buf)):
       self.logger.info ("[Protocol] Message discarded, checksum failed.")
       self.logger.info ("[Protocol] Discarded: " + buf)
       return
