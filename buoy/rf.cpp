@@ -244,8 +244,8 @@ namespace Buoy {
                 RF_Serial.print (ad->batchfilltime);
                 RF_Serial.print (",");
                 RF_Serial.print (ad->value);
-                RF_Serial.print (",");
-                RF_Serial.print (ad->reg.raw[1]);
+                RF_Serial.print (",0");
+                //RF_Serial.print (ad->reg.raw[1]);
                 RF_Serial.println (",*NN");
 
                 /*

@@ -22,6 +22,7 @@ namespace Buoy {
     continuous_read = false;
     run = 0;
 
+# if 0
     state.ports0 = 0;
     state.ports1 = 0;
     state.polarity0 = 0;
@@ -32,6 +33,7 @@ namespace Buoy {
     state.pdwn  = false;
 
     for (int i = 0; i < 11; i++) reg.raw[i] = 0;
+# endif
 
     batch       = 0;
     value       = 0;
@@ -133,8 +135,8 @@ namespace Buoy {
     if (n != SUCCESS) { error (); return; }
 
     // Read configuration
-    read_pca9535 (CONTROL0);
-    read_pca9535 (POLARITY0);
+    // read_pca9535 (CONTROL0);
+    // read_pca9535 (POLARITY0);
 
     /* Set up outputs: (defined in header file)
      * - SYNC:   HIGH  (active low)
@@ -157,7 +159,7 @@ namespace Buoy {
     n = Wire.endTransmission ();
     if (n != SUCCESS) { error (); return; }
 
-    read_pca9535 (OUTPUT0);
+    // read_pca9535 (OUTPUT0);
     delay (100); // Allow EVM and AD to power up..
 
     reset ();
@@ -172,10 +174,10 @@ namespace Buoy {
     send_command (SDATAC);
     delay (100);
 
-    read_registers ();
+    //read_registers ();
     configure_registers (); // resets ADC, 63 data cycles are lost..
     delay (100);
-    read_registers ();
+    //read_registers ();
     delay (400);
 
 # if DIRECT_SERIAL
@@ -187,7 +189,6 @@ namespace Buoy {
   /* Continuous read and write {{{ */
   void ADS1282::start_continuous_read () {
     continuous_read = true;
-    rf->send_debug ("[AD] Sync and start read data continuous..");
 # if DIRECT_SERIAL
     SerialUSB.println ("[AD] Sync and start read data continuous..");
 # endif
@@ -199,7 +200,6 @@ namespace Buoy {
   }
 
   void ADS1282::stop_continuous_read () {
-    rf->send_debug ("[AD] Reset by command and stop read data continuous..");
 # if DIRECT_SERIAL
     SerialUSB.println ("[AD] Reset by command and stop read data continuous..");
 # endif
@@ -213,6 +213,7 @@ namespace Buoy {
     continuous_read = false;
   } // }}}
 
+# if 0
   void ADS1282::read_pca9535 (PCA9535REGISTER reg) {
     /* Read registers of PCA9535RGE {{{
      *
@@ -287,6 +288,7 @@ namespace Buoy {
     if (n != SUCCESS) { error (); return; }
     // }}}
   }
+# endif
 
 # if 0
   void ADS1282::reset_spi () {
@@ -332,7 +334,7 @@ namespace Buoy {
     n = Wire.endTransmission ();
     if (n != SUCCESS) { error (); return; }
 
-    read_pca9535 (OUTPUT0);
+    //read_pca9535 (OUTPUT0);
     digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
     delay (1000);
     digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
@@ -344,7 +346,7 @@ namespace Buoy {
     n = Wire.endTransmission ();
     if (n != SUCCESS) { error (); return; }
 
-    read_pca9535 (OUTPUT0);
+    //read_pca9535 (OUTPUT0);
     digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
     delay (100);
 
@@ -427,6 +429,7 @@ namespace Buoy {
     // }}}
   }
 
+# if 0
   void ADS1282::read_registers () {
     /* Read registers of ADS1282, SDATAC must allready have been issued {{{ */
 # if DIRECT_SERIAL
@@ -503,6 +506,7 @@ namespace Buoy {
     }
     // }}}
   }
+# endif
 
   void ADS1282::configure_registers () {
     /* Configure ADS1282 registers {{{ */
