@@ -38,44 +38,41 @@ namespace Buoy {
         UNSPECIFIED = 0,
         UNKNOWN,
         GPRMC,
+        /*
         GPGGA,
         GPGLL,
         GPGSA,
         GPGSV,
         GPVTG,
+        */
       } GPS_TELEGRAM;
 
-      typedef struct _GPS_DATA {
-        GPS_TELEGRAM lasttype;
-        char    lasttelegram[TELEGRAM_LEN];
-        int     received; /* Received telegrams */
-        bool    valid;
-        int     fixtype;
+      /* Latest received data */
+      uint16_t  received;
+      GPS_TELEGRAM lasttype;
+      uint32_t  time;
+      uint8_t   hour;
+      uint8_t   minute;
+      uint8_t   second;
+      uint8_t   seconds_part;
+      uint8_t   day;
+      uint8_t   month;
+      uint16_t  year;
+      bool      valid;
+      char      latitude[12];
+      bool      north;
+      char      longitude[12];
+      bool      east;
+      char      speedoverground[6];
+      char      courseoverground[6]; // Ref. to True north
 
-        int     satellites;
-        int     satellites_used[12];
-        uint8_t    mode1;
-        uint8_t    mode2;
-
-        char    latitude[12];
-        bool    north;    /* true = Latitude is north aligned, false = south */
-        char    longitude[12];
-        bool    east;     /* true = Longitude is east aligned, false = south */
-
-        uint32_t   time;
-        int     hour;
-        int     minute;
-        int     second;
-        int     seconds_part;
-        int     day;
-        int     month;
-        int     year;
-
-        char    speedoverground[6];
-        char    courseoverground[6]; /* True north */
-      } GPS_DATA; // }}}
-
-      GPS_DATA gps_data;
+      /*
+      uint8_t   fixtype;
+      uint8_t   satellites;
+      uint8_t   satellites_used[12];
+      uint8_t   mode1;
+      uint8_t   mode2;
+      */
 
       GPS ();
       void        setup (BuoyMaster *);

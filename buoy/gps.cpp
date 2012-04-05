@@ -30,6 +30,24 @@ namespace Buoy {
 
     lastmicros      = micros ();
     lastsync        = 0;
+
+    received  = 0;
+    lasttype  = UNSPECIFIED;
+    time      = 0;
+    hour      = 0;
+    minute    = 0;
+    second    = 0;
+    seconds_part = 0;
+    day       = 0;
+    month     = 0;
+    year      = 0;
+    valid     = false;
+    *latitude = 0;
+    north     = false;
+    *longitude = 0;
+    east      = false;
+    *speedoverground = 0;
+    *courseoverground = 0;
   }
 
   void GPS::setup (BuoyMaster *b) {
@@ -39,10 +57,7 @@ namespace Buoy {
     gps_buf[0] = 0;
     gps_buf_pos = 0;
 
-    memset (&gps_data, 0, sizeof(gps_data));
-
     GPS_Serial.begin (GPS_BAUDRATE);
-
 
 # if DIRECT_SERIAL
     SerialUSB.println ("[GPS] Waiting for first (un-reliable) reference..");
@@ -135,33 +150,33 @@ namespace Buoy {
 # define SECONDS_PER_DAY 86400L
 # define LEAP_YEAR(x) !!(!((1970 + x) % 4) && ( ((1970 + x) % 100) || !((1970 + x) % 400) ))
 
-    uint32_t year = (2000 + gps_data.year) - 1970; // Offset 1970 (unix epoch)
+    uint32_t _year = (2000 + year) - 1970; // Offset 1970 (unix epoch)
 
-    uint64_t newsecond = year * 365 * SECONDS_PER_DAY;
+    uint64_t newsecond = _year * 365 * SECONDS_PER_DAY;
 
 # define LEAP_YEARS_BEFORE_1970 ((1970 / 4) - (1970 / 100) + (1970 / 400))
     /* Add a day of seconds for each leap year except this */
-    newsecond += (( (1970 + (year-1)) /   4 )
-               - (  (1970 + (year-1)) / 100 )
-               + (  (1970 + (year-1)) / 400 )
+    newsecond += (( (1970 + (_year-1)) /   4 )
+               - (  (1970 + (_year-1)) / 100 )
+               + (  (1970 + (_year-1)) / 400 )
                - LEAP_YEARS_BEFORE_1970     ) * SECONDS_PER_DAY;
 
     const int monthdays[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-    for (int i = 1; i < gps_data.month; i++) {
-      if ((i == 2) && LEAP_YEAR(year))
+    for (int i = 1; i < month; i++) {
+      if ((i == 2) && LEAP_YEAR(_year))
         newsecond += SECONDS_PER_DAY * 29;
       else
         newsecond += SECONDS_PER_DAY * monthdays[i - 1];
     }
 
-    newsecond += SECONDS_PER_DAY * (gps_data.day - 1);
-    newsecond += (uint32_t)gps_data.hour   * 60 * 60;
-    newsecond += (uint32_t)gps_data.minute * 60;
-    newsecond += (uint32_t)gps_data.second;
+    newsecond += SECONDS_PER_DAY * (day - 1);
+    newsecond += (uint32_t)hour   * 60 * 60;
+    newsecond += (uint32_t)minute * 60;
+    newsecond += (uint32_t)second;
 
-    gps_data.time  = gps_data.hour    * 1e4;
-    gps_data.time += gps_data.minute  * 1e2;
-    gps_data.time += gps_data.second;
+    time  = hour    * 1e4;
+    time += minute  * 1e2;
+    time += second;
 
     /* Make sure lastsync is not changed while working */
     disable_sync ();
@@ -174,7 +189,7 @@ namespace Buoy {
       lastsecond      = newsecond;
     }
 
-    HAS_TIME = gps_data.valid;
+    HAS_TIME = valid;
 
     enable_sync ();
     // }}}
@@ -250,15 +265,16 @@ namespace Buoy {
      *
      */
 
-    gps_data.received++;
+    received++;
 
     GPS_TELEGRAM type = UNSPECIFIED;
     int  tokeni = 0;
     int  len = gps_buf_pos; // Excluding NULL terminator
 
+    /*
     for (int i = 0; i < (len+1); i++)
       gps_data.lasttelegram[i] = gps_buf[i];
-
+    */
 
     /* Test checksum before parsing */
     if (!rf->test_checksum (gps_buf)) return;
@@ -310,7 +326,7 @@ namespace Buoy {
             type = UNKNOWN;
             return;
           }
-          gps_data.lasttype = type;
+          lasttype = type;
 
         } else {
           switch (type)
@@ -323,60 +339,60 @@ namespace Buoy {
                   {
                     char * s = token;
                     char * n = token + 2;
-                    gps_data.hour   = strtol (s, &n, 10);
+                    hour   = strtol (s, &n, 10);
                     s = n; n = s + 2;
-                    gps_data.minute = strtol (s, &n, 10);
+                    minute = strtol (s, &n, 10);
                     s = n; n = s + 2;
-                    gps_data.second = strtol (s, &n, 10);
+                    second = strtol (s, &n, 10);
                     n++; // skip delimiter
                     s = n;
-                    gps_data.seconds_part = strtol (s, NULL, 10);
+                    seconds_part = strtol (s, NULL, 10);
 
                     // Update seconds
-                    doseconds = (gps_data.day  > 0);
+                    doseconds = (day  > 0);
                   }
                   break;
 
                 case 2:
-                  gps_data.valid = (token[0] == 'A');
+                  valid = (token[0] == 'A');
                   break;
 
                 case 3:
-                  strcpy (gps_data.latitude, token);
+                  strcpy (latitude, token);
                   break;
 
                 case 4:
-                  gps_data.north =  (token[0] == 'N');
+                  north =  (token[0] == 'N');
                   break;
 
                 case 5:
-                  strcpy (gps_data.longitude, token);
+                  strcpy (longitude, token);
                   break;
 
                 case 6:
-                  gps_data.east = (token[0] == 'E');
+                  east = (token[0] == 'E');
                   break;
 
                 case 7:
-                  strcpy (gps_data.speedoverground, token);
+                  strcpy (speedoverground, token);
                   break;
 
                 case 8:
-                  strcpy (gps_data.courseoverground, token);
+                  strcpy (courseoverground, token);
                   break;
 
                 case 9:
                   {
                     char * s = token;
                     char * n = token + 2;
-                    gps_data.day   = strtol (s, &n, 10);
+                    day   = strtol (s, &n, 10);
                     s = n; n = s + 2;
-                    gps_data.month = strtol (s, &n, 10);
+                    month = strtol (s, &n, 10);
                     s = n; n = s + 2;
-                    gps_data.year = strtol (s, &n, 10);
+                    year = strtol (s, &n, 10);
 
                     // Update if we got time
-                    doseconds = (gps_data.day > 0);
+                    doseconds = (day > 0);
                   }
                   break;
 
