@@ -37,7 +37,6 @@ namespace Buoy {
 
     batch       = 0;
     value       = 0;
-    memset ((void*) values, 0, QUEUE_LENGTH * sizeof (uint32_t));
     position      = 0;
     totalsamples  = 0;
     batchstart    = millis ();

@@ -85,6 +85,25 @@ namespace Buoy {
     buf[i] = 0;
     return i;
   }
+
+  /* un-safe strcmp */
+  bool strcmp (const char *a, const char *b) {
+    while (*a != 0 && *b != 0) {
+      if (*a != *b) return false;
+      a++;
+      b++;
+    }
+    return true;
+  }
+
+  /* un-safe strcpy */
+  void strcpy (char *dst, const char *src) {
+    while (*src != 0) {
+      *dst = *src;
+      dst++;
+      src++;
+    }
+  }
 }
 
 /* vim: set filetype=arduino :  */

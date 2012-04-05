@@ -48,6 +48,8 @@ namespace Buoy {
   };
 
   int itoa (uint32_t, uint8_t, char *);
+  bool strcmp (const char *a, const char *b);
+  void strcpy (char *dst, const char *src);
 
   /* Globally available instance of BuoyMaster */
   extern BuoyMaster *bu;

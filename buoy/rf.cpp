@@ -373,33 +373,32 @@ cmderror:
      *
      */
 
+    /*
     byte cs = gen_checksum ("DBG,", false);
     cs ^= gen_checksum (msg, false);
+    */
 
     RF_Serial.print   ("$DBG,");
     RF_Serial.print   (msg);
-    RF_Serial.print   ("*");
+    RF_Serial.print   ("*NN");
+    /*
     RF_Serial.print   (cs>>4, HEX);
     RF_Serial.println (cs&0xf, HEX);
+    */
   } // }}}
 
   /* Checksum {{{ */
-  byte RF::gen_checksum (const char *buf, bool skip)
+  byte RF::gen_checksum (const char *buf)
   {
-  /* Generate checksum for NULL terminated string
-   * (skipping first and last char if skip (default)) */
+  /* Generate checksum for NULL terminated string */
 
     byte csum = 0;
-    int len = strlen(buf);
+    buf++; // skip $
 
-    int i = 0;
-    if (skip) {
-      i = 1;
-      len--;
+    while (*buf != '*') {
+      csum = csum ^ ((byte)*buf);
+      buf++;
     }
-
-    for (; i < len; i++)
-      csum = csum ^ ((byte)buf[i]);
 
     return csum;
   }
@@ -409,15 +408,16 @@ cmderror:
     /* Input: String including $ and * with HEX decimal checksum
      *        to test. NULL terminated.
      */
-    int len = strlen(buf);
+    uint32_t tsum = 0;
+    buf++; // skip $
+    while (*buf != '*') {
+      tsum = tsum ^ (uint8_t)*buf;
+      buf++;
+    }
+    buf++;
 
     uint16_t csum = 0;
-    //if (sscanf (&(buf[len-2]), F_CSUM, &csum) != 1) return false;
-    csum = strtoul (&(buf[len-2]), NULL, 16);
-
-    uint32_t tsum = 0;
-    for (int i = 1; i < (len - 3); i++)
-      tsum = tsum ^ (uint8_t)buf[i];
+    csum = strtoul (buf, NULL, 16); // buf now points to first digit of CS
 
     return tsum == csum;
   } // }}}

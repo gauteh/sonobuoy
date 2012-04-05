@@ -8,7 +8,6 @@
 # pragma once
 
 # include <stdint.h>
-# include <string.h>
 # include "types.h"
 
 namespace Buoy {
@@ -112,7 +111,7 @@ namespace Buoy {
       void send_debug (const char *);
       void send_error (RF_ERROR code);
 
-      static byte gen_checksum (const char *, bool skip = true);
+      static byte gen_checksum (const char *);
       static bool test_checksum (const char *);
       static void append_checksum (char *);
   };
