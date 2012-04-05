@@ -12,6 +12,7 @@ from gps import *
 
 class Buoy:
   zero = None
+  protocol = None
 
   gps  = None
   ad   = None
@@ -35,6 +36,7 @@ class Buoy:
 
   def __init__ (self, z, id, n):
     self.zero   = z
+    self.protocol = z.protocol
     self.id     = id
     self.name   = n
     self.logdir = os.path.join (self.BASEDIR, self.name)
@@ -182,4 +184,12 @@ class Buoy:
       time.sleep (0.1)
 
     self.logger.info ("[" + self.name + "] Stopped.")
+
+  # Protocol
+  def activate (self):
+    self.protocol.send ("A")
+
+  def getstatus (self):
+    self.activate ()
+
 

@@ -361,7 +361,6 @@ namespace Buoy {
 
     char fname[13];
     int p = itoa (current_index.id, 10, fname);
-    SerialUSB.println (fname);
     strcpy (&(fname[p]), ".DAT");
     //sprintf (fname, "%lu.DAT", current_index.id);
 
@@ -737,16 +736,14 @@ namespace Buoy {
   }
 
   void Store::send_lastid () {
-    /*
     if (!SD_AVAILABLE) {
       rf->send_error (RF::E_SDUNAVAILABLE);
       return;
     }
 
-    sprintf (rf->buf, "$LID,%lu*", current_index.id);
-    APPEND_CSUM (rf->buf);
-    RF_Serial.println (rf->buf);
-    */
+    RF_Serial.print ("$LID,");
+    RF_Serial.print (current_index.id);
+    RF_Serial.println ("*NN");
   }
 }
 

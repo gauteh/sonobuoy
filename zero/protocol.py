@@ -31,6 +31,12 @@ class Protocol:
   waitforreceipt  = False # Have just got a AD data batch and is waiting for
                           # a DE receipt message
 
+  def send (self, msg):
+    # Encapsulate and add checksum
+    msg = '$' + msg + '*' + gen_checksum (msg)
+    self.zero.send (msg)
+    self.logger.debug ("[Protocol] Sending: " + msg)
+
   def handle (self, buf):
     i = 0
     l = len (buf)

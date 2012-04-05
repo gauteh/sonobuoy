@@ -61,6 +61,9 @@ class Zero:
     logging.config.fileConfig ('zero.logging.conf')
     self.logger = logging.getLogger ('root')
 
+    # Protocol handler; receives data from ZeroNode
+    self.protocol = Protocol (self)
+
     self.logger.info ("==================================================")
     self.logger.info ("[Zero] Starting Zero..")
     self.logger.info ("[Zero] Logging to console and to file log/zero.log.")
@@ -75,9 +78,6 @@ class Zero:
     self.buoys.append (Buoy(self, 2, 'Two'))
     self.buoys.append (Buoy(self, 3, 'Three'))
     self.set_current (self.buoys[0])
-
-    # Protocol handler; receives data from ZeroNode
-    self.protocol = Protocol (self)
 
     # Start UI manager
     self.uimanagerthread = Thread (target = self.run_ui_service, name = 'ZeroUIService')
@@ -125,6 +125,15 @@ class Zero:
     for i in self.buoys:
       yield i
 
+  def send (self, msg):
+    try:
+      self.ser.write (msg)
+    except serial.SerialException as e:
+      self.logger.exception ("[Zero] Exception with serial link, reconnecting..: " + str(e))
+      self.closeserial ()
+      self.openserial ()
+
+
   def main (self):
     try:
       self.logger.info ("[Zero] Entering main loop..")
@@ -133,7 +142,7 @@ class Zero:
       while self.go:
         try:
           if not self.ser == None:
-            r = self.ser.read (128)
+            r = self.ser.read (5)
             if self.current is not None:
               self.protocol.handle (r)
 

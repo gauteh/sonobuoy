@@ -10,6 +10,9 @@ class ZeroCliService:
   def __init__(self):
     pass
 
+  def getstatus (self):
+    self.zero.current.getstatus ()
+
   def rollfile (self):
     for b in self.zero.buoys:
       b.rollfile ()

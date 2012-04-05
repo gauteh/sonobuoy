@@ -1,3 +1,14 @@
+def gen_checksum (s):
+  sum = 0
+  i = 0
+  l = len(s)
+
+  while (i < l):
+    sum = sum ^ ord(s[i])
+    i += 1
+
+  return hex2(sum)
+
 def test_checksum (s):
   csum = s[-2:]
   i = 1
