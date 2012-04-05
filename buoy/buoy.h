@@ -27,7 +27,7 @@
 
 /* Helpers to stringify defines */
 # define STRINGIFY_I(s) #s
-# define STRINGIFY(s) STRINGIFY_I(s)
+# define STRINGIFY(s)   STRINGIFY_I(s)
 
 namespace Buoy {
   class BuoyMaster {

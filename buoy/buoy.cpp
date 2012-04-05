@@ -39,7 +39,7 @@ namespace Buoy {
 
   void BuoyMaster::setup () {
     /* Configure LED */
-    pinMode(BOARD_LED_PIN, OUTPUT);
+    pinMode (BOARD_LED_PIN, OUTPUT);
     digitalWrite (BOARD_LED_PIN, LOW);
 
     /* Set up devices */
@@ -68,7 +68,7 @@ namespace Buoy {
   }
   */
 
-  int itoa (uint32_t n, uint8_t base, char *buf) 
+  int itoa (uint32_t n, uint8_t base, char *buf)
   {
     unsigned long i = 0;
 
