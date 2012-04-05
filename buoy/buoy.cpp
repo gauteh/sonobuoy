@@ -77,7 +77,8 @@ namespace Buoy {
     }
 
     while (n > 0) {
-      buf[i++] = n % base;
+      buf[i++] = (n % base);
+      buf[i]  += (buf[i] < 10 ? '0' : 'A');
       n /= base;
     }
 

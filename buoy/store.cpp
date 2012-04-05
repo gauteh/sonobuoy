@@ -155,10 +155,9 @@ namespace Buoy {
   }
 # endif // }}}
 
-
-  /* Open next index file */
   void Store::next_index (uint32_t i) // {{{
   {
+    /* Open next index file */
     if (!SD_AVAILABLE) return;
     // i is LASTID or LASTID + 1
 
@@ -264,9 +263,9 @@ namespace Buoy {
     SD_AVAILABLE &= (card->errorCode () == 0);
   } // }}}
 
-  /* Open new index and data file */
   void Store::roll_data_file () // {{{
   {
+    /* Open new index and data file */
     if (!SD_AVAILABLE) return;
 # if DIRECT_SERIAL
     SerialUSB.println ("[SD] Syncing index and data and rolling..");
@@ -289,9 +288,9 @@ namespace Buoy {
     open_data ();
   } // }}}
 
-  /* Write new batch of samples */
   void Store::write_batch () // {{{
   {
+    /* Write new batch of samples */
     if (!SD_AVAILABLE) {
       return;
     }
@@ -347,9 +346,9 @@ namespace Buoy {
     }
   } // }}}
 
-  /* Open data file */
   void Store::open_data () // {{{
   {
+    /* Open data file */
     if (!SD_AVAILABLE) return;
 
     char fname[13];

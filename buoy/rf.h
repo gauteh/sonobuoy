@@ -21,7 +21,7 @@ namespace Buoy {
  * to NULL terminated buffer with string encapsulated in $ and *.
  */
 # define F_CSUM "%02hX"
-# define APPEND_CSUM(buf) sprintf(&buf[strlen(buf)], F_CSUM, RF::gen_checksum(buf))
+//# define APPEND_CSUM(buf) sprintf(&buf[strlen(buf)], F_CSUM, RF::gen_checksum(buf))
 
 /* Macro for sending formatted debug strings, follows format of sprintf
  * will overflow if message is bigger than (RF_BUFLEN - 6 - 3)
@@ -114,6 +114,7 @@ namespace Buoy {
 
       static byte gen_checksum (const char *, bool skip = true);
       static bool test_checksum (const char *);
+      static void append_checksum (char *);
   };
 }
 
