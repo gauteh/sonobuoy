@@ -39,7 +39,7 @@ namespace Buoy {
 
       BuoyMaster ();
       void main ();
-      /*void send_greeting ();*/
+      void send_greeting ();
 
 
 

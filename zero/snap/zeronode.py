@@ -5,24 +5,21 @@ from synapse import *
 
 @setHook (HOOK_STARTUP)
 def startup():
-  # 2 Mbps
+  # 2 Mbps radio rate
   setRadioRate (3)
+  
+  # Full power
+  txPwr (17)
 
-n = 0
-start = 0
+  # Set up UART1
+  initUart (1, 1)
+  flowControl (1, False)
+  crossConnect (DS_UART1, DS_TRANSPARENT)
 
-def dobytes(bytes):
-  global n
-  i = 0
-  n += len(bytes)
-  if (n > 2000): printstatusb ()
+  # Receive instructions from UART1 connected to computer
+  crossConnect (DS_STDIO, DS_UART1)
 
-def printstatusb():
-  global n, now, start
-  now = getMs ()
-
-  s = n / (now - start)
-  print "Speed: " + str(s) + " [KBps]"
-  start = now
-  n = 0
+@setHook (HOOK_STDIN)
+def stdinhnd (buf):
+  pass
 

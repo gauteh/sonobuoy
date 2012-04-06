@@ -127,7 +127,7 @@ class Zero:
 
   def send (self, msg):
     try:
-      self.ser.write (msg)
+      self.ser.write (msg + '\r')
     except serial.SerialException as e:
       self.logger.exception ("[Zero] Exception with serial link, reconnecting..: " + str(e))
       self.closeserial ()
@@ -142,11 +142,11 @@ class Zero:
       while self.go:
         try:
           if not self.ser == None:
-            r = self.ser.read (5)
+            r = self.ser.read (1)
             if self.current is not None:
               self.protocol.handle (r)
 
-          time.sleep (0.01)
+          time.sleep (0.0001)
         except serial.SerialException as e:
           self.logger.exception ("[Zero] Exception with serial link, reconnecting..: " + str(e))
           self.closeserial ()

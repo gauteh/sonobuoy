@@ -35,7 +35,7 @@ namespace Buoy {
 
     RF_Serial.begin (RF_BAUDRATE);
 
-    //b->send_greeting ();
+    b->send_greeting ();
   }
 
   void RF::loop () {

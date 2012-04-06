@@ -60,11 +60,9 @@ namespace Buoy {
   }
 
 
-  /*
   void BuoyMaster::send_greeting () {
     rf->send_debug ("[Buoy] Initializing Gautebuoy [ " BUOY_ID_S ": " BUOY_NAME " ] ( version " VERSION " )");
   }
-  */
 
   int itoa (uint32_t n, uint8_t base, char *buf)
   {
