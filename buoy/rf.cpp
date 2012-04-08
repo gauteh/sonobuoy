@@ -63,7 +63,9 @@ namespace Buoy {
 
     while (ca > 0) {
       char c = (char)RF_Serial.read ();
+# if DIRECT_SERIAL
       SerialUSB.print (c);
+# endif
 
       if (rf_buf_pos >= RF_SERIAL_BUFLEN) {
         state = 0;
@@ -165,8 +167,10 @@ namespace Buoy {
             type = GETBATCH;
           else {
             /* Cancel parsing */
+# if DIRECT_SERIAL
             SerialUSB.print ("Unknown command: ");
             SerialUSB.println (token);
+# endif
             type = UNKNOWN;
             send_error (E_UNKNOWNCOMMAND);
             return;

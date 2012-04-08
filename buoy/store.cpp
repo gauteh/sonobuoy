@@ -689,7 +689,6 @@ namespace Buoy {
     /* Write '$' to signal start of binary data */
     RF_Serial.write ('$');
 
-    //uint32_t lasts = 0;
     uint32_t s;
 
     for (uint32_t i = 0; i < length; i++)
@@ -704,8 +703,6 @@ namespace Buoy {
       csum = csum ^ ((byte*)&s)[2];
       csum = csum ^ ((byte*)&s)[3];
 
-      //lasts = s;
-
       delayMicroseconds (100);
     }
 
@@ -719,20 +716,6 @@ namespace Buoy {
     RF_Serial.println (buf);
     */
     delayMicroseconds (100);
-
-    /*
-    SerialUSB.print ("[RF] Last sample: 0x");
-    SerialUSB.println (lasts, HEX);
-    rf_send_debug_f ("[RF] Last sample: 0x%lX", lasts);
-    */
-
-    lastbatch =  (lastbatch + 1) % BATCHES;
-    if (lastbatch != ad->batch) {
-      //send_debug ("[RF] [Error] Did not finish sending batch before it was swapped.");
-# if DIRECT_SERIAL
-      SerialUSB.println ("[RF] [Error] Did not finish sending batch before it was swapped.");
-# endif
-    }
   }
 
   void Store::send_lastid () {

@@ -11,7 +11,6 @@
 # ifndef ONLY_SPEC
 
 # include <stdint.h>
-# include <limits.h>
 # include "types.h"
 
 namespace Buoy {
