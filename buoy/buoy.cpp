@@ -5,10 +5,10 @@
  *
  */
 
-# include <limits.h> // CHAR_BIT
 # include <stdint.h>
 
 # include "wirish.h"
+
 # include "buoy.h"
 # include "ads1282.h"
 # include "rf.h"
@@ -43,16 +43,17 @@ namespace Buoy {
     digitalWrite (BOARD_LED_PIN, LOW);
 
     /* Set up devices */
-    rf = new RF ();
-    gps = new GPS ();
-    ad = new ADS1282 ();
+    rf    = new RF ();
+    gps   = new GPS ();
+    ad    = new ADS1282 ();
     store = new Store ();
 
-    rf->setup (this);
-    gps->setup (this);
-    ad->setup (this);
-    store->setup (this);
+    rf->setup     (this);
+    gps->setup    (this);
+    ad->setup     (this);
+    store->setup  (this);
 
+    /* Start reading data continuously and writing to SD card */
     SerialUSB.println ("[Buoy] Initiating continuous transfer and write.");
 
     ad->start_continuous_read ();
@@ -61,7 +62,7 @@ namespace Buoy {
 
 
   void BuoyMaster::send_greeting () {
-    rf->send_debug ("[Buoy] Initializing Gautebuoy [ " BUOY_ID_S ": " BUOY_NAME " ] ( version " VERSION " )");
+    rf->send_debug ("[Buoy] Initializing Gautebuoy [ " STRINGIFY(BUOY_ID) ": " BUOY_NAME " ] ( version " VERSION " )");
   }
 
   int itoa (uint32_t n, uint8_t base, char *buf)

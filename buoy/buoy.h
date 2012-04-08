@@ -12,7 +12,6 @@
 
 /* ID for this Buoy */
 # define BUOY_ID    1
-# define BUOY_ID_S  "1"
 # define BUOY_NAME  "One"
 
 # ifndef ONLY_SPEC
@@ -20,12 +19,13 @@
 # include <stdint.h>
 
 # include "wirish.h"
+
 # include "types.h"
 
-/* Define to have debug messages sent to USB serial */
+/* Print debug messages to USB serial */
 # define DIRECT_SERIAL 1
 
-/* Helpers to stringify defines */
+/* Macros for stringify defines */
 # define STRINGIFY_I(s) #s
 # define STRINGIFY(s)   STRINGIFY_I(s)
 
@@ -41,8 +41,6 @@ namespace Buoy {
       void main ();
       void send_greeting ();
 
-
-
     private:
       void setup ();
   };
@@ -52,7 +50,6 @@ namespace Buoy {
   /* Globally available instance of BuoyMaster */
   extern BuoyMaster *bu;
 }
-
 
 # endif
 
