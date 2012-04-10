@@ -5,7 +5,7 @@ from synapse import *
 
 buoyaddress = ''
 
-@setHook (HOOK_STARTUP)
+@setHook(HOOK_STARTUP)
 def startup():
   global buoyaddress
   # 2 Mbps radio rate
@@ -45,59 +45,9 @@ cmd   = ''
 l     = 0
 maxl  = 80
 
-@setHook (HOOK_STDIN)
-def stdinhnd (buf):
-  global cmd, state
-  # Listen for address instructions, otherwise relay instructions to buoy
-  for c in buf:
-    if state == 0:
-      if c == '$':
-        cmd = c
-        l = 1
-        state = 1
 
-      # Inside buoy instruction, relay
-      else:
-        print c
-
-    elif state == 1:
-      if c == 'Z':
-        state = 2
-        cmd = cmd + c
-        l   = l + 1
-
-      # Buoy instruction, relay
-      else:
-        print cmd
-        print c
-        cmd = ''
-        state = 0
-
-    elif state == 2:
-      cmd = cmd + c
-      l   = l + 1
-
-      # end of instruction, parse
-      if c == '*':
-        parse (cmd)
-
-      cmd = ''
-      state = 0
-
-    # Something wrong with state, reset
-    else:
-      cmd   = ''
-      state = 0
-      l     = 0
-
-    # Lost count, reset
-    if l > maxl:
-      state = 0
-      cmd   = ''
-      l     = 0
-
-
-def parse (cmd):
+def parse ():
+  global cmd, l, state, maxl
   l = len (cmd)
   i = 0
 

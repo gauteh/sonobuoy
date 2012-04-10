@@ -55,6 +55,10 @@ class zCLI:
     self.z.getstatus ()
     print "done."
 
+  def portalmode (self):
+    print "Setting zeronode in portal mode and stopping zero.."
+    self.m.portalmode ()
+
   def summary (self):
     print "Summary of known buoys:"
 
@@ -144,6 +148,7 @@ class zCLI:
     print "monitor [buoy name]      Regularily print information about buoy"
     print "rollfile                 Roll data file on all buoys"
     print "getstatus                Request status from current buoy"
+    print "portalmode               Put zeronode in portal mode and exit zero"
     print "stop                     Stop Zero Manager"
 
   def go (self):
@@ -162,6 +167,9 @@ class zCLI:
 
     elif sys.argv[1] == 'getstatus':
       self.getstatus ()
+
+    elif sys.argv[1] == 'portalmode':
+      self.portalmode ()
 
     elif sys.argv[1] == 'show':
       if len(sys.argv) != 3:

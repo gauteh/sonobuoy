@@ -118,6 +118,8 @@ namespace Buoy {
      *
      *
      */
+    SerialUSB.print ("Parsing..:");
+    SerialUSB.println (rf_buf);
 
     RF_TELEGRAM type = UNSPECIFIED;
     int tokeni = 0;
@@ -126,6 +128,8 @@ namespace Buoy {
 
     /* Test checksum before parsing */
     if (!test_checksum (rf_buf)) goto cmderror;
+
+    SerialUSB.println ("Checksum OK");
 
     /* Parse */
     while (i < len)
@@ -147,6 +151,10 @@ namespace Buoy {
       i++; /* Skip delimiter */
 
       token[j] = 0;
+# if DIRECT_SERIAL
+      SerialUSB.print ("Token: ");
+      SerialUSB.println (token);
+# endif
 
       if (i < len) {
         if (tokeni == 0) {
@@ -207,6 +215,7 @@ namespace Buoy {
               case GETSTATUS:
                 // $GPS,S,[lasttype],[telegrams received],[lasttelegram],Lat,Lon,unixtime,time,date,Valid,HAS_TIME,HAS_SYNC,HAS_SYNC_REFERENCE*CS
                 // Valid: Y = Yes, N = No
+                SerialUSB.println ("[RF] Sending status..");
                 RF_Serial.print ("$GPS,S");
                 RF_Serial.print (gps->lasttype);
                 RF_Serial.print (",");
@@ -346,6 +355,10 @@ namespace Buoy {
                  * parsing is cancelled. */
                 return;
             }
+          } else {
+# if DIRECT_SERIAL
+          SerialUSB.println ("[RF] Got command when not active.");
+# endif
           }
         }
       } else {
@@ -356,6 +369,9 @@ namespace Buoy {
 
     return;
 cmderror:
+# if DIRECT_SERIAL
+    SerialUSB.println ("[RF] E_BADCOMMAND");
+# endif
     if (isactive) send_error (E_BADCOMMAND);
     return;
 

@@ -17,8 +17,13 @@ class Buoy:
   gps  = None
   ad   = None
 
+  entry   = None  # Configuration entry
   id      = -1    # Unique ID
   name    = ''    # Unique friendly name
+  address = ''    # Node address
+  address_p = ''  # Synapse format address
+  enabled = False
+
   BASEDIR = 'log'
   logdir  = ''    # Will be BASEDIR/name
   logfile = ''
@@ -34,11 +39,17 @@ class Buoy:
   LOG_ON_RECEIVE = True # write data when batch of samples have been received
   LOG_MAX_FILE_SIZE = 50 * 1024 * 1024 # 50 MB
 
-  def __init__ (self, z, id, n):
+  def __init__ (self, z, b):
+    self.entry  = b
     self.zero   = z
     self.protocol = z.protocol
-    self.id     = id
-    self.name   = n
+    self.id     = b['id']
+    self.name   = b['name']
+    self.address = b['address']
+    self.enabled = b['enabled']
+
+    self.address_p = "\\x" + self.address[:2] + "\\x" + self.address[3:5] + "\\x" + self.address[6:8]
+
     self.logdir = os.path.join (self.BASEDIR, self.name)
 
     self.filelock = threading.Lock ()
@@ -185,11 +196,7 @@ class Buoy:
 
     self.logger.info ("[" + self.name + "] Stopped.")
 
-  # Protocol
-  def activate (self):
-    self.protocol.send ("A")
-
   def getstatus (self):
-    self.activate ()
+    self.protocol.send ("GS")
 
 

@@ -1,15 +1,26 @@
 """
 Gaute Hope <eg@gaute.vetsj.com> (c) 2011-09-09
 
-arduino.py: Interface and protocol to Arduino board
+protocol.py: Interface and protocol to buoys
 
 """
+
+from time import time
 
 from util import *
 
 class Protocol:
   zero = None
   logger = None
+
+  ACTIVE_TIMEOUT = 30
+  STAYACTIVE_TIMEOUT = 20 * 60
+
+  activated   = 0
+  active      = False
+  stayactive  = False
+
+  adressedbuoy = 0     # id of buoy addressed on zeronode
 
   def __init__ (self, z):
     self.zero     = z
@@ -31,13 +42,40 @@ class Protocol:
   waitforreceipt  = False # Have just got a AD data batch and is waiting for
                           # a DE receipt message
 
+  def checkactive (self):
+    if self.active:
+      if self.active:
+        to = self.ACTIVE_TIMEOUT
+      else:
+        to = self.STAYACTIVE_TIMEOUT
+
+      if ((time () - self.activated) > to):
+        self.active = False
+        self.stayactive = False
+
   def send (self, msg):
+    # Address buoy
+    if self.zero.current.id != self.adressedbuoy:
+      _msg = 'ZA,' + self.zero.current.address_p
+      self.zero.send ('$' + _msg + '*' + gen_checksum (_msg))
+      self.adressedbuoy = self.zero.current.id
+
+    # Activate buoy
+    self.checkactive ()
+    if not self.active:
+      _msg = '$A*' + gen_checksum ('A')
+      self.zero.send (_msg)
+      self.active    = True
+      self.activated = time ()
+
     # Encapsulate and add checksum
     msg = '$' + msg + '*' + gen_checksum (msg)
     self.zero.send (msg)
-    self.logger.debug ("[Protocol] Sending: " + msg)
 
   def handle (self, buf):
+    # Check activated
+    self.checkactive ()
+
     i = 0
     l = len (buf)
 
@@ -92,7 +130,7 @@ class Protocol:
   def a_parse (self, buf):
     # Test checksum
     if (buf[-2:] == 'NN'):
-      self.logger.debug ("[Protocol] Checksum not provided on received message.")
+      self.logger.debug ("[Protocol] Checksum not provided on received message")
     elif (not test_checksum (buf)):
       self.logger.info ("[Protocol] Message discarded, checksum failed.")
       self.logger.info ("[Protocol] Discarded: " + buf)
@@ -262,6 +300,10 @@ class Protocol:
         elif (msgtype == 'DBG'):
           if (tokeni == 1):
             self.logger.info ("[Buoy] " + token)
+
+        else:
+          self.logger.error ("[Protocol] Unknown message: " + str(buf))
+          return
 
       tokeni += 1
 

@@ -58,8 +58,10 @@ class ZeroUIManager (BaseManager):
 
     self.register ('get_zcliservice', callable = lambda: self.zcliservice)
     self.register ('stop', z.stop_manual)
+    self.register ('portalmode', z.portalmode)
 
   def setup_client (self):
     self.register ('get_zcliservice')
     self.register ('stop')
+    self.register ('portalmode')
 

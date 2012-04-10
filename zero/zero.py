@@ -19,6 +19,8 @@ from protocol import *
 from buoy     import *
 from ui       import *
 
+from buoys    import buoys
+
 class Zero:
   port = '/dev/ttyUSB0'
   baud = 115200
@@ -55,6 +57,11 @@ class Zero:
 
   current  = property(get_current, set_current) # Current Buoy
 
+  def portalmode (self):
+    # Put into portal mode and exit
+    self.protocol.send ("ZP")
+    self.stop_manual ()
+
   def __init__ (self):
     multiprocessing.process.current_process ().name = 'Main'
 
@@ -74,9 +81,10 @@ class Zero:
     #
     # Each node should register now and then as well..
 
-    self.buoys.append (Buoy(self, 1, 'One'))
-    self.buoys.append (Buoy(self, 2, 'Two'))
-    self.buoys.append (Buoy(self, 3, 'Three'))
+    for b in buoys:
+      if b['enabled']:
+        self.buoys.append (Buoy(self, b))
+
     self.set_current (self.buoys[0])
 
     # Start UI manager
@@ -85,8 +93,8 @@ class Zero:
     self.uimanagerthread.start ()
 
     # Start thread reading stdin
-    t = Thread (target = self.stdin, name = 'StdinHandler')
-    t.daemon = True
+    #t = Thread (target = self.stdin, name = 'StdinHandler')
+    #t.daemon = True
     #t.start ()
 
     self.main ()
@@ -101,6 +109,7 @@ class Zero:
   def openserial (self):
     while ((self.ser == None or not self.ser.isOpen ()) and self.go):
       self.logger.info ("[Zero] Opening serial port " + str(self.port) + "..")
+      self.protocol.adressedbuoy = 0 # reset adressed buoy
       try:
         try:
           self.ser = serial.Serial (self.port, self.baud)
@@ -127,7 +136,8 @@ class Zero:
 
   def send (self, msg):
     try:
-      self.ser.write (msg + '\r')
+      self.logger.debug ("[Zero] Sending: " + msg)
+      self.ser.write (msg + "\r\n")
     except serial.SerialException as e:
       self.logger.exception ("[Zero] Exception with serial link, reconnecting..: " + str(e))
       self.closeserial ()
