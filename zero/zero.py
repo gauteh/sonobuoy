@@ -57,11 +57,6 @@ class Zero:
 
   current  = property(get_current, set_current) # Current Buoy
 
-  def portalmode (self):
-    # Put into portal mode and exit
-    self.protocol.send ("ZP")
-    self.stop_manual ()
-
   def __init__ (self):
     multiprocessing.process.current_process ().name = 'Main'
 

@@ -58,10 +58,20 @@ class ZeroUIManager (BaseManager):
 
     self.register ('get_zcliservice', callable = lambda: self.zcliservice)
     self.register ('stop', z.stop_manual)
-    self.register ('portalmode', z.portalmode)
+    self.register ('znportalmode', z.protocol.znportalmode)
+    self.register ('zngetstatus', z.protocol.zngetstatus)
+    self.register ('znconnect', z.protocol.znconnect)
+    self.register ('znsetaddress', z.protocol.znsetaddress)
+    self.register ('znoutputuart', z.protocol.znoutputuart)
+    self.register ('znoutputwireless', z.protocol.znoutputwireless)
 
   def setup_client (self):
     self.register ('get_zcliservice')
     self.register ('stop')
-    self.register ('portalmode')
+    self.register ('znportalmode')
+    self.register ('zngetstatus')
+    self.register ('znconnect')
+    self.register ('znsetaddress')
+    self.register ('znoutputuart')
+    self.register ('znoutputwireless')
 

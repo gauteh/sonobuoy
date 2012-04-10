@@ -48,7 +48,7 @@ class Buoy:
     self.address = b['address']
     self.enabled = b['enabled']
 
-    self.address_p = "\\x" + self.address[:2] + "\\x" + self.address[3:5] + "\\x" + self.address[6:8]
+    self.address_p = str(int(self.address[:2],16)) + "." + str(int(self.address[3:5],16)) + "." + str(int (self.address[6:8], 16))
 
     self.logdir = os.path.join (self.BASEDIR, self.name)
 

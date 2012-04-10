@@ -55,9 +55,30 @@ class zCLI:
     self.z.getstatus ()
     print "done."
 
-  def portalmode (self):
+  def zngetstatus (self):
+    print "Getting Zero Node status..",
+    self.m.zngetstatus ()
+    print "done."
+
+  def znportalmode (self):
     print "Setting zeronode in portal mode and stopping zero.."
-    self.m.portalmode ()
+    self.m.znportalmode ()
+
+  def znconnect (self):
+    print "Requesting Zero node to connect to buoy node.."
+    self.m.znconnect ()
+
+  def znaddress (self):
+    print "Setting address on Zero node to address of current buoy.."
+    self.m.znsetaddress ()
+
+  def znoutputuart (self):
+    print "Requesting Zero node to output to uart.."
+    self.m.znoutputuart ()
+
+  def znoutputwireless (self):
+    print "Requesting Zero node to output to wireless.."
+    self.m.znoutputwireless ()
 
   def summary (self):
     print "Summary of known buoys:"
@@ -148,7 +169,12 @@ class zCLI:
     print "monitor [buoy name]      Regularily print information about buoy"
     print "rollfile                 Roll data file on all buoys"
     print "getstatus                Request status from current buoy"
-    print "portalmode               Put zeronode in portal mode and exit zero"
+    print "zngetstatus              Request status from zero node"
+    print "znportalmode             Put zeronode in portal mode and exit zero"
+    print "znaddress                Set address of zeronode to current buoy"
+    print "znconnect                Connect to currently specified address"
+    print "znoutputuart             Configure output of Zero to go to uart"
+    print "znoutputwireless         Configure output of Zero to go to wireless"
     print "stop                     Stop Zero Manager"
 
   def go (self):
@@ -168,8 +194,23 @@ class zCLI:
     elif sys.argv[1] == 'getstatus':
       self.getstatus ()
 
-    elif sys.argv[1] == 'portalmode':
-      self.portalmode ()
+    elif sys.argv[1] == 'zngetstatus':
+      self.zngetstatus ()
+
+    elif sys.argv[1] == 'znportalmode':
+      self.znportalmode ()
+
+    elif sys.argv[1] == 'znaddress':
+      self.znaddress ()
+
+    elif sys.argv[1] == 'znconnect':
+      self.znconnect ()
+
+    elif sys.argv[1] == 'znoutputuart':
+      self.znoutputuart ()
+
+    elif sys.argv[1] == 'znoutputwireless':
+      self.znoutputwireless ()
 
     elif sys.argv[1] == 'show':
       if len(sys.argv) != 3:

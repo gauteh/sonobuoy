@@ -36,16 +36,36 @@ class Protocol:
   waitforreceipt  = False # Have just got a AD data batch and is waiting for
                           # a DE receipt message
 
-  def send (self, msg):
+  def znsetaddress (self):
     # Address buoy
+    _msg = 'ZA,' + self.zero.current.address_p
+    self.zero.send ('$' + _msg + '*' + gen_checksum (_msg))
+    self.adressedbuoy = self.zero.current.id
+
+  def send (self, msg):
     if self.zero.current.id != self.adressedbuoy:
-      _msg = 'ZA,' + self.zero.current.address_p
-      self.zero.send ('$' + _msg + '*' + gen_checksum (_msg))
-      self.adressedbuoy = self.zero.current.id
+      self.znsetaddress ()
 
     # Encapsulate and add checksum
     msg = '$' + msg + '*' + gen_checksum (msg)
     self.zero.send (msg)
+
+  # Request status from zeronode
+  def zngetstatus (self):
+    self.zero.send ('$ZS*' + gen_checksum ('ZS'))
+
+  def znconnect (self):
+    self.zero.send ('$ZC*' + gen_checksum ('ZA'))
+
+  def znportalmode (self):
+    # Put into portal mode and exit
+    self.zero.send ("$ZP*" + gen_checksum ('ZP'))
+
+  def znoutputuart (self):
+    self.zero.send ("$ZU*" + gen_checksum ('ZU'))
+
+  def znoutputwireless (self):
+    self.zero.send ("$ZT*" + gen_checksum ('ZT'))
 
   def handle (self, buf):
     i = 0
@@ -305,4 +325,6 @@ class Protocol:
           return
 
       tokeni += 1
+
+
 
