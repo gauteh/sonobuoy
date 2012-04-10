@@ -11,9 +11,6 @@ from synapse.switchboard import *
 PORTAL_ADDR = "\x00\x00\x01"
 ZERO_ADDR = "\x03\xFF\x37"
 
-ARDUINO_UART  = 1
-ARDUINO_BAUD  = 1 # 1 = 115200 
-
 @setHook (HOOK_STARTUP)
 def startup ():
   initProtoHw ()
@@ -24,8 +21,8 @@ def startup ():
   # Full power
   txPwr(17)
 
-  # Set up serial and cross connect Arduino to ZeroNode
-  initUart (ARDUINO_UART, ARDUINO_BAUD, 8, 'N', 1)
+  # Set up serial and cross connect Buoy to ZeroNode
+  initUart (1, 1, 8, 'N', 1)
   flowControl (1, False)
 
   crossConnect (DS_TRANSPARENT, DS_UART1)
