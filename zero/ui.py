@@ -1,3 +1,9 @@
+#! /usr/bin/python2
+#
+# Author: Gaute Hope <eg@gaute.vetsj.com> / 2011-09-28
+#
+# API to zero service.
+
 from multiprocessing.managers import BaseManager, BaseProxy
 from zero import *
 from buoy import *
@@ -9,6 +15,9 @@ class ZeroCliService:
 
   def __init__(self):
     pass
+
+  def getstatus (self):
+    self.zero.current.getstatus ()
 
   def rollfile (self):
     for b in self.zero.buoys:
@@ -49,8 +58,20 @@ class ZeroUIManager (BaseManager):
 
     self.register ('get_zcliservice', callable = lambda: self.zcliservice)
     self.register ('stop', z.stop_manual)
+    self.register ('znportalmode', z.protocol.znportalmode)
+    self.register ('zngetstatus', z.protocol.zngetstatus)
+    self.register ('znconnect', z.protocol.znconnect)
+    self.register ('znsetaddress', z.protocol.znsetaddress)
+    self.register ('znoutputuart', z.protocol.znoutputuart)
+    self.register ('znoutputwireless', z.protocol.znoutputwireless)
 
   def setup_client (self):
     self.register ('get_zcliservice')
     self.register ('stop')
+    self.register ('znportalmode')
+    self.register ('zngetstatus')
+    self.register ('znconnect')
+    self.register ('znsetaddress')
+    self.register ('znoutputuart')
+    self.register ('znoutputwireless')
 

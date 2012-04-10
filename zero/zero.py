@@ -10,15 +10,16 @@
 import serial
 import signal
 import time
-from threading import Thread
+from   threading import Thread
 import multiprocessing, logging, logging.config
 import sys
 
-from ad import *
+from ad       import *
 from protocol import *
-from buoy import *
+from buoy     import *
+from ui       import *
 
-from ui import *
+from buoys    import buoys
 
 class Zero:
   port = '/dev/ttyUSB0'
@@ -34,7 +35,7 @@ class Zero:
   protocol = None # Serial protocol to ZeroNode
 
   buoys    = []   # List of Buoys
-  currenti = 0 # Current buoy index
+  currenti = 0    # Current buoy index
 
   # Reading thread
   go       = True
@@ -62,6 +63,9 @@ class Zero:
     logging.config.fileConfig ('zero.logging.conf')
     self.logger = logging.getLogger ('root')
 
+    # Protocol handler; receives data from ZeroNode
+    self.protocol = Protocol (self)
+
     self.logger.info ("==================================================")
     self.logger.info ("[Zero] Starting Zero..")
     self.logger.info ("[Zero] Logging to console and to file log/zero.log.")
@@ -72,13 +76,11 @@ class Zero:
     #
     # Each node should register now and then as well..
 
-    self.buoys.append (Buoy(self, 1, 'One'))
-    self.buoys.append (Buoy(self, 2, 'Two'))
-    self.buoys.append (Buoy(self, 3, 'Three'))
-    self.set_current (self.buoys[0])
+    for b in buoys:
+      if b['enabled']:
+        self.buoys.append (Buoy(self, b))
 
-    # Protocol handler; receives data from ZeroNode
-    self.protocol = Protocol (self)
+    self.set_current (self.buoys[0])
 
     # Start UI manager
     self.uimanagerthread = Thread (target = self.run_ui_service, name = 'ZeroUIService')
@@ -86,8 +88,8 @@ class Zero:
     self.uimanagerthread.start ()
 
     # Start thread reading stdin
-    t = Thread (target = self.stdin, name = 'StdinHandler')
-    t.daemon = True
+    #t = Thread (target = self.stdin, name = 'StdinHandler')
+    #t.daemon = True
     #t.start ()
 
     self.main ()
@@ -102,6 +104,7 @@ class Zero:
   def openserial (self):
     while ((self.ser == None or not self.ser.isOpen ()) and self.go):
       self.logger.info ("[Zero] Opening serial port " + str(self.port) + "..")
+      self.protocol.adressedbuoy = 0 # reset adressed buoy
       try:
         try:
           self.ser = serial.Serial (self.port, self.baud)
@@ -126,6 +129,16 @@ class Zero:
     for i in self.buoys:
       yield i
 
+  def send (self, msg):
+    try:
+      self.logger.debug ("[Zero] Sending: " + msg)
+      self.ser.write (msg + "\n")
+    except serial.SerialException as e:
+      self.logger.exception ("[Zero] Exception with serial link, reconnecting..: " + str(e))
+      self.closeserial ()
+      self.openserial ()
+
+
   def main (self):
     try:
       self.logger.info ("[Zero] Entering main loop..")
@@ -134,11 +147,11 @@ class Zero:
       while self.go:
         try:
           if not self.ser == None:
-            r = self.ser.read (128)
+            r = self.ser.read (1)
             if self.current is not None:
               self.protocol.handle (r)
 
-          time.sleep (0.01)
+          time.sleep (0.0001)
         except serial.SerialException as e:
           self.logger.exception ("[Zero] Exception with serial link, reconnecting..: " + str(e))
           self.closeserial ()

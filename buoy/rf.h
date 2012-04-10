@@ -8,30 +8,33 @@
 # pragma once
 
 # include <stdint.h>
-# include <string.h>
 # include "types.h"
 
 namespace Buoy {
 # define RF_BAUDRATE 115200
 # define RF_Serial Serial3
 
-# define RF_BUFLEN 90
+//# define RF_BUFLEN 90
 
 /* Format for printing checksum and macro for appending checksum
  * to NULL terminated buffer with string encapsulated in $ and *.
  */
 # define F_CSUM "%02hX"
-# define APPEND_CSUM(buf) sprintf(&buf[strlen(buf)], F_CSUM, RF::gen_checksum(buf))
+//# define APPEND_CSUM(buf) sprintf(&buf[strlen(buf)], F_CSUM, RF::gen_checksum(buf))
 
 /* Macro for sending formatted debug strings, follows format of sprintf
  * will overflow if message is bigger than (RF_BUFLEN - 6 - 3)
  */
 
+# define rf_send_debug_f(args...)
+
+/*
 # define rf_send_debug_f(args...) \
  { uint n = sprintf(((RF*)rf)->buf, args); \
-   if (n > RF_BUFLEN) ((RF*)rf)->send_debug ("[RF] [Error] DEBUG message to big."); \
+   if (n > RF_BUFLEN) ((RF*)rf)->send_debug ("[RF] [Error] DEBUG message to big. MEMORY possibly corrupted."); \
    else ((RF*)rf)->send_debug (((RF*)rf)->buf); \
    }
+*/
 
 /* Protocol
  *
@@ -54,41 +57,54 @@ namespace Buoy {
     public:
       ADS1282 *ad;
       GPS     *gps;
+      Store   *store;
 
-      char buf[RF_BUFLEN];
+      /* Information about batch, ids or id about to be sent */
+      uint32_t id;
+      uint32_t ref;
+      uint32_t sample;
+      uint32_t length;
 
-      typedef enum _RF_AD_MESSAGE {
-        AD_STATUS = 0,
-        AD_DATA_BATCH,
-      } RF_AD_MESSAGE;
+# define RF_SERIAL_BUFLEN 80
+      char rf_buf[RF_SERIAL_BUFLEN];
+      uint8_t rf_buf_pos;
 
-      typedef enum _RF_GPS_MESSAGE {
-        GPS_STATUS = 0,
-        GPS_POSITION,
-      } RF_GPS_MESSAGE;
+      //char buf[RF_BUFLEN];
+
+      /* Incoming telegrams */
+      typedef enum _RF_TELEGRAM {
+        UNSPECIFIED = 0,
+        UNKNOWN,
+        GETSTATUS,
+        GETIDS,
+        GETID,
+        GETLASTID,
+        GETBATCH,
+      } RF_TELEGRAM;
+
+      /* Error codes */
+      typedef enum _RF_ERROR {
+        E_CONFIRM = 0,
+        E_BADCOMMAND,
+        E_UNKNOWNCOMMAND,
+        E_SDUNAVAILABLE,
+        E_NOSUCHID,
+        E_NOSUCHREF,
+        E_NOSUCHSAMPLE,
+        E_NOSUCHDAT,
+      } RF_ERROR;
 
       RF ();
       void setup (BuoyMaster *);
       void loop ();
-
-      /* Send data as soon as a batch is ready */
-      uint8_t lastbatch;
-      bool    continuous_transfer;
-
-      /* Status is sent every second */
-      uint32_t laststatus;
-
-      void send_status ();
+      void parse ();
 
       void send_debug (const char *);
-      void ad_message (RF_AD_MESSAGE);
-      void gps_message (RF_GPS_MESSAGE);
+      void send_error (RF_ERROR code);
 
-      void start_continuous_transfer ();
-      void stop_continuous_transfer ();
-
-      static byte gen_checksum (const char *, bool skip = true);
+      static byte gen_checksum (const char *);
       static bool test_checksum (const char *);
+      static void append_checksum (char *);
   };
 }
 

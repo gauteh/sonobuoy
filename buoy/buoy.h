@@ -12,16 +12,22 @@
 
 /* ID for this Buoy */
 # define BUOY_ID    1
-# define BUOY_ID_S  "1"
 # define BUOY_NAME  "One"
 
 # ifndef ONLY_SPEC
 
+# include <stdint.h>
+
 # include "wirish.h"
+
 # include "types.h"
 
-/* Define to have debug messages sent to USB serial */
+/* Print debug messages to USB serial */
 # define DIRECT_SERIAL 1
+
+/* Macros for stringifying defines */
+# define STRINGIFY_I(s) #s
+# define STRINGIFY(s)   STRINGIFY_I(s)
 
 namespace Buoy {
   class BuoyMaster {
@@ -38,6 +44,8 @@ namespace Buoy {
     private:
       void setup ();
   };
+
+  int itoa (uint32_t, uint8_t, char *);
 
   /* Globally available instance of BuoyMaster */
   extern BuoyMaster *bu;

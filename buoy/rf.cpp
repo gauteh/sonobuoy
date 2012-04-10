@@ -5,7 +5,7 @@
  *
  */
 
-# include <stdio.h>
+# include <stdlib.h>
 # include <string.h>
 # include "wirish.h"
 
@@ -13,52 +13,345 @@
 # include "rf.h"
 # include "ads1282.h"
 # include "gps.h"
+# include "store.h"
 
 using namespace std;
 
 namespace Buoy {
   RF::RF () {
-    laststatus = 0;
-    lastbatch  = 0;
-    continuous_transfer = false;
     rf = this;
+
+    rf_buf_pos = 0;
   }
 
   void RF::setup (BuoyMaster *b) {
     ad  = b->ad;
     gps = b->gps;
+    store = b->store;
 
     RF_Serial.begin (RF_BAUDRATE);
 
     b->send_greeting ();
-    send_debug ("[RF] RF subsystem initiated.");
   }
 
   void RF::loop () {
-    /* Status is sent every second */
-    if (millis () - laststatus > 1000) send_status ();
+    /* Handle incoming RF telegrams on serial line (non-blocking) {{{
+     *
+     *
+     * States:
+     * 0 = Waiting for start of telegram $
+     * 1 = Receiving (between $ and *)
+     * 2 = Waiting for Checksum digit 1
+     * 3 = Waiting for Checksum digit 2
+     */
+    static int state = 0;
 
-    /* Loop must run at least 2x speed (Nyquist) of batchfilltime */
-    if (continuous_transfer) {
-      if (ad->batch != lastbatch) {
-       ad_message (AD_DATA_BATCH);
+    int ca = RF_Serial.available ();
+
+    while (ca > 0) {
+      char c = (char)RF_Serial.read ();
+# if DIRECT_SERIAL
+      SerialUSB.print (c);
+# endif
+
+      if (rf_buf_pos >= RF_SERIAL_BUFLEN) {
+        state = 0;
+        rf_buf_pos = 0;
       }
+
+      switch (state)
+      {
+        case 0:
+          if (c == '$') {
+            rf_buf[0] = '$';
+            rf_buf_pos = 1;
+            state = 1;
+          }
+          break;
+
+        case 2:
+          state = 3;
+        case 1:
+          if (c == '*') state = 2;
+
+          rf_buf[rf_buf_pos] = c;
+          rf_buf_pos++;
+          break;
+
+        case 3:
+          rf_buf[rf_buf_pos] = c;
+          rf_buf_pos++;
+          rf_buf[rf_buf_pos] = 0;
+
+          parse (); // Complete telegram received
+          rf_buf_pos = 0;
+          state = 0;
+          break;
+
+        /* Should not be reached. */
+        default:
+          state = 0;
+          break;
+      }
+
+      ca--;
     }
+
+    /* }}} Done telegram handler */
   }
 
-  void RF::send_status () {
-    static int sid;
+  void RF::parse ()
+  {
+    /* RF parser (non-blocking) {{{
+     *
+     *
+     */
+    SerialUSB.print ("Parsing..:");
+    SerialUSB.println (rf_buf);
 
-    ad_message (AD_STATUS);
-    gps_message (GPS_STATUS);
+    RF_TELEGRAM type = UNSPECIFIED;
+    int tokeni = 0;
+    int len    = rf_buf_pos; // Excluding NULL terminator
+    int i      = 0;
 
-    /* Every 10 status */
-    if (sid % 10 == 0) {
-      rf_send_debug_f ("Uptime micros %u", micros ());
+    /* Test checksum before parsing */
+    if (!test_checksum (rf_buf)) goto cmderror;
+
+    SerialUSB.println ("Checksum OK");
+
+    /* Parse */
+    while (i < len)
+    {
+      /*
+      uint32_t ltmp = 0;
+      uint32_t remainder = 0;
+      */
+
+      char token[80]; // Max length of token
+      int j = 0;
+      /* Get next token */
+      while ((rf_buf[i] != ',' && rf_buf[i] != '*') && i < len) {
+        token[j] = rf_buf[i];
+
+        i++;
+        j++;
+      }
+      i++; /* Skip delimiter */
+
+      token[j] = 0;
+# if DIRECT_SERIAL
+      SerialUSB.print ("Token: ");
+      SerialUSB.print (tokeni);
+      SerialUSB.println (token);
+# endif
+
+      if (i < len) {
+        if (tokeni == 0) {
+          /* Determine telegram type */
+          if (strcmp(token, "$GS") == 0) {
+            type = GETSTATUS;
+            goto simpleparser;
+          }
+          else if (strcmp(token, "$GLID") == 0) {
+            type = GETLASTID;
+            goto simpleparser;
+          }
+          else if (strcmp(token, "$GIDS") == 0)
+            type = GETIDS;
+          else if (strcmp(token, "$GID") == 0)
+            type = GETID;
+          else if (strcmp(token, "$GB") == 0)
+            type = GETBATCH;
+          else {
+            /* Cancel parsing */
+# if DIRECT_SERIAL
+            SerialUSB.print ("Unknown command: ");
+            SerialUSB.println (token);
+# endif
+            type = UNKNOWN;
+            send_error (E_UNKNOWNCOMMAND);
+            return;
+          }
+        } else {
+          switch (type)
+          {
+            // GETIDS {{{
+            case GETIDS:
+              switch (tokeni)
+              {
+                /* first token specifies starting id to send */
+                case 1:
+                  {
+                  id = atoi (token);
+                  if (id < 1) goto cmderror;
+
+                  store->send_indexes (id, GET_IDS_N);
+                  }
+                  break;
+              }
+              break;
+              // }}}
+
+            // GETID {{{
+            case GETID:
+              switch (tokeni)
+              {
+                /* first token specifies starting id to send */
+                case 1:
+                  {
+                  id = atoi (token);
+                  if (id < 1) goto cmderror;
+
+                  store->send_index (id);
+                  }
+                  break;
+              }
+              break;
+              // }}}
+
+            // GETBATCH {{{
+            case GETBATCH:
+              switch (tokeni)
+              {
+                case 1:
+                  {
+                  id = atoi (token);
+                  if (id < 1) goto cmderror;
+                  }
+                  break;
+
+                case 2:
+                  {
+                  ref = atoi (token);
+                  if (ref < 1) goto cmderror;
+                  }
+                  break;
+
+                case 3:
+                  {
+                  sample = atoi (token);
+                  if (sample < 1) goto cmderror;
+                  }
+                  break;
+
+                case 4:
+                  {
+                  length = atoi (token);
+                  if (length < 1) goto cmderror;
+
+                  store->send_batch (id, ref, sample, length);
+                  }
+                  break;
+              }
+              break;
+              // }}}
+
+            default:
+              /* Having reached here on an unknown or unspecified telegram
+               * parsing is cancelled. */
+              return;
+          }
+        }
+      } else {
+        /* Last token: Check sum */
+      }
+      tokeni++;
     }
+    return;
 
-    sid++;
-    laststatus = millis ();
+    /* Single token commands */
+simpleparser:
+    switch (type) {
+      // GETSTATUS {{{
+      case GETSTATUS:
+        // $GPS,S,[lasttype],[telegrams received],[lasttelegram],Lat,Lon,unixtime,time,date,Valid,HAS_TIME,HAS_SYNC,HAS_SYNC_REFERENCE*CS
+        // Valid: Y = Yes, N = No
+        SerialUSB.println ("[RF] Sending status..");
+        RF_Serial.print ("$GPS,S,");
+        RF_Serial.print (gps->lasttype);
+        RF_Serial.print (",");
+        RF_Serial.print (gps->received);
+        RF_Serial.print (",");
+        RF_Serial.print (gps->latitude);
+        RF_Serial.print (",");
+        RF_Serial.print ((gps->north ? 'N' : 'S'));
+        RF_Serial.print (",");
+        RF_Serial.print (gps->longitude);
+        RF_Serial.print (",");
+        RF_Serial.print ((gps->east ? 'E' : 'W'));
+        RF_Serial.print (",");
+        RF_Serial.print ((uint32_t) gps->lastsecond);
+        RF_Serial.print (",");
+        RF_Serial.print (gps->time);
+        RF_Serial.print (",");
+        RF_Serial.print (gps->day);
+        RF_Serial.print (gps->month);
+        RF_Serial.print (gps->year);
+        RF_Serial.print (",");
+        RF_Serial.print ((gps->valid ? 'Y' : 'N'));
+        RF_Serial.print (",");
+        RF_Serial.print ((gps->HAS_TIME ? 'Y' : 'N'));
+        RF_Serial.print (",");
+        RF_Serial.print ((gps->HAS_SYNC ? 'Y' : 'N'));
+        RF_Serial.print (",");
+        RF_Serial.print ((gps->HAS_SYNC_REFERENCE ? 'Y' : 'N'));
+        RF_Serial.println ("*NN");
+
+        /*
+        sprintf (buf, "$GPS,S,%d,%d,%s,%c,%s,%c,%lu,%lu,%02d%02d%02d,%c,%c,%c,%c*", gps->gps_data.lasttype, gps->gps_data.received, gps->gps_data.latitude, (gps->gps_data.north ? 'N' : 'S'), gps->gps_data.longitude, (gps->gps_data.east ? 'E' : 'W'), (uint32_t) gps->lastsecond, gps->gps_data.time, gps->gps_data.day, gps->gps_data.month, gps->gps_data.year, (gps->gps_data.valid ? 'Y' : 'N'), (gps->HAS_TIME ? 'Y' : 'N'), (gps->HAS_SYNC ? 'Y' : 'N'), (gps->HAS_SYNC_REFERENCE ? 'Y' : 'N'));
+        APPEND_CSUM (buf);
+        RF_Serial.println (buf);
+        */
+
+        // $AD,S,[queue position], [queue fill time],[value],[config]*CS
+        RF_Serial.print ("$AD,S,");
+        RF_Serial.print (ad->position);
+        RF_Serial.print (",");
+        RF_Serial.print (ad->batchfilltime);
+        RF_Serial.print (",");
+        RF_Serial.print (ad->value);
+        RF_Serial.print (",0");
+        //RF_Serial.print (ad->reg.raw[1]);
+        RF_Serial.println ("*NN");
+
+        /*
+        sprintf (buf, "$AD,S,%lu,%lu,0x%08lX,0x%08hX*", ad->position, ad->batchfilltime, ad->value, ad->reg.raw[1]);
+        APPEND_CSUM (buf);
+        RF_Serial.println (buf);
+        */
+        break;
+      // }}}
+
+      // GETLASTID {{{
+      case GETLASTID:
+        store->send_lastid ();
+        break;
+        // }}}
+
+      default: break;
+    }
+    return;
+
+cmderror:
+# if DIRECT_SERIAL
+    SerialUSB.println ("[RF] E_BADCOMMAND");
+# endif
+    send_error (E_BADCOMMAND);
+    return;
+
+    /* Done parser }}} */
+  }
+
+  /* Debug and error messages {{{ */
+  void RF::send_error (RF_ERROR code) {
+    RF_Serial.print ("$ERR,");
+    RF_Serial.print (code, DEC);
+    RF_Serial.println ("*NN");
+    /*
+    sprintf (buf, "$ERR,%d*", code);
+    APPEND_CSUM (buf);
+    RF_Serial.println (buf);
+    */
   }
 
   void RF::send_debug (const char * msg)
@@ -68,144 +361,32 @@ namespace Buoy {
      *
      */
 
+    /*
     byte cs = gen_checksum ("DBG,", false);
     cs ^= gen_checksum (msg, false);
+    */
 
     RF_Serial.print   ("$DBG,");
     RF_Serial.print   (msg);
-    RF_Serial.print   ("*");
+    RF_Serial.print   ("*NN");
+    /*
     RF_Serial.print   (cs>>4, HEX);
     RF_Serial.println (cs&0xf, HEX);
-  }
+    */
+  } // }}}
 
-  void RF::ad_message (RF_AD_MESSAGE messagetype)
+  /* Checksum {{{ */
+  byte RF::gen_checksum (const char *buf)
   {
-    switch (messagetype)
-    {
-      case AD_STATUS:
-        // $AD,S,[queue position], [queue fill time],[value],[config]*CS
-        sprintf (buf, "$AD,S,%lu,%lu,0x%08lX,0x%08hX*", ad->position, ad->batchfilltime, ad->value, ad->reg.raw[1]);
-        APPEND_CSUM (buf);
-        RF_Serial.println (buf);
-
-        break;
-
-      case AD_DATA_BATCH:
-        /* Send BATCH_LENGTH samples */
-
-        /* Format and protocol:
-
-         * 1. Initiate binary data stream:
-
-         $AD,D,[k = number of samples],[reference],[reference_status]*CC
-
-         * 2. Send one $ to indicate start of data
-
-         * 3. Send k number of samples: 4 bytes * k
-
-         * 4. Send end of data with checksum
-
-         */
-        {
-          rf_send_debug_f ("On batch %d sending batch %d", ad->batch, lastbatch);
-          uint32_t start    = (lastbatch * BATCH_LENGTH);
-          uint32_t length   = BATCH_LENGTH;
-          uint64_t ref      = ad->references[lastbatch];
-          uint32_t refstat  = ad->reference_status[lastbatch];
-
-          sprintf (buf, "$AD,D,%lu,%llu,%lu*", length, ref, refstat);
-          APPEND_CSUM (buf);
-          RF_Serial.println (buf);
-
-          delayMicroseconds (100);
-
-          byte csum = 0;
-
-          /* Write '$' to signal start of binary data */
-          RF_Serial.write ('$');
-
-          //uint32_t lasts = 0;
-          uint32_t s;
-
-          for (uint32_t i = 0; i < length; i++)
-          {
-            s = ad->values[start + i];
-            /* MSB first (big endian), means concatenating bytes on RX will
-             * result in LSB first; little endian. */
-            RF_Serial.write ((byte*)(&s), 4);
-
-            csum = csum ^ ((byte*)&s)[0];
-            csum = csum ^ ((byte*)&s)[1];
-            csum = csum ^ ((byte*)&s)[2];
-            csum = csum ^ ((byte*)&s)[3];
-
-            //lasts = s;
-
-            delayMicroseconds (100);
-          }
-
-          /* Send end of data with Checksum */
-          sprintf (buf, "$AD,DE," F_CSUM "*", csum);
-          APPEND_CSUM (buf);
-          RF_Serial.println (buf);
-          delayMicroseconds (100);
-
-          /*
-          SerialUSB.print ("[RF] Last sample: 0x");
-          SerialUSB.println (lasts, HEX);
-          rf_send_debug_f ("[RF] Last sample: 0x%lX", lasts);
-          */
-
-          lastbatch =  (lastbatch + 1) % BATCHES;
-          if (lastbatch != ad->batch) {
-            send_debug ("[RF] [Error] Did not finish sending batch before it was swapped.");
-# if DIRECT_SERIAL
-            SerialUSB.println ("[RF] [Error] Did not finish sending batch before it was swapped.");
-# endif
-          }
-        }
-        break;
-
-      default:
-        return;
-    }
-  }
-
-  void RF::gps_message (RF_GPS_MESSAGE messagetype)
-  {
-    switch (messagetype)
-    {
-      case GPS_STATUS:
-        // $GPS,S,[lasttype],[telegrams received],[lasttelegram],Lat,Lon,unixtime,time,date,Valid,HAS_TIME,HAS_SYNC,HAS_SYNC_REFERENCE*CS
-        // Valid: Y = Yes, N = No
-        sprintf (buf, "$GPS,S,%d,%d,%s,%c,%s,%c,%lu,%lu,%02d%02d%02d,%c,%c,%c,%c*", gps->gps_data.lasttype, gps->gps_data.received, gps->gps_data.latitude, (gps->gps_data.north ? 'N' : 'S'), gps->gps_data.longitude, (gps->gps_data.east ? 'E' : 'W'), (uint32_t) gps->lastsecond, gps->gps_data.time, gps->gps_data.day, gps->gps_data.month, gps->gps_data.year, (gps->gps_data.valid ? 'Y' : 'N'), (gps->HAS_TIME ? 'Y' : 'N'), (gps->HAS_SYNC ? 'Y' : 'N'), (gps->HAS_SYNC_REFERENCE ? 'Y' : 'N'));
-
-        break;
-
-      default:
-        return;
-    }
-
-    APPEND_CSUM (buf);
-    RF_Serial.println (buf);
-  }
-
-  byte RF::gen_checksum (const char *buf, bool skip)
-  {
-  /* Generate checksum for NULL terminated string
-   * (skipping first and last char if skip (default)) */
+  /* Generate checksum for NULL terminated string */
 
     byte csum = 0;
-    int len = strlen(buf);
+    buf++; // skip $
 
-    int i = 0;
-    if (skip) {
-      i = 1;
-      len--;
+    while (*buf != '*' && *buf != 0) {
+      csum = csum ^ ((byte)*buf);
+      buf++;
     }
-
-    for (; i < len; i++)
-      csum = csum ^ ((byte)buf[i]);
 
     return csum;
   }
@@ -215,25 +396,19 @@ namespace Buoy {
     /* Input: String including $ and * with HEX decimal checksum
      *        to test. NULL terminated.
      */
-    int len = strlen(buf);
+    uint32_t tsum = 0;
+    buf++; // skip $
+    while (*buf != '*' && *buf != 0) {
+      tsum = tsum ^ (uint8_t)*buf;
+      buf++;
+    }
+    buf++;
 
     uint16_t csum = 0;
-    if (sscanf (&(buf[len-2]), F_CSUM, &csum) != 1) return false;
-
-    uint32_t tsum = 0;
-    for (int i = 1; i < (len - 3); i++)
-      tsum = tsum ^ (uint8_t)buf[i];
+    csum = strtoul (buf, NULL, 16); // buf now points to first digit of CS
 
     return tsum == csum;
-  }
-
-  void RF::start_continuous_transfer () {
-    continuous_transfer = true;
-  }
-
-  void RF::stop_continuous_transfer () {
-    continuous_transfer = false;
-  }
+  } // }}}
 }
 
 /* vim: set filetype=arduino :  */

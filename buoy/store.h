@@ -67,6 +67,8 @@ namespace Buoy {
       SdVolume    *volume;
       SdFile      *root;
 
+      char buf[8+5]; // used for file names
+
       bool  SD_AVAILABLE;
       uint32_t lastsd;
 
@@ -75,17 +77,20 @@ namespace Buoy {
       typedef uint32_t sample;
 
 /* Data format */
-# define STORE_VERSION 4uL
-# define SAMPLE_LENGTH 4uL
+# define STORE_VERSION 4u
+# define SAMPLE_LENGTH 4u
 
 /* Maximum number of timestamp, sample pairs for each datafile */
+/*
 # define MINUTES_PER_DATAFILE 5uL
 # define MAX_SAMPLES_PER_FILE (FREQUENCY * 60uL * MINUTES_PER_DATAFILE)
 # define MAX_REFERENCES (MAX_SAMPLES_PER_FILE / BATCH_LENGTH)
 
-
 # define _SD_DATA_FILE_SIZE (MAX_SAMPLES_PER_FILE * (SAMPLE_LENGTH) + MAX_REFERENCES * 50uL)
 # define SD_DATA_FILE_SIZE (_SD_DATA_FILE_SIZE + (_SD_DATA_FILE_SIZE % 512uL))
+*/
+# define SD_DATA_FILE_SIZE (5 * 1024 * 1024)
+# define MAX_REFERENCES (SD_DATA_FILE_SIZE / BATCH_LENGTH)
 
 /* Data file format {{{
  *
@@ -121,8 +126,9 @@ namespace Buoy {
 
         /* Only nrefs will be written out for each of the following arrays */
         uint32_t refpos[MAX_REFERENCES]; // List with position of reference points.
-        uint64_t refs[MAX_REFERENCES];   // A re
+        uint64_t refs[MAX_REFERENCES];   // List with references, matches list of positions.
       } Index;
+# define REFPOS_START (2 * sizeof(uint16_t) + 4 * sizeof(uint32_t))
 
 
 /* Using 8.3 file names limits the ID */
@@ -175,6 +181,22 @@ namespace Buoy {
 
       void start_continuous_write ();
       void stop_continuous_write ();
+
+      /* ID and files currently being sent */
+# define GET_IDS_N 10 // no of ids to send in one go
+      uint32_t s_id;
+      uint32_t s_samples;
+      uint32_t s_nrefs;
+      uint16_t s_lastbatch;
+      SdFile *send_i;
+      SdFile *send_d;
+
+      bool _check_index (uint32_t); // check if current index is open and valid
+      void send_indexes (uint32_t, uint32_t);
+      void send_index (uint32_t);
+      void send_refs (uint32_t, uint32_t, uint32_t);
+      void send_batch (uint32_t id, uint32_t ref, uint32_t start, uint32_t length);
+      void send_lastid ();
 
       void open_next_log ();
       void log (const char *);

@@ -1,15 +1,20 @@
 """
 Gaute Hope <eg@gaute.vetsj.com> (c) 2011-09-09
 
-arduino.py: Interface and protocol to Arduino board
+protocol.py: Interface and protocol to buoys
 
 """
 
+from time import time
+
 from util import *
+from buoy import *
 
 class Protocol:
   zero = None
   logger = None
+
+  adressedbuoy = 0     # id of buoy addressed on zeronode
 
   def __init__ (self, z):
     self.zero     = z
@@ -30,6 +35,39 @@ class Protocol:
   a_buf           = ''
   waitforreceipt  = False # Have just got a AD data batch and is waiting for
                           # a DE receipt message
+
+  def znsetaddress (self):
+    # Address buoy
+    _msg = 'ZA,' + self.zero.current.address_p
+    self.zero.send ('$' + _msg + '*' + gen_checksum (_msg))
+    self.adressedbuoy = self.zero.current.id
+
+  def send (self, msg):
+    if self.zero.current.id != self.adressedbuoy:
+      self.znsetaddress ()
+      self.znconnect ()
+      self.znoutputwireless ()
+
+    # Encapsulate and add checksum
+    msg = '$' + msg + '*' + gen_checksum (msg)
+    self.zero.send (msg)
+
+  # Request status from zeronode
+  def zngetstatus (self):
+    self.zero.send ('$ZS*' + gen_checksum ('ZS'))
+
+  def znconnect (self):
+    self.zero.send ('$ZC*' + gen_checksum ('ZA'))
+
+  def znportalmode (self):
+    # Put into portal mode and exit
+    self.zero.send ("$ZP*" + gen_checksum ('ZP'))
+
+  def znoutputuart (self):
+    self.zero.send ("$ZU*" + gen_checksum ('ZU'))
+
+  def znoutputwireless (self):
+    self.zero.send ("$ZT*" + gen_checksum ('ZT'))
 
   def handle (self, buf):
     i = 0
@@ -85,7 +123,10 @@ class Protocol:
 
   def a_parse (self, buf):
     # Test checksum
-    if (not test_checksum (buf)):
+    if (buf[-2:] == 'NN'):
+      #self.logger.debug ("[Protocol] Checksum not provided on received message")
+      pass
+    elif (not test_checksum (buf)):
       self.logger.info ("[Protocol] Message discarded, checksum failed.")
       self.logger.info ("[Protocol] Discarded: " + buf)
       return
@@ -97,20 +138,20 @@ class Protocol:
     msgtype = ''
     subtype = ''
 
-    finished = False
-
     i = 0
     l = len (buf)
 
     while (i < l):
+
+      # Skip checksum
+      if buf[i-1] == '*':
+        return
+
       # Get token
       token = ''
       while ((i < l) and (buf[i] != ',' and buf[i] != '*')):
         token += buf[i]
         i += 1
-
-      if ((i < l) and buf[i] == '*'):
-        finished = True
 
       i += 1 # Skip delimiter
 
@@ -181,6 +222,13 @@ class Protocol:
                 self.zero.current.gps.has_sync_reference = (token == 'Y')
 
                 self.zero.current.gps.gps_status ()
+              else:
+                self.logger.error ("[Protocol] Too many tokens for message: " + msgtype + ", subtype: " + subtype + ", token: " + token)
+                return
+
+            else:
+              self.logger.error ("[Protocol] Unknown subtype for message: " + str(buf))
+              return
 
         elif (msgtype == 'AD'):
           if (tokeni == 1): subtype = token
@@ -196,6 +244,9 @@ class Protocol:
                 elif (tokeni == 5):
                   self.zero.current.ad.ad_config = token
                   self.zero.current.ad.ad_status ()
+                  return
+                else:
+                  self.logger.error ("[Protocol] Too many tokens for message: " + msgtype + ", subtype: " + subtype)
                   return
               except ValueError:
                 self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
@@ -235,6 +286,10 @@ class Protocol:
                 #print "[AD] Initiating binary transfer.. samples: ", self.zero.current.ad.ad_k_samples
                 return
 
+              else:
+                self.logger.error ("[Protocol] Too many tokens for message: " + msgtype + ", subtype: " + subtype)
+                return
+
             elif (subtype == 'DE'):
               if not self.waitforreceipt:
                 self.logger.error ("[Protocol] Got end of batch data without getting data first.")
@@ -251,9 +306,43 @@ class Protocol:
 
               return
 
+            else:
+              self.logger.error ("[Protocol] Unknown subtype for message: " + str(buf))
+              return
+
+        elif (msgtype == 'Z'):
+          if (tokeni == 1):
+            subtype = token
+          else:
+            if subtype == 'S':
+              self.znaddress = token
+              try:
+                self.logger.info ("[ZeroNode] Current node address: " + hex2(ord(token[0])) + ":" + hex2(ord(token[1])) + ":" + hex2(ord(token[2])))
+              except:
+                self.logger.exception ("[ZeroNode] Current node address (un-parseable): " + str(token))
+              return
+
         elif (msgtype == 'DBG'):
           if (tokeni == 1):
             self.logger.info ("[Buoy] " + token)
 
+        elif (msgtype == 'DBGZ'):
+          if (tokeni == 1):
+            self.logger.info ("[ZeroNode] " + token)
+
+        elif (msgtype == 'ERR'):
+          if (tokeni == 1):
+            try:
+              self.logger.error ("[Buoy] Received error: [" + token + "] " + Buoy.error_strings[int(token)])
+            except ValueError:
+              self.logger.error ("[Buoy] Received error: [" + token + "]")
+              self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
+
+        else:
+          self.logger.error ("[Protocol] Unknown message: " + str(buf))
+          return
+
       tokeni += 1
+
+
 

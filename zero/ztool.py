@@ -7,10 +7,10 @@
 # Requires:
 # - texttable
 
-from ui import *
+from ui   import *
 from zero import *
 from buoy import *
-from ad import *
+from ad   import *
 
 import sys
 import os
@@ -49,6 +49,36 @@ class zCLI:
   def rollfile (self):
     print "Rolling file.."
     self.z.rollfile()
+
+  def getstatus (self):
+    print "Getting status..",
+    self.z.getstatus ()
+    print "done."
+
+  def zngetstatus (self):
+    print "Getting Zero Node status..",
+    self.m.zngetstatus ()
+    print "done."
+
+  def znportalmode (self):
+    print "Setting zeronode in portal mode and stopping zero.."
+    self.m.znportalmode ()
+
+  def znconnect (self):
+    print "Requesting Zero node to connect to buoy node.."
+    self.m.znconnect ()
+
+  def znaddress (self):
+    print "Setting address on Zero node to address of current buoy.."
+    self.m.znsetaddress ()
+
+  def znoutputuart (self):
+    print "Requesting Zero node to output to uart.."
+    self.m.znoutputuart ()
+
+  def znoutputwireless (self):
+    print "Requesting Zero node to output to wireless.."
+    self.m.znoutputwireless ()
 
   def summary (self):
     print "Summary of known buoys:"
@@ -137,7 +167,14 @@ class zCLI:
     print "summary                  Print summary of connected nodes"
     print "show [buoy name]         Show detailed information about buoy"
     print "monitor [buoy name]      Regularily print information about buoy"
-    print "rollfile                 Roll data file on current buoy"
+    print "rollfile                 Roll data file on all buoys"
+    print "getstatus                Request status from current buoy"
+    print "zngetstatus              Request status from zero node"
+    print "znportalmode             Put zeronode in portal mode and exit zero"
+    print "znaddress                Set address of zeronode to current buoy"
+    print "znconnect                Connect to currently specified address"
+    print "znoutputuart             Configure output of Zero to go to uart"
+    print "znoutputwireless         Configure output of Zero to go to wireless"
     print "stop                     Stop Zero Manager"
 
   def go (self):
@@ -153,6 +190,27 @@ class zCLI:
 
     elif sys.argv[1] == 'rollfile':
       self.rollfile ()
+
+    elif sys.argv[1] == 'getstatus':
+      self.getstatus ()
+
+    elif sys.argv[1] == 'zngetstatus':
+      self.zngetstatus ()
+
+    elif sys.argv[1] == 'znportalmode':
+      self.znportalmode ()
+
+    elif sys.argv[1] == 'znaddress':
+      self.znaddress ()
+
+    elif sys.argv[1] == 'znconnect':
+      self.znconnect ()
+
+    elif sys.argv[1] == 'znoutputuart':
+      self.znoutputuart ()
+
+    elif sys.argv[1] == 'znoutputwireless':
+      self.znoutputwireless ()
 
     elif sys.argv[1] == 'show':
       if len(sys.argv) != 3:
