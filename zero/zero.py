@@ -137,7 +137,7 @@ class Zero:
   def send (self, msg):
     try:
       self.logger.debug ("[Zero] Sending: " + msg)
-      self.ser.write (msg + "\r\n")
+      self.ser.write (msg + "\n")
     except serial.SerialException as e:
       self.logger.exception ("[Zero] Exception with serial link, reconnecting..: " + str(e))
       self.closeserial ()

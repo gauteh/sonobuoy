@@ -285,9 +285,7 @@ simpleparser:
         RF_Serial.print (gps->time);
         RF_Serial.print (",");
         RF_Serial.print (gps->day);
-        RF_Serial.print (",");
         RF_Serial.print (gps->month);
-        RF_Serial.print (",");
         RF_Serial.print (gps->year);
         RF_Serial.print (",");
         RF_Serial.print ((gps->valid ? 'Y' : 'N'));
@@ -297,7 +295,7 @@ simpleparser:
         RF_Serial.print ((gps->HAS_SYNC ? 'Y' : 'N'));
         RF_Serial.print (",");
         RF_Serial.print ((gps->HAS_SYNC_REFERENCE ? 'Y' : 'N'));
-        RF_Serial.println (",*NN");
+        RF_Serial.println ("*NN");
 
         /*
         sprintf (buf, "$GPS,S,%d,%d,%s,%c,%s,%c,%lu,%lu,%02d%02d%02d,%c,%c,%c,%c*", gps->gps_data.lasttype, gps->gps_data.received, gps->gps_data.latitude, (gps->gps_data.north ? 'N' : 'S'), gps->gps_data.longitude, (gps->gps_data.east ? 'E' : 'W'), (uint32_t) gps->lastsecond, gps->gps_data.time, gps->gps_data.day, gps->gps_data.month, gps->gps_data.year, (gps->gps_data.valid ? 'Y' : 'N'), (gps->HAS_TIME ? 'Y' : 'N'), (gps->HAS_SYNC ? 'Y' : 'N'), (gps->HAS_SYNC_REFERENCE ? 'Y' : 'N'));
@@ -314,7 +312,7 @@ simpleparser:
         RF_Serial.print (ad->value);
         RF_Serial.print (",0");
         //RF_Serial.print (ad->reg.raw[1]);
-        RF_Serial.println (",*NN");
+        RF_Serial.println ("*NN");
 
         /*
         sprintf (buf, "$AD,S,%lu,%lu,0x%08lX,0x%08hX*", ad->position, ad->batchfilltime, ad->value, ad->reg.raw[1]);

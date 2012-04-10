@@ -8,6 +8,7 @@ protocol.py: Interface and protocol to buoys
 from time import time
 
 from util import *
+from buoy import *
 
 class Protocol:
   zero = None
@@ -101,7 +102,8 @@ class Protocol:
   def a_parse (self, buf):
     # Test checksum
     if (buf[-2:] == 'NN'):
-      self.logger.debug ("[Protocol] Checksum not provided on received message")
+      #self.logger.debug ("[Protocol] Checksum not provided on received message")
+      pass
     elif (not test_checksum (buf)):
       self.logger.info ("[Protocol] Message discarded, checksum failed.")
       self.logger.info ("[Protocol] Discarded: " + buf)
@@ -118,6 +120,11 @@ class Protocol:
     l = len (buf)
 
     while (i < l):
+
+      # Skip checksum
+      if buf[i-1] == '*':
+        return
+
       # Get token
       token = ''
       while ((i < l) and (buf[i] != ',' and buf[i] != '*')):
@@ -193,9 +200,13 @@ class Protocol:
                 self.zero.current.gps.has_sync_reference = (token == 'Y')
 
                 self.zero.current.gps.gps_status ()
+              else:
+                self.logger.error ("[Protocol] Too many tokens for message: " + msgtype + ", subtype: " + subtype + ", token: " + token)
+                return
 
             else:
               self.logger.error ("[Protocol] Unknown subtype for message: " + str(buf))
+              return
 
         elif (msgtype == 'AD'):
           if (tokeni == 1): subtype = token
@@ -211,6 +222,9 @@ class Protocol:
                 elif (tokeni == 5):
                   self.zero.current.ad.ad_config = token
                   self.zero.current.ad.ad_status ()
+                  return
+                else:
+                  self.logger.error ("[Protocol] Too many tokens for message: " + msgtype + ", subtype: " + subtype)
                   return
               except ValueError:
                 self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
@@ -250,6 +264,10 @@ class Protocol:
                 #print "[AD] Initiating binary transfer.. samples: ", self.zero.current.ad.ad_k_samples
                 return
 
+              else:
+                self.logger.error ("[Protocol] Too many tokens for message: " + msgtype + ", subtype: " + subtype)
+                return
+
             elif (subtype == 'DE'):
               if not self.waitforreceipt:
                 self.logger.error ("[Protocol] Got end of batch data without getting data first.")
@@ -268,10 +286,19 @@ class Protocol:
 
             else:
               self.logger.error ("[Protocol] Unknown subtype for message: " + str(buf))
+              return
 
         elif (msgtype == 'DBG'):
           if (tokeni == 1):
             self.logger.info ("[Buoy] " + token)
+
+        elif (msgtype == 'ERR'):
+          if (tokeni == 1):
+            try:
+              self.logger.error ("[Buoy] Received error: [" + token + "] " + Buoy.error_strings[int(token)])
+            except ValueError:
+              self.logger.error ("[Buoy] Received error: [" + token + "]")
+              self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
 
         else:
           self.logger.error ("[Protocol] Unknown message: " + str(buf))

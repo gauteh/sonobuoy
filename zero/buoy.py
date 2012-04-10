@@ -199,4 +199,14 @@ class Buoy:
   def getstatus (self):
     self.protocol.send ("GS")
 
+  error_strings = [ "E_CONFIRM",
+                    "E_BADCOMMAND",
+                    "E_UNKNOWNCOMMAND",
+                    "E_SDUNAVAILABLE",
+                    "E_NOSUCHID",
+                    "E_NOSUCHREF",
+                    "E_NOSUCHSAMPLE",
+                    "E_NOSUCHDAT",
+                  ]
+
 
