@@ -24,15 +24,12 @@ namespace Buoy {
     delay (3000); // time to connect with serial before starting..
     setup ();
 
-# define LOOP_DELAY 10
 
     while (true) {
       gps->loop ();
       ad->loop ();
       rf->loop ();
       store->loop ();
-
-      delay (LOOP_DELAY);
     }
   }
 

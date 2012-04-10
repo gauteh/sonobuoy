@@ -295,6 +295,9 @@ namespace Buoy {
 
   void Store::write_batch () // {{{
   {
+# if DIRECT_SERIAL
+    SerialUSB.println ("[SD] Writing batch..");
+# endif
     /* Write new batch of samples */
     if (!SD_AVAILABLE) {
       return;
