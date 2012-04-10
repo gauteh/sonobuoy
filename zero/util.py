@@ -23,5 +23,8 @@ def test_checksum (s):
 
 ''' Version of hex aimed at byte values returning two digits 0 padded '''
 def hex2(i):
+  if i > 255 or i < 0:
+    raise ValueError ("Argument for hex2 must be uin8_t: between 255 and 0, '" + str(i) + "' is invalid.")
+
   s = '0123456789ABCDEF'
   return s[i >> 4] + s[i & 0x0F]

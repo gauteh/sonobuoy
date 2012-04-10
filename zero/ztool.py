@@ -7,10 +7,10 @@
 # Requires:
 # - texttable
 
-from ui import *
+from ui   import *
 from zero import *
 from buoy import *
-from ad import *
+from ad   import *
 
 import sys
 import os
@@ -51,8 +51,9 @@ class zCLI:
     self.z.rollfile()
 
   def getstatus (self):
-    print "Getting status.. (async)"
+    print "Getting status..",
     self.z.getstatus ()
+    print "done."
 
   def summary (self):
     print "Summary of known buoys:"
