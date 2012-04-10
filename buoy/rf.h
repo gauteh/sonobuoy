@@ -59,12 +59,6 @@ namespace Buoy {
       GPS     *gps;
       Store   *store;
 
-      bool      isactive;
-      bool      stayactive;
-      uint32_t  activated;            // millis () at time of activation
-# define ACTIVE_TIMEOUT     60        // seconds before exiting active mode
-# define STAYACTIVE_TIMEOUT (20 * 60) // seconds before exiting stay active mode
-
       /* Information about batch, ids or id about to be sent */
       uint32_t id;
       uint32_t ref;
@@ -81,10 +75,7 @@ namespace Buoy {
       typedef enum _RF_TELEGRAM {
         UNSPECIFIED = 0,
         UNKNOWN,
-        ACTIVATE,
-        DEACTIVATE,
         GETSTATUS,
-        STAYACTIVE,
         GETIDS,
         GETID,
         GETLASTID,

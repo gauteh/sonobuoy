@@ -21,10 +21,6 @@ namespace Buoy {
   RF::RF () {
     rf = this;
 
-    isactive = false;
-    stayactive = false;
-    activated = 0;
-
     rf_buf_pos = 0;
   }
 
@@ -49,15 +45,6 @@ namespace Buoy {
      * 3 = Waiting for Checksum digit 2
      */
     static int state = 0;
-
-    /* Time out activeness.. */
-    if (isactive) {
-      if ((millis () - activated) >
-         ((stayactive ? STAYACTIVE_TIMEOUT : ACTIVE_TIMEOUT) * 1000)) {
-        isactive = false;
-        stayactive = false;
-      }
-    }
 
     int ca = RF_Serial.available ();
 
@@ -153,20 +140,21 @@ namespace Buoy {
       token[j] = 0;
 # if DIRECT_SERIAL
       SerialUSB.print ("Token: ");
+      SerialUSB.print (tokeni);
       SerialUSB.println (token);
 # endif
 
       if (i < len) {
         if (tokeni == 0) {
           /* Determine telegram type */
-          if (strcmp(token, "$A") == 0)
-            type = ACTIVATE;
-          else if (strcmp(token, "$DA") == 0)
-            type = DEACTIVATE;
-          else if (strcmp(token, "$GS") == 0)
+          if (strcmp(token, "$GS") == 0) {
             type = GETSTATUS;
-          else if (strcmp(token, "$SA") == 0)
-            type = STAYACTIVE;
+            goto simpleparser;
+          }
+          else if (strcmp(token, "$GLID") == 0) {
+            type = GETLASTID;
+            goto simpleparser;
+          }
           else if (strcmp(token, "$GIDS") == 0)
             type = GETIDS;
           else if (strcmp(token, "$GID") == 0)
@@ -184,181 +172,83 @@ namespace Buoy {
             return;
           }
         } else {
-          /* Must be activated first */
-          if (isactive || (type == ACTIVATE) || (type == STAYACTIVE)) {
-            switch (type)
-            {
-              // ACTIVATE {{{
-              case ACTIVATE:
-                isactive = true;
-                stayactive = false;
-                activated = millis ();
-                break;
+          switch (type)
+          {
+            // GETIDS {{{
+            case GETIDS:
+              switch (tokeni)
+              {
+                /* first token specifies starting id to send */
+                case 1:
+                  {
+                  id = atoi (token);
+                  if (id < 1) goto cmderror;
+
+                  store->send_indexes (id, GET_IDS_N);
+                  }
+                  break;
+              }
+              break;
               // }}}
 
-              // DEACTIVATE {{{
-              case DEACTIVATE:
-                isactive = false;
-                stayactive = false;
-                break;
+            // GETID {{{
+            case GETID:
+              switch (tokeni)
+              {
+                /* first token specifies starting id to send */
+                case 1:
+                  {
+                  id = atoi (token);
+                  if (id < 1) goto cmderror;
+
+                  store->send_index (id);
+                  }
+                  break;
+              }
+              break;
               // }}}
 
-              // STAYACTIVE {{{
-              case STAYACTIVE:
-                isactive = true;
-                stayactive = true;
-                activated = millis ();
-                break;
+            // GETBATCH {{{
+            case GETBATCH:
+              switch (tokeni)
+              {
+                case 1:
+                  {
+                  id = atoi (token);
+                  if (id < 1) goto cmderror;
+                  }
+                  break;
+
+                case 2:
+                  {
+                  ref = atoi (token);
+                  if (ref < 1) goto cmderror;
+                  }
+                  break;
+
+                case 3:
+                  {
+                  sample = atoi (token);
+                  if (sample < 1) goto cmderror;
+                  }
+                  break;
+
+                case 4:
+                  {
+                  length = atoi (token);
+                  if (length < 1) goto cmderror;
+
+                  store->send_batch (id, ref, sample, length);
+                  }
+                  break;
+              }
+              break;
               // }}}
 
-              // GETSTATUS {{{
-              case GETSTATUS:
-                // $GPS,S,[lasttype],[telegrams received],[lasttelegram],Lat,Lon,unixtime,time,date,Valid,HAS_TIME,HAS_SYNC,HAS_SYNC_REFERENCE*CS
-                // Valid: Y = Yes, N = No
-                SerialUSB.println ("[RF] Sending status..");
-                RF_Serial.print ("$GPS,S");
-                RF_Serial.print (gps->lasttype);
-                RF_Serial.print (",");
-                RF_Serial.print (gps->received);
-                RF_Serial.print (",");
-                RF_Serial.print (gps->latitude);
-                RF_Serial.print (",");
-                RF_Serial.print ((gps->north ? 'N' : 'S'));
-                RF_Serial.print (",");
-                RF_Serial.print (gps->longitude);
-                RF_Serial.print (",");
-                RF_Serial.print ((gps->east ? 'E' : 'W'));
-                RF_Serial.print (",");
-                RF_Serial.print ((uint32_t) gps->lastsecond);
-                RF_Serial.print (",");
-                RF_Serial.print (gps->time);
-                RF_Serial.print (",");
-                RF_Serial.print (gps->day);
-                RF_Serial.print (",");
-                RF_Serial.print (gps->month);
-                RF_Serial.print (",");
-                RF_Serial.print (gps->year);
-                RF_Serial.print (",");
-                RF_Serial.print ((gps->valid ? 'Y' : 'N'));
-                RF_Serial.print (",");
-                RF_Serial.print ((gps->HAS_TIME ? 'Y' : 'N'));
-                RF_Serial.print (",");
-                RF_Serial.print ((gps->HAS_SYNC ? 'Y' : 'N'));
-                RF_Serial.print (",");
-                RF_Serial.print ((gps->HAS_SYNC_REFERENCE ? 'Y' : 'N'));
-                RF_Serial.println (",*NN");
-
-                /*
-                sprintf (buf, "$GPS,S,%d,%d,%s,%c,%s,%c,%lu,%lu,%02d%02d%02d,%c,%c,%c,%c*", gps->gps_data.lasttype, gps->gps_data.received, gps->gps_data.latitude, (gps->gps_data.north ? 'N' : 'S'), gps->gps_data.longitude, (gps->gps_data.east ? 'E' : 'W'), (uint32_t) gps->lastsecond, gps->gps_data.time, gps->gps_data.day, gps->gps_data.month, gps->gps_data.year, (gps->gps_data.valid ? 'Y' : 'N'), (gps->HAS_TIME ? 'Y' : 'N'), (gps->HAS_SYNC ? 'Y' : 'N'), (gps->HAS_SYNC_REFERENCE ? 'Y' : 'N'));
-                APPEND_CSUM (buf);
-                RF_Serial.println (buf);
-                */
-
-                // $AD,S,[queue position], [queue fill time],[value],[config]*CS
-                RF_Serial.print ("$AD,");
-                RF_Serial.print (ad->position);
-                RF_Serial.print (",");
-                RF_Serial.print (ad->batchfilltime);
-                RF_Serial.print (",");
-                RF_Serial.print (ad->value);
-                RF_Serial.print (",0");
-                //RF_Serial.print (ad->reg.raw[1]);
-                RF_Serial.println (",*NN");
-
-                /*
-                sprintf (buf, "$AD,S,%lu,%lu,0x%08lX,0x%08hX*", ad->position, ad->batchfilltime, ad->value, ad->reg.raw[1]);
-                APPEND_CSUM (buf);
-                RF_Serial.println (buf);
-                */
-                break;
-              // }}}
-
-              // GETIDS {{{
-              case GETIDS:
-                switch (tokeni)
-                {
-                  /* first token specifies starting id to send */
-                  case 1:
-                    {
-                    id = atoi (token);
-                    if (id < 1) goto cmderror;
-
-                    store->send_indexes (id, GET_IDS_N);
-                    }
-                    break;
-                }
-                break;
-                // }}}
-
-              // GETID {{{
-              case GETID:
-                switch (tokeni)
-                {
-                  /* first token specifies starting id to send */
-                  case 1:
-                    {
-                    id = atoi (token);
-                    if (id < 1) goto cmderror;
-
-                    store->send_index (id);
-                    }
-                    break;
-                }
-                break;
-                // }}}
-
-              // GETLASTID {{{
-              case GETLASTID:
-                store->send_lastid ();
-                break;
-                // }}}
-
-              // GETBATCH {{{
-              case GETBATCH:
-                switch (tokeni)
-                {
-                  case 1:
-                    {
-                    id = atoi (token);
-                    if (id < 1) goto cmderror;
-                    }
-                    break;
-
-                  case 2:
-                    {
-                    ref = atoi (token);
-                    if (ref < 1) goto cmderror;
-                    }
-                    break;
-
-                  case 3:
-                    {
-                    sample = atoi (token);
-                    if (sample < 1) goto cmderror;
-                    }
-                    break;
-
-                  case 4:
-                    {
-                    length = atoi (token);
-                    if (length < 1) goto cmderror;
-
-                    store->send_batch (id, ref, sample, length);
-                    }
-                    break;
-                }
-                break;
-                // }}}
-
-              default:
-                /* Having reached here on an unknown or unspecified telegram
-                 * parsing is cancelled. */
-                return;
-            }
-          } else {
-# if DIRECT_SERIAL
-          SerialUSB.println ("[RF] Got command when not active.");
-# endif
+            default:
+              /* Having reached here on an unknown or unspecified telegram
+               * parsing is cancelled. */
+              return;
           }
         }
       } else {
@@ -366,13 +256,88 @@ namespace Buoy {
       }
       tokeni++;
     }
-
     return;
+
+    /* Single token commands */
+simpleparser:
+    switch (type) {
+      // GETSTATUS {{{
+      case GETSTATUS:
+        // $GPS,S,[lasttype],[telegrams received],[lasttelegram],Lat,Lon,unixtime,time,date,Valid,HAS_TIME,HAS_SYNC,HAS_SYNC_REFERENCE*CS
+        // Valid: Y = Yes, N = No
+        SerialUSB.println ("[RF] Sending status..");
+        RF_Serial.print ("$GPS,S");
+        RF_Serial.print (gps->lasttype);
+        RF_Serial.print (",");
+        RF_Serial.print (gps->received);
+        RF_Serial.print (",");
+        RF_Serial.print (gps->latitude);
+        RF_Serial.print (",");
+        RF_Serial.print ((gps->north ? 'N' : 'S'));
+        RF_Serial.print (",");
+        RF_Serial.print (gps->longitude);
+        RF_Serial.print (",");
+        RF_Serial.print ((gps->east ? 'E' : 'W'));
+        RF_Serial.print (",");
+        RF_Serial.print ((uint32_t) gps->lastsecond);
+        RF_Serial.print (",");
+        RF_Serial.print (gps->time);
+        RF_Serial.print (",");
+        RF_Serial.print (gps->day);
+        RF_Serial.print (",");
+        RF_Serial.print (gps->month);
+        RF_Serial.print (",");
+        RF_Serial.print (gps->year);
+        RF_Serial.print (",");
+        RF_Serial.print ((gps->valid ? 'Y' : 'N'));
+        RF_Serial.print (",");
+        RF_Serial.print ((gps->HAS_TIME ? 'Y' : 'N'));
+        RF_Serial.print (",");
+        RF_Serial.print ((gps->HAS_SYNC ? 'Y' : 'N'));
+        RF_Serial.print (",");
+        RF_Serial.print ((gps->HAS_SYNC_REFERENCE ? 'Y' : 'N'));
+        RF_Serial.println (",*NN");
+
+        /*
+        sprintf (buf, "$GPS,S,%d,%d,%s,%c,%s,%c,%lu,%lu,%02d%02d%02d,%c,%c,%c,%c*", gps->gps_data.lasttype, gps->gps_data.received, gps->gps_data.latitude, (gps->gps_data.north ? 'N' : 'S'), gps->gps_data.longitude, (gps->gps_data.east ? 'E' : 'W'), (uint32_t) gps->lastsecond, gps->gps_data.time, gps->gps_data.day, gps->gps_data.month, gps->gps_data.year, (gps->gps_data.valid ? 'Y' : 'N'), (gps->HAS_TIME ? 'Y' : 'N'), (gps->HAS_SYNC ? 'Y' : 'N'), (gps->HAS_SYNC_REFERENCE ? 'Y' : 'N'));
+        APPEND_CSUM (buf);
+        RF_Serial.println (buf);
+        */
+
+        // $AD,S,[queue position], [queue fill time],[value],[config]*CS
+        RF_Serial.print ("$AD,");
+        RF_Serial.print (ad->position);
+        RF_Serial.print (",");
+        RF_Serial.print (ad->batchfilltime);
+        RF_Serial.print (",");
+        RF_Serial.print (ad->value);
+        RF_Serial.print (",0");
+        //RF_Serial.print (ad->reg.raw[1]);
+        RF_Serial.println (",*NN");
+
+        /*
+        sprintf (buf, "$AD,S,%lu,%lu,0x%08lX,0x%08hX*", ad->position, ad->batchfilltime, ad->value, ad->reg.raw[1]);
+        APPEND_CSUM (buf);
+        RF_Serial.println (buf);
+        */
+        break;
+      // }}}
+
+      // GETLASTID {{{
+      case GETLASTID:
+        store->send_lastid ();
+        break;
+        // }}}
+
+      default: break;
+    }
+    return;
+
 cmderror:
 # if DIRECT_SERIAL
     SerialUSB.println ("[RF] E_BADCOMMAND");
 # endif
-    if (isactive) send_error (E_BADCOMMAND);
+    send_error (E_BADCOMMAND);
     return;
 
     /* Done parser }}} */
