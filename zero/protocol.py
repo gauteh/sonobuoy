@@ -45,6 +45,8 @@ class Protocol:
   def send (self, msg):
     if self.zero.current.id != self.adressedbuoy:
       self.znsetaddress ()
+      self.znconnect ()
+      self.znoutputwireless ()
 
     # Encapsulate and add checksum
     msg = '$' + msg + '*' + gen_checksum (msg)
@@ -308,9 +310,25 @@ class Protocol:
               self.logger.error ("[Protocol] Unknown subtype for message: " + str(buf))
               return
 
+        elif (msgtype == 'Z'):
+          if (tokeni == 1):
+            subtype = token
+          else:
+            if subtype == 'S':
+              self.znaddress = token
+              try:
+                self.logger.info ("[ZeroNode] Current node address: " + hex2(ord(token[0])) + ":" + hex2(ord(token[1])) + ":" + hex2(ord(token[2])))
+              except:
+                self.logger.exception ("[ZeroNode] Current node address (un-parseable): " + str(token))
+              return
+
         elif (msgtype == 'DBG'):
           if (tokeni == 1):
             self.logger.info ("[Buoy] " + token)
+
+        elif (msgtype == 'DBGZ'):
+          if (tokeni == 1):
+            self.logger.info ("[ZeroNode] " + token)
 
         elif (msgtype == 'ERR'):
           if (tokeni == 1):
