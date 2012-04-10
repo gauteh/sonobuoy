@@ -84,6 +84,7 @@ namespace Buoy {
           rf_buf[rf_buf_pos] = 0;
 
           parse (); // Complete telegram received
+          rf_buf_pos = 0;
           state = 0;
           break;
 
@@ -266,7 +267,7 @@ simpleparser:
         // $GPS,S,[lasttype],[telegrams received],[lasttelegram],Lat,Lon,unixtime,time,date,Valid,HAS_TIME,HAS_SYNC,HAS_SYNC_REFERENCE*CS
         // Valid: Y = Yes, N = No
         SerialUSB.println ("[RF] Sending status..");
-        RF_Serial.print ("$GPS,S");
+        RF_Serial.print ("$GPS,S,");
         RF_Serial.print (gps->lasttype);
         RF_Serial.print (",");
         RF_Serial.print (gps->received);
@@ -305,7 +306,7 @@ simpleparser:
         */
 
         // $AD,S,[queue position], [queue fill time],[value],[config]*CS
-        RF_Serial.print ("$AD,");
+        RF_Serial.print ("$AD,S,");
         RF_Serial.print (ad->position);
         RF_Serial.print (",");
         RF_Serial.print (ad->batchfilltime);

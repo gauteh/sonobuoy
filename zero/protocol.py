@@ -13,13 +13,6 @@ class Protocol:
   zero = None
   logger = None
 
-  ACTIVE_TIMEOUT = 30
-  STAYACTIVE_TIMEOUT = 20 * 60
-
-  activated   = 0
-  active      = False
-  stayactive  = False
-
   adressedbuoy = 0     # id of buoy addressed on zeronode
 
   def __init__ (self, z):
@@ -42,17 +35,6 @@ class Protocol:
   waitforreceipt  = False # Have just got a AD data batch and is waiting for
                           # a DE receipt message
 
-  def checkactive (self):
-    if self.active:
-      if self.active:
-        to = self.ACTIVE_TIMEOUT
-      else:
-        to = self.STAYACTIVE_TIMEOUT
-
-      if ((time () - self.activated) > to):
-        self.active = False
-        self.stayactive = False
-
   def send (self, msg):
     # Address buoy
     if self.zero.current.id != self.adressedbuoy:
@@ -60,22 +42,11 @@ class Protocol:
       self.zero.send ('$' + _msg + '*' + gen_checksum (_msg))
       self.adressedbuoy = self.zero.current.id
 
-    # Activate buoy
-    self.checkactive ()
-    if not self.active:
-      _msg = '$A*' + gen_checksum ('A')
-      self.zero.send (_msg)
-      self.active    = True
-      self.activated = time ()
-
     # Encapsulate and add checksum
     msg = '$' + msg + '*' + gen_checksum (msg)
     self.zero.send (msg)
 
   def handle (self, buf):
-    # Check activated
-    self.checkactive ()
-
     i = 0
     l = len (buf)
 
@@ -143,8 +114,6 @@ class Protocol:
     msgtype = ''
     subtype = ''
 
-    finished = False
-
     i = 0
     l = len (buf)
 
@@ -154,9 +123,6 @@ class Protocol:
       while ((i < l) and (buf[i] != ',' and buf[i] != '*')):
         token += buf[i]
         i += 1
-
-      if ((i < l) and buf[i] == '*'):
-        finished = True
 
       i += 1 # Skip delimiter
 
@@ -228,6 +194,9 @@ class Protocol:
 
                 self.zero.current.gps.gps_status ()
 
+            else:
+              self.logger.error ("[Protocol] Unknown subtype for message: " + str(buf))
+
         elif (msgtype == 'AD'):
           if (tokeni == 1): subtype = token
           elif (tokeni > 1):
@@ -296,6 +265,9 @@ class Protocol:
                 self.waitforreceipt = False
 
               return
+
+            else:
+              self.logger.error ("[Protocol] Unknown subtype for message: " + str(buf))
 
         elif (msgtype == 'DBG'):
           if (tokeni == 1):
