@@ -7,6 +7,7 @@
 
 # pragma once
 
+# include "buoy.h"
 # include <stdint.h>
 # include "types.h"
 

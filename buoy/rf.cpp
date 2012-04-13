@@ -5,11 +5,14 @@
  *
  */
 
+
 # include <stdlib.h>
 # include <string.h>
-# include "wirish.h"
 
 # include "buoy.h"
+
+# include "wirish.h"
+
 # include "rf.h"
 # include "ads1282.h"
 # include "gps.h"

@@ -17,9 +17,9 @@
  * along with the Arduino SdFat Library.  If not, see
  * <http://www.gnu.org/licenses/>.
  */
+# include "../buoy.h"
 #include "SdFat.h"
 #include <usb_serial.h>
-# include "../buoy.h"
 
 //------------------------------------------------------------------------------
 // raw block cache

@@ -5,9 +5,9 @@
  *
  */
 
+# include "buoy.h"
 # include "wirish.h"
 
-# include "buoy.h"
 using namespace Buoy;
 
 

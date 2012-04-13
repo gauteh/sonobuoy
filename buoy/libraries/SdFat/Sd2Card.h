@@ -23,10 +23,11 @@
  * \file
  * Sd2Card class
  */
+# include "../buoy.h"
+
 #include "Sd2PinMap.h"
 #include "SdInfo.h"
 #include "HardwareSPI.h"
-# include "../buoy.h"
 
 /** Set SCK to max rate of F_CPU/2. See Sd2Card::setSckRate(). */
 uint8_t const SPI_FULL_SPEED = 0;

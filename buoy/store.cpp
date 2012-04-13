@@ -5,13 +5,14 @@
  *
  */
 
+# include "buoy.h"
+
 # include <string.h>
 
 # include "wirish.h"
 # include "HardwareSPI.h"
 
 # include "store.h"
-# include "buoy.h"
 # include "rf.h"
 # include "ads1282.h"
 # include "gps.h"

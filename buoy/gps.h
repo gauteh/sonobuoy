@@ -10,6 +10,8 @@
 
 # ifndef ONLY_SPEC
 
+# include "buoy.h"
+
 # include <stdint.h>
 # include "types.h"
 
