@@ -23,8 +23,8 @@
  * \file
  * Useful utility functions.
  */
-#include <WProgram.h>
 # include "../buoy.h"
+#include <WProgram.h>
 //#include <avr/pgmspace.h>
 /** Store and print a string in flash memory.*/
 /*#define PgmPrint(x) SerialPrint_P(PSTR(x))*/

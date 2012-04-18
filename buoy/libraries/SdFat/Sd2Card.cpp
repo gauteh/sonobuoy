@@ -17,11 +17,13 @@
  * along with the Arduino Sd2Card Library.  If not, see
  * <http://www.gnu.org/licenses/>.
  */
+
+# include "../buoy.h"
+
 #include <WProgram.h>
 #include "Sd2Card.h"
 #include "HardwareSPI.h"
 #include "spi.h"
-# include "../buoy.h"
 
 //pointer to spi object
 HardwareSPI *SPIn;

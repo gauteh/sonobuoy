@@ -5,11 +5,12 @@
  *
  */
 
+# include "buoy.h"
+
 # include <stdint.h>
 
 # include "wirish.h"
 
-# include "buoy.h"
 # include "ads1282.h"
 # include "rf.h"
 # include "gps.h"

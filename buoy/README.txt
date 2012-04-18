@@ -10,6 +10,9 @@
     - openocd
     - python_serial
 
+  * The LeafLabs Maple udev rules (support/scripts/45-maple.rules might
+    need to be installed.
+
 For coding:
 
   Vim mode line: /* vim: set filetype=arduino :  */

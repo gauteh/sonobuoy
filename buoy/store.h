@@ -7,9 +7,10 @@
 
 # pragma once
 
+# include "buoy.h"
+
 # include "ads1282.h"
 # include "gps.h"
-# include "buoy.h"
 
 # ifndef ONLY_SPEC
 

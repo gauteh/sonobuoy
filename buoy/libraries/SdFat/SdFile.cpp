@@ -17,12 +17,12 @@
  * along with the Arduino SdFat Library.  If not, see
  * <http://www.gnu.org/licenses/>.
  */
+# include "../buoy.h"
 #include "SdFat.h"
 //#include <avr/pgmspace.h>
 #include <WProgram.h>
 #include "HardwareSPI.h"
 #include <string.h>
-# include "../buoy.h"
 
 //------------------------------------------------------------------------------
 // callback function for date/time

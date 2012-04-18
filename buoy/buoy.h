@@ -18,6 +18,13 @@
 
 # include <stdint.h>
 
+/* Disable any ASSERT() and serial line debugger (saves some program size)
+ *
+ * Must be defined before any wirish.h or libmaple.h includes.
+ *
+ */
+//# define DEBUG_LEVEL DEBUG_NONE
+
 # include "wirish.h"
 
 # include "types.h"
