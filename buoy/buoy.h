@@ -30,7 +30,7 @@
 # include "types.h"
 
 /* Print debug messages to USB serial */
-# define DIRECT_SERIAL 1
+# define DIRECT_SERIAL 0
 
 /* Macros for stringifying defines */
 # define STRINGIFY_I(s) #s

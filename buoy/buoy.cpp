@@ -27,10 +27,15 @@ namespace Buoy {
 
 
     while (true) {
+      /*
       gps->loop ();
       ad->loop ();
       rf->loop ();
       store->loop ();
+      */
+
+      SerialUSB.println ("loop");
+      delay (1000);
     }
   }
 
@@ -39,22 +44,32 @@ namespace Buoy {
     pinMode (BOARD_LED_PIN, OUTPUT);
     digitalWrite (BOARD_LED_PIN, LOW);
 
+    SerialUSB.begin ();
+
     /* Set up devices */
+    /*
     rf    = new RF ();
     gps   = new GPS ();
     ad    = new ADS1282 ();
-    store = new Store ();
 
+
+    store = new Store ();
+    */
+
+    /*
     rf->setup     (this);
     gps->setup    (this);
     ad->setup     (this);
     store->setup  (this);
+    */
 
     /* Start reading data continuously and writing to SD card */
     SerialUSB.println ("[Buoy] Initiating continuous transfer and write.");
 
+    /*
     ad->start_continuous_read ();
     store->start_continuous_write ();
+    */
   }
 
 
