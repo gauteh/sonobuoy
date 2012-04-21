@@ -53,7 +53,7 @@ namespace Buoy {
   }
 
   void GPS::setup (BuoyMaster *b) {
-    rf = b->rf;
+    //rf = b->rf;
     ad = b->ad;
 
     gps_buf[0] = 0;
@@ -279,7 +279,7 @@ namespace Buoy {
     */
 
     /* Test checksum before parsing */
-    if (!rf->test_checksum (gps_buf)) return;
+    if (!RF::test_checksum (gps_buf)) return;
 
     /* Update time, should be set in case time data has been received */
     bool doseconds = false;

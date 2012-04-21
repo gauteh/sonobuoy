@@ -10,11 +10,15 @@
 # include "wirish.h"
 # include "Wire.h"
 
+# define HAS_GPS 0
+# define NO_MINIMAL_CODE 0
+
 # include "ads1282.h"
 # include "gps.h"
 # include "rf.h"
 
 using namespace std;
+
 
 namespace Buoy {
   ADS1282::ADS1282 () {
@@ -23,7 +27,7 @@ namespace Buoy {
     continuous_read = false;
     run = 0;
 
-# if 0
+# if NO_MINIMAL_CODE
     state.ports0 = 0;
     state.ports1 = 0;
     state.polarity0 = 0;
@@ -54,8 +58,9 @@ namespace Buoy {
 
   void ADS1282::setup (BuoyMaster *b) {
     // Set up interface and ADS1282 {{{
-    rf = b->rf;
+# if HAS_GPS
     gps = b->gps;
+# endif
 
     /* Setup AD and get ready for data */
 # if DIRECT_SERIAL
@@ -63,9 +68,10 @@ namespace Buoy {
 # endif
 
     /* Set up I2C */
-    Wire.begin (AD_SDA, AD_SCL);
+    //Wire.begin (AD_SDA, AD_SCL);
 
     /* Set up SPI */
+    /*
     pinMode (AD_SCLK, OUTPUT);
     pinMode (AD_DIN, OUTPUT);
     pinMode (AD_DOUT, INPUT_PULLDOWN);
@@ -77,16 +83,20 @@ namespace Buoy {
     digitalWrite (AD_SS, LOW);
     digitalWrite (AD_SCLK, LOW);
     digitalWrite (AD_DIN, LOW);
+    */
 
     /* Pick initial reference for batch, counting on GPS to have waited
      * for some initial reference.
      */
+# if HAS_GPS
     references[batch] = (gps->reference * 1e6) + (micros () - gps->microdelta);
     reference_status[batch] = (gps->HAS_TIME & GPS::TIME) |
                               (gps->HAS_SYNC & GPS::SYNC) |
                               (gps->HAS_SYNC_REFERENCE & GPS::SYNC_REFERENCE);
+# endif
+
     /* Configure AD */
-    configure ();
+    //configure ();
 
     // }}}
   }
@@ -135,8 +145,10 @@ namespace Buoy {
     if (n != SUCCESS) { error (); return; }
 
     // Read configuration
-    // read_pca9535 (CONTROL0);
-    // read_pca9535 (POLARITY0);
+# if NO_MINIMAL_CODE
+    read_pca9535 (CONTROL0);
+    read_pca9535 (POLARITY0);
+# endif
 
     /* Set up outputs: (defined in header file)
      * - SYNC:   HIGH  (active low)
@@ -159,7 +171,9 @@ namespace Buoy {
     n = Wire.endTransmission ();
     if (n != SUCCESS) { error (); return; }
 
-    // read_pca9535 (OUTPUT0);
+# if NO_MINIMAL_CODE
+    read_pca9535 (OUTPUT0);
+# endif
     delay (100); // Allow EVM and AD to power up..
 
     reset ();
@@ -174,10 +188,14 @@ namespace Buoy {
     send_command (SDATAC);
     delay (100);
 
+# if NO_MINIMAL_CODE
     //read_registers ();
+# endif
     configure_registers (); // resets ADC, 63 data cycles are lost..
     delay (100);
-    //read_registers ();
+# if NO_MINIMAL_CODE
+    read_registers ();
+# endif
     delay (400);
 
 # if DIRECT_SERIAL
@@ -213,7 +231,7 @@ namespace Buoy {
     continuous_read = false;
   } // }}}
 
-# if 0
+# if NO_MINIMAL_CODE
   void ADS1282::read_pca9535 (PCA9535REGISTER reg) {
     /* Read registers of PCA9535RGE {{{
      *
@@ -290,7 +308,7 @@ namespace Buoy {
   }
 # endif
 
-# if 0
+# if NO_MINIMAL_CODE
   void ADS1282::reset_spi () {
     /* Reset SPI interface: Hold SCLK low for 64 nDRDY cycles  {{{*/
 # if DIRECT_SERIAL
@@ -334,7 +352,9 @@ namespace Buoy {
     n = Wire.endTransmission ();
     if (n != SUCCESS) { error (); return; }
 
-    //read_pca9535 (OUTPUT0);
+# if NO_MINIMAL_CODE
+    read_pca9535 (OUTPUT0);
+# endif
     digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
     delay (1000);
     digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
@@ -346,7 +366,9 @@ namespace Buoy {
     n = Wire.endTransmission ();
     if (n != SUCCESS) { error (); return; }
 
-    //read_pca9535 (OUTPUT0);
+# if NO_MINIMAL_CODE
+    read_pca9535 (OUTPUT0);
+# endif
     digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
     delay (100);
 
@@ -429,7 +451,7 @@ namespace Buoy {
     // }}}
   }
 
-# if 0
+# if NO_MINIMAL_CODE
   void ADS1282::read_registers () {
     /* Read registers of ADS1282, SDATAC must allready have been issued {{{ */
 # if DIRECT_SERIAL
@@ -443,7 +465,6 @@ namespace Buoy {
 
       /* TODO: Register values seem to arrive a bit earlier than sample values,
        * probably loosing MSB here though at the moment.. */
-      //reg.raw[i] >>= 1;
 
 # if DIRECT_SERIAL
       SerialUSB.print   ("[AD] Register [");
@@ -567,10 +588,13 @@ namespace Buoy {
       //gps->assert_time ();
 
       /* Pick new reference for batch */
+# if HAS_GPS
       references[batch] = (gps->reference * 1e6) + (micros () - gps->microdelta);
       reference_status[batch] = (gps->HAS_TIME & GPS::TIME) |
                                 (gps->HAS_SYNC & GPS::SYNC) |
                                 (gps->HAS_SYNC_REFERENCE & GPS::SYNC_REFERENCE);
+# endif
+
     }
 
     uint8_t v[4];
@@ -628,7 +652,7 @@ namespace Buoy {
   // }}}
 
   /* SPI clocking operations: in and out {{{ */
-# if 0
+# if NO_MINIMAL_CODE
   uint8_t ADS1282::shift_in () {
     /* Read each bit, MSB first */
     uint8_t v = 0;

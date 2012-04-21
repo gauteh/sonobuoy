@@ -21,7 +21,13 @@
 # include "types.h"
 
 /* SDIO, connected to SD socket. */
-
+# if BOARD_maple_native
+/* SPI mode, pins:
+ * CS     = CD (card detect) / SDIO_D3 (Data 3)
+ * DI     = SDIO_CMD
+ * SCLK   = SDIO_CK
+ * DO     = SDIO_D0 (Data 0)
+ */
 # define SDIO_D0   98
 # define SDIO_D1   99
 # define SDIO_D2  111
@@ -29,20 +35,6 @@
 
 # define SDIO_CK  113
 # define SDIO_CMD 116
-
-
-/* SPI mode, pins:
- * CS     = CD (card detect) / SDIO_D3 (Data 3)
- * DI     = SDIO_CMD
- * SCLK   = SDIO_CK
- * DO     = SDIO_D0 (Data 0)
- */
-/*
-# define SD_CS    SDIO_D3
-# define SD_MOSI  SDIO_CMD
-# define SD_MISO  SDIO_D0
-# define SD_SCLK  SDIO_CK
-*/
 
 /* SPI 2
  *
@@ -54,7 +46,19 @@
 # define SD_SPI 2
 # define SD_CS  2
 
+# elif BOARD_olimex_stm32_h103
 
+/* SPI 2
+ *
+ * NSS  = 31
+ * SCK  = 32
+ * MISO = 33
+ * MOSI = 34
+ */
+# define SD_SPI 2
+# define SD_CS  31 // chip select pin
+
+# endif
 
 namespace Buoy {
   class Store {

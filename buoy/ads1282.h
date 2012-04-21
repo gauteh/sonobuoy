@@ -26,11 +26,21 @@ namespace Buoy {
  * PCA9535RGE.
  */
 
+# if BOARD_maple_native
+
 # define AD_I2C  1
 # define AD_SCL 38
 # define AD_SDA 39
-# define AD_I2C_ADDRESS 0x20
 
+# elif BOARD_olimex_stm32_h103
+
+# define AD_I2C  1
+# define AD_SCL  5
+# define AD_SDA  9
+
+# endif
+
+# define AD_I2C_ADDRESS 0x20
 /* Register 1 */
 /* Inputs */
 # define AD_I2C_MFLAG   0b10000000
@@ -70,6 +80,7 @@ namespace Buoy {
 
 
   /* SPI */
+# if BOARD_maple_native
 # define AD_SPI   1
 # define AD_SCLK 53
 # define AD_DOUT 55
@@ -78,13 +89,26 @@ namespace Buoy {
 
 # define AD_nDRDY 40
 
+# elif BOARD_olimex_stm32_h103
+
+# define AD_SPI   1
+# define AD_SCLK 13
+# define AD_DOUT 12 // MISO
+# define AD_DIN  11 // MOSI
+# define AD_SS   BOARD_SPI1_NSS_PIN   // 52, unused
+
+# define AD_nDRDY 3
+
+# endif
+
   class ADS1282 {
     private:
     public:
-      RF   * rf;
+# if HAS_GPS
       GPS  * gps;
+# endif
 
-# if 0
+# if NO_MINIMAL_CODE
       typedef struct _control {
         /* Control registers of U7 / PCA9535RGE {{{ */
 
@@ -110,7 +134,7 @@ namespace Buoy {
       control state;
 # endif
 
-# if 0
+# if NO_MINIMAL_CODE
       typedef struct _registers {
         /* Registers of ADS1282 {{{ */
         uint8_t raw[11];
@@ -176,7 +200,7 @@ namespace Buoy {
       registers reg;
 # endif
 
-# if 0
+# if NO_MINIMAL_CODE
       typedef enum _pca9535register {
         /* Register id, corresponds to register id on device {{{ */
         INPUT0 = 0,
@@ -217,8 +241,8 @@ namespace Buoy {
 # endif
 
 # define FREQUENCY      250
-# define QUEUE_LENGTH  5000
-# define BATCHES          5 // _must_ be multiple of QUEUE_LENGTH
+# define QUEUE_LENGTH   500
+# define BATCHES          2 // _must_ be multiple of QUEUE_LENGTH
 # define BATCH_LENGTH (QUEUE_LENGTH / BATCHES)
 
 # ifndef ONLY_SPEC
@@ -249,11 +273,15 @@ namespace Buoy {
       void setup (BuoyMaster *);
       void configure ();
       void reset ();
-      //void reset_spi ();
-      // void read_pca9535 (PCA9535REGISTER);
+# if NO_MINIMAL_CODE
+      void reset_spi ();
+      void read_pca9535 (PCA9535REGISTER);
+# endif
 
       void send_command (COMMAND cmd, uint8_t start = 0, uint8_t n = 0);
-      // void read_registers ();
+# if NO_MINIMAL_CODE
+       void read_registers ();
+# endif
       void configure_registers ();
 
       void start_continuous_read ();
@@ -265,7 +293,9 @@ namespace Buoy {
       static void drdy ();
 
       void    shift_out (uint8_t v, bool delay = true);
-      //uint8_t shift_in  ();
+# if NO_MINIMAL_CODE
+      uint8_t shift_in  ();
+# endif
       void    shift_in_n (uint8_t *, int);
 
       void error ();

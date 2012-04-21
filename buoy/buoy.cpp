@@ -27,12 +27,10 @@ namespace Buoy {
 
 
     while (true) {
-      /*
-      gps->loop ();
-      ad->loop ();
-      rf->loop ();
-      store->loop ();
-      */
+      //gps->loop ();
+      //ad->loop ();
+      //rf->loop ();
+      //store->loop ();
 
       SerialUSB.println ("loop");
       delay (1000);
@@ -46,22 +44,24 @@ namespace Buoy {
 
     SerialUSB.begin ();
 
+    /* Count down.. */
+
+    for (int i = 0; i < 5; i++) {
+      SerialUSB.print ("Starting soon: ");
+      SerialUSB.println (i);
+      delay(1000);
+    }
+
     /* Set up devices */
-    /*
-    rf    = new RF ();
-    gps   = new GPS ();
+    //rf    = new RF ();
+    //gps   = new GPS ();
     ad    = new ADS1282 ();
+    //store = new Store ();
 
-
-    store = new Store ();
-    */
-
-    /*
-    rf->setup     (this);
-    gps->setup    (this);
+    //rf->setup     (this);
+    //gps->setup    (this);
     ad->setup     (this);
-    store->setup  (this);
-    */
+    //store->setup  (this);
 
     /* Start reading data continuously and writing to SD card */
     SerialUSB.println ("[Buoy] Initiating continuous transfer and write.");
@@ -70,11 +70,6 @@ namespace Buoy {
     ad->start_continuous_read ();
     store->start_continuous_write ();
     */
-  }
-
-
-  void BuoyMaster::send_greeting () {
-    rf->send_debug ("[Buoy] Initializing Gautebuoy [ " STRINGIFY(BUOY_ID) ": " BUOY_NAME " ] ( version " VERSION " )");
   }
 
   int itoa (uint32_t n, uint8_t base, char *buf)

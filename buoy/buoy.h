@@ -30,7 +30,7 @@
 # include "types.h"
 
 /* Print debug messages to USB serial */
-# define DIRECT_SERIAL 0
+# define DIRECT_SERIAL 1
 # define DEBUG_SD      0 // enable debug error messages on SdFat
 
 # if ! (defined (BOARD_olimex_stm32_h103) || defined (BOARD_maple_native))
@@ -45,14 +45,13 @@
 namespace Buoy {
   class BuoyMaster {
     public:
-      GPS       *gps;
+      /*GPS       *gps;*/
       ADS1282   *ad;
-      RF        *rf;
-      Store     *store;
+      /*RF        *rf;*/
+      /*Store     *store;*/
 
       BuoyMaster ();
       void main ();
-      void send_greeting ();
 
     private:
       void setup ();
