@@ -203,7 +203,7 @@ void SdFile::dirName(const dir_t& dir, char* name) {
  * list to indicate subdirectory level.
  */
 void SdFile::ls(uint8_t flags, uint8_t indent) {
-# if DIRECT_SERIAL
+# if DEBUG_SD
   dir_t* p;
 
   rewind();
@@ -593,7 +593,7 @@ uint8_t SdFile::openRoot(SdVolume* vol) {
  * \param[in] width Blank fill name if length is less than \a width.
  */
 void SdFile::printDirName(const dir_t& dir, uint8_t width) {
-# if DIRECT_SERIAL
+# if DEBUG_SD
   uint8_t w = 0;
   for (uint8_t i = 0; i < 11; i++) {
     if (dir.name[i] == ' ')continue;
@@ -622,7 +622,7 @@ void SdFile::printDirName(const dir_t& dir, uint8_t width) {
  * \param[in] fatDate The date field from a directory entry.
  */
 void SdFile::printFatDate(uint16_t fatDate) {
-# if DIRECT_SERIAL
+# if DEBUG_SD
   SerialUSB.print(FAT_YEAR(fatDate));
   SerialUSB.print('-');
   printTwoDigits(FAT_MONTH(fatDate));
@@ -638,7 +638,7 @@ void SdFile::printFatDate(uint16_t fatDate) {
  * \param[in] fatTime The time field from a directory entry.
  */
 void SdFile::printFatTime(uint16_t fatTime) {
-# if DIRECT_SERIAL
+# if DEBUG_SD
   printTwoDigits(FAT_HOUR(fatTime));
   SerialUSB.print(':');
   printTwoDigits(FAT_MINUTE(fatTime));
@@ -652,7 +652,7 @@ void SdFile::printFatTime(uint16_t fatTime) {
  * \param[in] v Value to be printed, 0 <= \a v <= 99
  */
 void SdFile::printTwoDigits(uint8_t v) {
-# if DIRECT_SERIAL
+# if DEBUG_SD
   char str[3];
   str[0] = '0' + v/10;
   str[1] = '0' + v % 10;

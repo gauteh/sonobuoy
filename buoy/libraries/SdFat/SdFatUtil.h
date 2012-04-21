@@ -30,7 +30,7 @@
 /*#define PgmPrint(x) SerialPrint_P(PSTR(x))*/
 /** Store and print a string in flash memory followed by a CR/LF.*/
 /*#define PgmPrintln(x) SerialPrintln_P(PSTR(x))*/
-# if DIRECT_SERIAL
+# if DEBUG_SD
   # define PgmPrint(x) SerialUSB.print(x)
   # define PgmPrintln(x) SerialUSB.println(x)
 # else

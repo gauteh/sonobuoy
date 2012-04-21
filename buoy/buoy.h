@@ -31,6 +31,7 @@
 
 /* Print debug messages to USB serial */
 # define DIRECT_SERIAL 0
+# define DEBUG_SD      0 // enable debug error messages on SdFat
 
 /* Macros for stringifying defines */
 # define STRINGIFY_I(s) #s
