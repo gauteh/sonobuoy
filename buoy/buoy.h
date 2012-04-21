@@ -33,6 +33,11 @@
 # define DIRECT_SERIAL 0
 # define DEBUG_SD      0 // enable debug error messages on SdFat
 
+# if ! (defined (BOARD_olimex_stm32_h103) || defined (BOARD_maple_native))
+  # error ("BOARD must either be: olimex_stm32_h103 or maple_native")
+# endif
+
+
 /* Macros for stringifying defines */
 # define STRINGIFY_I(s) #s
 # define STRINGIFY(s)   STRINGIFY_I(s)
