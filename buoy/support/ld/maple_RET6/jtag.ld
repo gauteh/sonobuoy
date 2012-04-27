@@ -1,6 +1,6 @@
 /*
- * Maple Native (STM32F103ZET6, high density) linker script for JTAG
- * (bare metal, no bootloader) builds.
+ * Maple RET6 Edition (STM32F103RET6, high density) linker script for
+ * JTAG (bare metal, no bootloader) builds.
  */
 
 MEMORY
@@ -13,10 +13,6 @@ REGION_ALIAS("REGION_TEXT", rom);
 REGION_ALIAS("REGION_DATA", ram);
 REGION_ALIAS("REGION_BSS", ram);
 REGION_ALIAS("REGION_RODATA", rom);
-
-/* Specify heap boundary addresses on the external SRAM chip */
-_lm_heap_start = 0x60000000;
-_lm_heap_end = 0x60100000;
 
 _FLASH_BUILD = 1;
 INCLUDE common.inc

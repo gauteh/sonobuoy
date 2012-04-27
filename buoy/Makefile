@@ -1,12 +1,8 @@
 # Try "make help" first
 
 SOURCES = buoy.cpp \
-          ads1282.cpp \
-          main.cpp
-
-					#gps.cpp \
-					rf.cpp \
-					store.cpp \
+					ads1282.cpp \
+					main.cpp
 
 .DEFAULT_GOAL := sketch
 
@@ -65,10 +61,11 @@ GLOBAL_CXXFLAGS := -fno-rtti -fno-exceptions -Wall $(GLOBAL_FLAGS)
 GLOBAL_ASFLAGS  := -mcpu=cortex-m3 -march=armv7-m -mthumb		     \
 		   -x assembler-with-cpp $(GLOBAL_FLAGS)
 LDFLAGS  = -T$(LDDIR)/$(LDSCRIPT) -L$(LDDIR)    \
-            -mcpu=cortex-m3 -mthumb -Xlinker     \
-            --gc-sections -Xassembler --march=armv7-m -Wall
+            -mcpu=cortex-m3 -mthumb -Xlinker -L $(LD_FAMILY_PATH)    \
+            -Xlinker --gc-sections \
+						-Xassembler --march=armv7-m -Wall
 
-# Excluded LDFLAGS
+# Removed LDFLAGS
 # -Xlinker --print-gc-sections
 
 ##
@@ -88,6 +85,7 @@ ifeq ($(LIBMAPLE_MODULES),)
 else
 	LIBMAPLE_MODULES += $(SRCROOT)/libmaple
 endif
+LIBMAPLE_MODULES += $(LIBMAPLE_MODULE_FAMILY) # family submodule in libmaple
 LIBMAPLE_MODULES += $(SRCROOT)/wirish
 # Official libraries:
 #LIBMAPLE_MODULES += $(SRCROOT)/libraries/Servo

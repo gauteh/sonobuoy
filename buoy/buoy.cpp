@@ -14,7 +14,7 @@
 # include "ads1282.h"
 # include "rf.h"
 # include "gps.h"
-# include "store.h"
+//# include "store.h"
 
 namespace Buoy {
   BuoyMaster::BuoyMaster () {
@@ -39,10 +39,10 @@ namespace Buoy {
 
   void BuoyMaster::setup () {
     /* Configure LED */
-    //pinMode (BOARD_LED_PIN, OUTPUT);
-    //digitalWrite (BOARD_LED_PIN, LOW);
+    pinMode (BOARD_LED_PIN, OUTPUT);
+    digitalWrite (BOARD_LED_PIN, LOW);
 
-    SerialUSB.begin ();
+    //SerialUSB.begin ();
 
     /* Count down.. */
 
