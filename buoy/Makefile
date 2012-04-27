@@ -39,7 +39,7 @@ PRODUCT_ID := 0003
 
 # Try "make help" for more information on BOARD and MEMORY_TARGET;
 # these default to a Maple Flash build.
-BOARD ?= olimex_stm32_h103
+BOARD ?= maple
 MEMORY_TARGET ?= flash
 
 # $(BOARD)- and $(MEMORY_TARGET)-specific configuration

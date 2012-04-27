@@ -46,7 +46,7 @@
 # define SD_SPI 2
 # define SD_CS  2
 
-# elif BOARD_olimex_stm32_h103
+# elif BOARD_maple
 
 /* SPI 2
  *

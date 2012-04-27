@@ -32,7 +32,7 @@ namespace Buoy {
 # define AD_SCL 38
 # define AD_SDA 39
 
-# elif BOARD_olimex_stm32_h103
+# elif BOARD_maple
 
 # define AD_I2C  1
 # define AD_SCL  5
@@ -89,7 +89,7 @@ namespace Buoy {
 
 # define AD_nDRDY 40
 
-# elif BOARD_olimex_stm32_h103
+# elif BOARD_maple
 
 # define AD_SPI   1
 # define AD_SCLK 13

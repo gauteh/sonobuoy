@@ -33,8 +33,8 @@
 # define DIRECT_SERIAL 1
 # define DEBUG_SD      0 // enable debug error messages on SdFat
 
-# if ! (defined (BOARD_olimex_stm32_h103) || defined (BOARD_maple_native))
-  # error ("BOARD must either be: olimex_stm32_h103 or maple_native")
+# if ! (defined (BOARD_maple) || defined (BOARD_maple_native))
+  # error ("BOARD must either be: maple or maple_native")
 # endif
 
 

@@ -17,7 +17,7 @@ namespace Buoy {
 
 # define RF_Serial Serial3
 
-# elif BOARD_olimex_stm32_h103
+# elif BOARD_maple
 
 # define RF_Serial Serial2
 

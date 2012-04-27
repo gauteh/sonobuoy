@@ -26,7 +26,7 @@ namespace Buoy {
 # define GPS_Serial Serial1
 # define GPS_SYNC_PIN 27 // Should be 5V tolerant
 
-# elif BOARD_olimex_stm32_h103
+# elif BOARD_maple
 
 # define GPS_Serial Serial1
 # define GPS_SYNC_PIN 30 // Should be 5V tolerant

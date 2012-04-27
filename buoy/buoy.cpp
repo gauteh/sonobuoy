@@ -39,8 +39,8 @@ namespace Buoy {
 
   void BuoyMaster::setup () {
     /* Configure LED */
-    pinMode (BOARD_LED_PIN, OUTPUT);
-    digitalWrite (BOARD_LED_PIN, LOW);
+    //pinMode (BOARD_LED_PIN, OUTPUT);
+    //digitalWrite (BOARD_LED_PIN, LOW);
 
     SerialUSB.begin ();
 

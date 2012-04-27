@@ -69,6 +69,25 @@ namespace Buoy {
     SerialUSB.println (AD_SCL);
 # endif
 
+    pinMode (AD_SDA, OUTPUT);
+    pinMode (AD_SCL, OUTPUT);
+    pinMode (3, OUTPUT);
+    digitalWrite (AD_SDA, LOW);
+    digitalWrite (AD_SCL, LOW);
+    digitalWrite (3, LOW);
+
+    SerialUSB.println ("[AD] i2c low.");
+
+    delay(4000);
+
+    SerialUSB.println ("[AD] i2c high.");
+    digitalWrite (AD_SDA, HIGH);
+    digitalWrite (AD_SCL, HIGH);
+    digitalWrite (3, HIGH);
+    delay(4000);
+
+
+
     /* Set up I2C */
     Wire.begin (AD_SDA, AD_SCL);
 
@@ -356,9 +375,9 @@ namespace Buoy {
 # if NO_MINIMAL_CODE
     read_pca9535 (OUTPUT0);
 # endif
-    digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
+    //digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
     delay (1000);
-    digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
+    //digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
 
     Wire.beginTransmission (AD_I2C_ADDRESS);
     Wire.send (0x02);
@@ -370,7 +389,7 @@ namespace Buoy {
 # if NO_MINIMAL_CODE
     read_pca9535 (OUTPUT0);
 # endif
-    digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
+    //digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
     delay (100);
 
 
