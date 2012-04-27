@@ -11,7 +11,7 @@
 # include "Wire.h"
 
 # define HAS_GPS 0
-# define NO_MINIMAL_CODE 0
+# define NO_MINIMAL_CODE 1
 
 # include "ads1282.h"
 # include "gps.h"
@@ -65,25 +65,25 @@ namespace Buoy {
     /* Setup AD and get ready for data */
 # if DIRECT_SERIAL
     SerialUSB.println ("[AD] Setting up ADS1282..");
+    SerialUSB.println (AD_SDA);
+    SerialUSB.println (AD_SCL);
 # endif
 
     /* Set up I2C */
-    //Wire.begin (AD_SDA, AD_SCL);
+    Wire.begin (AD_SDA, AD_SCL);
 
     /* Set up SPI */
-    /*
     pinMode (AD_SCLK, OUTPUT);
     pinMode (AD_DIN, OUTPUT);
     pinMode (AD_DOUT, INPUT_PULLDOWN);
-    pinMode (AD_nDRDY, INPUT_PULLDOWN);
+    //pinMode (AD_nDRDY, INPUT_PULLDOWN);
     pinMode (AD_SS, OUTPUT);
 
-    digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
+    //digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
 
     digitalWrite (AD_SS, LOW);
     digitalWrite (AD_SCLK, LOW);
     digitalWrite (AD_DIN, LOW);
-    */
 
     /* Pick initial reference for batch, counting on GPS to have waited
      * for some initial reference.
@@ -96,7 +96,7 @@ namespace Buoy {
 # endif
 
     /* Configure AD */
-    //configure ();
+    configure ();
 
     // }}}
   }
@@ -142,6 +142,7 @@ namespace Buoy {
     Wire.send (AD_I2C_CONTROL1);
     n = Wire.endTransmission ();
 
+    delay (1000);
     if (n != SUCCESS) { error (); return; }
 
     // Read configuration
@@ -189,7 +190,7 @@ namespace Buoy {
     delay (100);
 
 # if NO_MINIMAL_CODE
-    //read_registers ();
+    read_registers ();
 # endif
     configure_registers (); // resets ADC, 63 data cycles are lost..
     delay (100);
