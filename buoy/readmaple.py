@@ -63,9 +63,8 @@ class ReadMaple:
             r = self.ser.readline ()
             sys.stdout.write (r)
 
-          time.sleep (0.0001)
         except serial.SerialException as e:
-          self.logger.exception ("Exception with serial link, reconnecting..: " + str(e))
+          #self.logger.info ("Exception with serial link, reconnecting..: " + str(e))
           self.closeserial ()
           self.openserial ()
 
