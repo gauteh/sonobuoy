@@ -13,11 +13,11 @@
 
 namespace Buoy {
 # define RF_BAUDRATE 115200
-# if BOARD_maple_native
+# if BBOARD == 0
 
 # define RF_Serial Serial3
 
-# elif BOARD_maple
+# elif BBOARD == 1
 
 # define RF_Serial Serial2
 

@@ -76,11 +76,11 @@ namespace Buoy {
     pinMode (AD_DIN, OUTPUT);
     pinMode (AD_DOUT, INPUT_PULLDOWN);
     pinMode (AD_nDRDY, INPUT_PULLDOWN);
-    //pinMode (AD_SS, OUTPUT);
+    pinMode (AD_SS, OUTPUT);
 
-    digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
+    //digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
 
-    //digitalWrite (AD_SS, LOW);
+    digitalWrite (AD_SS, LOW);
     digitalWrite (AD_SCLK, LOW);
     digitalWrite (AD_DIN, LOW);
 
@@ -182,6 +182,9 @@ namespace Buoy {
 # if DIRECT_SERIAL
     SerialUSB.println ("[AD] Reset by command and stop read data continuous..");
 # endif
+
+    //reset_spi ();
+
     send_command (RESET);
     delay (100);
 

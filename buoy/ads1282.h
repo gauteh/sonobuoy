@@ -26,13 +26,13 @@ namespace Buoy {
  * PCA9535RGE.
  */
 
-# if BOARD_maple_native
+# if BBOARD == 0
 
 # define AD_I2C  1
 # define AD_SCL 38
 # define AD_SDA 39
 
-# elif BOARD_maple
+# elif BBOARD == 1
 
 # define AD_I2C  1
 # define AD_SCL  5
@@ -80,7 +80,7 @@ namespace Buoy {
 
 
   /* SPI */
-# if BOARD_maple_native
+# if BBOARD == 0
 # define AD_SPI   1
 # define AD_SCLK 53
 # define AD_DOUT 55
@@ -89,13 +89,13 @@ namespace Buoy {
 
 # define AD_nDRDY 40
 
-# elif BOARD_maple
+# elif BBOARD == 1
 
 # define AD_SPI   1
-# define AD_SCLK  8 
+# define AD_SCLK  8
 # define AD_DOUT 12 // MISO
 # define AD_DIN  11 // MOSI
-//# define AD_SS   BOARD_SPI1_NSS_PIN   // 52, unused
+# define AD_SS   10   // 10, unused
 
 # define AD_nDRDY 0
 

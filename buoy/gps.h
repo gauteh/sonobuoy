@@ -21,12 +21,12 @@ namespace Buoy {
 
 # define GPS_BAUDRATE 4800
 
-# if BOARD_maple_native
+# if BBOARD == 0
 
 # define GPS_Serial Serial1
 # define GPS_SYNC_PIN 27 // Should be 5V tolerant
 
-# elif BOARD_maple
+# elif BBOARD == 1
 
 # define GPS_Serial Serial1
 # define GPS_SYNC_PIN 30 // Should be 5V tolerant

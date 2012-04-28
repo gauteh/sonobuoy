@@ -33,10 +33,8 @@
 # define DIRECT_SERIAL 1
 # define DEBUG_SD      0 // enable debug error messages on SdFat
 
-# if ! (defined (BOARD_maple) || defined (BOARD_maple_native))
-  # error ("BOARD must either be: maple or maple_native")
-# endif
-
+/* Define board, 0 = maple_native, 1 = olimexino */
+# define BBOARD 0
 
 /* Macros for stringifying defines */
 # define STRINGIFY_I(s) #s

@@ -21,7 +21,7 @@
 # include "types.h"
 
 /* SDIO, connected to SD socket. */
-# if BOARD_maple_native
+# if BBOARD == 0
 /* SPI mode, pins:
  * CS     = CD (card detect) / SDIO_D3 (Data 3)
  * DI     = SDIO_CMD
@@ -46,7 +46,7 @@
 # define SD_SPI 2
 # define SD_CS  2
 
-# elif BOARD_maple
+# elif BBOARD == 1
 
 /* SPI 2
  *
