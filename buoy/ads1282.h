@@ -92,12 +92,12 @@ namespace Buoy {
 # elif BOARD_maple
 
 # define AD_SPI   1
-# define AD_SCLK 13
+# define AD_SCLK  8 
 # define AD_DOUT 12 // MISO
 # define AD_DIN  11 // MOSI
-# define AD_SS   BOARD_SPI1_NSS_PIN   // 52, unused
+//# define AD_SS   BOARD_SPI1_NSS_PIN   // 52, unused
 
-# define AD_nDRDY 3
+# define AD_nDRDY 0
 
 # endif
 
@@ -241,7 +241,7 @@ namespace Buoy {
 # endif
 
 # define FREQUENCY      250
-# define QUEUE_LENGTH   500
+# define QUEUE_LENGTH   200
 # define BATCHES          2 // _must_ be multiple of QUEUE_LENGTH
 # define BATCH_LENGTH (QUEUE_LENGTH / BATCHES)
 

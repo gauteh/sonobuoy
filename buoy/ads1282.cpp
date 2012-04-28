@@ -68,26 +68,6 @@ namespace Buoy {
     SerialUSB.println (AD_SDA);
     SerialUSB.println (AD_SCL);
 # endif
-
-    pinMode (AD_SDA, OUTPUT);
-    pinMode (AD_SCL, OUTPUT);
-    pinMode (3, OUTPUT);
-    digitalWrite (AD_SDA, LOW);
-    digitalWrite (AD_SCL, LOW);
-    digitalWrite (3, LOW);
-
-    SerialUSB.println ("[AD] i2c low.");
-
-    delay(4000);
-
-    SerialUSB.println ("[AD] i2c high.");
-    digitalWrite (AD_SDA, HIGH);
-    digitalWrite (AD_SCL, HIGH);
-    digitalWrite (3, HIGH);
-    delay(4000);
-
-
-
     /* Set up I2C */
     Wire.begin (AD_SDA, AD_SCL);
 
@@ -95,12 +75,12 @@ namespace Buoy {
     pinMode (AD_SCLK, OUTPUT);
     pinMode (AD_DIN, OUTPUT);
     pinMode (AD_DOUT, INPUT_PULLDOWN);
-    //pinMode (AD_nDRDY, INPUT_PULLDOWN);
-    pinMode (AD_SS, OUTPUT);
+    pinMode (AD_nDRDY, INPUT_PULLDOWN);
+    //pinMode (AD_SS, OUTPUT);
 
-    //digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
+    digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
 
-    digitalWrite (AD_SS, LOW);
+    //digitalWrite (AD_SS, LOW);
     digitalWrite (AD_SCLK, LOW);
     digitalWrite (AD_DIN, LOW);
 
@@ -124,7 +104,7 @@ namespace Buoy {
     /* Run as part of main loop {{{ */
     if (!disabled) {
       run++;
-      //acquire_on_command ();
+      acquire_on_command ();
 
       /*
       SerialUSB.print ("[AD] Loop: ");
@@ -375,9 +355,9 @@ namespace Buoy {
 # if NO_MINIMAL_CODE
     read_pca9535 (OUTPUT0);
 # endif
-    //digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
+    digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
     delay (1000);
-    //digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
+    digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
 
     Wire.beginTransmission (AD_I2C_ADDRESS);
     Wire.send (0x02);
@@ -389,7 +369,7 @@ namespace Buoy {
 # if NO_MINIMAL_CODE
     read_pca9535 (OUTPUT0);
 # endif
-    //digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
+    digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
     delay (100);
 
 
@@ -604,18 +584,18 @@ namespace Buoy {
      *                     DRDY (ADS1282) periods. */
 
     /* On new batch, pick reference */
+# if HAS_GPS
     if (position % BATCH_LENGTH == 0) {
       //gps->assert_time ();
 
       /* Pick new reference for batch */
-# if HAS_GPS
       references[batch] = (gps->reference * 1e6) + (micros () - gps->microdelta);
       reference_status[batch] = (gps->HAS_TIME & GPS::TIME) |
                                 (gps->HAS_SYNC & GPS::SYNC) |
                                 (gps->HAS_SYNC_REFERENCE & GPS::SYNC_REFERENCE);
-# endif
 
     }
+# endif
 
     uint8_t v[4];
     shift_in_n (v, 4);
@@ -636,6 +616,7 @@ namespace Buoy {
      * then it is 1 for +FS and 0 for -FS.
      */
 
+# if HAS_GPS
     /* Fill batch */
     values[position] = value;
 
@@ -652,6 +633,7 @@ namespace Buoy {
       batch         %= BATCHES;       // Increment batch or roll over
       position      %= QUEUE_LENGTH;  // Roll over queue position
     }
+# endif
   }
 
   void ADS1282::acquire_on_command () {

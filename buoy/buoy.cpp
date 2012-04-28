@@ -28,7 +28,7 @@ namespace Buoy {
 
     while (true) {
       //gps->loop ();
-      //ad->loop ();
+      ad->loop ();
       //rf->loop ();
       //store->loop ();
 
