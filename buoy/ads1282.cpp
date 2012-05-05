@@ -307,7 +307,9 @@ namespace Buoy {
   }
 
   void ADS1282::reset_spi () {
-    /* Reset SPI interface: Hold SCLK low for 64 nDRDY cycles  {{{*/
+    /* Reset SPI interface: Hold SCLK low for 64 nDRDY cycles
+     * (warning: may block), is not used in buoy implementation.
+     {{{*/
 # if DIRECT_SERIAL
     SerialUSB.println ("[AD] [SPI] Resetting SPI..");
 # endif
@@ -315,8 +317,9 @@ namespace Buoy {
 
     /* Make sure data is read continuously and nDRDY interrupt is detached */
 
+    // TODO: Check for time out.
     for (int i = 0; i < 64; i++) {
-      while (digitalRead (AD_nDRDY)) delayMicroseconds (2);
+      while (digitalRead (AD_nDRDY))  delayMicroseconds (2);
       while (!digitalRead (AD_nDRDY)) delayMicroseconds (2);
     }
 

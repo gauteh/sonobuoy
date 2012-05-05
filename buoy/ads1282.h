@@ -11,7 +11,7 @@
 
 # include "buoy.h"
 
-/* Do not rely on any other classes, for testing driver */
+/* Do not rely on any other classes, useful for testing driver and ADS1282 */
 # define ADS1282ONLY 1
 
 using namespace std;
