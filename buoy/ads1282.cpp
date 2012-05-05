@@ -79,7 +79,7 @@ namespace Buoy {
     pinMode (AD_nDRDY, INPUT_PULLDOWN);
     pinMode (AD_SS, OUTPUT);
 
-    digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
+    //digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
 
     digitalWrite (AD_SS, LOW);
     digitalWrite (AD_SCLK, LOW);
@@ -349,9 +349,9 @@ namespace Buoy {
     if (n != SUCCESS) { error (); return; }
 
     read_pca9535 (OUTPUT0);
-    digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
+    //digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
     delay (1000);
-    digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
+    //digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
 
     Wire.beginTransmission (AD_I2C_ADDRESS);
     Wire.send (0x02);
@@ -361,7 +361,7 @@ namespace Buoy {
     if (n != SUCCESS) { error (); return; }
 
     read_pca9535 (OUTPUT0);
-    digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
+    //digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
     delay (100);
 
 
