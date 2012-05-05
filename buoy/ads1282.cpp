@@ -107,7 +107,7 @@ namespace Buoy {
     /* Run as part of main loop {{{ */
     if (!disabled) {
       run++;
-      //acquire_on_command ();
+      acquire_on_command ();
 
       /*
       SerialUSB.print ("[AD] Loop: ");
