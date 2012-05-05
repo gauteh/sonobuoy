@@ -19,7 +19,9 @@ using namespace std;
 namespace Buoy {
 
 # if BBOARD == 0
-/* SPI */
+/* Maple Native */
+
+// SPI
 # define AD_SPI   1
 # define AD_SCLK 53
 # define AD_DOUT 55
@@ -28,21 +30,33 @@ namespace Buoy {
 
 # define AD_nDRDY 40
 
+# define AD_I2C  1
+# define AD_SCL 38
+# define AD_SDA 39
+
+# elif BBOARD == 1
+
+// SPI
+# define AD_SPI   1
+# define AD_SCLK  8
+# define AD_DOUT 12
+# define AD_DIN  11
+# define AD_SS   BOARD_SPI1_NSS_PIN   // 10, unused
+
+# define AD_nDRDY 0
+
+# define AD_I2C 1
+# define AD_SCL 5
+# define AD_SDA 9
+
+# endif
+
 /* I2C bus
  *
  * The I2C control unit (U7 on ADS1282-EVM schematic) appears to be an
  * PCA9535RGE.
  */
-
-# define AD_I2C  1
-# define AD_SCL 38
-# define AD_SDA 39
 # define AD_I2C_ADDRESS 0x20
-
-# elif BBOARD == 1
-// Olimexino
-# endif
-
 /* Register 1 */
 /* Inputs */
 # define AD_I2C_MFLAG   0b10000000
