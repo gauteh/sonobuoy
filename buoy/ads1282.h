@@ -9,14 +9,24 @@
 
 # ifndef ONLY_SPEC
 
-# include <stdint.h>
-# include <string>
-# include "wirish.h"
-# include "types.h"
+# include "buoy.h"
+
+/* Do not rely on any other classes, for testing driver */
+# define ADS1282ONLY 1
 
 using namespace std;
 
 namespace Buoy {
+
+# if BBOARD == 0
+/* SPI */
+# define AD_SPI   1
+# define AD_SCLK 53
+# define AD_DOUT 55
+# define AD_DIN  54
+# define AD_SS   BOARD_SPI1_NSS_PIN   // 52, unused
+
+# define AD_nDRDY 40
 
 /* I2C bus
  *
@@ -28,6 +38,10 @@ namespace Buoy {
 # define AD_SCL 38
 # define AD_SDA 39
 # define AD_I2C_ADDRESS 0x20
+
+# elif BBOARD == 1
+// Olimexino
+# endif
 
 /* Register 1 */
 /* Inputs */
@@ -66,21 +80,13 @@ namespace Buoy {
 # define AD_I2C_POLARITY0 0
 # define AD_I2C_POLARITY1 0
 
-
-  /* SPI */
-# define AD_SPI   1
-# define AD_SCLK 53
-# define AD_DOUT 55
-# define AD_DIN  54
-# define AD_SS   BOARD_SPI1_NSS_PIN   // 52, unused
-
-# define AD_nDRDY 40
-
   class ADS1282 {
     private:
     public:
+# if ADS1282ONLY
       RF   * rf;
       GPS  * gps;
+# endif
 
       typedef struct _control {
         /* Control registers of U7 / PCA9535RGE {{{ */

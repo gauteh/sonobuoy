@@ -5,16 +5,18 @@
  *
  */
 
-# include <stdio.h>
-# include <string.h>
+
+# include "buoy.h"
 
 # include "wirish.h"
 # include "Wire.h"
 
-# include "buoy.h"
 # include "ads1282.h"
-# include "gps.h"
-# include "rf.h"
+
+# if !ADS1282ONLY
+  # include "gps.h"
+  # include "rf.h"
+# endif
 
 using namespace std;
 
@@ -38,7 +40,7 @@ namespace Buoy {
 
     batch       = 0;
     value       = 0;
-    memset ((void*) values, 0, QUEUE_LENGTH * sizeof (uint32_t));
+    //memset ((void*) values, 0, QUEUE_LENGTH * sizeof (uint32_t));
     position      = 0;
     totalsamples  = 0;
     batchstart    = millis ();
@@ -46,7 +48,9 @@ namespace Buoy {
 
     for (int i = 0; i < BATCHES; i++) {
       references [i] = 0;
+# if !ADS1282ONLY
       reference_status[i] = GPS::NOTHING;
+# endif
     }
 
     return;
@@ -55,8 +59,10 @@ namespace Buoy {
 
   void ADS1282::setup (BuoyMaster *b) {
     // Set up interface and ADS1282 {{{
+# if !ADS1282ONLY
     rf = b->rf;
     gps = b->gps;
+# endif
 
     /* Setup AD and get ready for data */
 # if DIRECT_SERIAL
@@ -82,14 +88,18 @@ namespace Buoy {
     /* Pick initial reference for batch, counting on GPS to have waited
      * for some initial reference.
      */
+# if !ADS1282ONLY
     references[batch] = (gps->reference * 1e6) + (micros () - gps->microdelta);
     reference_status[batch] = (gps->HAS_TIME & GPS::TIME) |
                               (gps->HAS_SYNC & GPS::SYNC) |
                               (gps->HAS_SYNC_REFERENCE & GPS::SYNC_REFERENCE);
+# endif
     /* Configure AD */
     configure ();
 
+# if !ADS1282ONLY
     rf->send_debug ("[AD] ADS1282 subsystem initiated.");
+# endif
     // }}}
   }
 
@@ -191,7 +201,9 @@ namespace Buoy {
   /* Continuous read and write {{{ */
   void ADS1282::start_continuous_read () {
     continuous_read = true;
+# if !ADS1282ONLY
     rf->send_debug ("[AD] Sync and start read data continuous..");
+# endif
 # if DIRECT_SERIAL
     SerialUSB.println ("[AD] Sync and start read data continuous..");
 # endif
@@ -203,7 +215,9 @@ namespace Buoy {
   }
 
   void ADS1282::stop_continuous_read () {
+# if !ADS1282ONLY
     rf->send_debug ("[AD] Reset by command and stop read data continuous..");
+# endif
 # if DIRECT_SERIAL
     SerialUSB.println ("[AD] Reset by command and stop read data continuous..");
 # endif
@@ -565,10 +579,12 @@ namespace Buoy {
       //gps->assert_time ();
 
       /* Pick new reference for batch */
+# if !ADS1282ONLY
       references[batch] = (gps->reference * 1e6) + (micros () - gps->microdelta);
       reference_status[batch] = (gps->HAS_TIME & GPS::TIME) |
                                 (gps->HAS_SYNC & GPS::SYNC) |
                                 (gps->HAS_SYNC_REFERENCE & GPS::SYNC_REFERENCE);
+# endif
     }
 
     uint8_t v[4];
@@ -683,7 +699,9 @@ namespace Buoy {
 # if DIRECT_SERIAL
     SerialUSB.println ("[AD] Error. Disabling.");
 # endif
+# if !ADS1282ONLY
     rf->send_debug ("[AD] Error. Disabling.");
+# endif
 
     disabled = true;
     detachInterrupt (AD_nDRDY);
