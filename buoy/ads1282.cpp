@@ -457,10 +457,6 @@ namespace Buoy {
 
     for (int i = 0; i < 11; i++) {
 
-      /* TODO: Register values seem to arrive a bit earlier than sample values,
-       * probably loosing MSB here though at the moment.. */
-      //reg.raw[i] >>= 1;
-
 # if DIRECT_SERIAL
       SerialUSB.print   ("[AD] Register [");
       SerialUSB.print   (i);
