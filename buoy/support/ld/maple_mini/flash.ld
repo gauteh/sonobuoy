@@ -1,5 +1,5 @@
 /*
- * Maple (STM32F103RBT6, medium density) linker script for Flash builds.
+ * Maple Mini (STM32F103CBT6, medium density) linker script for Flash builds.
  */
 
 /*
@@ -20,5 +20,4 @@ REGION_ALIAS("REGION_RODATA", rom);
  * Define the rest of the sections
  */
 _FLASH_BUILD = 1;
-
 INCLUDE common.inc

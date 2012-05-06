@@ -20,9 +20,18 @@ namespace Buoy {
 # define TELEGRAM_LEN 80
 
 # define GPS_BAUDRATE 4800
-# define GPS_Serial Serial1
 
+# if BBOARD == 0
+
+# define GPS_Serial Serial1
 # define GPS_SYNC_PIN 27 // Should be 5V tolerant
+
+# elif BBOARD == 1
+
+# define GPS_Serial Serial1
+# define GPS_SYNC_PIN 30 // Should be 5V tolerant
+
+# endif
 
     private:
       char gps_buf [TELEGRAM_LEN + 2];
@@ -31,7 +40,7 @@ namespace Buoy {
       void parse ();
 
     public:
-      RF      * rf;
+      /*RF      * rf;*/
       ADS1282 * ad;
 
       /* Telegram and data structures {{{ */

@@ -14,23 +14,30 @@
 # define BUOY_ID    1
 # define BUOY_NAME  "One"
 
+/* ONLY_SPEC may be defined when including any of the headers to only include
+ * any definitions and constants without code or code dependant parts. */
+
 # ifndef ONLY_SPEC
 
-# include <stdint.h>
+/* Disable any ASSERT() and serial line debugger (decreases program size
+ * slightly).
+ *
+ * Must be defined before any wirish.h or libmaple.h includes. */
 
-/* Disable any ASSERT() and serial line debugger (saves some program size)
- *
- * Must be defined before any wirish.h or libmaple.h includes.
- *
- */
 //# define DEBUG_LEVEL DEBUG_NONE
 
+# include <stdint.h>
 # include "wirish.h"
 
 # include "types.h"
 
 /* Print debug messages to USB serial */
 # define DIRECT_SERIAL 1
+# define DEBUG_SD      0 // enable debug error messages on SdFat
+
+/* Define board, 0 = maple_native, 1 = olimexino/maple (should be
+ * compatible with BOARD in Makefile) */
+# define BBOARD 1
 
 /* Macros for stringifying defines */
 # define STRINGIFY_I(s) #s
@@ -39,14 +46,13 @@
 namespace Buoy {
   class BuoyMaster {
     public:
-      GPS       *gps;
+      /*GPS       *gps;*/
       ADS1282   *ad;
-      RF        *rf;
-      Store     *store;
+      /*RF        *rf;*/
+      /*Store     *store;*/
 
       BuoyMaster ();
       void main ();
-      void send_greeting ();
 
     private:
       void setup ();
@@ -54,7 +60,8 @@ namespace Buoy {
 
   int itoa (uint32_t, uint8_t, char *);
 
-  /* Globally available instance of BuoyMaster */
+  /* Globally available instance of BuoyMaster (i.e. for statical interrupt
+   * handlers). */
   extern BuoyMaster *bu;
 }
 

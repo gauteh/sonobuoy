@@ -131,7 +131,7 @@ uint8_t Sd2Card::erase(uint32_t firstBlock, uint32_t lastBlock)
   if (!eraseSingleBlockEnable()) 
   {
     error(SD_CARD_ERROR_ERASE_SINGLE_BLOCK);
-# if DIRECT_SERIAL
+# if DEBUG_SD
 	SerialUSB.println("Error: Erase Single Block");
 # endif
     goto fail;
@@ -146,7 +146,7 @@ uint8_t Sd2Card::erase(uint32_t firstBlock, uint32_t lastBlock)
     || cardCommand(CMD38, 0)) 
   {
       error(SD_CARD_ERROR_ERASE);
-# if DIRECT_SERIAL
+# if DEBUG_SD
 	  SerialUSB.println("Error: Erase");
 # endif
 	  goto fail;
@@ -154,7 +154,7 @@ uint8_t Sd2Card::erase(uint32_t firstBlock, uint32_t lastBlock)
   if (!waitNotBusy(SD_ERASE_TIMEOUT)) 
   {
     error(SD_CARD_ERROR_ERASE_TIMEOUT);
-# if DIRECT_SERIAL
+# if DEBUG_SD
 	SerialUSB.println("Error: Erase timeout");
 # endif
 	goto fail;
@@ -164,7 +164,7 @@ uint8_t Sd2Card::erase(uint32_t firstBlock, uint32_t lastBlock)
 
  fail:
   chipSelectHigh();
-# if DIRECT_SERIAL
+# if DEBUG_SD
   SerialUSB.println("Error: Sd2Card::Erase()");
 # endif
   return false;
@@ -229,7 +229,7 @@ uint8_t Sd2Card::init(HardwareSPI *s, uint32_t cs)
   {
     if (((uint16_t)millis() - t0) > SD_INIT_TIMEOUT) 
 	{
-# if DIRECT_SERIAL
+# if DEBUG_SD
 		SerialUSB.println("Error: CMD0");
 # endif
 		error(SD_CARD_ERROR_CMD0);
@@ -249,7 +249,7 @@ uint8_t Sd2Card::init(HardwareSPI *s, uint32_t cs)
     if (status_ != 0XAA) 
 	{
       error(SD_CARD_ERROR_CMD8);
-# if DIRECT_SERIAL
+# if DEBUG_SD
 	  SerialUSB.println("Error: CMD8");
 # endif
 	  goto fail;
@@ -264,7 +264,7 @@ uint8_t Sd2Card::init(HardwareSPI *s, uint32_t cs)
     // check for timeout
     if (((uint16_t)millis() - t0) > SD_INIT_TIMEOUT) 
 	{
-# if DIRECT_SERIAL
+# if DEBUG_SD
 		SerialUSB.println("Error: ACMD41");
 # endif
 		error(SD_CARD_ERROR_ACMD41);
@@ -276,7 +276,7 @@ uint8_t Sd2Card::init(HardwareSPI *s, uint32_t cs)
   {
     if (cardCommand(CMD58, 0)) 
 	{
-# if DIRECT_SERIAL
+# if DEBUG_SD
 		SerialUSB.println("Error: CMD58");
 # endif
 		error(SD_CARD_ERROR_CMD58);
@@ -295,7 +295,7 @@ uint8_t Sd2Card::init(HardwareSPI *s, uint32_t cs)
 
  fail:
   chipSelectHigh();
-# if DIRECT_SERIAL
+# if DEBUG_SD
   SerialUSB.println("Error: Sd2Card::init()");
 # endif
   return false;
@@ -362,7 +362,7 @@ uint8_t Sd2Card::readData(uint32_t block,
     if (cardCommand(CMD17, block)) 
 	{
       error(SD_CARD_ERROR_CMD17);
-# if DIRECT_SERIAL
+# if DEBUG_SD
 	  SerialUSB.println("Error: CMD17");
 # endif
       goto fail;
@@ -420,7 +420,7 @@ uint8_t Sd2Card::readData(uint32_t block,
 
  fail:
   chipSelectHigh();
-# if DIRECT_SERIAL
+# if DEBUG_SD
   SerialUSB.println("Error: Sd2Card::readData()");
 # endif
   return false;
@@ -458,7 +458,7 @@ uint8_t Sd2Card::readRegister(uint8_t cmd, void* buf)
   if (cardCommand(cmd, 0)) 
   {
 	  error(SD_CARD_ERROR_READ_REG);
-# if DIRECT_SERIAL
+# if DEBUG_SD
 	  SerialUSB.println("Error: Read reg");
 # endif
 	  goto fail;
@@ -474,7 +474,7 @@ uint8_t Sd2Card::readRegister(uint8_t cmd, void* buf)
   return true;
 
  fail:
-# if DIRECT_SERIAL
+# if DEBUG_SD
   SerialUSB.println("Error: Sd2Card::readRegister()");
 # endif
   chipSelectHigh();
@@ -533,7 +533,7 @@ uint8_t Sd2Card::waitStartBlock(void)
     if (((uint16_t)millis() - t0) > SD_READ_TIMEOUT) 
 	{
       error(SD_CARD_ERROR_READ_TIMEOUT);
-# if DIRECT_SERIAL
+# if DEBUG_SD
 	  SerialUSB.println("Error: Read timeout");
 # endif
       goto fail;
@@ -542,7 +542,7 @@ uint8_t Sd2Card::waitStartBlock(void)
   if (status_ != DATA_START_BLOCK) 
   {
     error(SD_CARD_ERROR_READ);
-# if DIRECT_SERIAL
+# if DEBUG_SD
 	SerialUSB.println("Error: Read");
 # endif
     goto fail;
@@ -551,7 +551,7 @@ uint8_t Sd2Card::waitStartBlock(void)
 
  fail:
   chipSelectHigh();
-# if DIRECT_SERIAL
+# if DEBUG_SD
   SerialUSB.println("Error: Sd2Card::waitStartBlock()");
 # endif
   return false;
@@ -572,7 +572,7 @@ uint8_t Sd2Card::writeBlock(uint32_t blockNumber, const uint8_t* src)
   if (blockNumber == 0) 
   {
     error(SD_CARD_ERROR_WRITE_BLOCK_ZERO);
-# if DIRECT_SERIAL
+# if DEBUG_SD
     SerialUSB.println("Error: Write block zero");
 # endif
     goto fail;
@@ -584,7 +584,7 @@ uint8_t Sd2Card::writeBlock(uint32_t blockNumber, const uint8_t* src)
 	  blockNumber <<= 9;
   if (cardCommand(CMD24, blockNumber)) 
   {
-# if DIRECT_SERIAL
+# if DEBUG_SD
 	SerialUSB.println("Error: CMD42");
 # endif
 	error(SD_CARD_ERROR_CMD24);
@@ -597,7 +597,7 @@ uint8_t Sd2Card::writeBlock(uint32_t blockNumber, const uint8_t* src)
   if (!waitNotBusy(SD_WRITE_TIMEOUT)) 
   {
     error(SD_CARD_ERROR_WRITE_TIMEOUT);
-# if DIRECT_SERIAL
+# if DEBUG_SD
     SerialUSB.println("Error: Write timeout");
 # endif
     goto fail;
@@ -606,7 +606,7 @@ uint8_t Sd2Card::writeBlock(uint32_t blockNumber, const uint8_t* src)
   if (cardCommand(CMD13, 0) || spiRec()) 
   {
     error(SD_CARD_ERROR_WRITE_PROGRAMMING);
-# if DIRECT_SERIAL
+# if DEBUG_SD
     SerialUSB.println("Error: Write programming");
 # endif
     goto fail;
@@ -616,7 +616,7 @@ uint8_t Sd2Card::writeBlock(uint32_t blockNumber, const uint8_t* src)
 
  fail:
   chipSelectHigh();
-# if DIRECT_SERIAL
+# if DEBUG_SD
   SerialUSB.println("Error: Sd2Card::writeBlock");
 # endif
   return false;
@@ -629,7 +629,7 @@ uint8_t Sd2Card::writeData(const uint8_t* src)
   if (!waitNotBusy(SD_WRITE_TIMEOUT)) 
   {
     error(SD_CARD_ERROR_WRITE_MULTIPLE);
-# if DIRECT_SERIAL
+# if DEBUG_SD
 	SerialUSB.println("Error: writeData");
 # endif
     chipSelectHigh();
@@ -671,7 +671,7 @@ uint8_t Sd2Card::writeData(uint8_t token, const uint8_t* src) {
   {
     error(SD_CARD_ERROR_WRITE);
     chipSelectHigh();
-# if DIRECT_SERIAL
+# if DEBUG_SD
 	SerialUSB.println("Error: Write");
     SerialUSB.println("Error: Sd2Card::writeData()");
 # endif
@@ -698,7 +698,7 @@ uint8_t Sd2Card::writeStart(uint32_t blockNumber, uint32_t eraseCount)
   if (blockNumber == 0) 
   {
     error(SD_CARD_ERROR_WRITE_BLOCK_ZERO);
-# if DIRECT_SERIAL
+# if DEBUG_SD
 	SerialUSB.println("Error: Write block zero");
 # endif
     goto fail;
@@ -707,7 +707,7 @@ uint8_t Sd2Card::writeStart(uint32_t blockNumber, uint32_t eraseCount)
   // send pre-erase count
   if (cardAcmd(ACMD23, eraseCount)) 
   {
-# if DIRECT_SERIAL
+# if DEBUG_SD
 	SerialUSB.println("Error: ACMD23");
 # endif
     error(SD_CARD_ERROR_ACMD23);
@@ -719,7 +719,7 @@ uint8_t Sd2Card::writeStart(uint32_t blockNumber, uint32_t eraseCount)
   if (cardCommand(CMD25, blockNumber)) 
   {
     error(SD_CARD_ERROR_CMD25);
-# if DIRECT_SERIAL
+# if DEBUG_SD
 	SerialUSB.println("Error: CMD25");
 # endif
     goto fail;
@@ -728,7 +728,7 @@ uint8_t Sd2Card::writeStart(uint32_t blockNumber, uint32_t eraseCount)
 
  fail:
   chipSelectHigh();
-# if DIRECT_SERIAL
+# if DEBUG_SD
     SerialUSB.println("Error: Sd2Card::writeStart()");
 # endif
   return false;
@@ -752,7 +752,7 @@ uint8_t Sd2Card::writeStop(void)
  fail:
   error(SD_CARD_ERROR_STOP_TRAN);
   chipSelectHigh();
-# if DIRECT_SERIAL
+# if DEBUG_SD
     SerialUSB.println("Error: Sd2Card::writeStop()");
 # endif
   return false;

@@ -11,26 +11,53 @@
 
 # include "buoy.h"
 
-# include <stdint.h>
-# include <string>
-# include "wirish.h"
-# include "types.h"
+/* Do not rely on any other classes, useful for testing driver and ADS1282 */
+# define ADS1282ONLY 1
 
 using namespace std;
 
 namespace Buoy {
+
+# if BBOARD == 0
+/* Maple Native */
+
+// SPI
+# define AD_SPI   1
+# define AD_SCLK 53
+# define AD_DOUT 55
+# define AD_DIN  54
+# define AD_SS   BOARD_SPI1_NSS_PIN   // 52, unused
+
+# define AD_nDRDY 40
+
+# define AD_I2C  1
+# define AD_SCL 38
+# define AD_SDA 39
+
+# elif BBOARD == 1
+/* Olimexino STM32 H103 */
+
+// SPI
+# define AD_SPI   1
+# define AD_SCLK 13
+# define AD_DOUT 12 // (D12 = led 1)
+# define AD_DIN  11
+# define AD_SS   BOARD_SPI1_NSS_PIN   // 10, unused
+
+# define AD_nDRDY 3 // (D3 = led 2)
+
+# define AD_I2C 1
+# define AD_SCL 5
+# define AD_SDA 9
+
+# endif
 
 /* I2C bus
  *
  * The I2C control unit (U7 on ADS1282-EVM schematic) appears to be an
  * PCA9535RGE.
  */
-
-# define AD_I2C  1
-# define AD_SCL 38
-# define AD_SDA 39
 # define AD_I2C_ADDRESS 0x20
-
 /* Register 1 */
 /* Inputs */
 # define AD_I2C_MFLAG   0b10000000
@@ -68,23 +95,14 @@ namespace Buoy {
 # define AD_I2C_POLARITY0 0
 # define AD_I2C_POLARITY1 0
 
-
-  /* SPI */
-# define AD_SPI   1
-# define AD_SCLK 53
-# define AD_DOUT 55
-# define AD_DIN  54
-# define AD_SS   BOARD_SPI1_NSS_PIN   // 52, unused
-
-# define AD_nDRDY 40
-
   class ADS1282 {
     private:
     public:
+# if ADS1282ONLY
       RF   * rf;
       GPS  * gps;
+# endif
 
-# if 0
       typedef struct _control {
         /* Control registers of U7 / PCA9535RGE {{{ */
 
@@ -108,9 +126,7 @@ namespace Buoy {
         // }}}
       } control;
       control state;
-# endif
 
-# if 0
       typedef struct _registers {
         /* Registers of ADS1282 {{{ */
         uint8_t raw[11];
@@ -174,9 +190,7 @@ namespace Buoy {
       } registers;
 
       registers reg;
-# endif
 
-# if 0
       typedef enum _pca9535register {
         /* Register id, corresponds to register id on device {{{ */
         INPUT0 = 0,
@@ -189,7 +203,6 @@ namespace Buoy {
         CONTROL1
         // }}}
       } PCA9535REGISTER;
-# endif
 
       typedef enum _command {
       /* SPI commands for ADS1282 {{{ */
@@ -217,7 +230,7 @@ namespace Buoy {
 # endif
 
 # define FREQUENCY      250
-# define QUEUE_LENGTH  5000
+# define QUEUE_LENGTH   500
 # define BATCHES          5 // _must_ be multiple of QUEUE_LENGTH
 # define BATCH_LENGTH (QUEUE_LENGTH / BATCHES)
 
@@ -249,11 +262,11 @@ namespace Buoy {
       void setup (BuoyMaster *);
       void configure ();
       void reset ();
-      //void reset_spi ();
-      // void read_pca9535 (PCA9535REGISTER);
+      void reset_spi ();
+      void read_pca9535 (PCA9535REGISTER);
 
       void send_command (COMMAND cmd, uint8_t start = 0, uint8_t n = 0);
-      // void read_registers ();
+      void read_registers ();
       void configure_registers ();
 
       void start_continuous_read ();
@@ -265,7 +278,7 @@ namespace Buoy {
       static void drdy ();
 
       void    shift_out (uint8_t v, bool delay = true);
-      //uint8_t shift_in  ();
+      uint8_t shift_in  ();
       void    shift_in_n (uint8_t *, int);
 
       void error ();
