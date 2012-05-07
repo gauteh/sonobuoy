@@ -70,7 +70,7 @@ namespace Buoy {
 /* Outputs */
 # define AD_I2C_SUPSOR  0b00001000 // GPIO3 (Power supply regulator) J5.12
 # define AD_I2C_PDWN    0b00010000 // GPIO4 J5.14
-# define AD_I2C_EXTCLK  0b00100000 // GPIO5 J5.19 (Controlled by jumper: On-
+# define AD_I2C_EXTCLK  0b00100000 // GPIO5 J5.19 (Controlled by jumper: On-brd)
 
 # define AD_I2C_SYNC    0b01000000
 
@@ -79,8 +79,9 @@ namespace Buoy {
 # define AD_I2C_RESET   0b00000010
 
 /* Outputs configured HIGH */
-# define AD_I2C_OUTPUT0 AD_I2C_SYNC | AD_I2C_PDWN | AD_I2C_M1 | AD_I2C_EXTCLK |\
-                        AD_I2C_SUPSOR
+// Un-needed (hardwired): AD_I2C_SYNC | AD_I2C_PDWN | AD_I2C_M1 | AD_I2C_EXTCLK | AD_I2C_SUPSOR
+// AD_I2C_MFLAG
+# define AD_I2C_OUTPUT0 0
 # define AD_I2C_OUTPUT1 AD_I2C_RESET
 
 /* Control register of PCA9535RGE:
@@ -90,8 +91,8 @@ namespace Buoy {
  * Programming all outputs using default (pull up) value as inputs to avoid
  * conflicting U7 output with hardwired output - meaning shortening.
  */
-# define AD_I2C_CONTROL0 AD_I2C_MFLAG
-# define AD_I2C_CONTROL1  0
+# define AD_I2C_CONTROL0  0xFF
+# define AD_I2C_CONTROL1  0xFF & !(AD_I2C_RESET)
 # define AD_I2C_POLARITY0 0
 # define AD_I2C_POLARITY1 0
 
