@@ -10,7 +10,6 @@
 # include "buoy.h"
 
 # include "ads1282.h"
-# include "gps.h"
 
 # ifndef ONLY_SPEC
 
@@ -50,22 +49,26 @@
 
 /* SPI 2
  *
- * NSS  = 31
+ * NSS  = 25
  * SCK  = 32
  * MISO = 33
  * MOSI = 34
  */
 # define SD_SPI 2
-# define SD_CS  31 // chip select pin
+# define SD_CS  25 // chip select pin
 
 # endif
+
+// Enable RF dependent sections
+# define HASRF 0
 
 namespace Buoy {
   class Store {
     public:
+# if HASRF
       RF      *rf;
+# endif
       ADS1282 *ad;
-      GPS     *gps;
 
       HardwareSPI *spi;
       Sd2Card     *card;
@@ -187,6 +190,7 @@ namespace Buoy {
       void start_continuous_write ();
       void stop_continuous_write ();
 
+# if HASRF
       /* ID and files currently being sent */
 # define GET_IDS_N 10 // no of ids to send in one go
       uint32_t s_id;
@@ -202,9 +206,12 @@ namespace Buoy {
       void send_refs (uint32_t, uint32_t, uint32_t);
       void send_batch (uint32_t id, uint32_t ref, uint32_t start, uint32_t length);
       void send_lastid ();
+# endif
 
+# if 0
       void open_next_log ();
       void log (const char *);
+# endif
   };
 }
 

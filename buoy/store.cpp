@@ -13,9 +13,11 @@
 # include "HardwareSPI.h"
 
 # include "store.h"
-# include "rf.h"
 # include "ads1282.h"
-# include "gps.h"
+
+# if HASRF
+  # include "rf.h"
+# endif
 
 
 namespace Buoy {
@@ -29,16 +31,22 @@ namespace Buoy {
 
   void Store::setup (BuoyMaster *b) // {{{
   {
+# if DIRECT_SERIAL
+    SerialUSB.println ("[SD] Setup.");
+# endif
+# if HASRF
     rf  = b->rf;
+# endif
     ad  = b->ad;
-    gps = b->gps;
 
     spi = new HardwareSPI(SD_SPI);
 
     lastsd    = millis ();
     lastbatch = 0;
-    s_lastbatch = 0;
     continuous_write = false;
+# if HASRF
+    s_lastbatch = 0;
+# endif
 
     /* Initialize card */
     init ();
@@ -201,7 +209,9 @@ namespace Buoy {
         SerialUSB.print ("[SD] Found free index at: ");
         SerialUSB.println (i);
 # endif
+# if HASRF
         rf_send_debug_f ("[SD] Next index: %lu", i);
+# endif
 
       } else {
         fi.close ();
@@ -436,6 +446,7 @@ namespace Buoy {
         sd_data = NULL;
       }
 
+# if HASRF
       s_id = 0;
       s_samples = 0;
       s_nrefs   = 0;
@@ -449,6 +460,7 @@ namespace Buoy {
         delete send_d;
         send_d  = NULL;
       }
+# endif
 
       /* Reinitiate SD card */
       SerialUSB.println ("[SD] Re-init..");
@@ -474,6 +486,7 @@ namespace Buoy {
     continuous_write = false;
   }
 
+# if HASRF
   /* ID list and retrieval */
   void Store::send_indexes (uint32_t start, uint32_t length) {
     if (!SD_AVAILABLE) {
@@ -732,6 +745,7 @@ namespace Buoy {
     RF_Serial.print (current_index.id);
     RF_Serial.println ("*NN");
   }
+# endif
 }
 
 /* vim: set filetype=arduino :  */
