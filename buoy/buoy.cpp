@@ -42,7 +42,7 @@ namespace Buoy {
 
     /* Count down.. */
 
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 3; i++) {
       SerialUSB.print ("Starting soon: ");
       SerialUSB.println (i);
       delay(1000);
