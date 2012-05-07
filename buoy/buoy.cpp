@@ -48,6 +48,8 @@ namespace Buoy {
       delay(1000);
     }
 
+    SerialUSB.println ("[**] Gautebøye 1 [" BUOY_NAME "] version: " GIT_DESC "[**]");
+
     /* Set up devices */
     //rf    = new RF ();
     //gps   = new GPS ();
