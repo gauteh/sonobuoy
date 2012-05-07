@@ -231,7 +231,7 @@ namespace Buoy {
 # endif
 
 # define FREQUENCY      250
-# define QUEUE_LENGTH  1000
+# define QUEUE_LENGTH  1024
 # define BATCHES          2 // _must_ be multiple of QUEUE_LENGTH
 # define BATCH_LENGTH (QUEUE_LENGTH / BATCHES)
 
