@@ -387,8 +387,16 @@ namespace Buoy {
 
   void Store::write_reference (uint64_t ref, uint32_t refstat) // {{{
   {
+# if DIRECT_SERIAL
+    SerialUSB.println ("[SD] Write reference.");
+# endif
     if (!SD_AVAILABLE) {
       return;
+    }
+
+    if (current_index.nrefs >= MAX_REFERENCES) {
+      SerialUSB.println ("[SD] Max references reached.");
+      roll_data_file ();
     }
 
     /* Update index */
