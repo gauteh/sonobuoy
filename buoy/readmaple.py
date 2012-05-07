@@ -3,7 +3,7 @@
 # Author:  Gaute Hope <eg@gaute.vetsj.com>
 # Date:    2012-04-28
 #
-# Reads /dev/maple
+# Reads /dev/maple persistently, allows programming without exiting.
 
 import serial
 import time, os, sys
