@@ -14,7 +14,7 @@
 # include "ads1282.h"
 # include "rf.h"
 # include "gps.h"
-//# include "store.h"
+# include "store.h"
 
 namespace Buoy {
   BuoyMaster::BuoyMaster () {
@@ -29,7 +29,7 @@ namespace Buoy {
       //gps->loop ();
       ad->loop ();
       //rf->loop ();
-      //store->loop ();
+      store->loop ();
     }
   }
 
@@ -51,16 +51,13 @@ namespace Buoy {
     /* Set up devices */
     //rf    = new RF ();
     //gps   = new GPS ();
-    //store = new Store ();
-    SerialUSB.println ("Create AD");
+    store = new Store ();
     ad    = new ADS1282 ();
 
     //rf->setup     (this);
     //gps->setup    (this);
-    SerialUSB.println ("Setup AD");
     ad->setup     (this);
-    SerialUSB.println ("Setup SD");
-    //store->setup  (this);
+    store->setup  (this);
 
     /* Start reading data continuously and writing to SD card */
     SerialUSB.println ("[Buoy] Initiating continuous transfer and write.");
@@ -69,7 +66,7 @@ namespace Buoy {
     //store->start_continuous_write ();
   }
 
-  int itoa (uint32_t n, uint8_t base, char *buf)
+  int itoa (uint32_t n, uint8_t base, char *buf) // {{{
   {
     unsigned long i = 0;
 
@@ -97,7 +94,7 @@ namespace Buoy {
 
     buf[++i] = 0;
     return i;
-  }
+  } // }}}
 }
 
 /* vim: set filetype=arduino :  */

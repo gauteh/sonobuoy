@@ -49,7 +49,7 @@ namespace Buoy {
       /*GPS       *gps;*/
       ADS1282   *ad;
       /*RF        *rf;*/
-      /*Store     *store;*/
+      Store     *store;
 
       BuoyMaster ();
       void main ();

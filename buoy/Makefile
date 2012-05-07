@@ -2,6 +2,7 @@
 
 SOURCES = buoy.cpp \
 					ads1282.cpp \
+					store.cpp \
 					main.cpp
 
 .DEFAULT_GOAL := sketch
