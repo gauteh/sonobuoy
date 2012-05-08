@@ -139,10 +139,9 @@ namespace Buoy {
     SerialUSB.println ("[AD] Configuring ADS1282..");
 # endif
 
-    int n = 0;
-
     /*
     // Configure I2C (U7)
+    int n = 0;
     Wire.beginTransmission (AD_I2C_ADDRESS);
     Wire.send (0x06);
     Wire.send (AD_I2C_CONTROL0);
