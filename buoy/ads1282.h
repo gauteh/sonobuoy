@@ -92,7 +92,7 @@ namespace Buoy {
  * conflicting U7 output with hardwired output - meaning shortening.
  */
 # define AD_I2C_CONTROL0  0xFF
-# define AD_I2C_CONTROL1  0xFF & !(AD_I2C_RESET)
+# define AD_I2C_CONTROL1  0xFF
 # define AD_I2C_POLARITY0 0
 # define AD_I2C_POLARITY1 0
 

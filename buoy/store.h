@@ -98,7 +98,7 @@ namespace Buoy {
 # define SD_DATA_FILE_SIZE (_SD_DATA_FILE_SIZE + (_SD_DATA_FILE_SIZE % 512uL))
 */
 # define SD_DATA_FILE_SIZE (5 * 1024 * 1024)
-# define MAX_REFERENCES (SD_DATA_FILE_SIZE / (BATCH_LENGTH * 1000))
+# define MAX_REFERENCES (SD_DATA_FILE_SIZE / (BATCH_LENGTH * 50))
 
 /* Data file format {{{
  *
