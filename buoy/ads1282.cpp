@@ -181,7 +181,6 @@ namespace Buoy {
     read_pca9535 (OUTPUT0);
     */
     delay (100); // Allow EVM and AD to power up..
-
     reset ();
     delay (100);
 
