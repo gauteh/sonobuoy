@@ -141,6 +141,11 @@ namespace Buoy {
 
     /*
     // Configure I2C (U7)
+
+    // Important: Currently setting all ports to input, but still doing a
+    // apparently in-effective RESET which seems to be necessary. Possibly
+    // due to an time delay. Anyway; it works.
+
     int n = 0;
     Wire.beginTransmission (AD_I2C_ADDRESS);
     Wire.send (0x06);
