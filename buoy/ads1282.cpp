@@ -142,8 +142,8 @@ namespace Buoy {
     /*
     // Configure I2C (U7)
 
-    // Important: Currently setting all ports to input, but still doing a
-    // apparently in-effective RESET which seems to be necessary. Possibly
+    // Important: Currently setting all ports to input, but still doing an
+    // presumable in-effective RESET which seems to be necessary (!). Possibly
     // due to an time delay. Anyway; it works.
 
     int n = 0;
@@ -154,8 +154,8 @@ namespace Buoy {
     n = Wire.endTransmission ();
 
     if (n != SUCCESS) { error (); return; }
-
     */
+
     // Read configuration
     read_pca9535 (CONTROL0);
     read_pca9535 (POLARITY0);
@@ -174,6 +174,7 @@ namespace Buoy {
      * - PMODE (not available on ADS1282)
      * - MFLAG
      */
+
     /*
     Wire.beginTransmission (AD_I2C_ADDRESS);
     Wire.send (0x02);
@@ -184,6 +185,7 @@ namespace Buoy {
 
     read_pca9535 (OUTPUT0);
     */
+
     delay (100); // Allow EVM and AD to power up..
     reset ();
     delay (100);
