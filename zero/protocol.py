@@ -38,6 +38,7 @@ class Protocol:
 
   def znsetaddress (self):
     # Address buoy
+    self.logger.info ("[ZeroNode] Setting to address: " + str(self.zero.current.address_p))
     _msg = 'ZA,' + self.zero.current.address_p
     self.zero.send ('$' + _msg + '*' + gen_checksum (_msg))
     self.adressedbuoy = self.zero.current.id
@@ -57,16 +58,20 @@ class Protocol:
     self.zero.send ('$ZS*' + gen_checksum ('ZS'))
 
   def znconnect (self):
+    self.logger.info ("[ZeroNode] Connecting to current buoy..")
     self.zero.send ('$ZC*' + gen_checksum ('ZA'))
 
   def znportalmode (self):
     # Put into portal mode and exit
+    self.logger.info ("[ZeroNode] Going into portal mode..")
     self.zero.send ("$ZP*" + gen_checksum ('ZP'))
 
   def znoutputuart (self):
+    self.logger.info ("[ZeroNode] Setting output on RF to UART (computer)")
     self.zero.send ("$ZU*" + gen_checksum ('ZU'))
 
   def znoutputwireless (self):
+    self.logger.info ("[ZeroNode] Setting output on RF to wireless (remote buoy)")
     self.zero.send ("$ZT*" + gen_checksum ('ZT'))
 
   def handle (self, buf):
@@ -317,7 +322,10 @@ class Protocol:
             if subtype == 'S':
               self.znaddress = token
               try:
-                self.logger.info ("[ZeroNode] Current node address: " + hex2(ord(token[0])) + ":" + hex2(ord(token[1])) + ":" + hex2(ord(token[2])))
+                if len(token) == 3:
+                  self.logger.info ("[ZeroNode] Current node address: " + hex2(ord(token[0])) + ":" + hex2(ord(token[1])) + ":" + hex2(ord(token[2])))
+                else:
+                  self.logger.info ("[ZeroNode] No current address.")
               except:
                 self.logger.exception ("[ZeroNode] Current node address (un-parseable): " + str(token))
               return

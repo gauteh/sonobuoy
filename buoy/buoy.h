@@ -11,8 +11,8 @@
 # define VERSION GIT_DESC
 
 /* ID for this Buoy */
-# define BUOY_ID    2
-# define BUOY_NAME  "Two"
+# define BUOY_ID    1
+# define BUOY_NAME  "One"
 
 /* ONLY_SPEC may be defined when including any of the headers to only include
  * any definitions and constants without code or code dependant parts. */
@@ -55,7 +55,6 @@ namespace Buoy {
       /*RF        *rf;*/
       Store     *store;
 
-      BuoyMaster ();
       void main ();
 
     private:

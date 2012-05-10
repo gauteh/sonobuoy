@@ -18,13 +18,8 @@
 # include "store.h"
 
 namespace Buoy {
-  BuoyMaster::BuoyMaster () {
-
-  }
-
   void BuoyMaster::main () {
     setup ();
-
 
     uint32_t lasts = 0;
 
