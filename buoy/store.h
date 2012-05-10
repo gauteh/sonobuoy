@@ -59,9 +59,6 @@
 
 # endif
 
-// Enable RF dependent sections
-# define HASRF 0
-
 namespace Buoy {
   class Store {
     public:

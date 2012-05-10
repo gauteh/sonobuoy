@@ -11,9 +11,6 @@
 
 # include "buoy.h"
 
-/* Do not rely on any other classes, useful for testing driver and ADS1282 */
-# define ADS1282ONLY 1
-
 using namespace std;
 
 namespace Buoy {
@@ -99,9 +96,11 @@ namespace Buoy {
   class ADS1282 {
     private:
     public:
-# if ADS1282ONLY
-      RF   * rf;
+# if HASGPS
       GPS  * gps;
+# endif
+# if HASRF
+      RF   * rf;
 # endif
 
       typedef struct _control {

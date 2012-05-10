@@ -13,8 +13,10 @@
 
 # include "ads1282.h"
 
-# if !ADS1282ONLY
+# if HASGPS
   # include "gps.h"
+# endif
+# if HASRF
   # include "rf.h"
 # endif
 
@@ -48,7 +50,7 @@ namespace Buoy {
 
     for (int i = 0; i < BATCHES; i++) {
       references [i] = 0;
-# if !ADS1282ONLY
+# if HASGPS
       reference_status[i] = GPS::NOTHING;
 # endif
     }
@@ -59,8 +61,10 @@ namespace Buoy {
 
   void ADS1282::setup (BuoyMaster *b) {
     // Set up interface and ADS1282 {{{
-# if !ADS1282ONLY
+# if HASRF
     rf = b->rf;
+# endif
+# if HASGPS
     gps = b->gps;
 # endif
 
@@ -88,7 +92,7 @@ namespace Buoy {
     /* Pick initial reference for batch, counting on GPS to have waited
      * for some initial reference.
      */
-# if !ADS1282ONLY
+# if HASGPS
     references[batch] = (gps->reference * 1e6) + (micros () - gps->microdelta);
     reference_status[batch] = (gps->HAS_TIME & GPS::TIME) |
                               (gps->HAS_SYNC & GPS::SYNC) |
@@ -97,7 +101,7 @@ namespace Buoy {
     /* Configure AD */
     configure ();
 
-# if !ADS1282ONLY
+# if HASRF
     rf->send_debug ("[AD] ADS1282 subsystem initiated.");
 # endif
     // }}}
@@ -214,7 +218,7 @@ namespace Buoy {
   /* Continuous read and write {{{ */
   void ADS1282::start_continuous_read () {
     continuous_read = true;
-# if !ADS1282ONLY
+# if HASRF
     rf->send_debug ("[AD] Sync and start read data continuous..");
 # endif
 # if DIRECT_SERIAL
@@ -228,7 +232,7 @@ namespace Buoy {
   }
 
   void ADS1282::stop_continuous_read () {
-# if !ADS1282ONLY
+# if HASRF
     rf->send_debug ("[AD] Reset by command and stop read data continuous..");
 # endif
 # if DIRECT_SERIAL
@@ -591,7 +595,7 @@ namespace Buoy {
       //gps->assert_time ();
 
       /* Pick new reference for batch */
-# if !ADS1282ONLY
+# if HASGPS
       references[batch] = (gps->reference * 1e6) + (micros () - gps->microdelta);
       reference_status[batch] = (gps->HAS_TIME & GPS::TIME) |
                                 (gps->HAS_SYNC & GPS::SYNC) |
@@ -711,7 +715,7 @@ namespace Buoy {
 # if DIRECT_SERIAL
     SerialUSB.println ("[AD] Error. Disabling.");
 # endif
-# if !ADS1282ONLY
+# if HASRF
     rf->send_debug ("[AD] Error. Disabling.");
 # endif
 

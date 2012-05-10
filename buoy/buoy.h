@@ -35,6 +35,10 @@
 # define DIRECT_SERIAL 1
 # define DEBUG_SD      0 // enable debug error messages on SdFat
 
+// Enable sections in dependant classes
+# define HASRF  0
+# define HASGPS 1
+
 /* Define board, 0 = maple_native, 1 = olimexino/maple (should be
  * compatible with BOARD in Makefile) */
 # define BBOARD 1
