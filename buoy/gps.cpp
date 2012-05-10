@@ -309,8 +309,11 @@ namespace Buoy {
       if (i < len) {
         if (tokeni == 0) {
           /* Determine telegram type */
-          if (strcmp(token, "$GPRMC") == 0)
+          if (strcmp(token, "$GPRMC") == 0) {
             type = GPRMC;
+            SerialUSB.print ("[GPS] Parsing GPRMC:");
+            SerialUSB.println (gps_buf);
+          }
           /*
           else if (strcmp(token, "$GPGGA") == 0)
             type = GPGGA;
@@ -339,16 +342,18 @@ namespace Buoy {
               {
                 case 1:
                   {
-                    char * s = token;
-                    char * n = token + 2;
-                    hour   = strtol (s, &n, 10);
-                    s = n; n = s + 2;
-                    minute = strtol (s, &n, 10);
-                    s = n; n = s + 2;
-                    second = strtol (s, &n, 10);
-                    n++; // skip delimiter
-                    s = n;
-                    seconds_part = strtol (s, NULL, 10);
+                    char t[4];
+                    strncpy(t, token, 2);
+                    hour   = strtol (t, NULL, 10);
+
+                    strncpy(t, token+2, 2);
+                    minute = strtol (t, NULL, 10);
+
+                    strncpy(t, token+4, 2);
+                    second = strtol (t, NULL, 10);
+
+                    strncpy(t, token+7, 3); // skip delimiter
+                    seconds_part = strtol (t, NULL, 10);
 
                     // Update seconds
                     doseconds = (day  > 0);
@@ -385,13 +390,16 @@ namespace Buoy {
 
                 case 9:
                   {
-                    char * s = token;
-                    char * n = token + 2;
-                    day   = strtol (s, &n, 10);
-                    s = n; n = s + 2;
-                    month = strtol (s, &n, 10);
-                    s = n; n = s + 2;
-                    year = strtol (s, &n, 10);
+                    char t[3];
+
+                    strncpy (t, token, 2);
+                    day   = strtol (t, NULL, 10);
+
+                    strncpy (t, token+2, 2);
+                    month = strtol (t, NULL, 10);
+
+                    strncpy (t, token+4, 2);
+                    year = strtol (t, NULL, 10);
 
                     // Update if we got time
                     doseconds = (day > 0);
