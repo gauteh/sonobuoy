@@ -83,10 +83,14 @@ namespace Buoy {
       uint8_t   mode1;
       uint8_t   mode2;
       */
+      // }}}
 
       GPS ();
       void        setup (BuoyMaster *);
       void        loop  ();
+# if DIRECT_SERIAL
+      void        print_status ();
+# endif
 
       static void sync_pulse_int ();
       void        sync_pulse ();

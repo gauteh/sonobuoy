@@ -108,7 +108,7 @@ namespace Buoy {
   }
 
   void ADS1282::loop () {
-    static uint32_t lasts;
+    //static uint32_t lasts;
     /* Run as part of main loop {{{ */
     if (!disabled) {
       run++;
@@ -121,21 +121,28 @@ namespace Buoy {
 
       //rf_send_debug_f ("[AD] Queue pos: %lu samples: %lu value: 0x%lX", position, totalsamples, value);
 
+      /*
       if (millis() - lasts >= 1000)
       {
-        SerialUSB.print ("[AD] Queue pos: ");
-        SerialUSB.print (position);
-
-        SerialUSB.print (", samples: ");
-        SerialUSB.print (totalsamples);
-
-        SerialUSB.print (", value: 0x");
-        SerialUSB.println (value, HEX);
-
+        status ();
         lasts = millis ();
       }
+      */
     } // }}}
   }
+
+# if DIRECT_SERIAL
+  void ADS1282::print_status () {
+    SerialUSB.print ("[AD] Queue pos: ");
+    SerialUSB.print (position);
+
+    SerialUSB.print (", samples: ");
+    SerialUSB.print (totalsamples);
+
+    SerialUSB.print (", value: 0x");
+    SerialUSB.println (value, HEX);
+  }
+# endif
 
   void ADS1282::configure () {
     // Configure {{{

@@ -18,7 +18,9 @@
 # if HASRF
   # include "rf.h"
 # endif
-
+# if HASGPS
+  # include "gps.h"
+# endif
 
 namespace Buoy {
   Store::Store () {

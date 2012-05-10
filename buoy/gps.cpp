@@ -309,11 +309,8 @@ namespace Buoy {
       if (i < len) {
         if (tokeni == 0) {
           /* Determine telegram type */
-          if (strcmp(token, "$GPRMC") == 0) {
+          if (strcmp(token, "$GPRMC") == 0)
             type = GPRMC;
-            SerialUSB.print ("[GPS] Parsing GPRMC:");
-            SerialUSB.println (gps_buf);
-          }
           /*
           else if (strcmp(token, "$GPGGA") == 0)
             type = GPGGA;
@@ -343,6 +340,8 @@ namespace Buoy {
                 case 1:
                   {
                     char t[4];
+                    t[2] = 0;
+                    t[3] = 0;
                     strncpy(t, token, 2);
                     hour   = strtol (t, NULL, 10);
 
@@ -391,6 +390,7 @@ namespace Buoy {
                 case 9:
                   {
                     char t[3];
+                    t[2] = 0;
 
                     strncpy (t, token, 2);
                     day   = strtol (t, NULL, 10);
@@ -603,6 +603,21 @@ namespace Buoy {
 
     /* Done parser }}} */
   }
+
+# if DIRECT_SERIAL
+  void GPS::print_status () {
+    SerialUSB.print ("[GPS] lat: ");
+    SerialUSB.print (ad->gps->latitude);
+    SerialUSB.print (", lon: ");
+    SerialUSB.print (ad->gps->longitude);
+    SerialUSB.print (", time: ");
+    SerialUSB.print (ad->gps->time);
+    SerialUSB.print (", date: ");
+    SerialUSB.print (day);
+    SerialUSB.print (month);
+    SerialUSB.println (year);
+  }
+# endif
 
   void GPS::enable_sync () {
     attachInterrupt (GPS_SYNC_PIN, &(GPS::sync_pulse_int), FALLING);

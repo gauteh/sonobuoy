@@ -26,11 +26,21 @@ namespace Buoy {
     setup ();
 
 
+    uint32_t lasts = 0;
+
     while (true) {
       gps->loop ();
       ad->loop ();
       //rf->loop ();
       store->loop ();
+
+# if DIRECT_SERIAL
+      if (millis () - lasts >= 1000) {
+        ad->print_status ();
+        gps->print_status ();
+        lasts = millis ();
+      }
+# endif
     }
   }
 

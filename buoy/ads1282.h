@@ -283,6 +283,9 @@ namespace Buoy {
 
       void error ();
 
+# if DIRECT_SERIAL
+      void print_status ();
+# endif
   };
 }
 # endif
