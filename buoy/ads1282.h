@@ -283,7 +283,9 @@ namespace Buoy {
 
       void error ();
 
+# if DEBUG_VERB
       void print_status ();
+# endif
   };
 }
 # endif

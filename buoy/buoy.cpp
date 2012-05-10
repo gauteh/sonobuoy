@@ -29,13 +29,15 @@ namespace Buoy {
       rf->loop ();
       store->loop ();
 
+# if DEBUG_INFO
       if (millis () - lasts >= 1000) {
-        //SerialUSB.println ("loop");
+        SerialUSB.print ("Position: ");
         SerialUSB.println (ad->position);
         //ad->print_status ();
         //gps->print_status ();
         lasts = millis ();
       }
+# endif
     }
   }
 
@@ -48,6 +50,7 @@ namespace Buoy {
 
     /* Count down.. */
 
+# if DEBUG_INFO
     for (int i = 0; i < 3; i++) {
       SerialUSB.print ("Starting soon: ");
       SerialUSB.println (i);
@@ -55,6 +58,7 @@ namespace Buoy {
     }
 
     SerialUSB.println ("[**] Gautebøye 1 [" BUOY_NAME "] version: " GIT_DESC);
+# endif
 
     /* Set up devices */
     rf    = new RF ();
@@ -67,8 +71,10 @@ namespace Buoy {
     ad->setup     (this);
     store->setup  (this);
 
+# if DEBUG_INFO
     /* Start reading data continuously and writing to SD card */
     SerialUSB.println ("[Buoy] Initiating continuous transfer and write.");
+# endif
 
     ad->start_continuous_read ();
     store->start_continuous_write ();

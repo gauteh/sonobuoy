@@ -88,7 +88,9 @@ namespace Buoy {
       GPS ();
       void        setup (BuoyMaster *);
       void        loop  ();
+# if DEBUG_VERB
       void        print_status ();
+# endif
 
       static void sync_pulse_int ();
       void        sync_pulse ();

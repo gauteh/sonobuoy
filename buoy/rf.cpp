@@ -33,9 +33,6 @@ namespace Buoy {
     store = b->store;
 
     RF_Serial.begin (RF_BAUDRATE);
-
-    /* Send greeting */
-    //send_debug ("[Buoy] Initializing Gautebuoy [ " STRINGIFY(BUOY_ID) ": " BUOY_NAME " ] ( version " VERSION " )");
   }
 
   void RF::loop () {
@@ -54,9 +51,6 @@ namespace Buoy {
 
     while (ca > 0) {
       char c = (char)RF_Serial.read ();
-# if DIRECT_SERIAL
-      SerialUSB.print (c);
-# endif
 
       if (rf_buf_pos >= RF_SERIAL_BUFLEN) {
         state = 0;
@@ -143,7 +137,7 @@ namespace Buoy {
       i++; /* Skip delimiter */
 
       token[j] = 0;
-# if DIRECT_SERIAL
+# if DEBUG_VERB
       SerialUSB.print ("Token: ");
       SerialUSB.print (tokeni);
       SerialUSB.println (token);
@@ -168,7 +162,7 @@ namespace Buoy {
             type = GETBATCH;
           else {
             /* Cancel parsing */
-# if DIRECT_SERIAL
+# if DEBUG_VERB
             SerialUSB.print ("Unknown command: ");
             SerialUSB.println (token);
 # endif
@@ -337,7 +331,7 @@ simpleparser:
     return;
 
 cmderror:
-# if DIRECT_SERIAL
+# if DEBUG_VERB
     SerialUSB.println ("[RF] E_BADCOMMAND");
 # endif
     send_error (E_BADCOMMAND);

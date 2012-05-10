@@ -33,7 +33,7 @@ namespace Buoy {
 
   void Store::setup (BuoyMaster *b) // {{{
   {
-# if DIRECT_SERIAL
+# if DEBUG_VERB
     SerialUSB.println ("[SD] Setup.");
 # endif
 # if HASRF
@@ -56,7 +56,7 @@ namespace Buoy {
 
   void Store::init () // {{{
   {
-# if DIRECT_SERIAL
+# if DEBUG_VERB
     SerialUSB.println ("[SD] Init SD card.");
 # endif
 
@@ -91,7 +91,7 @@ namespace Buoy {
 
     if (SD_AVAILABLE)
     {
-# if DIRECT_SERIAL
+# if DEBUG_VERB
       SerialUSB.println ("[SD] Card initialized.");
 # endif
 
@@ -101,7 +101,7 @@ namespace Buoy {
       //open_next_log ();
 
     } else {
-# if DIRECT_SERIAL
+# if DEBUG_VERB
       SerialUSB.println ("[SD] Could not initialize SD card.");
 # endif
       current_index.id = 0;
@@ -127,7 +127,7 @@ namespace Buoy {
       i = 1;
     }
 
-# if DIRECT_SERIAL
+# if DEBUG_VERB
     SerialUSB.print ("[SD] Last id: ");
     SerialUSB.println (i);
 # endif
@@ -180,7 +180,7 @@ namespace Buoy {
     // TODO: Handle better MAXID
 
     if (i > MAXID ) {
-# if DIRECT_SERIAL
+# if DEBUG_VERB
     SerialUSB.print ("[SD] Reached maximum ID:");
     SerialUSB.println (i);
     SerialUSB.println (MAXID);
@@ -191,7 +191,7 @@ namespace Buoy {
     /* Walk through subsequent indexes above lastid and take next free */
     bool newi = false;
 
-# if DIRECT_SERIAL
+# if DEBUG_VERB
     SerialUSB.print ("[SD] Checking for subseq. indexes from: ");
     SerialUSB.println (i);
 # endif
@@ -207,7 +207,7 @@ namespace Buoy {
       if (!fi.open(root, buf, O_READ)) {
         newi = true; /* Found new index file at id I */
 
-# if DIRECT_SERIAL
+# if DEBUG_VERB
         SerialUSB.print ("[SD] Found free index at: ");
         SerialUSB.println (i);
 # endif
@@ -242,7 +242,7 @@ namespace Buoy {
   {
     if (!SD_AVAILABLE) return;
 
-# if DIRECT_SERIAL
+# if DEBUG_VERB
     SerialUSB.print   ("[SD] Writing index: ");
     SerialUSB.println (current_index.id);
 # endif
@@ -285,7 +285,7 @@ namespace Buoy {
   {
     /* Open new index and data file */
     if (!SD_AVAILABLE) return;
-# if DIRECT_SERIAL
+# if DEBUG_VERB
     SerialUSB.println ("[SD] Syncing index and data and rolling..");
 # endif
 
@@ -308,7 +308,7 @@ namespace Buoy {
 
   void Store::write_batch () // {{{
   {
-# if DIRECT_SERIAL
+# if DEBUG_VERB
     SerialUSB.println ("[SD] Writing batch..");
 # endif
     /* Write new batch of samples */
@@ -329,7 +329,9 @@ namespace Buoy {
     /* Check if we have room in size */
     if (sd_data->curPosition () > (SD_DATA_FILE_SIZE - (BATCH_LENGTH * (SAMPLE_LENGTH))))
     {
+# if DEBUG_INFO
       SerialUSB.println ("[SD] Rolling because of SD_DATA_FILE_SIZE.");
+# endif
       roll_data_file ();
     }
 
@@ -339,7 +341,7 @@ namespace Buoy {
 
     /* Writing entries */
     /*
-# if DIRECT_SERIAL
+# if DEBUG_VERB
     SerialUSB.println ("[SD] Writing entries to data file.");
 # endif
     */
@@ -347,7 +349,7 @@ namespace Buoy {
     int r = sd_data->write (reinterpret_cast<char*>((uint32_t*) &(ad->values[s])), sizeof(uint32_t) * BATCH_LENGTH);
 
     if (r != sizeof(uint32_t) * BATCH_LENGTH) {
-# if DIRECT_SERIAL
+# if DEBUG_VERB
       SerialUSB.println ("[SD] [Error] Failed while writing samples.");
 # endif
 
@@ -364,7 +366,7 @@ namespace Buoy {
       lastbatch  =  (lastbatch + 1) % BATCHES;
 
     if (lastbatch != ad->batch) {
-# if DIRECT_SERIAL
+# if DEBUG_VERB
       SerialUSB.println ("[SD] [Error] Out of sync with AD, might not finish writing batch before it is swapped.");
 # endif
     }
@@ -394,7 +396,7 @@ namespace Buoy {
     }
 
     if (current_index.nrefs >= MAX_REFERENCES) {
-# if DIRECT_SERIAL
+# if DEBUG_VERB
       SerialUSB.println ("[SD] Max references reached.");
 # endif
       roll_data_file ();
@@ -425,7 +427,7 @@ namespace Buoy {
   {
     /* Try to set up SD card, 5 sec delay  */
     if (!SD_AVAILABLE && (millis () - lastsd) > 5000) {
-# if DIRECT_SERIAL
+# if DEBUG_VERB
       SerialUSB.println ("[SD] [Error] Trying to reset.");
       SerialUSB.println (card->errorCode ());
 # endif
@@ -434,7 +436,9 @@ namespace Buoy {
       spi->end ();
 
       /* Clean up stale file references */
+# if DEBUG_INFO
       SerialUSB.println ("[SD] Cleaning up..");
+# endif
       if (card != NULL) {
         delete card;
         card = NULL;
@@ -472,7 +476,9 @@ namespace Buoy {
 # endif
 
       /* Reinitiate SD card */
+# if DEBUG_INFO
       SerialUSB.println ("[SD] Re-init..");
+# endif
       init ();
 
       lastsd = millis ();

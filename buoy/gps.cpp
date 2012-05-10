@@ -61,7 +61,7 @@ namespace Buoy {
 
     GPS_Serial.begin (GPS_BAUDRATE);
 
-# if DIRECT_SERIAL
+# if DEBUG_VERB
     SerialUSB.println ("[GPS] Waiting for first (un-reliable) reference..");
 # endif
     uint8_t n = 0;
@@ -71,7 +71,7 @@ namespace Buoy {
 
       /* Break after 100 secs */
       if (n > 1000) {
-# if DIRECT_SERIAL
+# if DEBUG_VERB
         SerialUSB.println ("[GPS] [Error] No initial reference received for 100 sec.");
 # endif
         break;
@@ -604,6 +604,7 @@ namespace Buoy {
     /* Done parser }}} */
   }
 
+# if DEBUG_VERB
   void GPS::print_status () {
     SerialUSB.print ("[GPS] lat: ");
     SerialUSB.print (ad->gps->latitude);
@@ -616,6 +617,7 @@ namespace Buoy {
     SerialUSB.print (month);
     SerialUSB.println (year);
   }
+# endif
 
   void GPS::enable_sync () {
     attachInterrupt (GPS_SYNC_PIN, &(GPS::sync_pulse_int), FALLING);

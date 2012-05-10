@@ -32,7 +32,9 @@
 # include "types.h"
 
 /* Print debug messages to USB serial */
-# define DIRECT_SERIAL 0
+# define DEBUG_VERB    0
+# define DEBUG_INFO    1
+# define DEBUG_WARN    1
 # define DEBUG_SD      0 // enable debug error messages on SdFat
 
 // Enable sections in dependant classes
