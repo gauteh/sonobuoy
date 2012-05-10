@@ -32,11 +32,11 @@
 # include "types.h"
 
 /* Print debug messages to USB serial */
-# define DIRECT_SERIAL 1
+# define DIRECT_SERIAL 0
 # define DEBUG_SD      0 // enable debug error messages on SdFat
 
 // Enable sections in dependant classes
-# define HASRF  0
+# define HASRF  1
 # define HASGPS 1
 
 /* Define board, 0 = maple_native, 1 = olimexino/maple (should be
@@ -52,7 +52,7 @@ namespace Buoy {
     public:
       GPS       *gps;
       ADS1282   *ad;
-      /*RF        *rf;*/
+      RF        *rf;
       Store     *store;
 
       void main ();

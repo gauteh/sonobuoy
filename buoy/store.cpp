@@ -334,12 +334,6 @@ namespace Buoy {
     }
 
     write_reference (ad->references[lastbatch], ad->reference_status[lastbatch]);
-# if DIRECT_SERIAL
-    SerialUSB.print ("[SD] Ref: ");
-    SerialUSB.print (ad->references[lastbatch]);
-    SerialUSB.print (", status: 0b");
-    SerialUSB.println (ad->reference_status[lastbatch], BIN);
-# endif
 
     if (!SD_AVAILABLE) return;
 

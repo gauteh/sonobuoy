@@ -26,16 +26,15 @@ namespace Buoy {
     while (true) {
       gps->loop ();
       ad->loop ();
-      //rf->loop ();
+      rf->loop ();
       store->loop ();
 
-# if DIRECT_SERIAL
       if (millis () - lasts >= 1000) {
-        ad->print_status ();
-        gps->print_status ();
+        //SerialUSB.println ("loop");
+        //ad->print_status ();
+        //gps->print_status ();
         lasts = millis ();
       }
-# endif
     }
   }
 
@@ -57,12 +56,12 @@ namespace Buoy {
     SerialUSB.println ("[**] Gautebøye 1 [" BUOY_NAME "] version: " GIT_DESC);
 
     /* Set up devices */
-    //rf    = new RF ();
+    rf    = new RF ();
     gps   = new GPS ();
     store = new Store ();
     ad    = new ADS1282 ();
 
-    //rf->setup     (this);
+    rf->setup     (this);
     gps->setup    (this);
     ad->setup     (this);
     store->setup  (this);

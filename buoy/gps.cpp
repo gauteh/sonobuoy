@@ -604,7 +604,6 @@ namespace Buoy {
     /* Done parser }}} */
   }
 
-# if DIRECT_SERIAL
   void GPS::print_status () {
     SerialUSB.print ("[GPS] lat: ");
     SerialUSB.print (ad->gps->latitude);
@@ -617,7 +616,6 @@ namespace Buoy {
     SerialUSB.print (month);
     SerialUSB.println (year);
   }
-# endif
 
   void GPS::enable_sync () {
     attachInterrupt (GPS_SYNC_PIN, &(GPS::sync_pulse_int), FALLING);

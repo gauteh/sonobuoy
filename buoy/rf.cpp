@@ -35,7 +35,7 @@ namespace Buoy {
     RF_Serial.begin (RF_BAUDRATE);
 
     /* Send greeting */
-    send_debug ("[Buoy] Initializing Gautebuoy [ " STRINGIFY(BUOY_ID) ": " BUOY_NAME " ] ( version " VERSION " )");
+    //send_debug ("[Buoy] Initializing Gautebuoy [ " STRINGIFY(BUOY_ID) ": " BUOY_NAME " ] ( version " VERSION " )");
   }
 
   void RF::loop () {

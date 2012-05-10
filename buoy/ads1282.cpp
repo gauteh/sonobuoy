@@ -131,7 +131,6 @@ namespace Buoy {
     } // }}}
   }
 
-# if DIRECT_SERIAL
   void ADS1282::print_status () {
     SerialUSB.print ("[AD] Queue pos: ");
     SerialUSB.print (position);
@@ -142,7 +141,6 @@ namespace Buoy {
     SerialUSB.print (", value: 0x");
     SerialUSB.println (value, HEX);
   }
-# endif
 
   void ADS1282::configure () {
     // Configure {{{
