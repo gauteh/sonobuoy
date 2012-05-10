@@ -279,7 +279,7 @@ namespace Buoy {
     */
 
     /* Test checksum before parsing */
-    if (!RF::test_checksum (gps_buf)) return;
+    if (!test_checksum (gps_buf)) return;
 
     /* Update time, should be set in case time data has been received */
     bool doseconds = false;

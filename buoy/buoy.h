@@ -46,7 +46,7 @@
 namespace Buoy {
   class BuoyMaster {
     public:
-      /*GPS       *gps;*/
+      GPS       *gps;
       ADS1282   *ad;
       /*RF        *rf;*/
       Store     *store;
@@ -59,6 +59,9 @@ namespace Buoy {
   };
 
   int itoa (uint32_t, uint8_t, char *);
+  byte gen_checksum (const char *);
+  bool test_checksum (const char *);
+  //void append_checksum (char *);
 
   /* Globally available instance of BuoyMaster (i.e. for statical interrupt
    * handlers). */

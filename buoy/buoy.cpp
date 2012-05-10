@@ -5,9 +5,10 @@
  *
  */
 
-# include "buoy.h"
-
 # include <stdint.h>
+# include <stdlib.h>
+
+# include "buoy.h"
 
 # include "wirish.h"
 
@@ -26,7 +27,7 @@ namespace Buoy {
 
 
     while (true) {
-      //gps->loop ();
+      gps->loop ();
       ad->loop ();
       //rf->loop ();
       store->loop ();
@@ -52,12 +53,12 @@ namespace Buoy {
 
     /* Set up devices */
     //rf    = new RF ();
-    //gps   = new GPS ();
+    gps   = new GPS ();
     store = new Store ();
     ad    = new ADS1282 ();
 
     //rf->setup     (this);
-    //gps->setup    (this);
+    gps->setup    (this);
     ad->setup     (this);
     store->setup  (this);
 
@@ -96,6 +97,41 @@ namespace Buoy {
 
     buf[++i] = 0;
     return i;
+  } // }}}
+
+  /* Checksum {{{ */
+  byte gen_checksum (const char *buf)
+  {
+  /* Generate checksum for NULL terminated string */
+
+    byte csum = 0;
+    buf++; // skip $
+
+    while (*buf != '*' && *buf != 0) {
+      csum = csum ^ ((byte)*buf);
+      buf++;
+    }
+
+    return csum;
+  }
+
+  bool test_checksum (const char *buf)
+  {
+    /* Input: String including $ and * with HEX decimal checksum
+     *        to test. NULL terminated.
+     */
+    uint32_t tsum = 0;
+    buf++; // skip $
+    while (*buf != '*' && *buf != 0) {
+      tsum = tsum ^ (uint8_t)*buf;
+      buf++;
+    }
+    buf++;
+
+    uint16_t csum = 0;
+    csum = strtoul (buf, NULL, 16); // buf now points to first digit of CS
+
+    return tsum == csum;
   } // }}}
 }
 

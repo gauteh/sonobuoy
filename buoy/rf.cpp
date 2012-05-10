@@ -378,41 +378,6 @@ cmderror:
     RF_Serial.println (cs&0xf, HEX);
     */
   } // }}}
-
-  /* Checksum {{{ */
-  byte RF::gen_checksum (const char *buf)
-  {
-  /* Generate checksum for NULL terminated string */
-
-    byte csum = 0;
-    buf++; // skip $
-
-    while (*buf != '*' && *buf != 0) {
-      csum = csum ^ ((byte)*buf);
-      buf++;
-    }
-
-    return csum;
-  }
-
-  bool RF::test_checksum (const char *buf)
-  {
-    /* Input: String including $ and * with HEX decimal checksum
-     *        to test. NULL terminated.
-     */
-    uint32_t tsum = 0;
-    buf++; // skip $
-    while (*buf != '*' && *buf != 0) {
-      tsum = tsum ^ (uint8_t)*buf;
-      buf++;
-    }
-    buf++;
-
-    uint16_t csum = 0;
-    csum = strtoul (buf, NULL, 16); // buf now points to first digit of CS
-
-    return tsum == csum;
-  } // }}}
 }
 
 /* vim: set filetype=arduino :  */
