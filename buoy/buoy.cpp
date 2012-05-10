@@ -31,6 +31,7 @@ namespace Buoy {
 
       if (millis () - lasts >= 1000) {
         //SerialUSB.println ("loop");
+        SerialUSB.println (ad->position);
         //ad->print_status ();
         //gps->print_status ();
         lasts = millis ();
