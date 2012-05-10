@@ -13,6 +13,7 @@ class AD:
   buoy = None
   logger = None
 
+  ad_batch_length = 1024 # Only for sample rate calculations.. may change
   ad_qposition  = 0
   ad_queue_time = 0 # Time to fill up queue
   ad_value      = ''
@@ -47,7 +48,7 @@ class AD:
   ''' Print some AD stats '''
   def ad_status (self):
     # Gets called when an AD status message has been received and interpreted
-    self.logger.debug ("[AD] Sample rate: " + str((self.ad_k_samples * 1000 / float(self.ad_queue_time if self.ad_queue_time > 0 else 1))) + " [Hz], value: " + str(self.ad_value) + ", Queue postion: " + str(self.ad_qposition) + ", Config: " + self.ad_config)
+    self.logger.debug ("[AD] Sample rate: " + str((self.ad_batch_length * 1000 / float(self.ad_queue_time if self.ad_queue_time > 0 else 1))) + " [Hz], value: " + str(self.ad_value) + ", Queue postion: " + str(self.ad_qposition) + ", Config: " + self.ad_config)
 
   def swapstore (self):
     self.store = 1 if (self.store == 0) else 0
