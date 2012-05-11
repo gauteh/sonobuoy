@@ -26,8 +26,8 @@ namespace Buoy {
     while (true) {
       gps->loop ();
       ad->loop ();
-      rf->loop ();
       store->loop ();
+      rf->loop ();
 
 # if DEBUG_INFO
       if (millis () - lasts >= 1000) {
