@@ -199,6 +199,16 @@ class Buoy:
   def getstatus (self):
     self.protocol.send ("GS")
 
+  def getlatestbatch (self):
+    self.getlatestid ()
+    pass
+
+  def getlatestid (self):
+    self.protocol.send ("GLID")
+  
+  def getids (self, start):
+    self.protocol.send ("GIDS," + str(start))
+
   error_strings = [ "E_CONFIRM",
                     "E_BADCOMMAND",
                     "E_UNKNOWNCOMMAND",

@@ -74,8 +74,8 @@ namespace Buoy {
 
       char buf[8+5]; // used for file names
 
-      bool  SD_AVAILABLE;
-      uint32_t lastsd;
+      bool      SD_AVAILABLE;
+      uint32_t  lastsd;
 
 # endif
 

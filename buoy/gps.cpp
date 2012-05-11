@@ -257,7 +257,6 @@ namespace Buoy {
     }
 
     /* }}} Done telegram handler */
-
   }
 
   void GPS::parse ()

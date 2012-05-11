@@ -20,38 +20,13 @@ class Protocol:
     self.zero     = z
     self.logger   = z.logger
 
-  # Last type received
-  lasttype = ''
-
-  # Receiver state:
-  # 0 = Waiting for '$'
-  # 1 = Between '$' and '*'
-  # 2 = On first CS digit
-  # 3 = On second CS digit
-  # 4 = Waiting for '$' to signal start of binary data
-  # 5 = Receiving AD binary sample data
-
-  a_receive_state = 0
-  a_buf           = ''
-  waitforreceipt  = False # Have just got a AD data batch and is waiting for
-                          # a DE receipt message
-
+# Commands (buoy and zeronode) and ouput {{{
   def znsetaddress (self):
     # Address buoy
     self.logger.info ("[ZeroNode] Setting to address: " + str(self.zero.current.address_p))
     _msg = 'ZA,' + self.zero.current.address_p
     self.zero.send ('$' + _msg + '*' + gen_checksum (_msg))
     self.adressedbuoy = self.zero.current.id
-
-  def send (self, msg):
-    if self.zero.current.id != self.adressedbuoy:
-      self.znsetaddress ()
-      self.znconnect ()
-      self.znoutputwireless ()
-
-    # Encapsulate and add checksum
-    msg = '$' + msg + '*' + gen_checksum (msg)
-    self.zero.send (msg)
 
   # Request status from zeronode
   def zngetstatus (self):
@@ -74,6 +49,33 @@ class Protocol:
     self.logger.info ("[ZeroNode] Setting output on RF to wireless (remote buoy)")
     self.zero.send ("$ZT*" + gen_checksum ('ZT'))
 
+  def send (self, msg):
+    if self.zero.current.id != self.adressedbuoy:
+      self.znsetaddress ()
+      self.znconnect ()
+      self.znoutputwireless ()
+
+    # Encapsulate and add checksum
+    msg = '$' + msg + '*' + gen_checksum (msg)
+    self.zero.send (msg)
+# }}}
+
+# Parser and handler {{{
+  # Last type received
+  lasttype = ''
+
+  # Receiver state:
+  # 0 = Waiting for '$'
+  # 1 = Between '$' and '*'
+  # 2 = On first CS digit
+  # 3 = On second CS digit
+  # 4 = Waiting for '$' to signal start of binary data
+  # 5 = Receiving AD binary sample data
+
+  a_receive_state = 0
+  a_buf           = ''
+  waitforreceipt  = False # Have just got a AD data batch and is waiting for
+                          # a DE receipt message
   def handle (self, buf):
     i = 0
     l = len (buf)
@@ -126,7 +128,7 @@ class Protocol:
         self.a_receive_state = 0
 
 
-  def a_parse (self, buf):
+  def a_parse (self, buf): # {{{
     # Test checksum
     if (buf[-2:] == 'NN'):
       #self.logger.debug ("[Protocol] Checksum not provided on received message")
@@ -351,6 +353,7 @@ class Protocol:
           return
 
       tokeni += 1
+  # }}}
 
-
+# }}}
 

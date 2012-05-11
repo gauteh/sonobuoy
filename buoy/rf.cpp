@@ -47,12 +47,10 @@ namespace Buoy {
      */
     static int state = 0;
 
-    int ca = RF_Serial.available ();
-
-    while (ca > 0) {
+    while (RF_Serial.available () > 0) {
       char c = (char)RF_Serial.read ();
 
-      if (rf_buf_pos >= RF_SERIAL_BUFLEN) {
+      if (rf_buf_pos >= RF_SERIAL_BUFLEN - 1) {
         state = 0;
         rf_buf_pos = 0;
       }
@@ -91,8 +89,6 @@ namespace Buoy {
           state = 0;
           break;
       }
-
-      ca--;
     }
 
     /* }}} Done telegram handler */
@@ -116,6 +112,7 @@ namespace Buoy {
     if (!test_checksum (rf_buf)) goto cmderror;
 
     SerialUSB.println ("Checksum OK");
+    delay(500);
 
     /* Parse */
     while (i < len)
@@ -259,12 +256,15 @@ namespace Buoy {
 
     /* Single token commands */
 simpleparser:
+    SerialUSB.println ("[RF] simplep");
+    delay(500);
     switch (type) {
       // GETSTATUS {{{
       case GETSTATUS:
         // $GPS,S,[lasttype],[telegrams received],[lasttelegram],Lat,Lon,unixtime,time,date,Valid,HAS_TIME,HAS_SYNC,HAS_SYNC_REFERENCE*CS
         // Valid: Y = Yes, N = No
         SerialUSB.println ("[RF] Sending status..");
+        delay(500);
         RF_Serial.print ("$GPS,S,");
         RF_Serial.print (gps->lasttype);
         RF_Serial.print (",");
@@ -331,8 +331,9 @@ simpleparser:
     return;
 
 cmderror:
-# if DEBUG_VERB
+# if DEBUG_WARN
     SerialUSB.println ("[RF] E_BADCOMMAND");
+    delay (500);
 # endif
     send_error (E_BADCOMMAND);
     return;

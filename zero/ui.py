@@ -19,6 +19,12 @@ class ZeroCliService:
   def getstatus (self):
     self.zero.current.getstatus ()
 
+  def getlatestbatch (self):
+    self.zero.current.getlatestbatch ()
+
+  def getids (self, start):
+    self.zero.current.getids (start)
+
   def rollfile (self):
     for b in self.zero.buoys:
       b.rollfile ()

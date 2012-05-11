@@ -55,6 +55,16 @@ class zCLI:
     self.z.getstatus ()
     print "done."
 
+  def getlatestbatch (self):
+    print "Getting latest batch..",
+    self.z.getlatestbatch ()
+    print "done."
+
+  def getids (self, start):
+    print "Getting ids..",
+    self.z.getids (start)
+    print "done."
+
   def zngetstatus (self):
     print "Getting Zero Node status..",
     self.m.zngetstatus ()
@@ -163,18 +173,26 @@ class zCLI:
     print ""
     print "Usage: ", sys.argv[0] + " command [arguments]"
     print ""
-    print "Commands:"
+    print "=> Data commands:"
     print "summary                  Print summary of connected nodes"
     print "show [buoy name]         Show detailed information about buoy"
     print "monitor [buoy name]      Regularily print information about buoy"
     print "rollfile                 Roll data file on all buoys"
+    print ""
+    print "=> Buoy commands:"
     print "getstatus                Request status from current buoy"
+    print "getlatestbatch           Request latest batch from current buoy"
+    print "getids [start]           Get ids"
+    print ""
+    print "=> ZeroNode commands:"
     print "zngetstatus              Request status from zero node"
     print "znportalmode             Put zeronode in portal mode and exit zero"
     print "znaddress                Set address of zeronode to current buoy"
     print "znconnect                Connect to currently specified address"
     print "znoutputuart             Configure output of Zero to go to uart"
     print "znoutputwireless         Configure output of Zero to go to wireless"
+    print ""
+    print "=> Zero Manager commands:"
     print "stop                     Stop Zero Manager"
 
   def go (self):
@@ -193,6 +211,15 @@ class zCLI:
 
     elif sys.argv[1] == 'getstatus':
       self.getstatus ()
+
+    elif sys.argv[1] == 'getlatestbatch':
+      self.getlatestbatch ()
+
+    elif sys.argv[1] == 'getids':
+      if len(sys.argv) != 3:
+        print "Error: Must specify starting id."
+        return
+      self.getids (int(sys.argv[2]))
 
     elif sys.argv[1] == 'zngetstatus':
       self.zngetstatus ()
