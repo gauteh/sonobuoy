@@ -38,7 +38,12 @@ class Index:
       self.indexf = open (self.indexf_uri, 'r')
       for l in self.indexf.readlines ():
         s = l.split (",")
-        self.data.append (Data (self.logger, self.buoy, self, int(s[0]), bool(s[1])))
+        if s[1].strip () == "True":
+          e = True
+        else:
+          e = False
+
+        self.data.append (Data (self.logger, self.buoy, self, int(s[0]), e))
         if int(s[0]) > self.greatestid:
           self.greatestid = int(s[0])
 
