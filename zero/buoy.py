@@ -64,6 +64,9 @@ class Buoy:
     self.gps  = Gps (self)
     self.ad   = AD (self)
 
+  def loop (self):
+    self.index.loop ()
+
   def stop (self):
     self.logger.info ("[" + self.name + "] Stopping..")
     self.index.close ()
@@ -78,10 +81,10 @@ class Buoy:
     self.protocol.send ("GS")
 
   def getlatestbatch (self):
-    self.getlatestid ()
+    self.getlastid ()
     pass
 
-  def getlatestid (self):
+  def getlastid (self):
     self.protocol.send ("GLID")
   
   def getids (self, start):

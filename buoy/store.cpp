@@ -515,16 +515,18 @@ namespace Buoy {
       int p = itoa (start, 10, buf);
       strcpy (&(buf[p]), ".IND");
       //sprintf (buf, "%lu.IND", start);
+      RF_Serial.print ("$IDS,");
+      RF_Serial.print (start);
       if (!!fi.open (root, buf, O_READ)) {
         fi.close ();
-        RF_Serial.print ("$IDS,");
-        RF_Serial.print (start);
-        RF_Serial.println ("*NN");
+        RF_Serial.println (",1*NN");
         /*
         sprintf (rf->buf, "$IDS,%lu*", start);
         APPEND_CSUM(rf->buf);
         RF_Serial.println (rf->buf);
         */
+      } else {
+        RF_Serial.println (",0*NN");
       }
 
       start++;

@@ -16,6 +16,8 @@ class Protocol:
 
   adressedbuoy = 0     # id of buoy addressed on zeronode
 
+  tokens = [0, 0, 0, 0, 0, 0, 0, 0] # temp for storing tokens
+
   def __init__ (self, z):
     self.zero     = z
     self.logger   = z.logger
@@ -229,6 +231,7 @@ class Protocol:
                 self.zero.current.gps.has_sync_reference = (token == 'Y')
 
                 self.zero.current.gps.gps_status ()
+                self.zero.current.index.gotstatus ()
               else:
                 self.logger.error ("[Protocol] Too many tokens for message: " + msgtype + ", subtype: " + subtype + ", token: " + token)
                 return
@@ -251,6 +254,7 @@ class Protocol:
                 elif (tokeni == 5):
                   self.zero.current.ad.ad_config = token
                   self.zero.current.ad.ad_status ()
+                  self.zero.current.index.gotstatus ()
                   return
                 else:
                   self.logger.error ("[Protocol] Too many tokens for message: " + msgtype + ", subtype: " + subtype)
@@ -331,6 +335,17 @@ class Protocol:
               except:
                 self.logger.exception ("[ZeroNode] Current node address (un-parseable): " + str(token))
               return
+
+        elif (msgtype == 'LID'):
+          if (tokeni == 1):
+            self.zero.current.index.gotlastid (token)
+
+        elif (msgtype == 'IDS'):
+          if (tokeni == 1):
+            self.tokens[0] = token
+
+          elif (tokeni == 2):
+            self.zero.current.index.gotids (self.tokens[0], token)
 
         elif (msgtype == 'DBG'):
           if (tokeni == 1):

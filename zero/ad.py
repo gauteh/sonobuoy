@@ -9,6 +9,8 @@ import math
 
 from util import *
 
+from data import *
+
 class AD:
   buoy = None
   logger = None
@@ -28,13 +30,6 @@ class AD:
   ad_sample_csum    = '' # String rep of hex value
   ad_samples        = '' # Array of bytes (3 * byte / value)
 
-  # AD storage, swap before storing
-  storelock = None
-  referencesa = []
-  referencesb = []
-  samplesa = []
-  samplesb = []
-  store    = 0 # 0 = a, 1 = b
   nsamples = 0
   freq     = 0
   last     = 0
@@ -43,15 +38,11 @@ class AD:
   def __init__ (self, b):
     self.buoy = b
     self.logger = b.logger
-    self.storelock = threading.Lock ()
 
   ''' Print some AD stats '''
   def ad_status (self):
     # Gets called when an AD status message has been received and interpreted
     self.logger.debug ("[AD] Sample rate: " + str((self.ad_batch_length * 1000 / float(self.ad_queue_time if self.ad_queue_time > 0 else 1))) + " [Hz], value: " + str(self.ad_value) + ", Queue postion: " + str(self.ad_qposition) + ", Config: " + self.ad_config)
-
-  def swapstore (self):
-    self.store = 1 if (self.store == 0) else 0
 
   ''' Handle received binary samples '''
   def ad_handle_samples (self):
@@ -68,7 +59,6 @@ class AD:
     csum = 0
 
     s = []
-    t = []
 
     i = 0
     while (i < self.ad_k_samples):
@@ -93,29 +83,10 @@ class AD:
 
     else:
       # Successfully received samples and time stamps
-      self.storelock.acquire ()
+      self.buoy.index.received_batch (self.ad_k_samples, self.ad_reference, self.ad_reference_status, s)
 
       # Write reference line as described in buoy.py, log ()
       r = "R," + str(self.ad_k_samples) + "," + str(self.ad_reference) + "," + str(self.ad_reference_status)
-
-      if self.store == 0:
-        self.referencesa.append ((r, len(self.samplesa)))
-      else:
-        self.referencesb.append ((r, len(self.samplesb)))
-
-      i = 0
-      while i < self.ad_k_samples:
-        if self.store == 0:
-          self.samplesa.append (s[i])
-        else:
-          self.samplesb.append (s[i])
-
-        i += 1
-
-      self.storelock.release ()
-
-      if self.buoy.LOG_ON_RECEIVE:
-        self.buoy.log ()
 
       #print "[AD] Successfully received ", self.ad_k_samples, " samples.. (time of first: " + str(self.ad_time_of_first) + ")"
       #print "[AD] Frequency: " + str(self.freq) + "[Hz]"

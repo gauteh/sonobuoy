@@ -40,6 +40,9 @@ class Zero:
   # Reading thread
   go       = True
 
+  # Current buoy thread
+  cthread = None
+
   def get_current (self):
     try:
       return self.buoys[self.currenti]
@@ -87,6 +90,10 @@ class Zero:
     self.uimanagerthread.daemon = True
     self.uimanagerthread.start ()
 
+    # Start thread for current buoy
+    self.cthread = Thread (target = self.current_thread, name = 'CurrentBuoy')
+    self.cthread.start ()
+
     # Start thread reading stdin
     #t = Thread (target = self.stdin, name = 'StdinHandler')
     #t.daemon = True
@@ -131,8 +138,9 @@ class Zero:
 
   def send (self, msg):
     try:
-      self.logger.debug ("[Zero] Sending: " + msg)
-      self.ser.write (msg + "\n")
+      if self.ser is not None:
+        self.logger.debug ("[Zero] Sending: " + msg)
+        self.ser.write (msg + "\n")
     except serial.SerialException as e:
       self.logger.exception ("[Zero] Exception with serial link, reconnecting..: " + str(e))
       self.closeserial ()
@@ -152,6 +160,7 @@ class Zero:
               self.protocol.handle (r)
 
           time.sleep (0.0001)
+
         except serial.SerialException as e:
           self.logger.exception ("[Zero] Exception with serial link, reconnecting..: " + str(e))
           self.closeserial ()
@@ -174,6 +183,14 @@ class Zero:
 
     finally:
       self.logger.info ("[Zero] Main loop finished..")
+
+  def current_thread (self):
+    self.logger.info ("[Zero] Entering current thread..")
+    while self.go:
+      if self.current is not None:
+        self.current.loop ()
+
+      time.sleep (0.0001)
 
   def stdin (self):
     # Wait for input on stdin, then exit..

@@ -13,6 +13,7 @@ class Data:
   logger = None
 
   id = 0
+  enabled = False
 
   class Ref: # Ref struct {{{
     id  = 0
@@ -48,16 +49,18 @@ class Data:
   batch_length  = 0
   refs_no       = 0
 
-  def __init__ (self, l, _buoy, _index, _id):
+  def __init__ (self, l, _buoy, _index, _id, _enabled):
     self.logger = l
     self.buoy = _buoy
     self.index = _index
     self.id = _id
+    self.enabled = _enabled
 
-    self.indexf_uri = os.path.join (self.buoy.logdir, str(self.id), '.ITT')
-    self.dataf_uri  = os.path.join (self.buoy.logdir, str(self.id), '.DTT')
 
-    self.logger.info ("[Data] Initializing, reading index and data..")
+    self.indexf_uri = os.path.join (self.buoy.logdir, str(self.id) + '.ITT')
+    self.dataf_uri  = os.path.join (self.buoy.logdir, str(self.id) + '.DTT')
+
+    self.logger.info ("[Data] [" + str(self.id) + "] Initializing, reading index and data..")
     self.read_index ()
     self.read_data  ()
 
@@ -85,8 +88,7 @@ class Data:
       self.batch_length   = int(self.indexf.readline ())
       self.refs_no        = int(self.indexf.readline ())
 
-      while not self.indexf.eof ():
-        l = self.indexf.readline ()
+      for l in self.indexf.readlines ():
         s = l.split (',')
         self.refs.append (Ref (int(s[0]), int(s[1]), int(s[2]), 0, False))
 
@@ -95,15 +97,15 @@ class Data:
 
   def write_index (self):
     self.refs = sorted (self.refs, key = lambda r: r.no)
-    self.indexf.open (self.indexf_uri, 'w+') # truncate file
-    self.indexf.writeline (self.store_version)
-    self.indexf.writeline (self.index_id)
-    self.indexf.writeline (self.sample_length)
-    self.indexf.writeline (self.samples)
-    self.indexf.writeline (self.batch_length)
-    self.indexf.writeline (self.refs_no)
+    self.indexf = open (self.indexf_uri, 'w+') # truncate file
+    self.indexf.write (str(self.store_version) + '\n')
+    self.indexf.write (str(self.index_id) + '\n')
+    self.indexf.write (str(self.sample_length) + '\n')
+    self.indexf.write (str(self.samples) + '\n')
+    self.indexf.write (str(self.batch_length) + '\n')
+    self.indexf.write (str(self.refs_no) + '\n')
     for i in self.refs:
-      self.indexf.writeline (str(i.id) + ',' + str(i.no) + ',' + str(i.ref))
+      self.indexf.write (str(i.id) + ',' + str(i.no) + ',' + str(i.ref) + '\n')
 
     self.indexf.close ()
   # }}}
@@ -115,8 +117,7 @@ class Data:
 
       # Scan for references, all that are present here must be complete
       n = 0
-      while not self.dataf.eof ():
-        l = self.dataf.readline ()
+      for l in self.dataf.readlines ():
         if l[0] == 'R':
           s     = l.split (',')
           bl    = s[1]
@@ -132,9 +133,19 @@ class Data:
 
         n = n + 1 # line no
 
-  def append_batch (self, ref, samples):
-    # ref is Data.Ref with info about just received batch
+  def append_batch (self, batch_length, reference, status, samples):
+    # reference is time
     # samples is list of samples for this ref
+
+    # find Ref corresponding to reference
+    ref = None
+    for i in self.refs:
+      if i.ref == reference:
+        ref = i
+
+    if ref is None:
+      self.logger.error ("[Data] Got batch without corresponding reference.")
+      return
 
     # load data file
     # write segment by segment
@@ -166,21 +177,25 @@ class Data:
         n = n + self.batch_length + 1
 
       else:
-        k = self.batch_length + 1
-        j = 0
-        while j < k:
-          self.dataf.writeline (lines[i.lineno + j])
-          j = j + 1
-          n = n + 1
+        if i.complete:
+          k = self.batch_length + 1
+          j = 0
+          while j < k:
+            self.dataf.writeline (lines[i.lineno + j])
+            j = j + 1
+            n = n + 1
 
-        # Update lineno if new batch has been written
-        if newref_written:
-          i.lineno = i.lineno + self.batch_length + 1
+          # Update lineno if new batch has been written
+          if newref_written:
+            i.lineno = i.lineno + self.batch_length + 1
 
     self.dataf.close ()
 
     self.refs.append (ref)
     self.write_index ()
+
+  def __eq__ (self, other):
+    return (self.id == other)
 
   def close (self):
     self.write_index ()
