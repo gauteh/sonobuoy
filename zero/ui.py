@@ -1,5 +1,3 @@
-#! /usr/bin/python2
-#
 # Author: Gaute Hope <eg@gaute.vetsj.com> / 2011-09-28
 #
 # API to zero service.

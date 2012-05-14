@@ -20,12 +20,16 @@ class Index:
   greatestid = 0
   lastid = 0
 
+  # id for log
+  me = ""
+
   def __init__ (self, l, _buoy):
     self.logger = l
     self.buoy = _buoy
+    self.me = "[" + self.buoy.name + "] [Index]"
     self.indexf_uri = os.path.join (self.buoy.logdir, 'indexes')
 
-    self.logger.info ("[Index] Initializing and opening index..")
+    self.logger.info (self.me + " Initializing and opening index..")
     self.open_index ()
 
   ''' Open index list file and read known data segments and status {{{
@@ -83,11 +87,11 @@ class Index:
       if self.greatestid < id:
         self.greatestid = id
 
-      self.logger.info ("[Index] Got id: " + str(id))
+      self.logger.info (self.me +  " Got id: " + str(id))
       if self.indexofdata(id) is None:
         self.data.append (Data (self.logger, self.buoy, self, id, enabled))
       else:
-        self.logger.info ("[Index] Id already known.")
+        self.logger.info (self.me + " Id already known.")
 
       self.write_index ()
 
@@ -108,7 +112,7 @@ class Index:
 
   def gotlastid (self, token):
     self.lastid = int(token)
-    self.logger.info ("[Index] Latest id: " + str(self.lastid))
+    self.logger.info (self.me + " Latest id: " + str(self.lastid))
     self.sync_lastid_t = time.time ()
     self.state = 0
 
@@ -128,7 +132,7 @@ class Index:
     elif self.status == 1:
       self.state = 0
       self.sync_status_t = time.time ()
-      self.logger.debug ("[Index] Status updated.")
+      self.logger.debug (self.me + " Status updated.")
 
   # State for keeping this buoys data uptodate
   state     = 0

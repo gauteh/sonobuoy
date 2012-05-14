@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Author: Gaute Hope <eg@gaute.vetsj.com> / 2012-05-14
 #
 # data.py: Keep track of one data file for buoy
@@ -14,6 +15,9 @@ class Data:
 
   id = 0
   enabled = False
+
+  # id for log
+  me = ""
 
   class Ref: # Ref struct {{{
     id  = 0
@@ -55,12 +59,13 @@ class Data:
     self.index = _index
     self.id = _id
     self.enabled = _enabled
+    self.me = "[" + self.buoy.name + "] [Data] [" + str(_id) + "]"
 
 
     self.indexf_uri = os.path.join (self.buoy.logdir, str(self.id) + '.ITT')
     self.dataf_uri  = os.path.join (self.buoy.logdir, str(self.id) + '.DTT')
 
-    self.logger.info ("[Data] [" + str(self.id) + "] Initializing (enabled: " + str(self.enabled) + ")")
+    self.logger.info (self.me + " Initializing (enabled: " + str(self.enabled) + ")")
     self.read_index ()
     self.read_data  ()
 
@@ -148,7 +153,7 @@ class Data:
           ref = i
 
       if ref is None:
-        self.logger.error ("[Data] Got batch without corresponding reference.")
+        self.logger.error (self.me + " Got batch without corresponding reference.")
         return
 
       # load data file
@@ -198,7 +203,7 @@ class Data:
       self.refs.append (ref)
       self.write_index ()
     else:
-      self.logger.error ("[Data] Tried to append batch on disabled data file.")
+      self.logger.error (self.me + " Tried to append batch on disabled data file.")
 
   def __eq__ (self, other):
     return (self.id == other)
