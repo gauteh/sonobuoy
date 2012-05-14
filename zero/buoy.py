@@ -82,7 +82,6 @@ class Buoy:
 
   def getlatestbatch (self):
     self.getlastid ()
-    pass
 
   def getlastid (self):
     self.protocol.send ("GLID")

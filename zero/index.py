@@ -168,12 +168,12 @@ class Index:
       elif self.state == 1:
         # time.time out
         if time.time () - self.request_t > self.timeout:
-          self.state = 0
-          self.status = 0
+          self.reset ()
 
-      # wait for ids
-      elif self.state == 2:
-        if time.time () - self.request_t > self.timeout:
-          self.state = 0
-          self.gotids_n = 0
+  def reset (self):
+    # reset in case checksum mismatch or timeout
+    self.state    = 0
+    self.gotids_n = 0
+    self.status   = 0
+
 

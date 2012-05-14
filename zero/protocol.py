@@ -138,6 +138,7 @@ class Protocol:
     elif (not test_checksum (buf)):
       self.logger.info ("[Protocol] Message discarded, checksum failed.")
       self.logger.info ("[Protocol] Discarded: " + buf)
+      self.zero.current.index.reset ()
       return
 
     # Parse message

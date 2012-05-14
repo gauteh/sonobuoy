@@ -167,8 +167,8 @@ class Data:
       if ref.no < i.no:
         # Write ref
         self.dataf.writeline ("R," + str(self.batch_length) + "," + str(ref.no) + "," + str(ref.ref) + "," + str(ref.status))
-        ref.lineno = n + 1
-        ref.complete = True
+        ref.lineno    = n + 1
+        ref.complete  = True
         # Write samples
         for s in samples:
           self.dataf.writeline (str(samples))
