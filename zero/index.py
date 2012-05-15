@@ -140,8 +140,10 @@ class Index:
   def gotstatus (self):
     if self.status == 0: # got gps status
       self.status = 1 # wait for ad status
+      self.sync_status_t = time.time ()
     elif self.status == 1:
-      self.state = 0
+      self.state  = 0
+      self.status = 0
       self.sync_status_t = time.time ()
       self.logger.debug (self.me + " Status updated.")
 
