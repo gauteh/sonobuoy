@@ -99,9 +99,6 @@ namespace Buoy {
 # if HASGPS
       GPS  * gps;
 # endif
-# if HASRF
-      RF   * rf;
-# endif
 
       typedef struct _control {
         /* Control registers of U7 / PCA9535RGE {{{ */

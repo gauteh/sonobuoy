@@ -16,9 +16,6 @@
 # if HASGPS
   # include "gps.h"
 # endif
-# if HASRF
-  # include "rf.h"
-# endif
 
 using namespace std;
 
@@ -61,9 +58,6 @@ namespace Buoy {
 
   void ADS1282::setup (BuoyMaster *b) {
     // Set up interface and ADS1282 {{{
-# if HASRF
-    rf = b->rf;
-# endif
 # if HASGPS
     gps = b->gps;
 # endif
