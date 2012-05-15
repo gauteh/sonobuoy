@@ -77,7 +77,7 @@ namespace Buoy {
 # endif
 
     ad->start_continuous_read ();
-    store->start_continuous_write ();
+    //store->start_continuous_write ();
   }
 
   int itoa (uint32_t n, uint8_t base, char *buf) // {{{

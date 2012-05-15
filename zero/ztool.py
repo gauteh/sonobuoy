@@ -51,6 +51,11 @@ class zCLI:
     self.z.getstatus ()
     print "done."
 
+  def resetbuoy (self):
+    print "Resetting current buoy..",
+    self.z.resetbuoy ()
+    print "done."
+
   def getlatestbatch (self):
     print "Getting latest batch..",
     self.z.getlatestbatch ()
@@ -177,6 +182,7 @@ class zCLI:
     print "getstatus                Request status from current buoy"
     print "getlatestbatch           Request latest batch from current buoy"
     print "getids [start]           Get ids"
+    print "reset                    Reset CPU card on current buoy"
     print ""
     print "=> ZeroNode commands:"
     print "zngetstatus              Request status from zero node"
@@ -214,6 +220,9 @@ class zCLI:
 
     elif sys.argv[1] == 'zngetstatus':
       self.zngetstatus ()
+
+    elif sys.argv[1] == 'reset':
+      self.resetbuoy ()
 
     elif sys.argv[1] == 'znportalmode':
       self.znportalmode ()

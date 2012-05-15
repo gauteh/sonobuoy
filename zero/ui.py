@@ -17,6 +17,9 @@ class ZeroCliService:
   def getstatus (self):
     self.zero.current.getstatus ()
 
+  def resetbuoy (self):
+    self.zero.protocol.resetbuoy ()
+
   def getlatestbatch (self):
     self.zero.current.getlatestbatch ()
 

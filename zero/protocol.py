@@ -44,6 +44,13 @@ class Protocol:
     self.zero.send ("$ZP*" + gen_checksum ('ZP'))
     self.zero.stop ()
 
+  def resetbuoy (self):
+    self.logger.info ("[ZeroNode] Resetting current buoy.")
+    if self.zero.current.id != self.adressedbuoy:
+      self.znsetaddress ()
+      self.znconnect ()
+    self.zero.send ("$ZR*" + gen_checksum ('ZR'))
+
   def znoutputuart (self):
     self.logger.info ("[ZeroNode] Setting output on RF to UART (computer)")
     self.zero.send ("$ZU*" + gen_checksum ('ZU'))

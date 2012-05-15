@@ -41,7 +41,7 @@ namespace Buoy {
 # define AD_DIN  11
 # define AD_SS   BOARD_SPI1_NSS_PIN   // 10, unused
 
-# define AD_nDRDY 3 // (D3 = led 2)
+# define AD_nDRDY 7 // (D3 = led 2)
 
 # define AD_I2C 1
 # define AD_SCL 5
@@ -230,7 +230,7 @@ namespace Buoy {
 # endif
 
 # define FREQUENCY      250
-# define QUEUE_LENGTH  (2*1024)
+# define QUEUE_LENGTH  (1024)
 # define BATCHES          2 // _must_ be multiple of QUEUE_LENGTH (min 2!)
 # define BATCH_LENGTH (QUEUE_LENGTH / BATCHES)
 

@@ -28,8 +28,8 @@ namespace Buoy {
   }
 
   void RF::setup (BuoyMaster *b) {
-    ad  = b->ad;
-    gps = b->gps;
+    ad    = b->ad;
+    gps   = b->gps;
     store = b->store;
 
     RF_Serial.begin (RF_BAUDRATE);
@@ -49,26 +49,28 @@ namespace Buoy {
 
     while (RF_Serial.available () > 0) {
       char c = (char)RF_Serial.read ();
+      SerialUSB.println (c);
 
-      if (rf_buf_pos >= RF_SERIAL_BUFLEN - 1) {
-        state = 0;
-        rf_buf_pos = 0;
+      if (rf_buf_pos >= RF_SERIAL_BUFLEN) {
+        state       = 0;
+        rf_buf_pos  = 0;
       }
 
       switch (state)
       {
         case 0:
           if (c == '$') {
-            rf_buf[0] = '$';
-            rf_buf_pos = 1;
-            state = 1;
+            rf_buf[0]   = '$';
+            rf_buf_pos  = 1;
+            state       = 1;
           }
           break;
 
         case 2:
           state = 3;
         case 1:
-          if (c == '*') state = 2;
+          if (c == '*')
+            state = 2;
 
           rf_buf[rf_buf_pos] = c;
           rf_buf_pos++;
@@ -80,13 +82,14 @@ namespace Buoy {
           rf_buf[rf_buf_pos] = 0;
 
           parse (); // Complete telegram received
-          rf_buf_pos = 0;
-          state = 0;
+          rf_buf_pos  = 0;
+          state       = 0;
           break;
 
         /* Should not be reached. */
         default:
-          state = 0;
+          state       = 0;
+          rf_buf_pos  = 0;
           break;
       }
     }
@@ -105,18 +108,18 @@ namespace Buoy {
 
     RF_TELEGRAM type = UNSPECIFIED;
     int tokeni = 0;
-    int len    = rf_buf_pos; // Excluding NULL terminator
+    int len    = rf_buf_pos - 1; // Excluding NULL terminator
     int i      = 0;
 
     /* Test checksum before parsing */
     if (!test_checksum (rf_buf)) goto cmderror;
 
-    SerialUSB.println ("Checksum OK");
     delay(500);
 
     /* Parse */
     while (i < len)
     {
+      SerialUSB.println ("nc");
       /*
       uint32_t ltmp = 0;
       uint32_t remainder = 0;
@@ -126,6 +129,7 @@ namespace Buoy {
       int j = 0;
       /* Get next token */
       while ((rf_buf[i] != ',' && rf_buf[i] != '*') && i < len) {
+        SerialUSB.println ("nt");
         token[j] = rf_buf[i];
 
         i++;
@@ -135,7 +139,7 @@ namespace Buoy {
 
       token[j] = 0;
 # if DEBUG_VERB
-      SerialUSB.print ("Token: ");
+      SerialUSB.print ("T ");
       SerialUSB.print (tokeni);
       SerialUSB.println (token);
 # endif

@@ -221,9 +221,6 @@ namespace Buoy {
   /* Continuous read and write {{{ */
   void ADS1282::start_continuous_read () {
     continuous_read = true;
-# if HASRF
-    rf->send_debug ("[AD] Sync and start read data continuous..");
-# endif
 # if DEBUG_VERB
     SerialUSB.println ("[AD] Sync and start read data continuous..");
 # endif
@@ -235,9 +232,6 @@ namespace Buoy {
   }
 
   void ADS1282::stop_continuous_read () {
-# if HASRF
-    rf->send_debug ("[AD] Reset by command and stop read data continuous..");
-# endif
 # if DEBUG_VERB
     SerialUSB.println ("[AD] Reset by command and stop read data continuous..");
 # endif
@@ -717,9 +711,6 @@ namespace Buoy {
     /* Some error on the ADS1282 - disable {{{ */
 # if DEBUG_VERB
     SerialUSB.println ("[AD] Error. Disabling.");
-# endif
-# if HASRF
-    rf->send_debug ("[AD] Error. Disabling.");
 # endif
 
     disabled = true;
