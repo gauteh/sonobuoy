@@ -74,12 +74,10 @@ class Index:
   ''' Update local list of segments from buoy, going backwards '''
   gotids_n = 0
   def gotids (self, id, enabled):
-    id = int(id)
-
     self.gotids_n = self.gotids_n + 1
 
     if id <= self.lastid:
-      if enabled == "1":
+      if enabled == 1:
         enabled = True
       else:
         enabled = False
@@ -91,7 +89,7 @@ class Index:
       if self.indexofdata(id) is None:
         self.data.append (Data (self.logger, self.buoy, self, id, enabled))
       else:
-        self.logger.info (self.me + " Id already known.")
+        self.logger.info (self.me + " Id already known: " + str(id))
 
       self.write_index ()
 
