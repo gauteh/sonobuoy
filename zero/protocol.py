@@ -355,7 +355,12 @@ class Protocol:
 
         elif (msgtype == 'LID'):
           if (tokeni == 1):
-            self.zero.current.index.gotlastid (token)
+            try:
+              self.zero.current.index.gotlastid (int(token))
+            except ValueError:
+              self.zero.current.index.reset ()
+              self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
+              return
 
         elif (msgtype == 'IDS'):
           if (tokeni == 1):
@@ -367,14 +372,15 @@ class Protocol:
             except ValueError:
               self.zero.current.index.reset ()
               self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
+              return
 
         elif (msgtype == 'DBG'):
           if (tokeni == 1):
-            self.logger.info ("[Buoy] " + token)
+            self.logger.info ("[Buoy] [DBG] " + token)
 
         elif (msgtype == 'DBGZ'):
           if (tokeni == 1):
-            self.logger.info ("[ZeroNode] " + token)
+            self.logger.info ("[ZeroNode] [DBG] " + token)
 
         elif (msgtype == 'ERR'):
           self.zero.current.index.reset ()
@@ -384,6 +390,7 @@ class Protocol:
             except ValueError:
               self.logger.error ("[Buoy] Received error: [" + token + "]")
               self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
+              return
 
         else:
           self.zero.current.index.reset ()
