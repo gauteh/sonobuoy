@@ -118,8 +118,11 @@ class Index:
   def getlastid (self):
     self.buoy.getlastid ()
 
-  def gotlastid (self, token):
-    self.lastid = int(token)
+  def gotlastid (self, id):
+    if id != self.lastid:
+      self.__incremental_id_check_done__ = False
+
+    self.lastid = id
     self.logger.info (self.me + " Latest id: " + str(self.lastid))
     self.sync_lastid_t = time.time ()
     self.state = 0
@@ -157,6 +160,7 @@ class Index:
     # idle
     if self.buoy.zero.ser is not None:
       if self.state == 0:
+        # Get status and lastid {{{
         if time.time () - self.sync_status_t > self.sync_status:
           self.buoy.getstatus ()
           self.request_t = time.time ()
@@ -167,9 +171,9 @@ class Index:
           self.getlastid ()
           self.request_t = time.time ()
           self.state = 1
+        # }}}
 
-
-        # check if we have all ids
+        # check if we have all ids {{{
         elif self.lastid > 0:
           # get ids down to greatestid
           if self.greatestid < self.lastid:
@@ -199,6 +203,7 @@ class Index:
                 self.__unchecked_ids__              = None
                 self.__incremental_id_check_done__  = True
                 self.logger.debug (self.me + " All missing ids got.")
+        # }}}
 
 
         # download data
