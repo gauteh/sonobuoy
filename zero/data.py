@@ -13,8 +13,6 @@ class Data:
   index = None
   logger = None
 
-  id = 0
-  enabled = False
 
   # id for log
   me = ""
@@ -47,7 +45,8 @@ class Data:
   dataf       = None # Samples with refs
 
   store_version = 0
-  index_id      = 0
+  id            = 0
+  enabled       = False
   sample_length = 0
   samples       = 0
   batch_length  = 0
@@ -88,7 +87,7 @@ class Data:
         self.indexf = open (self.indexf_uri, 'r')
 
         self.store_version  = int(self.indexf.readline ())
-        self.index_id       = int(self.indexf.readline ())
+        self.id             = int(self.indexf.readline ())
         self.sample_length  = int(self.indexf.readline ())
         self.samples        = int(self.indexf.readline ())
         self.batch_length   = int(self.indexf.readline ())
@@ -101,12 +100,15 @@ class Data:
         self.indexf.close ()
         self.refs = sorted (self.refs, key = lambda r: r.no)
 
+      else:
+        self.write_index ()
+
   def write_index (self):
     if self.enabled:
       self.refs = sorted (self.refs, key = lambda r: r.no)
       self.indexf = open (self.indexf_uri, 'w+') # truncate file
       self.indexf.write (str(self.store_version) + '\n')
-      self.indexf.write (str(self.index_id) + '\n')
+      self.indexf.write (str(self.id) + '\n')
       self.indexf.write (str(self.sample_length) + '\n')
       self.indexf.write (str(self.samples) + '\n')
       self.indexf.write (str(self.batch_length) + '\n')
