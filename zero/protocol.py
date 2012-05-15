@@ -52,11 +52,11 @@ class Protocol:
     self.zero.send ("$ZR*" + gen_checksum ('ZR'))
 
   def znoutputuart (self):
-    self.logger.info ("[ZeroNode] Setting output on RF to UART (computer)")
+    self.logger.info ("[ZeroNode] Setting Zero RF to output locally.")
     self.zero.send ("$ZU*" + gen_checksum ('ZU'))
 
   def znoutputwireless (self):
-    self.logger.info ("[ZeroNode] Setting output on RF to wireless (remote buoy)")
+    self.logger.info ("[ZeroNode] Setting Zero RF to output on air.")
     self.zero.send ("$ZT*" + gen_checksum ('ZT'))
 
   def send (self, msg):

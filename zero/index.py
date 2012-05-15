@@ -95,11 +95,11 @@ class Index:
       if self.greatestid < id:
         self.greatestid = id
 
-      self.logger.info (self.me +  " Got id: " + str(id))
       if self.indexofdata(id) is None:
+        self.logger.info (self.me +  " Got id: " + str(id))
         self.data.append (Data (self.logger, self.buoy, self, id, enabled))
       else:
-        self.logger.info (self.me + " Id already known: " + str(id))
+        self.logger.info (self.me + " Got already known id: " + str(id))
 
       self.write_index ()
 

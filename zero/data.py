@@ -64,7 +64,7 @@ class Data:
     self.indexf_uri = os.path.join (self.buoy.logdir, str(self.id) + '.ITT')
     self.dataf_uri  = os.path.join (self.buoy.logdir, str(self.id) + '.DTT')
 
-    self.logger.info (self.me + " Initializing (enabled: " + str(self.enabled) + ")")
+    self.logger.debug (self.me + " Initializing (enabled: " + str(self.enabled) + ")")
     self.read_index ()
     self.read_data  ()
 
