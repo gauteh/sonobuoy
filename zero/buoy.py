@@ -29,13 +29,8 @@ class Buoy:
 
   BASEDIR = 'log'
   logdir  = ''    # Will be BASEDIR/name
-  logfile = ''
-  logfilef = None
-  filelock = None
 
-  keeprun = True
   active  = False
-  runthread = None
   logger  = None
 
   def __init__ (self, z, b):

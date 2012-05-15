@@ -159,8 +159,6 @@ class Zero:
             if self.current is not None:
               self.protocol.handle (r)
 
-          time.sleep (0.0001)
-
         except serial.SerialException as e:
           self.logger.exception ("[Zero] Exception with serial link, reconnecting..: " + str(e))
           self.closeserial ()
@@ -185,12 +183,12 @@ class Zero:
       self.logger.info ("[Zero] Main loop finished..")
 
   def current_thread (self):
-    self.logger.info ("[Zero] Entering current thread..")
+    self.logger.info ("[Zero] Starting current buoy thread..")
     while self.go:
       if self.current is not None:
         self.current.loop ()
 
-      time.sleep (0.0001)
+      time.sleep (0.001)
 
   def stdin (self):
     # Wait for input on stdin, then exit..
