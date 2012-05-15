@@ -68,7 +68,10 @@ class zCLI:
 
   def znportalmode (self):
     print "Setting zeronode in portal mode and stopping zero.."
-    self.m.znportalmode ()
+    try:
+      self.m.znportalmode ()
+    except:
+      os._exit (1)
 
   def znconnect (self):
     print "Requesting Zero node to connect to buoy node.."
@@ -102,7 +105,7 @@ class zCLI:
         t.add_row ([("X" if s[0] else ""),] + s[1:5] + [f,] + [s[6]])
     except:
       print "Error: Lost connection to Zero"
-      sys.exit (1)
+      os._exit (1)
 
     print t.draw ()
 
@@ -110,7 +113,7 @@ class zCLI:
       print "Total: ", self.z.bouy_count ()
     except:
       print "Error: Lost connection to Zero"
-      sys.exit (1)
+      os._exit (1)
 
   def show (self, b):
     t = Texttable ()
@@ -120,9 +123,7 @@ class zCLI:
     except Exception as e:
       print "Error: Lost connection to Zero"
       self.r_monitor = False
-      #self.m.close ()
-      sys.exit (1)
-      throw (e)
+      os._exit (1)
 
     if s is None:
       print "Error: No such buoy."
@@ -159,10 +160,8 @@ class zCLI:
     print "Stopping Zero Manager.."
     try:
       self.m.stop ()
-      #self.z.stop ()
     except:
-      print "Error: Lost connection to Zero."
-      sys.exit (1)
+      os._exit (1)
 
   ''' Usage output '''
   def help (self):

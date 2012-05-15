@@ -134,7 +134,7 @@ class Index:
 
   # State for keeping this buoys data uptodate
   state     = 0
-  timeout   = 10 # secs
+  timeout   = 30 # secs
   request_t = 0
 
   sync_lastid   = 4 * 60 # time between syncs of last id

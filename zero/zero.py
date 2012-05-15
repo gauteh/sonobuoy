@@ -114,7 +114,7 @@ class Zero:
       self.protocol.adressedbuoy = 0 # reset adressed buoy
       try:
         try:
-          self.ser = serial.Serial (self.port, self.baud)
+          self.ser = serial.Serial (port = self.port, baudrate = self.baud, timeout = 0)
           self.logger.info ("[Zero] Serial port open.")
         except serial.SerialException as e:
           self.logger.error ("[Zero] Failed to open serial port.. retrying in 5 seconds.")
@@ -128,7 +128,8 @@ class Zero:
     try:
       if self.ser != None:
         self.ser.close ()
-    except: pass
+    except Exception as e:
+      self.logger.exception ("[Zero] Could not close serial: " + str(e))
 
     self.ser = None
 
@@ -155,9 +156,11 @@ class Zero:
       while self.go:
         try:
           if not self.ser == None:
-            r = self.ser.read (1) # blocking
+            r = self.ser.read (1) # non-blocking 
             if self.current is not None:
               self.protocol.handle (r)
+
+            time.sleep (0.001)
 
         except serial.SerialException as e:
           self.logger.exception ("[Zero] Exception with serial link, reconnecting..: " + str(e))
@@ -215,6 +218,7 @@ class Zero:
     for i in self.buoys:
       i.stop ()
 
+    self.closeserial ()
     self.logger.info ("[Zero] Stopped.")
 
 if __name__ == '__main__':

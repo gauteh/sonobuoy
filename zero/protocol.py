@@ -42,6 +42,7 @@ class Protocol:
     # Put into portal mode and exit
     self.logger.info ("[ZeroNode] Going into portal mode..")
     self.zero.send ("$ZP*" + gen_checksum ('ZP'))
+    self.zero.stop ()
 
   def znoutputuart (self):
     self.logger.info ("[ZeroNode] Setting output on RF to UART (computer)")
