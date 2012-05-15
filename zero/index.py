@@ -19,9 +19,12 @@ class Index:
   data = []
   greatestid = 0
   lastid = 0
+  __incremental_id_check_done__ = False
+  __unchecked_ids__             = None
 
   # id for log
   me = ""
+
 
   def __init__ (self, l, _buoy):
     self.logger = l
@@ -75,6 +78,13 @@ class Index:
   gotids_n = 0
   def gotids (self, id, enabled):
     self.gotids_n = self.gotids_n + 1
+
+    # check if id is in special check list
+    if not self.__incremental_id_check_done__:
+      if self.__unchecked_ids__ is not None:
+        if id in self.__unchecked_ids__:
+          self.__unchecked_ids__.remove (id)
+          self.logger.debug (self.me + " Got missing id: " + str(id) + ", remaining: " + str(self.__unchecked_ids__))
 
     if id <= self.lastid:
       if enabled == 1:
@@ -167,6 +177,28 @@ class Index:
             self.gotids_n = 0
             self.buoy.getids (self.greatestid + 1)
             self.state = 1
+
+          # Get possibly missing ids
+          elif not self.__incremental_id_check_done__:
+            if self.__unchecked_ids__ is None:
+              self.__unchecked_ids__ = []
+              ii = 1
+              while ii < self.greatestid:
+                if self.indexofdata (ii) is None:
+                  self.__unchecked_ids__.append (ii)
+                ii = ii + 1
+
+              self.logger.debug (self.me + " Getting missing ids: " + str(self.__unchecked_ids__))
+
+            else:
+              if len(self.__unchecked_ids__) > 0:
+                self.buoy.getids (self.__unchecked_ids__[0]) # take first, but leave it in list, is removed when received
+                self.request_t = time.time ()
+                self.state = 1
+              else:
+                self.__unchecked_ids__              = None
+                self.__incremental_id_check_done__  = True
+                self.logger.debug (self.me + " All missing ids got.")
 
 
         # download data
