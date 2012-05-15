@@ -155,7 +155,7 @@ class Zero:
       while self.go:
         try:
           if not self.ser == None:
-            r = self.ser.read (1)
+            r = self.ser.read (1) # blocking
             if self.current is not None:
               self.protocol.handle (r)
 

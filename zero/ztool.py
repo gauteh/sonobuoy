@@ -46,10 +46,6 @@ class zCLI:
 
     self.go ()
 
-  def rollfile (self):
-    print "Rolling file.."
-    self.z.rollfile()
-
   def getstatus (self):
     print "Getting status..",
     self.z.getstatus ()
@@ -177,7 +173,6 @@ class zCLI:
     print "summary                  Print summary of connected nodes"
     print "show [buoy name]         Show detailed information about buoy"
     print "monitor [buoy name]      Regularily print information about buoy"
-    print "rollfile                 Roll data file on all buoys"
     print ""
     print "=> Buoy commands:"
     print "getstatus                Request status from current buoy"
@@ -205,9 +200,6 @@ class zCLI:
 
     if sys.argv[1] == 'summary':
       self.summary ()
-
-    elif sys.argv[1] == 'rollfile':
-      self.rollfile ()
 
     elif sys.argv[1] == 'getstatus':
       self.getstatus ()

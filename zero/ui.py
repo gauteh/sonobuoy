@@ -23,10 +23,6 @@ class ZeroCliService:
   def getids (self, start):
     self.zero.current.getids (start)
 
-  def rollfile (self):
-    for b in self.zero.buoys:
-      b.rollfile ()
-
   def bouy_count (self):
     return len(self.zero.buoys)
 
