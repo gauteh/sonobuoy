@@ -28,8 +28,8 @@ namespace Buoy {
 
 # elif BBOARD == 1
 
-# define GPS_Serial Serial1
-# define GPS_SYNC_PIN 30 // Should be 5V tolerant
+# define GPS_Serial Serial3
+# define GPS_SYNC_PIN 2 // Should be 5V tolerant
 
 # endif
 
