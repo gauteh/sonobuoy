@@ -35,13 +35,11 @@ namespace Buoy {
 /* Olimexino STM32 H103 */
 
 // SPI
-# define AD_SPI   1
-# define AD_SCLK 13
-# define AD_DOUT 12 // (D12 = led 1)
+# define AD_SCLK 12
+# define AD_DOUT 10 // (D13 = led 1)
 # define AD_DIN  11
-# define AD_SS   BOARD_SPI1_NSS_PIN   // 10, unused
 
-# define AD_nDRDY 7 // (D3 = led 2)
+# define AD_nDRDY 4 // (D3 = led 2)
 
 # define AD_I2C 1
 # define AD_SCL 5

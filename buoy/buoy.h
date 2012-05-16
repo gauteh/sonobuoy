@@ -25,6 +25,7 @@
  * Must be defined before any wirish.h or libmaple.h includes. */
 
 //# define DEBUG_LEVEL DEBUG_NONE
+# define USART_SAFE_INSERT 1
 
 # include <stdint.h>
 # include "wirish.h"

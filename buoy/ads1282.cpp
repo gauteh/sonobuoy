@@ -73,13 +73,9 @@ namespace Buoy {
     /* Set up SPI */
     pinMode (AD_SCLK, OUTPUT);
     pinMode (AD_DIN, OUTPUT);
-    pinMode (AD_DOUT, INPUT_PULLDOWN);
-    pinMode (AD_nDRDY, INPUT_PULLDOWN);
-    pinMode (AD_SS, OUTPUT);
+    pinMode (AD_DOUT, INPUT);
+    pinMode (AD_nDRDY, INPUT);
 
-    //digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
-
-    digitalWrite (AD_SS, LOW);
     digitalWrite (AD_SCLK, LOW);
     digitalWrite (AD_DIN, LOW);
 
@@ -110,10 +106,10 @@ namespace Buoy {
 
       //rf_send_debug_f ("[AD] Queue pos: %lu samples: %lu value: 0x%lX", position, totalsamples, value);
 
-      if (millis() - lasts >= 1000)
+      if (millis() - lasts >= (1000 / 250))
       {
         //status ();
-        acquire_on_command ();
+        //acquire_on_command ();
         lasts = millis ();
       }
     } // }}}
@@ -572,9 +568,7 @@ namespace Buoy {
   // Acquire {{{
   void ADS1282::drdy () {
     /* Static wrapper function for interrupt */
-    digitalWrite (3, HIGH);
     bu->ad->acquire ();
-    digitalWrite (3, LOW);
   }
 
   void ADS1282::acquire () {
@@ -592,6 +586,7 @@ namespace Buoy {
                                 (gps->HAS_SYNC & GPS::SYNC) |
                                 (gps->HAS_SYNC_REFERENCE & GPS::SYNC_REFERENCE);
 # endif
+      togglePin (13);
     }
 
     uint8_t v[4];

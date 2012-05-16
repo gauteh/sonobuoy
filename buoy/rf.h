@@ -20,7 +20,7 @@ namespace Buoy {
 
 # elif BBOARD == 1
 
-# define RF_Serial Serial2
+# define RF_Serial Serial1
 
 # endif
 

@@ -24,7 +24,6 @@ namespace Buoy {
     uint32_t lasts = 0;
 
     while (true) {
-      togglePin (3);
       gps->loop ();
       ad->loop ();
       store->loop ();
@@ -47,19 +46,20 @@ namespace Buoy {
 
     //SerialUSB.begin ();
 
+    pinMode (13, OUTPUT);
     pinMode (3, OUTPUT);
+    digitalWrite (3, LOW);
     /* Count down.. */
 
-# if DEBUG_INFO
     for (int i = 0; i < 3; i++) {
       SerialUSB.print ("Starting soon: ");
       SerialUSB.println (i);
       delay(1000);
+      //togglePin (3);
     }
 
 
     SerialUSB.println ("[**] Gautebøye 1 [" BUOY_NAME "] version: " GIT_DESC);
-# endif
 
     /* Set up devices */
     rf    = new RF ();
@@ -77,8 +77,8 @@ namespace Buoy {
     SerialUSB.println ("[Buoy] Initiating continuous transfer and write.");
 # endif
 
-    //ad->start_continuous_read ();
-    //store->start_continuous_write ();
+    store->start_continuous_write ();
+    ad->start_continuous_read ();
   }
 
   int itoa (uint32_t n, uint8_t base, char *buf) // {{{

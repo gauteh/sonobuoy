@@ -54,6 +54,7 @@ namespace Buoy {
       if (rf_buf_pos >= RF_SERIAL_BUFLEN) {
         state       = 0;
         rf_buf_pos  = 0;
+        return;
       }
 
       switch (state)
@@ -84,12 +85,14 @@ namespace Buoy {
           parse (); // Complete telegram received
           rf_buf_pos  = 0;
           state       = 0;
+          return;
           break;
 
         /* Should not be reached. */
         default:
           state       = 0;
           rf_buf_pos  = 0;
+          return;
           break;
       }
     }
