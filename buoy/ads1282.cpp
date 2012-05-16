@@ -701,7 +701,7 @@ namespace Buoy {
 
   void ADS1282::error () {
     /* Some error on the ADS1282 - disable {{{ */
-# if DEBUG_VERB
+# if DEBUG_WARN
     SerialUSB.println ("[AD] Error. Disabling.");
 # endif
 
