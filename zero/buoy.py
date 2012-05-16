@@ -73,16 +73,13 @@ class Buoy:
     self.active = False
 
   def getstatus (self):
-    self.protocol.send ("GS")
+    self.index.getstatus ()
 
   def getlatestbatch (self):
     self.getlastid ()
 
   def getlastid (self):
-    self.protocol.send ("GLID")
-  
-  def getids (self, start):
-    self.protocol.send ("GIDS," + str(start))
+    self.index.getlastid ()
 
   error_strings = [ "E_CONFIRM",
                     "E_BADCOMMAND",

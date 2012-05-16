@@ -12,6 +12,7 @@ from data import *
 class Index:
   buoy = None
   logger = None
+  protocol = None
 
   indexf_uri = None
   indexf = None
@@ -28,6 +29,7 @@ class Index:
   def __init__ (self, l, _buoy):
     self.logger = l
     self.buoy = _buoy
+    self.protocol = self.buoy.protocol
     self.me = "[" + self.buoy.name + "] [Index]"
     self.indexf_uri = os.path.join (self.buoy.logdir, 'indexes')
 
@@ -75,6 +77,11 @@ class Index:
 
   ''' Update local list of segments from buoy, going backwards '''
   gotids_n = 0
+
+  def getids (self, start):
+    if self.state == 0:
+      self.protocol.send ("GIDS," + str(start))
+
   def gotids (self, id, enabled):
     self.gotids_n = self.gotids_n + 1
 
@@ -103,7 +110,8 @@ class Index:
       self.write_index ()
 
     if self.gotids_n >= 10:
-      self.state = 0
+      if self.pendingid == 3:
+        self.state = 0
 
   def indexofdata (self, id):
     n = 0
@@ -115,7 +123,10 @@ class Index:
     return None
 
   def getlastid (self):
-    self.buoy.getlastid ()
+    if self.state == 0:
+      self.request_t = time.time ()
+      self.state = 1
+      self.protocol.send ("GLID")
 
   def gotlastid (self, id):
     if id != self.lastid:
@@ -124,7 +135,8 @@ class Index:
     self.lastid = id
     self.logger.info (self.me + " Latest id: " + str(self.lastid))
     self.sync_lastid_t = time.time ()
-    self.state = 0
+    if self.pendingid == 2:
+      self.state = 0
 
   def gotid (self):
     pass
@@ -136,12 +148,20 @@ class Index:
     pass
 
   status = 0
+  def getstatus (self):
+    if self.state == 0 or self:
+      self.request_t = time.time ()
+      self.status = 0
+      self.state = 1
+      self.protocol.send ("GS")
+
   def gotstatus (self):
+    self.sync_status_t = time.time ()
     if self.status == 0: # got gps status
       self.status = 1 # wait for ad status
-      self.sync_status_t = time.time ()
     elif self.status == 1:
-      self.state  = 0
+      if self.pendingid == 1:
+        self.state  = 0
       self.status = 0
       self.sync_status_t = time.time ()
       self.logger.debug (self.me + " Status updated.")
@@ -149,6 +169,7 @@ class Index:
   # State for keeping this buoys data uptodate
   state     = 0
   timeout   = 30 # secs
+  pendingid = 0  # automatic request last sent (in case manual request mess up the flooooow..)
   request_t = 0
 
   sync_lastid   = 4 * 60 # time between syncs of last id
@@ -159,52 +180,52 @@ class Index:
 
   def loop (self):
     # idle
-    if self.buoy.zero.ser is not None and self.buoy.zero.acquire is True:
+    if self.buoy.zero.ser is not None:
       if self.state == 0:
-        # Get status and lastid {{{
-        if time.time () - self.sync_status_t > self.sync_status:
-          self.buoy.getstatus ()
-          self.request_t = time.time ()
-          self.status = 0
-          self.state = 1
+        if self.buoy.zero.acquire:
+          # Get status and lastid {{{
+          if time.time () - self.sync_status_t > self.sync_status:
+            self.pendingid = 1
+            self.getstatus ()
 
-        elif time.time() - self.sync_lastid > self.sync_lastid_t:
-          self.getlastid ()
-          self.request_t = time.time ()
-          self.state = 1
-        # }}}
+          elif time.time() - self.sync_lastid > self.sync_lastid_t:
+            self.pendingid = 2
+            self.getlastid ()
+          # }}}
 
-        # check if we have all ids {{{
-        elif self.lastid > 0:
-          # get ids down to greatestid
-          if self.greatestid < self.lastid:
-            self.request_t = time.time ()
-            self.gotids_n = 0
-            self.buoy.getids (self.greatestid + 1)
-            self.state = 1
+          # check if we have all ids {{{
+          elif self.lastid > 0:
+            # get ids down to greatestid
+            if self.greatestid < self.lastid:
+              self.request_t = time.time ()
+              self.gotids_n = 0
+              self.pendingid = 3
+              self.getids (self.greatestid + 1)
+              self.state = 1
 
-          # Get possibly missing ids
-          elif not self.__incremental_id_check_done__:
-            if self.__unchecked_ids__ is None:
-              self.__unchecked_ids__ = []
-              ii = 1
-              while ii < self.greatestid:
-                if self.indexofdata (ii) is None:
-                  self.__unchecked_ids__.append (ii)
-                ii = ii + 1
+            # Get possibly missing ids
+            elif not self.__incremental_id_check_done__:
+              if self.__unchecked_ids__ is None:
+                self.__unchecked_ids__ = []
+                ii = 1
+                while ii < self.greatestid:
+                  if self.indexofdata (ii) is None:
+                    self.__unchecked_ids__.append (ii)
+                  ii = ii + 1
 
-              self.logger.debug (self.me + " Getting missing ids: " + str(self.__unchecked_ids__))
+                self.logger.debug (self.me + " Getting missing ids: " + str(self.__unchecked_ids__))
 
-            else:
-              if len(self.__unchecked_ids__) > 0:
-                self.buoy.getids (self.__unchecked_ids__[0]) # take first, but leave it in list, is removed when received
-                self.request_t = time.time ()
-                self.state = 1
               else:
-                self.__unchecked_ids__              = None
-                self.__incremental_id_check_done__  = True
-                self.logger.debug (self.me + " All missing ids got.")
-        # }}}
+                if len(self.__unchecked_ids__) > 0:
+                  self.pendingid = 3
+                  self.buoy.getids (self.__unchecked_ids__[0]) # take first, but leave it in list, is removed when received
+                  self.request_t = time.time ()
+                  self.state = 1
+                else:
+                  self.__unchecked_ids__              = None
+                  self.__incremental_id_check_done__  = True
+                  self.logger.debug (self.me + " All missing ids got.")
+          # }}}
 
 
         # download data
@@ -213,12 +234,15 @@ class Index:
       elif self.state == 1:
         # time.time out
         if time.time () - self.request_t > self.timeout:
+          self.logger.debug (self.me + " Request timed out, reset..")
           self.reset ()
 
   def reset (self):
+    self.logger.debug (self.me + " Resetting communication state.")
     # reset in case checksum mismatch or timeout
     self.state    = 0
     self.gotids_n = 0
     self.status   = 0
+    self.pendingids = 0
 
 
