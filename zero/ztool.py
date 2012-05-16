@@ -168,6 +168,14 @@ class zCLI:
     except:
       os._exit (1)
 
+  def startacquire (self):
+    print "Starting continuous transmission from buoys.."
+    self.z.startacquire ()
+
+  def stopacquire (self):
+    print "Stopping continuous transmission from buoys.."
+    self.z.stopacquire ()
+
   ''' Usage output '''
   def help (self):
     print ""
@@ -193,6 +201,8 @@ class zCLI:
     print "znoutputwireless         Configure output of Zero to go to wireless"
     print ""
     print "=> Zero Manager commands:"
+    print "stopacquire              Stop continuous data transmission from buoys"
+    print "startacquire             Start contnuous data transmission from buoys"
     print "stop                     Stop Zero Manager"
 
   def go (self):
@@ -255,6 +265,14 @@ class zCLI:
 
     elif sys.argv[1] == 'stop':
       self.stop ()
+      return
+
+    elif sys.argv[1] == 'startacquire':
+      self.startacquire ()
+      return
+
+    elif sys.argv[1] == 'stopacquire':
+      self.stopacquire ()
       return
 
     elif sys.argv[1] == 'help' or sys.argv[1] == '--help':

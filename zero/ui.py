@@ -26,6 +26,12 @@ class ZeroCliService:
   def getids (self, start):
     self.zero.current.getids (start)
 
+  def startacquire (self):
+    self.zero.startacquire ()
+
+  def stopacquire (self):
+    self.zero.stopacquire ()
+
   def bouy_count (self):
     return len(self.zero.buoys)
 

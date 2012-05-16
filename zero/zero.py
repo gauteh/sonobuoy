@@ -42,6 +42,7 @@ class Zero:
 
   # Current buoy thread
   cthread = None
+  acquire = True # Do continuous acquisition of buoy data
 
   def get_current (self):
     try:
@@ -156,7 +157,7 @@ class Zero:
       while self.go:
         try:
           if not self.ser == None:
-            r = self.ser.read (1) # non-blocking 
+            r = self.ser.read (1) # non-blocking
             if self.current is not None:
               self.protocol.handle (r)
 
@@ -192,6 +193,14 @@ class Zero:
         self.current.loop ()
 
       time.sleep (0.001)
+
+  def startacquire (self):
+    self.logger.info ("[Zero] Starting continuous acquistion from buoys..")
+    self.acquire = True
+
+  def stopacquire (self):
+    self.logger.info ("[Zero] Stopping continuous acquistion from buoys..")
+    self.acquire = False
 
   def stdin (self):
     # Wait for input on stdin, then exit..

@@ -25,7 +25,6 @@ class Index:
   # id for log
   me = ""
 
-
   def __init__ (self, l, _buoy):
     self.logger = l
     self.buoy = _buoy
@@ -160,7 +159,7 @@ class Index:
 
   def loop (self):
     # idle
-    if self.buoy.zero.ser is not None:
+    if self.buoy.zero.ser is not None and self.buoy.zero.acquire is True:
       if self.state == 0:
         # Get status and lastid {{{
         if time.time () - self.sync_status_t > self.sync_status:
