@@ -24,12 +24,12 @@ namespace Buoy {
     uint32_t lasts = 0;
 
     while (true) {
+      togglePin (3);
       gps->loop ();
       ad->loop ();
       store->loop ();
       rf->loop ();
 
-# if DEBUG_INFO
       if (millis () - lasts >= 1000) {
         SerialUSB.print ("Position: ");
         SerialUSB.println (ad->position);
@@ -37,7 +37,6 @@ namespace Buoy {
         //gps->print_status ();
         lasts = millis ();
       }
-# endif
     }
   }
 
@@ -48,6 +47,7 @@ namespace Buoy {
 
     //SerialUSB.begin ();
 
+    pinMode (3, OUTPUT);
     /* Count down.. */
 
 # if DEBUG_INFO
@@ -56,6 +56,7 @@ namespace Buoy {
       SerialUSB.println (i);
       delay(1000);
     }
+
 
     SerialUSB.println ("[**] Gautebøye 1 [" BUOY_NAME "] version: " GIT_DESC);
 # endif
@@ -76,7 +77,7 @@ namespace Buoy {
     SerialUSB.println ("[Buoy] Initiating continuous transfer and write.");
 # endif
 
-    ad->start_continuous_read ();
+    //ad->start_continuous_read ();
     //store->start_continuous_write ();
   }
 

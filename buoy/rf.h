@@ -8,8 +8,9 @@
 # pragma once
 
 # include "buoy.h"
-# include <stdint.h>
 # include "types.h"
+
+# include <stdint.h>
 
 namespace Buoy {
 # define RF_BAUDRATE 115200

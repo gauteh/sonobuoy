@@ -49,7 +49,7 @@ namespace Buoy {
 
     while (RF_Serial.available () > 0) {
       char c = (char)RF_Serial.read ();
-      SerialUSB.println (c);
+      //SerialUSB.println (c);
 
       if (rf_buf_pos >= RF_SERIAL_BUFLEN) {
         state       = 0;
@@ -103,8 +103,8 @@ namespace Buoy {
      *
      *
      */
-    SerialUSB.print ("Parsing..:");
-    SerialUSB.println (rf_buf);
+    //SerialUSB.print ("Parsing..:");
+    //SerialUSB.println (rf_buf);
 
     RF_TELEGRAM type = UNSPECIFIED;
     int tokeni = 0;
@@ -114,12 +114,10 @@ namespace Buoy {
     /* Test checksum before parsing */
     if (!test_checksum (rf_buf)) goto cmderror;
 
-    delay(3000);
-
     /* Parse */
     while (i < len)
     {
-      SerialUSB.println ("nc");
+      //SerialUSB.println ("nc");
       /*
       uint32_t ltmp = 0;
       uint32_t remainder = 0;
@@ -129,7 +127,7 @@ namespace Buoy {
       int j = 0;
       /* Get next token */
       while ((rf_buf[i] != ',' && rf_buf[i] != '*') && i < len) {
-        SerialUSB.println ("nt");
+        //SerialUSB.println ("nt");
         token[j] = rf_buf[i];
 
         i++;
@@ -260,15 +258,13 @@ namespace Buoy {
 
     /* Single token commands */
 simpleparser:
-    SerialUSB.println ("[RF] simplep");
-    delay(500);
+    //SerialUSB.println ("[RF] simplep");
     switch (type) {
       // GETSTATUS {{{
       case GETSTATUS:
         // $GPS,S,[lasttype],[telegrams received],[lasttelegram],Lat,Lon,unixtime,time,date,Valid,HAS_TIME,HAS_SYNC,HAS_SYNC_REFERENCE*CS
         // Valid: Y = Yes, N = No
-        SerialUSB.println ("[RF] Sending status..");
-        delay(500);
+        //SerialUSB.println ("[RF] Sending status..");
         RF_Serial.print ("$GPS,S,");
         RF_Serial.print (gps->lasttype);
         RF_Serial.print (",");
@@ -337,7 +333,6 @@ simpleparser:
 cmderror:
 # if DEBUG_WARN
     SerialUSB.println ("[RF] E_BADCOMMAND");
-    delay (500);
 # endif
     send_error (E_BADCOMMAND);
     return;

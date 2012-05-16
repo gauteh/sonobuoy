@@ -98,11 +98,10 @@ namespace Buoy {
   }
 
   void ADS1282::loop () {
-    //static uint32_t lasts;
+    static uint32_t lasts;
     /* Run as part of main loop {{{ */
     if (!disabled) {
       run++;
-      //acquire_on_command ();
 
       /*
       SerialUSB.print ("[AD] Loop: ");
@@ -111,13 +110,12 @@ namespace Buoy {
 
       //rf_send_debug_f ("[AD] Queue pos: %lu samples: %lu value: 0x%lX", position, totalsamples, value);
 
-      /*
       if (millis() - lasts >= 1000)
       {
-        status ();
+        //status ();
+        acquire_on_command ();
         lasts = millis ();
       }
-      */
     } // }}}
   }
 
@@ -574,7 +572,9 @@ namespace Buoy {
   // Acquire {{{
   void ADS1282::drdy () {
     /* Static wrapper function for interrupt */
+    digitalWrite (3, HIGH);
     bu->ad->acquire ();
+    digitalWrite (3, LOW);
   }
 
   void ADS1282::acquire () {
@@ -641,10 +641,8 @@ namespace Buoy {
     // Shift bits in (should wait min 100 ns)
     acquire ();
 
-# if DEBUG_VERB
     SerialUSB.print   ("[AD] Value: ");
     SerialUSB.println (value, HEX);
-# endif
   }
   // }}}
 
