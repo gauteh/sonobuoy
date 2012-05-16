@@ -112,7 +112,10 @@ namespace Buoy {
     int i      = 0;
 
     /* Test checksum before parsing */
-    if (!test_checksum (rf_buf)) goto cmderror;
+    if (!test_checksum (rf_buf)) {
+      send_error (E_BADCOMMAND);
+      return;
+    }
 
     /* Parse */
     while (i < len)
@@ -146,12 +149,12 @@ namespace Buoy {
         if (tokeni == 0) {
           /* Determine telegram type */
           if (strcmp(token, "$GS") == 0) {
-            type = GETSTATUS;
-            goto simpleparser;
+            simple_parser (GETSTATUS);
+            return;
           }
           else if (strcmp(token, "$GLID") == 0) {
-            type = GETLASTID;
-            goto simpleparser;
+            simple_parser (GETLASTID);
+            return;
           }
           else if (strcmp(token, "$GIDS") == 0)
             type = GETIDS;
@@ -180,7 +183,10 @@ namespace Buoy {
                 case 1:
                   {
                   id = atoi (token);
-                  if (id < 1) goto cmderror;
+                  if (id < 1) {
+                    send_error (E_BADCOMMAND);
+                    return;
+                  }
 
                   store->send_indexes (id, GET_IDS_N);
                   }
@@ -197,7 +203,10 @@ namespace Buoy {
                 case 1:
                   {
                   id = atoi (token);
-                  if (id < 1) goto cmderror;
+                  if (id < 1) {
+                    send_error (E_BADCOMMAND);
+                    return;
+                  }
 
                   store->send_index (id);
                   }
@@ -213,28 +222,40 @@ namespace Buoy {
                 case 1:
                   {
                   id = atoi (token);
-                  if (id < 1) goto cmderror;
+                  if (id < 1) {
+                    send_error (E_BADCOMMAND);
+                    return;
+                  }
                   }
                   break;
 
                 case 2:
                   {
                   ref = atoi (token);
-                  if (ref < 1) goto cmderror;
+                  if (ref < 1) {
+                    send_error (E_BADCOMMAND);
+                    return;
+                  }
                   }
                   break;
 
                 case 3:
                   {
                   sample = atoi (token);
-                  if (sample < 1) goto cmderror;
+                  if (sample < 1) {
+                    send_error (E_BADCOMMAND);
+                    return;
+                  }
                   }
                   break;
 
                 case 4:
                   {
                   length = atoi (token);
-                  if (length < 1) goto cmderror;
+                  if (length < 1) {
+                    send_error (E_BADCOMMAND);
+                    return;
+                  }
 
                   store->send_batch (id, ref, sample, length);
                   }
@@ -255,9 +276,11 @@ namespace Buoy {
       tokeni++;
     }
     return;
+    /* Done parser }}} */
+  }
 
-    /* Single token commands */
-simpleparser:
+  void RF::simple_parser (RF_TELEGRAM type) {
+    /* Single token commands  {{{ */
     //SerialUSB.println ("[RF] simplep");
     switch (type) {
       // GETSTATUS {{{
@@ -329,15 +352,7 @@ simpleparser:
       default: break;
     }
     return;
-
-cmderror:
-# if DEBUG_WARN
-    SerialUSB.println ("[RF] E_BADCOMMAND");
-# endif
-    send_error (E_BADCOMMAND);
-    return;
-
-    /* Done parser }}} */
+    // }}}
   }
 
   /* Debug and error messages {{{ */
@@ -345,6 +360,11 @@ cmderror:
     RF_Serial.print ("$ERR,");
     RF_Serial.print (code, DEC);
     RF_Serial.println ("*NN");
+
+# if DEBUG_WARN
+    SerialUSB.print ("[RF] [Error] ");
+    SerialUSB.print (code);
+# endif
     /*
     sprintf (buf, "$ERR,%d*", code);
     APPEND_CSUM (buf);

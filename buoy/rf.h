@@ -108,6 +108,7 @@ namespace Buoy {
       void setup (BuoyMaster *);
       void loop ();
       void parse ();
+      void simple_parser (RF_TELEGRAM);
 
       void send_debug (const char *);
       void send_error (RF_ERROR code);
