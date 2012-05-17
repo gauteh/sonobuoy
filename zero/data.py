@@ -44,6 +44,11 @@ class Data:
   indexf      = None # Index file for this data segment (refs + meta)
   dataf       = None # Samples with refs
 
+  hasfull     = False # Has complete index been received (determined from wether
+                      # store_version is greater than 0)
+  hasallrefs  = False # Has all references been received
+  hasalldata  = False # Has all data been received
+
   store_version = 0
   id            = 0
   enabled       = False
@@ -92,6 +97,7 @@ class Data:
         self.samples        = int(self.indexf.readline ())
         self.batch_length   = int(self.indexf.readline ())
         self.refs_no        = int(self.indexf.readline ())
+        self.hasfull        = (self.store_version > 0)
 
         for l in self.indexf.readlines ():
           s = l.split (',')

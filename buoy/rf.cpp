@@ -211,6 +211,7 @@ namespace Buoy {
                     return;
                   }
 
+                  SerialUSB.println ("Sending index");
                   store->send_index (id);
                   }
                   break;
@@ -328,14 +329,14 @@ namespace Buoy {
         */
 
         // $AD,S,[queue position], [queue fill time],[value],[config]*CS
-        RF_Serial.print ("$AD,S,0");
-        //RF_Serial.print (ad->position);
-        RF_Serial.print (",0");
-        //RF_Serial.print (ad->batchfilltime);
-        RF_Serial.print (",0");
-        //RF_Serial.print (ad->value);
-        RF_Serial.print (",0");
-        //RF_Serial.print (ad->reg.raw[1]);
+        RF_Serial.print ("$AD,S,");
+        RF_Serial.print (ad->position);
+        RF_Serial.print (",");
+        RF_Serial.print (ad->batchfilltime);
+        RF_Serial.print (",");
+        RF_Serial.print (ad->value);
+        RF_Serial.print (",");
+        RF_Serial.print (ad->reg.raw[1]);
         RF_Serial.println ("*NN");
 
         /*

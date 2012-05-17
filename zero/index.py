@@ -23,6 +23,8 @@ class Index:
   __incremental_id_check_done__ = False
   __unchecked_ids__             = None
 
+  __full_data_check_done__      = False
+
   # id for log
   me = ""
 
@@ -81,6 +83,8 @@ class Index:
   def getids (self, start):
     if self.state == 0:
       self.protocol.send ("GIDS," + str(start))
+      self.request_t = time.time ()
+      self.gotids_n = 0
 
   def gotids (self, id, enabled):
     self.gotids_n = self.gotids_n + 1
@@ -130,7 +134,8 @@ class Index:
 
   def gotlastid (self, id):
     if id != self.lastid:
-      self.__incremental_id_check_done__ = False
+      self.__incremental_id_check_done__  = False
+      self.__full_data_check__done__      = False
 
     self.lastid = id
     self.logger.info (self.me + " Latest id: " + str(self.lastid))
@@ -138,8 +143,19 @@ class Index:
     if self.pendingid == 2:
       self.state = 0
 
+  def getid (self, id):
+    if self.state == 0:
+      self.logger.info (self.me + " Getting full index for: " + str(id))
+      self.pendingid = 4
+      self.state     = 1
+
+      self.protocol.send ("GID," + str(id))
+
+      self.request_t = time.time ()
+
   def gotid (self):
-    pass
+    if self.pendingid == 4:
+      self.state = 0
 
   def gotrefs (self):
     pass
@@ -178,6 +194,8 @@ class Index:
   sync_status   = 20 # time between status updates
   sync_status_t = 0
 
+  working_data  = None  # working data object, getting full index, refs and data
+
   def loop (self):
     # idle
     if self.buoy.zero.ser is not None:
@@ -197,11 +215,8 @@ class Index:
           elif self.lastid > 0:
             # get ids down to greatestid
             if self.greatestid < self.lastid:
-              self.request_t = time.time ()
-              self.gotids_n = 0
               self.pendingid = 3
               self.getids (self.greatestid + 1)
-              self.state = 1
 
             # Get possibly missing ids
             elif not self.__incremental_id_check_done__:
@@ -218,17 +233,56 @@ class Index:
               else:
                 if len(self.__unchecked_ids__) > 0:
                   self.pendingid = 3
-                  self.buoy.getids (self.__unchecked_ids__[0]) # take first, but leave it in list, is removed when received
-                  self.request_t = time.time ()
-                  self.state = 1
+                  self.getids (self.__unchecked_ids__[0]) # take first, but leave it in list, is removed when received
                 else:
                   self.__unchecked_ids__              = None
                   self.__incremental_id_check_done__  = True
                   self.logger.debug (self.me + " All missing ids got.")
           # }}}
 
+          # download data, strategy:
+          # start on last id, get full id and refs.. then start to get data from
+          # beginning
 
-        # download data
+          elif self.working_data is not None:
+
+            if not self.working_data.hasfull:
+              # get full index
+              self.getid (self.working_data.id)
+              self.request_t = time.time ()
+
+            elif not self.working_data.hasallrefs:
+              # continue to get refs on this id
+              pass
+
+            elif not self.working_data.hasalldata:
+              # continue to get data on this id
+              pass
+
+            else:
+              self.working_data = None
+
+          elif not self.__full_data_check_done__:
+            # find latest id with missing index, refs or data
+            ii = self.greatestid
+
+            while ii > 0:
+              d  = None
+              di = self.indexofdata (ii)
+              if di is not None:
+                d = self.data[di]
+
+              if d is not None:
+                if d.enabled and not (d.hasfull or d.hasallrefs or d.hasalldata):
+                  self.working_data = d
+                  return
+                else:
+                  ii = ii - 1
+
+            # none missing found
+            self.working_data = None
+            self.__full_data_check_done__ = True
+
 
       # waiting for response
       elif self.state == 1:
