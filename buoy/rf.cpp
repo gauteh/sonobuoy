@@ -211,7 +211,6 @@ namespace Buoy {
                     return;
                   }
 
-                  SerialUSB.println ("Sending index");
                   store->send_index (id);
                   }
                   break;

@@ -17,12 +17,15 @@ class Data:
   # id for log
   me = ""
 
+  BATCH_LENGTH = 1024
+
   class Ref: # Ref struct {{{
     id  = 0
     no  = 0
     ref      = None
     status   = None
     complete = False
+    sampleno = 0 # latest sampleno received
     lineno   = 0 # line no in ref
 
     def __init__ (self, _i, _n, _r, _s, _c):
@@ -34,6 +37,15 @@ class Data:
 
     def __eq__ (self, other):
       return (self.no == other) # compare against ref no
+
+  def indexofref (self, id):
+    n = 0
+    for i in self.refs:
+      if i.id == id:
+        return n
+      n = n + 1
+
+    return None
   # }}}
 
   refs = [] # Known refs available on buoy, with flag indicating complete
@@ -45,7 +57,6 @@ class Data:
   dataf       = None # Samples with refs
 
   hasfull     = False # Has complete index been received
-  hasallrefs  = False # Has all references been received
   hasalldata  = False # Has all data been received
 
   id            = 0
@@ -206,6 +217,11 @@ class Data:
     self.samples = _samples
     self.refs_no = n_refs
     self.hasfull = True
+
+    # check if we have all refs and data
+    if self.refs_no < len(self.refs):
+      self.hasalldata = False
+
     self.write_index ()
 
   def __eq__ (self, other):

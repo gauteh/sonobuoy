@@ -567,7 +567,6 @@ namespace Buoy {
       strcpy (&(buf[p]), ".IND");
       //sprintf (buf, "%lu.IND", id);
 
-      SerialUSB.println ("open indexfile");
       send_i = new SdFile ();
 
       if (!send_i->open (root, buf, O_READ)) {
@@ -621,8 +620,14 @@ namespace Buoy {
     */
   }
 
-  void Store::send_refs (uint32_t id, uint32_t start, uint32_t length) {
-    if (!_check_index (id)) return;
+  void Store::send_refs (uint32_t id, uint32_t start, uint32_t length) { // {{{
+    if (current_index.id == id) {
+      s_id = id;
+      s_samples = current_index.samples;
+      s_nrefs   = current_index.nrefs;
+    } else {
+      if (!_check_index (id)) return;
+    }
 
     if ((start + length) >= s_nrefs) {
       rf->send_error (RF::E_NOSUCHREF);
@@ -630,13 +635,18 @@ namespace Buoy {
     }
 
     /* Send references, _not_ reference positions */
-    uint32_t pos = REFPOS_START + s_nrefs * sizeof(uint32_t) + start * sizeof(uint64_t);
-    send_i->seekSet (pos);
+    if (current_index.id != id) {
+      uint32_t pos = REFPOS_START + s_nrefs * sizeof(uint32_t) + start * sizeof(uint64_t);
+      send_i->seekSet (pos);
+    }
 
     uint64_t ref;
     while (length > 0) {
       // format: $REF,id,refnumber,ref*CS
-      send_i->read (reinterpret_cast<char*>(&ref), sizeof(uint64_t));
+      if (current_index.id != id)
+        send_i->read (reinterpret_cast<char*>(&ref), sizeof(uint64_t));
+      else
+        ref = current_index.refs[start];
 
       RF_Serial.print ("$REF,");
       RF_Serial.print (id);
@@ -655,7 +665,7 @@ namespace Buoy {
       start++;
       length--;
     }
-  }
+  } // }}}
 
   void Store::send_batch (uint32_t id, uint32_t refno, uint32_t start, uint32_t length) {
     if (!_check_index (id)) return;

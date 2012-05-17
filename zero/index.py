@@ -164,6 +164,15 @@ class Index:
 
       self.state = 0
 
+  def getrefs (self, id, start, length):
+    if self.state == 0:
+      self.logger.debug (self.me + " Getting refs from: " + str(start) + " to " + str(start + length))
+      self.pendingid  = 5
+      self.state      = 1
+      self.protocol.send ("GRS," + str(id) + "," + str(start) + "," + str(length))
+      self.request_t  = time.time ()
+
+
   def gotrefs (self):
     pass
 
@@ -202,6 +211,7 @@ class Index:
   sync_status_t = 0
 
   working_data  = None  # working data object, getting full index, refs and data
+  TRANSMIT_BATCH_LENGTH = 512
 
   def loop (self):
     # idle
@@ -261,11 +271,27 @@ class Index:
             if not self.working_data.hasfull:
               # get full index
               self.getid (self.working_data.id)
-              self.request_t = time.time ()
+              return
 
             elif not self.working_data.hasallrefs:
               # continue to get refs on this id
-              pass
+              # figure out which refs are missing
+              ii = 0
+              while ii < self.working_data.refs_no:
+                i = self.working_data.indexofref (ii)
+                if i is None:
+                  # start on new batch
+                  self.getbatch (self.working_data.id, ii, 0, self.TRANSMIT_BATCH_LENGTH)
+                  return
+                else:
+                  # check if this 'ref' has been completed
+                  i = self.working_data.refs[i]
+                  if not i.completed:
+                    # get rest of this 'ref/batch'
+
+
+                ii = ii + 1
+                  
 
             elif not self.working_data.hasalldata:
               # continue to get data on this id
@@ -286,13 +312,12 @@ class Index:
                 d = self.data[di]
 
               if d is not None:
-                if d.enabled and not (d.hasfull or d.hasallrefs or d.hasalldata):
+                if d.enabled and not (d.hasfull or d.hasalldata):
                   self.working_data = d
                   self.logger.info (self.me + " Working on id: " + str(d.id))
                   return
                 else:
                   ii = ii - 1
-                  self.logger.info (ii)
 
             # none missing found
             self.working_data = None
