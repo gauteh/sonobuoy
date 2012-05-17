@@ -110,15 +110,23 @@ class Zero:
 
 
   def openserial (self):
-    while ((self.ser == None or not self.ser.isOpen ()) and self.go):
+    if self.go:
       self.logger.info ("[Zero] Opening serial port " + str(self.port) + "..")
+
+    msg = False
+    while ((self.ser == None or not self.ser.isOpen ()) and self.go):
       self.protocol.adressedbuoy = 0 # reset adressed buoy
       try:
         try:
           self.ser = serial.Serial (port = self.port, baudrate = self.baud, timeout = 0)
           self.logger.info ("[Zero] Serial port open.")
         except serial.SerialException as e:
-          self.logger.error ("[Zero] Failed to open serial port.. retrying in 5 seconds.")
+          if not msg:
+            self.logger.error ("[Zero] Failed to open serial port.. retrying every 5 seconds.")
+            msg = True
+          else:
+            self.logger.debug ("[Zero] Failed to open serial port.. retrying in 5 seconds.")
+
           self.ser = None
           time.sleep (5)
 
