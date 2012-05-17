@@ -44,17 +44,13 @@ class Data:
   indexf      = None # Index file for this data segment (refs + meta)
   dataf       = None # Samples with refs
 
-  hasfull     = False # Has complete index been received (determined from wether
-                      # store_version is greater than 0)
+  hasfull     = False # Has complete index been received
   hasallrefs  = False # Has all references been received
   hasalldata  = False # Has all data been received
 
-  store_version = 0
   id            = 0
   enabled       = False
-  sample_length = 0
   samples       = 0
-  batch_length  = 0
   refs_no       = 0
 
   def __init__ (self, l, _buoy, _index, _id, _enabled):
@@ -76,12 +72,10 @@ class Data:
   ''' Read index file and figure out meta data and existing refs {{{
 
       Format (as returned by GETID):
-      Store version
       Index id
-      Sample length
       Samples
-      Batch length
       No of refs
+      hasfull
 
       After this, one line for each ref (as returned by GETREFS):
       id (always the same),ref no, ref
@@ -91,13 +85,10 @@ class Data:
       if os.path.exists (self.indexf_uri):
         self.indexf = open (self.indexf_uri, 'r')
 
-        self.store_version  = int(self.indexf.readline ())
         self.id             = int(self.indexf.readline ())
-        self.sample_length  = int(self.indexf.readline ())
         self.samples        = int(self.indexf.readline ())
-        self.batch_length   = int(self.indexf.readline ())
         self.refs_no        = int(self.indexf.readline ())
-        self.hasfull        = (self.store_version > 0)
+        self.hasfull        = bool(self.indexf.readline ())
 
         for l in self.indexf.readlines ():
           s = l.split (',')
@@ -113,12 +104,10 @@ class Data:
     if self.enabled:
       self.refs = sorted (self.refs, key = lambda r: r.no)
       self.indexf = open (self.indexf_uri, 'w+') # truncate file
-      self.indexf.write (str(self.store_version) + '\n')
       self.indexf.write (str(self.id) + '\n')
-      self.indexf.write (str(self.sample_length) + '\n')
       self.indexf.write (str(self.samples) + '\n')
-      self.indexf.write (str(self.batch_length) + '\n')
       self.indexf.write (str(self.refs_no) + '\n')
+      self.indexf.write (str(self.hasfull) + '\n')
       for i in self.refs:
         self.indexf.write (str(i.id) + ',' + str(i.no) + ',' + str(i.ref) + '\n')
 
@@ -212,6 +201,12 @@ class Data:
       self.write_index ()
     else:
       self.logger.error (self.me + " Tried to append batch on disabled data file.")
+
+  def fullindex (self, _samples, n_refs):
+    self.samples = _samples
+    self.refs_no = n_refs
+    self.hasfull = True
+    self.write_index ()
 
   def __eq__ (self, other):
     return (self.id == other)

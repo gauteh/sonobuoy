@@ -85,6 +85,7 @@ class Index:
       self.protocol.send ("GIDS," + str(start))
       self.request_t = time.time ()
       self.gotids_n = 0
+      self.state    = 1
 
   def gotids (self, id, enabled):
     self.gotids_n = self.gotids_n + 1
@@ -153,8 +154,14 @@ class Index:
 
       self.request_t = time.time ()
 
-  def gotid (self):
+  # should probably be gotind..
+  def gotid (self, id, samples, n_refs):
     if self.pendingid == 4:
+      self.logger.info (self.me + " Got full index: " + str(id) + ", samples: " + str(samples) + ", no of refs: " + str(n_refs))
+      if self.working_data is not None:
+        if self.working_data.id == id:
+          self.working_data.fullindex (samples, n_refs)
+
       self.state = 0
 
   def gotrefs (self):
@@ -205,18 +212,21 @@ class Index:
           if time.time () - self.sync_status_t > self.sync_status:
             self.pendingid = 1
             self.getstatus ()
+            return
 
-          elif time.time() - self.sync_lastid > self.sync_lastid_t:
+          if time.time() - self.sync_lastid > self.sync_lastid_t:
             self.pendingid = 2
             self.getlastid ()
+            return
           # }}}
 
           # check if we have all ids {{{
-          elif self.lastid > 0:
-            # get ids down to greatestid
+          if self.lastid > 0:
+            # get ids from greatestid to lastid
             if self.greatestid < self.lastid:
               self.pendingid = 3
               self.getids (self.greatestid + 1)
+              return
 
             # Get possibly missing ids
             elif not self.__incremental_id_check_done__:
@@ -229,11 +239,13 @@ class Index:
                   ii = ii + 1
 
                 self.logger.debug (self.me + " Getting missing ids: " + str(self.__unchecked_ids__))
+                return
 
               else:
                 if len(self.__unchecked_ids__) > 0:
                   self.pendingid = 3
                   self.getids (self.__unchecked_ids__[0]) # take first, but leave it in list, is removed when received
+                  return
                 else:
                   self.__unchecked_ids__              = None
                   self.__incremental_id_check_done__  = True
@@ -244,7 +256,7 @@ class Index:
           # start on last id, get full id and refs.. then start to get data from
           # beginning
 
-          elif self.working_data is not None:
+          if self.working_data is not None:
 
             if not self.working_data.hasfull:
               # get full index
@@ -261,8 +273,9 @@ class Index:
 
             else:
               self.working_data = None
+            return
 
-          elif not self.__full_data_check_done__:
+          elif self.lastid > 0 and self.greatestid == self.lastid and not self.__full_data_check_done__:
             # find latest id with missing index, refs or data
             ii = self.greatestid
 
@@ -275,13 +288,17 @@ class Index:
               if d is not None:
                 if d.enabled and not (d.hasfull or d.hasallrefs or d.hasalldata):
                   self.working_data = d
+                  self.logger.info (self.me + " Working on id: " + str(d.id))
                   return
                 else:
                   ii = ii - 1
+                  self.logger.info (ii)
 
             # none missing found
             self.working_data = None
             self.__full_data_check_done__ = True
+            self.logger.info (self.me + " All data up to date.")
+            return
 
 
       # waiting for response

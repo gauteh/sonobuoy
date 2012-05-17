@@ -29,6 +29,14 @@ namespace Buoy {
     volume  = NULL;
     root    = NULL;
     sd_data = NULL;
+
+    s_id = 0;
+    s_samples = 0;
+    s_nrefs = 0;
+    s_lastbatch = 0;
+    send_i = NULL;
+    send_d = NULL;
+
   }
 
   void Store::setup (BuoyMaster *b) // {{{
@@ -558,21 +566,29 @@ namespace Buoy {
       int p = itoa (id, 10, buf);
       strcpy (&(buf[p]), ".IND");
       //sprintf (buf, "%lu.IND", id);
+
+      SerialUSB.println ("open indexfile");
       send_i = new SdFile ();
+
       if (!send_i->open (root, buf, O_READ)) {
         rf->send_error (RF::E_NOSUCHID);
         delete send_i;
+        s_id = 0;
+
         return false;
       }
 
       /* Open and read index if we just opened it */
       if (send_i->curPosition () > 0) send_i->seekSet (0);
 
+
       /* Reading first part of Index */
       send_i->seekCur ( sizeof(Index::version)
                       + sizeof(Index::id)
                       + sizeof(Index::sample_l));
+      SerialUSB.println (send_i->curPosition ());
       send_i->read (reinterpret_cast<char*>(&s_samples), sizeof(s_samples));
+      SerialUSB.println (s_samples);
       send_i->seekCur (sizeof(Index::samples_per_reference));
       send_i->read (reinterpret_cast<char*>(&s_nrefs), sizeof(s_nrefs));
     }
@@ -581,15 +597,20 @@ namespace Buoy {
   }
 
   void Store::send_index (uint32_t id) {
-    if (!_check_index (id)) return;
+    if (current_index.id == id) {
+      s_id = id;
+      s_samples = current_index.samples;
+      s_nrefs   = current_index.nrefs;
+    } else {
+      if (!_check_index (id)) return;
+    }
 
-    // format: $IND,version,id,sample_l,samples,samples_per_reference,nrefs*CS
+    // format: $IND,id,samples,nrefs*CS
     RF_Serial.print ("$IND,");
-    RF_Serial.print (STRINGIFY(STORE_VERSION) ",");
     RF_Serial.print (id);
-    RF_Serial.print ("," STRINGIFY(SAMPLE_LENGTH) ",");
+    RF_Serial.print (",");
     RF_Serial.print (s_samples);
-    RF_Serial.print ("," STRINGIFY(BATCH_LENGTH) ",");
+    RF_Serial.print (",");
     RF_Serial.print (s_nrefs);
     RF_Serial.println ("*NN");
 
