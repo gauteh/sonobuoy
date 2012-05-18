@@ -211,7 +211,6 @@ class Index:
   sync_status_t = 0
 
   working_data  = None  # working data object, getting full index, refs and data
-  TRANSMIT_BATCH_LENGTH = 512
 
   def loop (self):
     # idle
@@ -263,7 +262,7 @@ class Index:
           # }}}
 
           # download data, strategy:
-          # start on last id, get full id and refs.. then start to get data from
+          # start on last id, get full id then start to get data from
           # beginning
 
           if self.working_data is not None:
@@ -273,25 +272,28 @@ class Index:
               self.getid (self.working_data.id)
               return
 
-            elif not self.working_data.hasallrefs:
+            elif not self.working_data.hasalldata:
               # continue to get refs on this id
               # figure out which refs are missing
               ii = 0
               while ii < self.working_data.refs_no:
-                i = self.working_data.indexofref (ii)
+                i = self.working_data.indexofbatch (ii)
                 if i is None:
                   # start on new batch
-                  self.getbatch (self.working_data.id, ii, 0, self.TRANSMIT_BATCH_LENGTH)
+                  self.getbatch (self.working_data.id, ii, 0, CHUNK_SIZE)
                   return
                 else:
-                  # check if this 'ref' has been completed
-                  i = self.working_data.refs[i]
+                  # check if this batch has been completed
+                  i = self.working_data.batches[i]
                   if not i.completed:
-                    # get rest of this 'ref/batch'
-
+                    # get rest of this batch, figure out which next chunk is missing
+                    jj = 0
+                    while jj < i.maxchunks:
+                      if not jj in i.completechunks:
+                        self.getbatch (self.working_data.id, ii, CHUNK_SIZE * jj, CHUNK_SIZE)
+                      jj = jj + 1
 
                 ii = ii + 1
-                  
 
             elif not self.working_data.hasalldata:
               # continue to get data on this id

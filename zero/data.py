@@ -8,6 +8,9 @@ import logging
 import time
 import os
 
+BATCH_LENGTH = 1024
+CHUNK_SIZE = 512
+
 class Data:
   buoy  = None
   index = None
@@ -17,39 +20,41 @@ class Data:
   # id for log
   me = ""
 
-  BATCH_LENGTH = 1024
 
-  class Ref: # Ref struct {{{
-    id  = 0
-    no  = 0
-    ref      = None
-    status   = None
-    complete = False
-    sampleno = 0 # latest sampleno received
-    lineno   = 0 # line no in ref
+  class Batch:
+    no      = 0   # no of ref/batch in data file
+    ref     = None
+    status  = None
+    complete = False # Is batch completely received
+    line    = None   # Where in data file does this ref start
 
-    def __init__ (self, _i, _n, _r, _s, _c):
-      self.id = _i
-      self.no = _n
-      self.ref = _r
+    class Chunk:
+      no        = None # 0 indexed
+      line      = None # where in data file does this chunk start
+                       # _must_ be ordered
+
+    completechunks  = [] # list of chunks received
+    maxchunks       = (BATCH_LENGTH / CHUNK_SIZE)
+
+    def __init__ (self, _n, _r, _s, _l):
+      self.no   = _n
+      self.ref  = _r
       self.status = _s
-      self.complete = _c
+      self.line = _l
+      self.completechunks = []
 
-    def __eq__ (self, other):
-      return (self.no == other) # compare against ref no
 
-  def indexofref (self, id):
+  def indexofbatch (self, id):
     n = 0
-    for i in self.refs:
+    for i in self.batches:
       if i.id == id:
         return n
       n = n + 1
 
     return None
-  # }}}
 
-  refs = [] # Known refs available on buoy, with flag indicating complete
-            # download.
+  batches = [] # Known batches available on buoy, with flag indicating complete
+               # download.
 
   indexf_uri  = None
   dataf_uri   = None
@@ -88,8 +93,8 @@ class Data:
       No of refs
       hasfull
 
-      After this, one line for each ref (as returned by GETREFS):
-      id (always the same),ref no, ref
+      After this, one line for each batch:
+      refno,ref,refstatus,line,list of completechunks
   '''
   def read_index (self):
     if self.enabled:
@@ -103,35 +108,52 @@ class Data:
 
         for l in self.indexf.readlines ():
           s = l.split (',')
-          self.refs.append (Ref (int(s[0]), int(s[1]), int(s[2]), 0, False))
+          b = Batch (int(s[0]), int(s[1]), int(s[2]), int(s[3]))
+
+          c = []
+          i = 4
+          while i < len(s):
+            t = Chunk ()
+            t.no   = int(s[i])
+            t.line = b.line + ((i - 4) * CHUNK_SIZE)
+            c.append (t)
+
+          b.completechunks = c
+          b.complete = (len(b.completechunks) == (BATCH_LENGTH / CHUNK_SIZE))
+
+          self.batches.append (b)
 
         self.indexf.close ()
-        self.refs = sorted (self.refs, key = lambda r: r.no)
+        self.batches = sorted (self.batches, key = lambda r: r.no)
 
       else:
         self.write_index ()
 
   def write_index (self):
     if self.enabled:
-      self.refs = sorted (self.refs, key = lambda r: r.no)
+      self.batches = sorted (self.batches, key = lambda r: r.no)
       self.indexf = open (self.indexf_uri, 'w+') # truncate file
       self.indexf.write (str(self.id) + '\n')
       self.indexf.write (str(self.samples) + '\n')
       self.indexf.write (str(self.refs_no) + '\n')
       self.indexf.write (str(self.hasfull) + '\n')
-      for i in self.refs:
-        self.indexf.write (str(i.id) + ',' + str(i.no) + ',' + str(i.ref) + '\n')
+      for i in self.batches:
+        self.indexf.write (str(i.no) + ',' + str(i.ref) + ',' + str(i.status)  + ',' + int(i.line))
+        for c in i.completechunks:
+          self.indexf.write (',' + str(c.no))
+
+        self.indexf.write ('\n')
 
       self.indexf.close ()
   # }}}
 
-  ''' Read data file and figure out which references are complete '''
+  ''' Read data file and figure out which refs are complete '''
   def read_data (self):
     if self.enabled:
       if os.path.exists (self.dataf_uri):
         self.dataf = open (self.dataf_uri, 'r')
 
-        # Scan for references, all that are present here must be complete
+        # Scan for references
         n = 0
         for l in self.dataf.readlines ():
           if l[0] == 'R':
@@ -141,75 +163,14 @@ class Data:
             ref   = s[3]
             stat  = s[4]
 
-            # Find the ref in refslist
-            if ref in self.refs:
-              i = self.refs.index(refno)
-              self.refs[i].complete = True
-              self.refs[i].lineno   = n
+            self.batches[self.indexofbatch (refno)].line = n
+            self.logger.debug (self.me + " Found ref no: " + refno + " at " + str(n))
 
           n = n + 1 # line no
 
-  def append_batch (self, batch_length, reference, status, samples):
+  def got_chunk (self, batch_length, reference, status, samples):
     if self.enabled:
-      # reference is time
-      # samples is list of samples for this ref
-
-      # find Ref corresponding to reference
-      ref = None
-      for i in self.refs:
-        if i.ref == reference:
-          ref = i
-
-      if ref is None:
-        self.logger.error (self.me + " Got batch without corresponding reference.")
-        return
-
-      # load data file
-      # write segment by segment
-      # insert new batch
-      # update linenos and refs
-      lines = []
-      if os.path.exists (self.dataf_uri):
-        self.dataf = open (self.dataf_uri, 'r')
-
-        lines = self.dataf.readlines ()
-        self.dataf.close ()
-
-      self.dataf = open (self.dataf_uri, 'w+') # truncate
-
-      newref_written = False
-      n = 0 # lineno
-      for i in self.refs:
-        # Write new batch
-        if ref.no < i.no:
-          # Write ref
-          self.dataf.writeline ("R," + str(self.batch_length) + "," + str(ref.no) + "," + str(ref.ref) + "," + str(ref.status))
-          ref.lineno    = n + 1
-          ref.complete  = True
-          # Write samples
-          for s in samples:
-            self.dataf.writeline (str(samples))
-
-          newref_written = True
-          n = n + self.batch_length + 1
-
-        else:
-          if i.complete:
-            k = self.batch_length + 1
-            j = 0
-            while j < k:
-              self.dataf.writeline (lines[i.lineno + j])
-              j = j + 1
-              n = n + 1
-
-            # Update lineno if new batch has been written
-            if newref_written:
-              i.lineno = i.lineno + self.batch_length + 1
-
-      self.dataf.close ()
-
-      self.refs.append (ref)
-      self.write_index ()
+      pass
     else:
       self.logger.error (self.me + " Tried to append batch on disabled data file.")
 
@@ -219,7 +180,7 @@ class Data:
     self.hasfull = True
 
     # check if we have all refs and data
-    if self.refs_no < len(self.refs):
+    if self.refs_no < len(self.batches):
       self.hasalldata = False
 
     self.write_index ()
