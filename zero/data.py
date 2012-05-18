@@ -9,7 +9,30 @@ import time
 import os
 
 BATCH_LENGTH = 1024
-CHUNK_SIZE = 512
+CHUNK_SIZE   = 512
+
+class Chunk:
+  no        = None # 0 indexed
+  line      = None # where in data file does this chunk start
+                   # _must_ be ordered
+
+class Batch:
+  no      = 0   # no of ref/batch in data file
+  ref     = None
+  status  = None
+  complete  = False # Is batch completely received
+  line      = None   # Where in data file does this ref start
+
+
+  completechunks  = [] # list of chunks received
+  maxchunks       = (BATCH_LENGTH / CHUNK_SIZE)
+
+  def __init__ (self, _n, _r, _s, _l):
+    self.no   = _n
+    self.ref  = _r
+    self.status = _s
+    self.line = _l
+    self.completechunks = []
 
 class Data:
   buoy  = None
@@ -20,34 +43,10 @@ class Data:
   # id for log
   me = ""
 
-
-  class Batch:
-    no      = 0   # no of ref/batch in data file
-    ref     = None
-    status  = None
-    complete = False # Is batch completely received
-    line    = None   # Where in data file does this ref start
-
-    class Chunk:
-      no        = None # 0 indexed
-      line      = None # where in data file does this chunk start
-                       # _must_ be ordered
-
-    completechunks  = [] # list of chunks received
-    maxchunks       = (BATCH_LENGTH / CHUNK_SIZE)
-
-    def __init__ (self, _n, _r, _s, _l):
-      self.no   = _n
-      self.ref  = _r
-      self.status = _s
-      self.line = _l
-      self.completechunks = []
-
-
   def indexofbatch (self, id):
     n = 0
     for i in self.batches:
-      if i.id == id:
+      if i.no == id:
         return n
       n = n + 1
 
@@ -168,11 +167,81 @@ class Data:
 
           n = n + 1 # line no
 
-  def got_chunk (self, batch_length, reference, status, samples):
+  def got_chunk (self, refno, start, length, reference, status, samples):
     if self.enabled:
-      pass
+      b = None
+      i = self.indexofbatch (refno)
+      # on new batch
+      if i is None:
+        b = Batch (refno, 0, 0, 0)
+        self.batches.append (b)
+        self.batches = sorted (self.batches, key = lambda r: r.no)
+      else:
+        b = self.batches[i]
+
+      # mark chunk complete
+      thischunk = start / CHUNK_SIZE
+      b.completechunks.append (thischunk)
+
+      # if first sample on ref, ref has been included
+      if start == 0:
+        b.ref    = reference
+        b.status = status
+
+      # write out updated data file
+      lines = []
+      if self.os.path.exists (self.dataf_uri):
+        self.dataf = open (self.dataf_uri, 'r')
+        lines = self.dataf.readlines ()
+        self.dataf.close ()
+
+      self.dataf = open (self.dataf_uri, 'w')
+      n = 0
+      for bb in self.batches:
+        if bb.refno != refno:
+          self.dataf.write (line[bb.line] + '\n') # write ref
+          self.dataf.writelines (line[bb.line+1:(bb.line+1 + len(bb.complete_chunks) * CHUNK_SIZE)]) # write chunks
+
+        else:
+          # on this chunk
+          b.line = n
+
+          r = "R," + str(BATCH_LENGTH) + "," + str(b.ref) + "," + str(b.status)
+          self.dataf.write (r + '\n')
+
+          if len(b.complete_chunks) > 1:
+            n = n + 1 # skip previous reference line
+
+          for c in b.complete_chunks:
+            if c == thischunk:
+              self.writelines (samples)
+            else:
+              k = 0
+              while k < CHUNK_SIZE:
+                self.write (lines[n] + '\n')
+                n = n + 1
+                k = k + 1
+
+      # check if batch is complete
+      b.complete = (len(b.completechunks) == (BATCH_LENGTH / CHUNK_SIZE))
+
+      # check if datafile is complete
+      if self.refs_no == len(self.batches):
+        self.hasalldata = True
+        for b in self.batches:
+          self.hasalldata = (self.hasalldata and b.complete)
+
+      else:
+        self.hasalldata = False
+
+      if self.hasalldata:
+        self.logger.info (self.me + " All batches complete for data file.")
+
+      # write indexes
+      self.write_index ()
+
     else:
-      self.logger.error (self.me + " Tried to append batch on disabled data file.")
+      self.logger.error (self.me + " Tried to append chunk on disabled data file.")
 
   def fullindex (self, _samples, n_refs):
     self.samples = _samples

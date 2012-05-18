@@ -225,7 +225,7 @@ namespace Buoy {
                 case 1:
                   {
                   id = atoi (token);
-                  if (id < 1) {
+                  if (id < 1 || id > MAX_SANE_ID) {
                     send_error (E_BADCOMMAND);
                     return;
                   }
@@ -235,7 +235,7 @@ namespace Buoy {
                 case 2:
                   {
                   ref = atoi (token);
-                  if (ref < 1) {
+                  if (ref > MAX_SANE_REF) {
                     send_error (E_BADCOMMAND);
                     return;
                   }
@@ -245,7 +245,7 @@ namespace Buoy {
                 case 3:
                   {
                   sample = atoi (token);
-                  if (sample < 1) {
+                  if (sample > MAX_SANE_SAMPLE) {
                     send_error (E_BADCOMMAND);
                     return;
                   }
@@ -255,7 +255,7 @@ namespace Buoy {
                 case 4:
                   {
                   length = atoi (token);
-                  if (length < 1) {
+                  if (length > MAX_SANE_LENGTH) {
                     send_error (E_BADCOMMAND);
                     return;
                   }

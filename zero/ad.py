@@ -22,6 +22,9 @@ class AD:
   ad_config     = ''
 
   # Receving binary data
+  ad_batch_id       = 0
+  ad_refno          = 0
+  ad_start          = 0
   ad_k_remaining    = 0
   ad_k_samples      = 0
   AD_K_SAMPLES_MAX  = 10000 # protect from erronous infinite large batches
@@ -78,15 +81,20 @@ class AD:
 
       #print "[AD] Sample[", i, "] : ", hex(n)
 
-    if (hex2 (csum) != self.ad_sample_csum):
-      self.logger.error ("[AD] Checksum mismatch in received binary samples (length: " + str(l) + ").")
+    # checksum from buoy may only have one digit
+    scsum = hex2 (csum)
+    if scsum[0] == '0':
+      scsum = scsum[1]
+
+    if (scsum != self.ad_sample_csum):
+      self.logger.error ("[AD] Checksum mismatch in received binary samples (length: " + str(l) + "): " + hex2(csum) + " != " + self.ad_sample_csum)
 
     else:
       # Successfully received samples and time stamps
-      self.buoy.index.received_batch (self.ad_k_samples, self.ad_reference, self.ad_reference_status, s)
+      self.buoy.index.gotbatch (self.ad_batch_id, self.ad_refno, self.ad_start, self.ad_k_samples, self.ad_reference, self.ad_reference_status, s)
 
       # Write reference line as described in buoy.py, log ()
-      r = "R," + str(self.ad_k_samples) + "," + str(self.ad_reference) + "," + str(self.ad_reference_status)
+      #r = "R," + str(self.ad_k_samples) + "," + str(self.ad_reference) + "," + str(self.ad_reference_status)
 
       #print "[AD] Successfully received ", self.ad_k_samples, " samples.. (time of first: " + str(self.ad_time_of_first) + ")"
       #print "[AD] Frequency: " + str(self.freq) + "[Hz]"

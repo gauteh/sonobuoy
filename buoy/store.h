@@ -96,6 +96,7 @@ namespace Buoy {
 */
 # define SD_DATA_FILE_SIZE (5 * 1024 * 1024)
 # define MAX_REFERENCES (SD_DATA_FILE_SIZE / (BATCH_LENGTH * 50))
+# define MAX_SAMPLES_PER_FILE (MAX_REFERENCES * BATCH_LENGTH)
 
 /* Data file format {{{
  *

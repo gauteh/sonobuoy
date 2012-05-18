@@ -284,6 +284,30 @@ class Protocol:
             elif (subtype == 'D'):
               if (tokeni == 2):
                 try:
+                  self.zero.current.ad.ad_batch_id = int (token)
+                except ValueError:
+                  self.zero.current.index.reset ()
+                  self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
+                  return
+
+              elif (tokeni == 3):
+                try:
+                  self.zero.current.ad.ad_refno = int (token)
+                except ValueError:
+                  self.zero.current.index.reset ()
+                  self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
+                  return
+
+              elif (tokeni == 4):
+                try:
+                  self.zero.current.ad.ad_start = int (token)
+                except ValueError:
+                  self.zero.current.index.reset ()
+                  self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
+                  return
+
+              elif (tokeni == 5):
+                try:
                   self.zero.current.ad.ad_k_samples = int (token)
                 except ValueError:
                   self.zero.current.index.reset ()
@@ -300,7 +324,7 @@ class Protocol:
                   self.zero.current.ad.ad_samples = ''
                   self.a_receive_state = 4
 
-              elif (tokeni == 3):
+              elif (tokeni == 6):
                 try:
                   self.zero.current.ad.ad_reference = int (token)
                 except ValueError:
@@ -308,7 +332,7 @@ class Protocol:
                   self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
                   return
 
-              elif (tokeni == 4):
+              elif (tokeni == 7):
                 try:
                   self.zero.current.ad.ad_reference_status = int (token)
                 except ValueError:

@@ -156,28 +156,31 @@ class Index:
 
   # should probably be gotind..
   def gotid (self, id, samples, n_refs):
-    if self.pendingid == 4:
-      self.logger.info (self.me + " Got full index: " + str(id) + ", samples: " + str(samples) + ", no of refs: " + str(n_refs))
-      if self.working_data is not None:
-        if self.working_data.id == id:
-          self.working_data.fullindex (samples, n_refs)
+    self.logger.info (self.me + " Got full index: " + str(id) + ", samples: " + str(samples) + ", no of refs: " + str(n_refs))
+    if self.working_data is not None:
+      if self.working_data.id == id:
+        self.working_data.fullindex (samples, n_refs)
 
+    if self.pendingid == 4:
       self.state = 0
 
-  def getrefs (self, id, start, length):
+  def getbatch (self, id, ref, start, length):
     if self.state == 0:
-      self.logger.debug (self.me + " Getting refs from: " + str(start) + " to " + str(start + length))
-      self.pendingid  = 5
-      self.state      = 1
-      self.protocol.send ("GRS," + str(id) + "," + str(start) + "," + str(length))
-      self.request_t  = time.time ()
+      self.logger.info (self.me + " Getting batch, id: " + str(id) + ", ref no: " + str(ref) + ", start: " + str(start) + ", length: " + str(length))
+      self.pendingid = 5
+      self.state     = 1
 
+      self.protocol.send ("GB," + str(id) + "," + str(ref) + "," + str(start) + "," + str(length))
 
-  def gotrefs (self):
-    pass
+      self.request_t = time.time ()
 
-  def gotbatch (self):
-    pass
+  def gotbatch (self, id, refno, start, length, ref, refstat, samples):
+    self.logger.info (self.me + " Got batch, id: " + str(id) + ", ref no: " + str(refno) + ", start: " + str(start) + ", length: " + str(length))
+    if self.working_data.id == id:
+      self.working_data.got_chunk (refno, start, length, ref, refstat, samples)
+
+    if self.pending == 5:
+      self.state = 0
 
   status = 0
   def getstatus (self):
@@ -262,8 +265,9 @@ class Index:
           # }}}
 
           # download data, strategy:
-          # start on last id, get full id then start to get data from
-          # beginning
+          #
+          # start on last id, get full id then start to get batches and chunks
+          # from beginning of corresponding data file to id.
 
           if self.working_data is not None:
 
@@ -291,17 +295,13 @@ class Index:
                     while jj < i.maxchunks:
                       if not jj in i.completechunks:
                         self.getbatch (self.working_data.id, ii, CHUNK_SIZE * jj, CHUNK_SIZE)
+                        return
                       jj = jj + 1
 
                 ii = ii + 1
 
-            elif not self.working_data.hasalldata:
-              # continue to get data on this id
-              pass
-
             else:
               self.working_data = None
-            return
 
           elif self.lastid > 0 and self.greatestid == self.lastid and not self.__full_data_check_done__:
             # find latest id with missing index, refs or data
@@ -314,7 +314,7 @@ class Index:
                 d = self.data[di]
 
               if d is not None:
-                if d.enabled and not (d.hasfull or d.hasalldata):
+                if d.enabled and not (d.hasfull and d.hasalldata):
                   self.working_data = d
                   self.logger.info (self.me + " Working on id: " + str(d.id))
                   return
