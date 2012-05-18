@@ -11,11 +11,6 @@ import os
 BATCH_LENGTH = 1024
 CHUNK_SIZE   = 512
 
-class Chunk:
-  no        = None # 0 indexed
-  line      = None # where in data file does this chunk start
-                   # _must_ be ordered
-
 class Batch:
   no      = 0   # no of ref/batch in data file
   ref     = None
@@ -112,10 +107,8 @@ class Data:
           c = []
           i = 4
           while i < len(s):
-            t = Chunk ()
-            t.no   = int(s[i])
-            t.line = b.line + ((i - 4) * CHUNK_SIZE)
-            c.append (t)
+            c.append (int(s[i]))
+            i = i + 1
 
           b.completechunks = c
           b.complete = (len(b.completechunks) == (BATCH_LENGTH / CHUNK_SIZE))
@@ -137,9 +130,9 @@ class Data:
       self.indexf.write (str(self.refs_no) + '\n')
       self.indexf.write (str(self.hasfull) + '\n')
       for i in self.batches:
-        self.indexf.write (str(i.no) + ',' + str(i.ref) + ',' + str(i.status)  + ',' + int(i.line))
+        self.indexf.write (str(i.no) + ',' + str(i.ref) + ',' + str(i.status)  + ',' + str(i.line))
         for c in i.completechunks:
-          self.indexf.write (',' + str(c.no))
+          self.indexf.write (',' + str(c))
 
         self.indexf.write ('\n')
 
@@ -157,13 +150,13 @@ class Data:
         for l in self.dataf.readlines ():
           if l[0] == 'R':
             s     = l.split (',')
-            bl    = s[1]
-            refno = s[2]
-            ref   = s[3]
-            stat  = s[4]
+            bl    = int(s[1])
+            refno = int(s[2])
+            ref   = int(s[3])
+            stat  = int(s[4])
 
+            self.logger.debug (self.me + " Found ref no: " + str(refno) + " at " + str(n))
             self.batches[self.indexofbatch (refno)].line = n
-            self.logger.debug (self.me + " Found ref no: " + refno + " at " + str(n))
 
           n = n + 1 # line no
 
@@ -190,7 +183,7 @@ class Data:
 
       # write out updated data file
       lines = []
-      if self.os.path.exists (self.dataf_uri):
+      if os.path.exists (self.dataf_uri):
         self.dataf = open (self.dataf_uri, 'r')
         lines = self.dataf.readlines ()
         self.dataf.close ()
@@ -198,29 +191,32 @@ class Data:
       self.dataf = open (self.dataf_uri, 'w')
       n = 0
       for bb in self.batches:
-        if bb.refno != refno:
-          self.dataf.write (line[bb.line] + '\n') # write ref
-          self.dataf.writelines (line[bb.line+1:(bb.line+1 + len(bb.complete_chunks) * CHUNK_SIZE)]) # write chunks
+        if bb.no != refno:
+          self.dataf.write (lines[bb.line] + '\n') # write ref
+          self.dataf.writelines (lines[bb.line+1:(bb.line+1 + len(bb.completechunks) * CHUNK_SIZE)]) # write chunks
 
         else:
           # on this chunk
           b.line = n
 
-          r = "R," + str(BATCH_LENGTH) + "," + str(b.ref) + "," + str(b.status)
+          r = "R," + str(BATCH_LENGTH) + "," + str(b.no) + "," + str(b.ref) + "," + str(b.status)
           self.dataf.write (r + '\n')
 
-          if len(b.complete_chunks) > 1:
+          if len(b.completechunks) > 1:
             n = n + 1 # skip previous reference line
 
-          for c in b.complete_chunks:
+          for c in b.completechunks:
             if c == thischunk:
-              self.writelines (samples)
+              print samples
+              self.dataf.writelines (samples)
             else:
               k = 0
               while k < CHUNK_SIZE:
-                self.write (lines[n] + '\n')
+                self.dataf.write (lines[n] + '\n')
                 n = n + 1
                 k = k + 1
+
+      self.dataf.close ()
 
       # check if batch is complete
       b.complete = (len(b.completechunks) == (BATCH_LENGTH / CHUNK_SIZE))

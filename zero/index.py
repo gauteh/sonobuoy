@@ -289,7 +289,7 @@ class Index:
                 else:
                   # check if this batch has been completed
                   i = self.working_data.batches[i]
-                  if not i.completed:
+                  if not i.complete:
                     # get rest of this batch, figure out which next chunk is missing
                     jj = 0
                     while jj < i.maxchunks:
