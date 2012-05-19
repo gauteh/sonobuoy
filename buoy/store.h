@@ -134,7 +134,9 @@ namespace Buoy {
         uint32_t refpos[MAX_REFERENCES]; // List with position of reference points.
         uint64_t refs[MAX_REFERENCES];   // List with references, matches list of positions.
       } Index;
-# define REFPOS_START (2 * sizeof(uint16_t) + 4 * sizeof(uint32_t))
+
+      /* Start of references in index file */
+      // # define REFPOS_START (2 * sizeof(uint16_t) + 4 * sizeof(uint32_t))
 
 
 /* Using 8.3 file names limits the ID */
@@ -198,10 +200,12 @@ namespace Buoy {
       SdFile *send_i;
       SdFile *send_d;
 
+      void _reset_index ();
       bool _check_index (uint32_t); // check if current index is open and valid
+
       void send_indexes (uint32_t, uint32_t);
       void send_index (uint32_t);
-      void send_refs (uint32_t, uint32_t, uint32_t);
+      //void send_refs (uint32_t, uint32_t, uint32_t);
       void send_batch (uint32_t id, uint32_t ref, uint32_t start, uint32_t length);
       void send_lastid ();
 # endif

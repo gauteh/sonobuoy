@@ -541,34 +541,47 @@ namespace Buoy {
     }
   } // }}}
 
+  void Store::_reset_index () { // {{{
+    if (send_i != NULL) {
+      send_i->close ();
+      delete send_i;
+    }
+
+    s_id      = 0;
+    s_samples = 0;
+    s_nrefs   = 0;
+    s_lastbatch = 0;
+
+    if (send_d != NULL) {
+      send_d->close ();
+      delete send_d;
+    }
+  } // }}}
+
   bool Store::_check_index (uint32_t id) { // {{{
     if (!SD_AVAILABLE) {
       rf->send_error (RF::E_SDUNAVAILABLE);
       return false;
     }
 
+    // Should not happen (index is always closed at the end of this function)
+    if (send_i != NULL) {
+      _reset_index ();
+    }
+
+    // Change to new ID
     if (s_id != id) {
+      _reset_index ();
+    }
 
-      // Should not happen
-      if (send_i != NULL) {
-        send_i->close ();
-        delete send_i;
-      }
-
-      // Will happen on index change
-      if (send_d != NULL) {
-        send_d->close ();
-        delete send_d;
-      }
-
-      s_id      = id;
-      s_samples = 0;
-      s_nrefs   = 0;
+    if (s_id != id) {
+      _reset_index ();
 
       if (current_index.id == id) {
 
+        s_id      = id;
         s_samples = current_index.samples;
-        s_nrefs = current_index.nrefs;
+        s_nrefs   = current_index.nrefs;
 
       } else {
         // Not working on current index, read index file
@@ -587,14 +600,10 @@ namespace Buoy {
           return false;
         }
 
-        /* Open and read index if we just opened it */
-        if (send_i->curPosition () > 0) send_i->seekSet (0);
-
-
         /* Reading first part of Index */
-        send_i->seekCur ( sizeof(Index::version)
-                        + sizeof(Index::id)
-                        + sizeof(Index::sample_l));
+        send_i->seekCur (  sizeof(Index::version)
+                         + sizeof(Index::id)
+                         + sizeof(Index::sample_l));
         send_i->read (reinterpret_cast<char*>(&s_samples), sizeof(s_samples));
         send_i->seekCur (sizeof(Index::samples_per_reference));
         send_i->read (reinterpret_cast<char*>(&s_nrefs), sizeof(s_nrefs));
@@ -630,13 +639,13 @@ namespace Buoy {
                           uint32_t length) {
     if (!_check_index (id)) return;
 
-    // refno is ref number
+    // refno is ref number in this id
     if (refno >= s_nrefs) {
       rf->send_error (RF::E_NOSUCHREF);
       return;
     }
 
-    // start is sample no from first sample to this ref no
+    // start is sample no from first sample of this ref no
     if (((refno * BATCH_LENGTH) + start + length) > s_samples) {
 
       if (send_d != NULL) {
@@ -648,7 +657,7 @@ namespace Buoy {
       return;
     }
 
-    /* Open data file, otherwise assume it is already open */
+    /* Open data file, otherwise it must already be the data file for this id */
     if (send_d == NULL) {
 
       int p = itoa (id, 10, buf);
@@ -749,7 +758,7 @@ namespace Buoy {
     RF_Serial.println (buf);
     */
 
-    /* If this was the last sample, close file (index may be changed anyway) */
+    /* If this was the last sample, close file. */
     if (((refno * BATCH_LENGTH) + start + length) > s_samples) {
       if (send_d != NULL) {
         send_d->close ();
