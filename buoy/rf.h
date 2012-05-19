@@ -85,8 +85,6 @@ namespace Buoy {
       char rf_buf[RF_SERIAL_BUFLEN];
       uint8_t rf_buf_pos;
 
-      //char buf[RF_BUFLEN];
-
       /* Incoming telegrams */
       typedef enum _RF_TELEGRAM {
         UNSPECIFIED = 0,

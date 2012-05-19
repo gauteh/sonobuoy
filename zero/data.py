@@ -190,31 +190,36 @@ class Data:
 
       self.dataf = open (self.dataf_uri, 'w')
       n = 0
+      thischunk_written = False
+
       for bb in self.batches:
-        if bb.no != refno:
+        if bb is not b:
+          if thischunk_written:
+            bb.line = bb.line + CHUNK_SIZE # update line no of batch after
+                                           # new chunk.
+
           self.dataf.write (lines[bb.line] + '\n') # write ref
           self.dataf.writelines (lines[bb.line+1:(bb.line+1 + len(bb.completechunks) * CHUNK_SIZE)]) # write chunks
+          n = n + 1 + len(bb.completechunks) * CHUNK_SIZE
 
         else:
-          # on this chunk
+          # on this batch
           b.line = n
 
           r = "R," + str(BATCH_LENGTH) + "," + str(b.no) + "," + str(b.ref) + "," + str(b.status)
           self.dataf.write (r + '\n')
 
           if len(b.completechunks) > 1:
-            n = n + 1 # skip previous reference line
+            n = n + 1 # skip existing reference line
 
           for c in b.completechunks:
             if c == thischunk:
+              # on this chunk
               print samples
               self.dataf.writelines (samples)
             else:
-              k = 0
-              while k < CHUNK_SIZE:
-                self.dataf.write (lines[n] + '\n')
-                n = n + 1
-                k = k + 1
+              self.dataf.writelines (lines[n:n + CHUNK_SIZE])
+              n = n + CHUNK_SIZE
 
       self.dataf.close ()
 

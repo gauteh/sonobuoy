@@ -74,6 +74,7 @@ class Protocol:
   # Last type received
   lasttype = ''
 
+  # Handler {{{
   # Receiver state:
   # 0 = Waiting for '$'
   # 1 = Between '$' and '*'
@@ -137,7 +138,7 @@ class Protocol:
       if len(self.a_buf) > 80:
         self.a_buf = ''
         self.a_receive_state = 0
-
+  # }}}
 
   def a_parse (self, buf): # {{{
     # Test checksum
