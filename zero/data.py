@@ -164,11 +164,15 @@ class Data:
     if self.enabled:
       b = None
       i = self.indexofbatch (refno)
+
+      first_on_batch = False
+
       # on new batch
       if i is None:
         b = Batch (refno, 0, 0, 0)
         self.batches.append (b)
         self.batches = sorted (self.batches, key = lambda r: r.no)
+        first_on_batch = True
       else:
         b = self.batches[i]
 
@@ -194,13 +198,16 @@ class Data:
 
       for bb in self.batches:
         if bb is not b:
+          self.dataf.write (lines[bb.line] + '\n') # write ref
+          self.dataf.writelines (lines[bb.line+1:(bb.line+1 + len(bb.completechunks) * CHUNK_SIZE)]) # write chunks
+
+          n = n + 1 + len(bb.completechunks) * CHUNK_SIZE
+
           if thischunk_written:
             bb.line = bb.line + CHUNK_SIZE # update line no of batch after
                                            # new chunk.
-
-          self.dataf.write (lines[bb.line] + '\n') # write ref
-          self.dataf.writelines (lines[bb.line+1:(bb.line+1 + len(bb.completechunks) * CHUNK_SIZE)]) # write chunks
-          n = n + 1 + len(bb.completechunks) * CHUNK_SIZE
+            if first_on_batch:
+              bb.line = bb.line + 1 # add line for ref if this is a new batch
 
         else:
           # on this batch
@@ -217,6 +224,7 @@ class Data:
               # on this chunk
               print samples
               self.dataf.writelines (samples)
+              thischunk_written = True
             else:
               self.dataf.writelines (lines[n:n + CHUNK_SIZE])
               n = n + CHUNK_SIZE
