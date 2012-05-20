@@ -201,12 +201,10 @@ class Data:
             # write this chunk
             if not thischunk_written and thischunk == ci:
               k = 0
-              print (len(samples))
               while k < CHUNK_SIZE:
                 self.dataf.write (str(samples.pop(0)) + '\n')
                 k = k + 1
 
-              print (len(samples))
               thischunk_written = True
 
             # write existing chunks
