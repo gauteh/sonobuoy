@@ -40,6 +40,10 @@ class Zero:
   # Reading thread
   go       = True
 
+  # Current buoy thread
+  cthread = None
+  acquire = True # Do continuous acquisition of buoy data
+
   def get_current (self):
     try:
       return self.buoys[self.currenti]
@@ -87,6 +91,10 @@ class Zero:
     self.uimanagerthread.daemon = True
     self.uimanagerthread.start ()
 
+    # Start thread for current buoy
+    self.cthread = Thread (target = self.current_thread, name = 'CurrentBuoy')
+    self.cthread.start ()
+
     # Start thread reading stdin
     #t = Thread (target = self.stdin, name = 'StdinHandler')
     #t.daemon = True
@@ -102,15 +110,23 @@ class Zero:
 
 
   def openserial (self):
-    while ((self.ser == None or not self.ser.isOpen ()) and self.go):
+    if self.go:
       self.logger.info ("[Zero] Opening serial port " + str(self.port) + "..")
+
+    msg = False
+    while ((self.ser == None or not self.ser.isOpen ()) and self.go):
       self.protocol.adressedbuoy = 0 # reset adressed buoy
       try:
         try:
-          self.ser = serial.Serial (self.port, self.baud)
+          self.ser = serial.Serial (port = self.port, baudrate = self.baud) #, timeout = 0)
           self.logger.info ("[Zero] Serial port open.")
         except serial.SerialException as e:
-          self.logger.error ("[Zero] Failed to open serial port.. retrying in 5 seconds.")
+          if not msg:
+            self.logger.error ("[Zero] Failed to open serial port.. retrying every 5 seconds.")
+            msg = True
+          else:
+            self.logger.debug ("[Zero] Failed to open serial port.. retrying in 5 seconds.")
+
           self.ser = None
           time.sleep (5)
 
@@ -121,7 +137,8 @@ class Zero:
     try:
       if self.ser != None:
         self.ser.close ()
-    except: pass
+    except Exception as e:
+      self.logger.exception ("[Zero] Could not close serial: " + str(e))
 
     self.ser = None
 
@@ -131,8 +148,9 @@ class Zero:
 
   def send (self, msg):
     try:
-      self.logger.debug ("[Zero] Sending: " + msg)
-      self.ser.write (msg + "\n")
+      if self.ser is not None:
+        self.logger.debug ("[Zero] Sending: " + msg)
+        self.ser.write (msg + "\n")
     except serial.SerialException as e:
       self.logger.exception ("[Zero] Exception with serial link, reconnecting..: " + str(e))
       self.closeserial ()
@@ -147,11 +165,11 @@ class Zero:
       while self.go:
         try:
           if not self.ser == None:
-            r = self.ser.read (1)
+            r = self.ser.read (1) # non-blocking
             if self.current is not None:
               self.protocol.handle (r)
 
-          time.sleep (0.0001)
+
         except serial.SerialException as e:
           self.logger.exception ("[Zero] Exception with serial link, reconnecting..: " + str(e))
           self.closeserial ()
@@ -174,6 +192,22 @@ class Zero:
 
     finally:
       self.logger.info ("[Zero] Main loop finished..")
+
+  def current_thread (self):
+    self.logger.info ("[Zero] Starting current buoy thread..")
+    while self.go:
+      if self.current is not None:
+        self.current.loop ()
+
+      time.sleep (0.001)
+
+  def startacquire (self):
+    self.logger.info ("[Zero] Starting continuous acquistion from buoys..")
+    self.acquire = True
+
+  def stopacquire (self):
+    self.logger.info ("[Zero] Stopping continuous acquistion from buoys..")
+    self.acquire = False
 
   def stdin (self):
     # Wait for input on stdin, then exit..
@@ -200,6 +234,7 @@ class Zero:
     for i in self.buoys:
       i.stop ()
 
+    self.closeserial ()
     self.logger.info ("[Zero] Stopped.")
 
 if __name__ == '__main__':

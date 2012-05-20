@@ -61,7 +61,7 @@ namespace Buoy {
 
     GPS_Serial.begin (GPS_BAUDRATE);
 
-# if DIRECT_SERIAL
+# if DEBUG_VERB
     SerialUSB.println ("[GPS] Waiting for first (un-reliable) reference..");
 # endif
     uint8_t n = 0;
@@ -71,7 +71,7 @@ namespace Buoy {
 
       /* Break after 100 secs */
       if (n > 1000) {
-# if DIRECT_SERIAL
+# if DEBUG_VERB
         SerialUSB.println ("[GPS] [Error] No initial reference received for 100 sec.");
 # endif
         break;
@@ -257,7 +257,6 @@ namespace Buoy {
     }
 
     /* }}} Done telegram handler */
-
   }
 
   void GPS::parse ()
@@ -279,7 +278,7 @@ namespace Buoy {
     */
 
     /* Test checksum before parsing */
-    if (!RF::test_checksum (gps_buf)) return;
+    if (!test_checksum (gps_buf)) return;
 
     /* Update time, should be set in case time data has been received */
     bool doseconds = false;
@@ -339,16 +338,20 @@ namespace Buoy {
               {
                 case 1:
                   {
-                    char * s = token;
-                    char * n = token + 2;
-                    hour   = strtol (s, &n, 10);
-                    s = n; n = s + 2;
-                    minute = strtol (s, &n, 10);
-                    s = n; n = s + 2;
-                    second = strtol (s, &n, 10);
-                    n++; // skip delimiter
-                    s = n;
-                    seconds_part = strtol (s, NULL, 10);
+                    char t[4];
+                    t[2] = 0;
+                    t[3] = 0;
+                    strncpy(t, token, 2);
+                    hour   = strtol (t, NULL, 10);
+
+                    strncpy(t, token+2, 2);
+                    minute = strtol (t, NULL, 10);
+
+                    strncpy(t, token+4, 2);
+                    second = strtol (t, NULL, 10);
+
+                    strncpy(t, token+7, 3); // skip delimiter
+                    seconds_part = strtol (t, NULL, 10);
 
                     // Update seconds
                     doseconds = (day  > 0);
@@ -385,13 +388,17 @@ namespace Buoy {
 
                 case 9:
                   {
-                    char * s = token;
-                    char * n = token + 2;
-                    day   = strtol (s, &n, 10);
-                    s = n; n = s + 2;
-                    month = strtol (s, &n, 10);
-                    s = n; n = s + 2;
-                    year = strtol (s, &n, 10);
+                    char t[3];
+                    t[2] = 0;
+
+                    strncpy (t, token, 2);
+                    day   = strtol (t, NULL, 10);
+
+                    strncpy (t, token+2, 2);
+                    month = strtol (t, NULL, 10);
+
+                    strncpy (t, token+4, 2);
+                    year = strtol (t, NULL, 10);
 
                     // Update if we got time
                     doseconds = (day > 0);
@@ -595,6 +602,21 @@ namespace Buoy {
 
     /* Done parser }}} */
   }
+
+# if DEBUG_VERB
+  void GPS::print_status () {
+    SerialUSB.print ("[GPS] lat: ");
+    SerialUSB.print (ad->gps->latitude);
+    SerialUSB.print (", lon: ");
+    SerialUSB.print (ad->gps->longitude);
+    SerialUSB.print (", time: ");
+    SerialUSB.print (ad->gps->time);
+    SerialUSB.print (", date: ");
+    SerialUSB.print (day);
+    SerialUSB.print (month);
+    SerialUSB.println (year);
+  }
+# endif
 
   void GPS::enable_sync () {
     attachInterrupt (GPS_SYNC_PIN, &(GPS::sync_pulse_int), FALLING);

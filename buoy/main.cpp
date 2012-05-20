@@ -25,6 +25,10 @@ int main(void) {
   Buoy::bu = new BuoyMaster ();
   Buoy::bu->main ();
 
+  while (true) {
+    togglePin (3);
+    delay(1000);
+  }
   return 0;
 }
 

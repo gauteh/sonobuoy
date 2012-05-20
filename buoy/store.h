@@ -10,7 +10,6 @@
 # include "buoy.h"
 
 # include "ads1282.h"
-# include "gps.h"
 
 # ifndef ONLY_SPEC
 
@@ -50,22 +49,23 @@
 
 /* SPI 2
  *
- * NSS  = 31
+ * NSS  = 25
  * SCK  = 32
  * MISO = 33
  * MOSI = 34
  */
 # define SD_SPI 2
-# define SD_CS  31 // chip select pin
+# define SD_CS  25 // chip select pin
 
 # endif
 
 namespace Buoy {
   class Store {
     public:
+# if HASRF
       RF      *rf;
+# endif
       ADS1282 *ad;
-      GPS     *gps;
 
       HardwareSPI *spi;
       Sd2Card     *card;
@@ -74,8 +74,8 @@ namespace Buoy {
 
       char buf[8+5]; // used for file names
 
-      bool  SD_AVAILABLE;
-      uint32_t lastsd;
+      bool      SD_AVAILABLE;
+      uint32_t  lastsd;
 
 # endif
 
@@ -94,8 +94,9 @@ namespace Buoy {
 # define _SD_DATA_FILE_SIZE (MAX_SAMPLES_PER_FILE * (SAMPLE_LENGTH) + MAX_REFERENCES * 50uL)
 # define SD_DATA_FILE_SIZE (_SD_DATA_FILE_SIZE + (_SD_DATA_FILE_SIZE % 512uL))
 */
-# define SD_DATA_FILE_SIZE (5 * 1024 * 1024)
-# define MAX_REFERENCES (SD_DATA_FILE_SIZE / BATCH_LENGTH)
+# define SD_DATA_FILE_SIZE (50 * 4 * 1024)
+# define MAX_REFERENCES (SD_DATA_FILE_SIZE / (BATCH_LENGTH * 50))
+# define MAX_SAMPLES_PER_FILE (MAX_REFERENCES * BATCH_LENGTH)
 
 /* Data file format {{{
  *
@@ -109,7 +110,7 @@ namespace Buoy {
  *
  * Entry:
  *  - SAMPLE    (4 bytes)
- *  Total length: 8 bytes.
+ *  Total length: 4 bytes.
  *
  * }}} */
 
@@ -133,7 +134,9 @@ namespace Buoy {
         uint32_t refpos[MAX_REFERENCES]; // List with position of reference points.
         uint64_t refs[MAX_REFERENCES];   // List with references, matches list of positions.
       } Index;
-# define REFPOS_START (2 * sizeof(uint16_t) + 4 * sizeof(uint32_t))
+
+      /* Start of references in index file */
+      // # define REFPOS_START (2 * sizeof(uint16_t) + 4 * sizeof(uint32_t))
 
 
 /* Using 8.3 file names limits the ID */
@@ -187,6 +190,7 @@ namespace Buoy {
       void start_continuous_write ();
       void stop_continuous_write ();
 
+# if HASRF
       /* ID and files currently being sent */
 # define GET_IDS_N 10 // no of ids to send in one go
       uint32_t s_id;
@@ -196,15 +200,20 @@ namespace Buoy {
       SdFile *send_i;
       SdFile *send_d;
 
+      void _reset_index ();
       bool _check_index (uint32_t); // check if current index is open and valid
+
       void send_indexes (uint32_t, uint32_t);
       void send_index (uint32_t);
-      void send_refs (uint32_t, uint32_t, uint32_t);
+      //void send_refs (uint32_t, uint32_t, uint32_t);
       void send_batch (uint32_t id, uint32_t ref, uint32_t start, uint32_t length);
       void send_lastid ();
+# endif
 
+# if 0
       void open_next_log ();
       void log (const char *);
+# endif
   };
 }
 

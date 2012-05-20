@@ -601,7 +601,7 @@ void SdFile::printDirName(const dir_t& dir, uint8_t width) {
       SerialUSB.print('.');
       w++;
     }
-    SerialUSB.print(dir.name[i]);
+    SerialUSB.print((char) dir.name[i]);
     w++;
   }
   if (DIR_IS_SUBDIR(&dir)) {

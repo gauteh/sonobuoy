@@ -11,18 +11,70 @@ from util import *
 from buoy import *
 
 class Protocol:
-  zero = None
-  logger = None
+  zero    = None
+  logger  = None
 
   adressedbuoy = 0     # id of buoy addressed on zeronode
+
+  tokens = [0, 0, 0, 0, 0, 0, 0, 0] # temp for storing tokens during parsing
 
   def __init__ (self, z):
     self.zero     = z
     self.logger   = z.logger
 
+# Commands (buoy and zeronode) and ouput {{{
+  def znsetaddress (self):
+    # Address buoy
+    self.logger.info ("[ZeroNode] Setting to address: " + str(self.zero.current.address_p))
+    _msg = 'ZA,' + self.zero.current.address_p
+    self.zero.send ('$' + _msg + '*' + gen_checksum (_msg))
+    self.adressedbuoy = self.zero.current.id
+
+  # Request status from zeronode
+  def zngetstatus (self):
+    self.zero.send ('$ZS*' + gen_checksum ('ZS'))
+
+  def znconnect (self):
+    self.logger.info ("[ZeroNode] Connecting to current buoy..")
+    self.zero.send ('$ZC*' + gen_checksum ('ZA'))
+
+  def znportalmode (self):
+    # Put into portal mode and exit
+    self.logger.info ("[ZeroNode] Going into portal mode..")
+    self.zero.send ("$ZP*" + gen_checksum ('ZP'))
+    self.zero.stop ()
+
+  def resetbuoy (self):
+    self.logger.info ("[ZeroNode] Resetting current buoy.")
+    if self.zero.current.id != self.adressedbuoy:
+      self.znsetaddress ()
+      self.znconnect ()
+    self.zero.send ("$ZR*" + gen_checksum ('ZR'))
+
+  def znoutputuart (self):
+    self.logger.info ("[ZeroNode] Setting Zero RF to output locally.")
+    self.zero.send ("$ZU*" + gen_checksum ('ZU'))
+
+  def znoutputwireless (self):
+    self.logger.info ("[ZeroNode] Setting Zero RF to output on air.")
+    self.zero.send ("$ZT*" + gen_checksum ('ZT'))
+
+  def send (self, msg):
+    if self.zero.current.id != self.adressedbuoy:
+      self.znsetaddress ()
+      self.znconnect ()
+      self.znoutputwireless ()
+
+    # Encapsulate and add checksum
+    msg = '$' + msg + '*' + gen_checksum (msg)
+    self.zero.send (msg)
+# }}}
+
+# Parser and handler {{{
   # Last type received
   lasttype = ''
 
+  # Handler {{{
   # Receiver state:
   # 0 = Waiting for '$'
   # 1 = Between '$' and '*'
@@ -35,40 +87,6 @@ class Protocol:
   a_buf           = ''
   waitforreceipt  = False # Have just got a AD data batch and is waiting for
                           # a DE receipt message
-
-  def znsetaddress (self):
-    # Address buoy
-    _msg = 'ZA,' + self.zero.current.address_p
-    self.zero.send ('$' + _msg + '*' + gen_checksum (_msg))
-    self.adressedbuoy = self.zero.current.id
-
-  def send (self, msg):
-    if self.zero.current.id != self.adressedbuoy:
-      self.znsetaddress ()
-      self.znconnect ()
-      self.znoutputwireless ()
-
-    # Encapsulate and add checksum
-    msg = '$' + msg + '*' + gen_checksum (msg)
-    self.zero.send (msg)
-
-  # Request status from zeronode
-  def zngetstatus (self):
-    self.zero.send ('$ZS*' + gen_checksum ('ZS'))
-
-  def znconnect (self):
-    self.zero.send ('$ZC*' + gen_checksum ('ZA'))
-
-  def znportalmode (self):
-    # Put into portal mode and exit
-    self.zero.send ("$ZP*" + gen_checksum ('ZP'))
-
-  def znoutputuart (self):
-    self.zero.send ("$ZU*" + gen_checksum ('ZU'))
-
-  def znoutputwireless (self):
-    self.zero.send ("$ZT*" + gen_checksum ('ZT'))
-
   def handle (self, buf):
     i = 0
     l = len (buf)
@@ -114,14 +132,15 @@ class Protocol:
         self.a_buf = ''
         self.a_receive_state = 0
         self.waitforreceipt = False
+        self.zero.current.index.reset ()
 
       # Check if we're receiving sane amounts of data..
       if len(self.a_buf) > 80:
         self.a_buf = ''
         self.a_receive_state = 0
+  # }}}
 
-
-  def a_parse (self, buf):
+  def a_parse (self, buf): # {{{
     # Test checksum
     if (buf[-2:] == 'NN'):
       #self.logger.debug ("[Protocol] Checksum not provided on received message")
@@ -129,6 +148,7 @@ class Protocol:
     elif (not test_checksum (buf)):
       self.logger.info ("[Protocol] Message discarded, checksum failed.")
       self.logger.info ("[Protocol] Discarded: " + buf)
+      self.zero.current.index.reset ()
       return
 
     # Parse message
@@ -160,6 +180,7 @@ class Protocol:
       else:
         if self.waitforreceipt:
           if msgtype != 'AD' or (tokeni > 1 and subtype != 'DE'):
+            self.zero.current.index.reset ()
             self.logger.error ("[Protocol] Did not receive receipt immediately after data batch. Discarding data batch.")
             self.waitforreceipt = False
             self.zero.current.ad.ad_k_samples = 0
@@ -177,6 +198,7 @@ class Protocol:
                 try:
                   self.zero.current.gps.telegramsreceived = int(token)
                 except ValueError:
+                  self.zero.current.index.reset ()
                   self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
                   return
 
@@ -184,6 +206,7 @@ class Protocol:
                 try:
                   self.zero.current.gps.latitude = float(token) if len(token) else 0
                 except ValueError:
+                  self.zero.current.index.reset ()
                   self.logger.exception ("[Protocol] Could not convert token to float. Discarding rest of message.")
                   return
 
@@ -194,6 +217,7 @@ class Protocol:
                 try:
                   self.zero.current.gps.longitude = float(token) if len(token) > 0 else 0
                 except ValueError:
+                  self.zero.current.index.reset ()
                   self.logger.exception ("[Protocol] Could not convert token to float. Discarding rest of message.")
                   return
 
@@ -222,11 +246,14 @@ class Protocol:
                 self.zero.current.gps.has_sync_reference = (token == 'Y')
 
                 self.zero.current.gps.gps_status ()
+                self.zero.current.index.gotstatus ()
               else:
+                self.zero.current.index.reset ()
                 self.logger.error ("[Protocol] Too many tokens for message: " + msgtype + ", subtype: " + subtype + ", token: " + token)
                 return
 
             else:
+              self.zero.current.index.reset ()
               self.logger.error ("[Protocol] Unknown subtype for message: " + str(buf))
               return
 
@@ -244,24 +271,53 @@ class Protocol:
                 elif (tokeni == 5):
                   self.zero.current.ad.ad_config = token
                   self.zero.current.ad.ad_status ()
+                  self.zero.current.index.gotstatus ()
                   return
                 else:
+                  self.zero.current.index.reset ()
                   self.logger.error ("[Protocol] Too many tokens for message: " + msgtype + ", subtype: " + subtype)
                   return
               except ValueError:
+                self.zero.current.index.reset ()
                 self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
                 return
 
             elif (subtype == 'D'):
               if (tokeni == 2):
                 try:
+                  self.zero.current.ad.ad_batch_id = int (token)
+                except ValueError:
+                  self.zero.current.index.reset ()
+                  self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
+                  return
+
+              elif (tokeni == 3):
+                try:
+                  self.zero.current.ad.ad_refno = int (token)
+                except ValueError:
+                  self.zero.current.index.reset ()
+                  self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
+                  return
+
+              elif (tokeni == 4):
+                try:
+                  self.zero.current.ad.ad_start = int (token)
+                except ValueError:
+                  self.zero.current.index.reset ()
+                  self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
+                  return
+
+              elif (tokeni == 5):
+                try:
                   self.zero.current.ad.ad_k_samples = int (token)
                 except ValueError:
+                  self.zero.current.index.reset ()
                   self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
                   return
 
                 if (self.zero.current.ad.ad_k_samples > self.zero.current.ad.AD_K_SAMPLES_MAX):
                   self.logger.error ("[Protocol] Too large batch, resetting protocol.")
+                  self.zero.current.index.reset ()
                   self.a_receive_state = 0
                 else:
 
@@ -269,17 +325,19 @@ class Protocol:
                   self.zero.current.ad.ad_samples = ''
                   self.a_receive_state = 4
 
-              elif (tokeni == 3):
+              elif (tokeni == 6):
                 try:
                   self.zero.current.ad.ad_reference = int (token)
                 except ValueError:
+                  self.zero.current.index.reset ()
                   self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
                   return
 
-              elif (tokeni == 4):
+              elif (tokeni == 7):
                 try:
                   self.zero.current.ad.ad_reference_status = int (token)
                 except ValueError:
+                  self.zero.current.index.reset ()
                   self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
                   return
 
@@ -287,11 +345,13 @@ class Protocol:
                 return
 
               else:
+                self.zero.current.index.reset ()
                 self.logger.error ("[Protocol] Too many tokens for message: " + msgtype + ", subtype: " + subtype)
                 return
 
             elif (subtype == 'DE'):
               if not self.waitforreceipt:
+                self.zero.current.index.reset ()
                 self.logger.error ("[Protocol] Got end of batch data without getting data first.")
                 self.zero.current.ad.ad_k_samples = 0
                 self.zero.current.ad.ad_reference = 0
@@ -307,6 +367,7 @@ class Protocol:
               return
 
             else:
+              self.zero.current.index.reset ()
               self.logger.error ("[Protocol] Unknown subtype for message: " + str(buf))
               return
 
@@ -317,32 +378,75 @@ class Protocol:
             if subtype == 'S':
               self.znaddress = token
               try:
-                self.logger.info ("[ZeroNode] Current node address: " + hex2(ord(token[0])) + ":" + hex2(ord(token[1])) + ":" + hex2(ord(token[2])))
+                if len(token) == 3:
+                  self.logger.info ("[ZeroNode] Current node address: " + hex2(ord(token[0])) + ":" + hex2(ord(token[1])) + ":" + hex2(ord(token[2])))
+                else:
+                  self.logger.info ("[ZeroNode] No current address.")
               except:
                 self.logger.exception ("[ZeroNode] Current node address (un-parseable): " + str(token))
               return
 
+        elif (msgtype == 'LID'):
+          if (tokeni == 1):
+            try:
+              self.zero.current.index.gotlastid (int(token))
+            except ValueError:
+              self.zero.current.index.reset ()
+              self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
+              return
+
+        elif (msgtype == 'IDS'):
+          if (tokeni == 1):
+            self.tokens[0] = token
+
+          elif (tokeni == 2):
+            try:
+              self.zero.current.index.gotids (int(self.tokens[0]), int(token))
+            except ValueError:
+              self.zero.current.index.reset ()
+              self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
+              return
+
+        elif (msgtype == 'IND'):
+          if (tokeni == 1):
+            self.tokens[0] = token
+
+          elif (tokeni == 2):
+            self.tokens[1] = token
+
+          elif (tokeni == 3):
+            try:
+              self.zero.current.index.gotid (int(self.tokens[0]), int(self.tokens[1]), int(token))
+            except ValueError:
+              self.zero.current.index.reset ()
+              self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
+              return
+
         elif (msgtype == 'DBG'):
           if (tokeni == 1):
-            self.logger.info ("[Buoy] " + token)
+            self.logger.info ("[Buoy] [DBG] " + token)
 
         elif (msgtype == 'DBGZ'):
           if (tokeni == 1):
-            self.logger.info ("[ZeroNode] " + token)
+            self.logger.info ("[ZeroNode] [DBG] " + token)
 
         elif (msgtype == 'ERR'):
+          self.zero.current.index.reset ()
           if (tokeni == 1):
             try:
               self.logger.error ("[Buoy] Received error: [" + token + "] " + Buoy.error_strings[int(token)])
             except ValueError:
               self.logger.error ("[Buoy] Received error: [" + token + "]")
               self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
+              return
 
         else:
+          self.zero.current.index.reset ()
           self.logger.error ("[Protocol] Unknown message: " + str(buf))
           return
 
       tokeni += 1
+  # }}}
 
-
+# }}}
 

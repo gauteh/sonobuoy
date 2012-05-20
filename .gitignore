@@ -13,6 +13,7 @@ buoy/build
 *.pyc
 zero/storereader/storereader
 zero/storereader/data/*
+zero/log
 *.DAT
 *.LOG
 *.LON

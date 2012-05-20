@@ -46,13 +46,24 @@ class zCLI:
 
     self.go ()
 
-  def rollfile (self):
-    print "Rolling file.."
-    self.z.rollfile()
-
   def getstatus (self):
     print "Getting status..",
     self.z.getstatus ()
+    print "done."
+
+  def resetbuoy (self):
+    print "Resetting current buoy..",
+    self.z.resetbuoy ()
+    print "done."
+
+  def getlatestbatch (self):
+    print "Getting latest batch..",
+    self.z.getlatestbatch ()
+    print "done."
+
+  def getids (self, start):
+    print "Getting ids..",
+    self.z.getids (start)
     print "done."
 
   def zngetstatus (self):
@@ -62,7 +73,10 @@ class zCLI:
 
   def znportalmode (self):
     print "Setting zeronode in portal mode and stopping zero.."
-    self.m.znportalmode ()
+    try:
+      self.m.znportalmode ()
+    except:
+      os._exit (1)
 
   def znconnect (self):
     print "Requesting Zero node to connect to buoy node.."
@@ -96,7 +110,7 @@ class zCLI:
         t.add_row ([("X" if s[0] else ""),] + s[1:5] + [f,] + [s[6]])
     except:
       print "Error: Lost connection to Zero"
-      sys.exit (1)
+      os._exit (1)
 
     print t.draw ()
 
@@ -104,7 +118,7 @@ class zCLI:
       print "Total: ", self.z.bouy_count ()
     except:
       print "Error: Lost connection to Zero"
-      sys.exit (1)
+      os._exit (1)
 
   def show (self, b):
     t = Texttable ()
@@ -114,9 +128,7 @@ class zCLI:
     except Exception as e:
       print "Error: Lost connection to Zero"
       self.r_monitor = False
-      #self.m.close ()
-      sys.exit (1)
-      throw (e)
+      os._exit (1)
 
     if s is None:
       print "Error: No such buoy."
@@ -153,28 +165,44 @@ class zCLI:
     print "Stopping Zero Manager.."
     try:
       self.m.stop ()
-      #self.z.stop ()
     except:
-      print "Error: Lost connection to Zero."
-      sys.exit (1)
+      os._exit (1)
+
+  def startacquire (self):
+    print "Starting continuous transmission from buoys.."
+    self.z.startacquire ()
+
+  def stopacquire (self):
+    print "Stopping continuous transmission from buoys.."
+    self.z.stopacquire ()
 
   ''' Usage output '''
   def help (self):
     print ""
     print "Usage: ", sys.argv[0] + " command [arguments]"
     print ""
-    print "Commands:"
+    print "=> Data commands:"
     print "summary                  Print summary of connected nodes"
     print "show [buoy name]         Show detailed information about buoy"
     print "monitor [buoy name]      Regularily print information about buoy"
-    print "rollfile                 Roll data file on all buoys"
+    print ""
+    print "=> Buoy commands:"
     print "getstatus                Request status from current buoy"
+    print "getlatestbatch           Request latest batch from current buoy"
+    print "getids [start]           Get ids"
+    print "reset                    Reset CPU card on current buoy"
+    print ""
+    print "=> ZeroNode commands:"
     print "zngetstatus              Request status from zero node"
     print "znportalmode             Put zeronode in portal mode and exit zero"
     print "znaddress                Set address of zeronode to current buoy"
     print "znconnect                Connect to currently specified address"
     print "znoutputuart             Configure output of Zero to go to uart"
     print "znoutputwireless         Configure output of Zero to go to wireless"
+    print ""
+    print "=> Zero Manager commands:"
+    print "stopacquire              Stop continuous data transmission from buoys"
+    print "startacquire             Start contnuous data transmission from buoys"
     print "stop                     Stop Zero Manager"
 
   def go (self):
@@ -188,14 +216,23 @@ class zCLI:
     if sys.argv[1] == 'summary':
       self.summary ()
 
-    elif sys.argv[1] == 'rollfile':
-      self.rollfile ()
-
     elif sys.argv[1] == 'getstatus':
       self.getstatus ()
 
+    elif sys.argv[1] == 'getlatestbatch':
+      self.getlatestbatch ()
+
+    elif sys.argv[1] == 'getids':
+      if len(sys.argv) != 3:
+        print "Error: Must specify starting id."
+        return
+      self.getids (int(sys.argv[2]))
+
     elif sys.argv[1] == 'zngetstatus':
       self.zngetstatus ()
+
+    elif sys.argv[1] == 'reset':
+      self.resetbuoy ()
 
     elif sys.argv[1] == 'znportalmode':
       self.znportalmode ()
@@ -228,6 +265,14 @@ class zCLI:
 
     elif sys.argv[1] == 'stop':
       self.stop ()
+      return
+
+    elif sys.argv[1] == 'startacquire':
+      self.startacquire ()
+      return
+
+    elif sys.argv[1] == 'stopacquire':
+      self.stopacquire ()
       return
 
     elif sys.argv[1] == 'help' or sys.argv[1] == '--help':

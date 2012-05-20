@@ -2,6 +2,9 @@
 
 SOURCES = buoy.cpp \
 					ads1282.cpp \
+					store.cpp \
+					gps.cpp \
+					rf.cpp \
 					main.cpp
 
 .DEFAULT_GOAL := sketch
@@ -35,7 +38,7 @@ PRODUCT_ID := 0003
 
 # Try "make help" for more information on BOARD and MEMORY_TARGET;
 # these default to a Maple Flash build.
-BOARD ?= maple
+BOARD ?= olimex_stm32_h103
 MEMORY_TARGET ?= flash
 
 # $(BOARD)- and $(MEMORY_TARGET)-specific configuration
@@ -53,7 +56,8 @@ GLOBAL_FLAGS    := -D$(VECT_BASE_ADDR)					     \
 		   -DERROR_LED_PORT=$(ERROR_LED_PORT)			     \
 		   -DERROR_LED_PIN=$(ERROR_LED_PIN)			     \
 		   -D$(DENSITY)															 \
-			 -DGIT_DESC=$(GIT_DESC)
+			 -DGIT_DESC=$(GIT_DESC) \
+			 -DUSART_SAFE_INSERT
 GLOBAL_CFLAGS   := -Os -g3 -gdwarf-2  -mcpu=cortex-m3 -mthumb -march=armv7-m \
 		   -nostdlib -ffunction-sections -fdata-sections	     \
 		   -Wl,--gc-sections $(GLOBAL_FLAGS)

@@ -5,35 +5,37 @@
  *
  */
 
-# include "buoy.h"
-
 # include <stdint.h>
+# include <stdlib.h>
+
+# include "buoy.h"
 
 # include "wirish.h"
 
 # include "ads1282.h"
 # include "rf.h"
 # include "gps.h"
-//# include "store.h"
+# include "store.h"
 
 namespace Buoy {
-  BuoyMaster::BuoyMaster () {
-
-  }
-
   void BuoyMaster::main () {
-    delay (3000); // time to connect with serial before starting..
     setup ();
 
+    uint32_t lasts = 0;
 
     while (true) {
-      //gps->loop ();
+      gps->loop ();
       ad->loop ();
-      //rf->loop ();
-      //store->loop ();
+      store->loop ();
+      rf->loop ();
 
-      SerialUSB.println ("loop");
-      delay (1000);
+      if (millis () - lasts >= 1000) {
+        SerialUSB.print ("V ");
+        SerialUSB.println (ad->value);
+        //ad->print_status ();
+        //gps->print_status ();
+        lasts = millis ();
+      }
     }
   }
 
@@ -44,35 +46,42 @@ namespace Buoy {
 
     //SerialUSB.begin ();
 
+    pinMode (13, OUTPUT);
+    pinMode (3, OUTPUT);
+    digitalWrite (3, LOW);
     /* Count down.. */
 
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 3; i++) {
       SerialUSB.print ("Starting soon: ");
       SerialUSB.println (i);
       delay(1000);
+      //togglePin (3);
     }
 
+
+    //SerialUSB.println ("[**] Gautebøye 1 [" BUOY_NAME "] version: " GIT_DESC);
+
     /* Set up devices */
-    //rf    = new RF ();
-    //gps   = new GPS ();
+    rf    = new RF ();
+    gps   = new GPS ();
+    store = new Store ();
     ad    = new ADS1282 ();
-    //store = new Store ();
 
-    //rf->setup     (this);
-    //gps->setup    (this);
+    rf->setup     (this);
+    gps->setup    (this);
     ad->setup     (this);
-    //store->setup  (this);
+    store->setup  (this);
 
+# if DEBUG_INFO
     /* Start reading data continuously and writing to SD card */
     SerialUSB.println ("[Buoy] Initiating continuous transfer and write.");
+# endif
 
-    /*
-    ad->start_continuous_read ();
     store->start_continuous_write ();
-    */
+    ad->start_continuous_read ();
   }
 
-  int itoa (uint32_t n, uint8_t base, char *buf)
+  int itoa (uint32_t n, uint8_t base, char *buf) // {{{
   {
     unsigned long i = 0;
 
@@ -82,7 +91,7 @@ namespace Buoy {
 
     while (n > 0) {
       buf[i] = (n % base);
-      buf[i]  += (buf[i] < 10 ? '0' : 'A');
+      buf[i] += (buf[i] < 10 ? '0' : 'A');
       n /= base;
       i++;
     }
@@ -90,17 +99,52 @@ namespace Buoy {
     /* swap */
     i--;
     char c;
-    while ( n < (i/2) ) {
-      c = buf[i-n];
-      buf[i-n] = buf[n];
-      buf[n] = c;
+    while (n <= (i/2)) {
+      c         = buf[i-n];
+      buf[i-n]  = buf[n];
+      buf[n]    = c;
 
       n++;
     }
 
     buf[++i] = 0;
     return i;
+  } // }}}
+
+  /* Checksum {{{ */
+  byte gen_checksum (const char *buf)
+  {
+  /* Generate checksum for NULL terminated string */
+
+    byte csum = 0;
+    buf++; // skip $
+
+    while (*buf != '*' && *buf != 0) {
+      csum = csum ^ ((byte)*buf);
+      buf++;
+    }
+
+    return csum;
   }
+
+  bool test_checksum (const char *buf)
+  {
+    /* Input: String including $ and * with HEX decimal checksum
+     *        to test. NULL terminated.
+     */
+    uint32_t tsum = 0;
+    buf++; // skip $
+    while (*buf != '*' && *buf != 0) {
+      tsum = tsum ^ (uint8_t)*buf;
+      buf++;
+    }
+    buf++;
+
+    uint16_t csum = 0;
+    csum = strtoul (buf, NULL, 16); // buf now points to first digit of CS
+
+    return tsum == csum;
+  } // }}}
 }
 
 /* vim: set filetype=arduino :  */

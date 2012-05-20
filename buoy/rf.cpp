@@ -28,14 +28,11 @@ namespace Buoy {
   }
 
   void RF::setup (BuoyMaster *b) {
-    ad  = b->ad;
-    gps = b->gps;
+    ad    = b->ad;
+    gps   = b->gps;
     store = b->store;
 
     RF_Serial.begin (RF_BAUDRATE);
-
-    /* Send greeting */
-    send_debug ("[Buoy] Initializing Gautebuoy [ " STRINGIFY(BUOY_ID) ": " BUOY_NAME " ] ( version " VERSION " )");
   }
 
   void RF::loop () {
@@ -50,33 +47,31 @@ namespace Buoy {
      */
     static int state = 0;
 
-    int ca = RF_Serial.available ();
-
-    while (ca > 0) {
+    while (RF_Serial.available () > 0) {
       char c = (char)RF_Serial.read ();
-# if DIRECT_SERIAL
-      SerialUSB.print (c);
-# endif
+      //SerialUSB.println (c);
 
       if (rf_buf_pos >= RF_SERIAL_BUFLEN) {
-        state = 0;
-        rf_buf_pos = 0;
+        state       = 0;
+        rf_buf_pos  = 0;
+        return;
       }
 
       switch (state)
       {
         case 0:
           if (c == '$') {
-            rf_buf[0] = '$';
-            rf_buf_pos = 1;
-            state = 1;
+            rf_buf[0]   = '$';
+            rf_buf_pos  = 1;
+            state       = 1;
           }
           break;
 
         case 2:
           state = 3;
         case 1:
-          if (c == '*') state = 2;
+          if (c == '*')
+            state = 2;
 
           rf_buf[rf_buf_pos] = c;
           rf_buf_pos++;
@@ -88,17 +83,18 @@ namespace Buoy {
           rf_buf[rf_buf_pos] = 0;
 
           parse (); // Complete telegram received
-          rf_buf_pos = 0;
-          state = 0;
+          rf_buf_pos  = 0;
+          state       = 0;
+          return;
           break;
 
         /* Should not be reached. */
         default:
-          state = 0;
+          state       = 0;
+          rf_buf_pos  = 0;
+          return;
           break;
       }
-
-      ca--;
     }
 
     /* }}} Done telegram handler */
@@ -110,22 +106,24 @@ namespace Buoy {
      *
      *
      */
-    SerialUSB.print ("Parsing..:");
-    SerialUSB.println (rf_buf);
+    //SerialUSB.print ("Parsing..:");
+    //SerialUSB.println (rf_buf);
 
     RF_TELEGRAM type = UNSPECIFIED;
     int tokeni = 0;
-    int len    = rf_buf_pos; // Excluding NULL terminator
+    int len    = rf_buf_pos - 1; // Excluding NULL terminator
     int i      = 0;
 
     /* Test checksum before parsing */
-    if (!test_checksum (rf_buf)) goto cmderror;
-
-    SerialUSB.println ("Checksum OK");
+    if (!test_checksum (rf_buf)) {
+      send_error (E_BADCOMMAND);
+      return;
+    }
 
     /* Parse */
     while (i < len)
     {
+      //SerialUSB.println ("nc");
       /*
       uint32_t ltmp = 0;
       uint32_t remainder = 0;
@@ -135,6 +133,7 @@ namespace Buoy {
       int j = 0;
       /* Get next token */
       while ((rf_buf[i] != ',' && rf_buf[i] != '*') && i < len) {
+        //SerialUSB.println ("nt");
         token[j] = rf_buf[i];
 
         i++;
@@ -143,8 +142,8 @@ namespace Buoy {
       i++; /* Skip delimiter */
 
       token[j] = 0;
-# if DIRECT_SERIAL
-      SerialUSB.print ("Token: ");
+# if DEBUG_VERB
+      SerialUSB.print ("T ");
       SerialUSB.print (tokeni);
       SerialUSB.println (token);
 # endif
@@ -153,12 +152,12 @@ namespace Buoy {
         if (tokeni == 0) {
           /* Determine telegram type */
           if (strcmp(token, "$GS") == 0) {
-            type = GETSTATUS;
-            goto simpleparser;
+            simple_parser (GETSTATUS);
+            return;
           }
           else if (strcmp(token, "$GLID") == 0) {
-            type = GETLASTID;
-            goto simpleparser;
+            simple_parser (GETLASTID);
+            return;
           }
           else if (strcmp(token, "$GIDS") == 0)
             type = GETIDS;
@@ -168,7 +167,7 @@ namespace Buoy {
             type = GETBATCH;
           else {
             /* Cancel parsing */
-# if DIRECT_SERIAL
+# if DEBUG_VERB
             SerialUSB.print ("Unknown command: ");
             SerialUSB.println (token);
 # endif
@@ -187,7 +186,10 @@ namespace Buoy {
                 case 1:
                   {
                   id = atoi (token);
-                  if (id < 1) goto cmderror;
+                  if (id < 1) {
+                    send_error (E_BADCOMMAND);
+                    return;
+                  }
 
                   store->send_indexes (id, GET_IDS_N);
                   }
@@ -204,7 +206,10 @@ namespace Buoy {
                 case 1:
                   {
                   id = atoi (token);
-                  if (id < 1) goto cmderror;
+                  if (id < 1) {
+                    send_error (E_BADCOMMAND);
+                    return;
+                  }
 
                   store->send_index (id);
                   }
@@ -220,28 +225,40 @@ namespace Buoy {
                 case 1:
                   {
                   id = atoi (token);
-                  if (id < 1) goto cmderror;
+                  if (id < 1 || id > MAX_SANE_ID) {
+                    send_error (E_BADCOMMAND);
+                    return;
+                  }
                   }
                   break;
 
                 case 2:
                   {
                   ref = atoi (token);
-                  if (ref < 1) goto cmderror;
+                  if (ref > MAX_SANE_REF) {
+                    send_error (E_BADCOMMAND);
+                    return;
+                  }
                   }
                   break;
 
                 case 3:
                   {
                   sample = atoi (token);
-                  if (sample < 1) goto cmderror;
+                  if (sample > MAX_SANE_SAMPLE) {
+                    send_error (E_BADCOMMAND);
+                    return;
+                  }
                   }
                   break;
 
                 case 4:
                   {
                   length = atoi (token);
-                  if (length < 1) goto cmderror;
+                  if (length > MAX_SANE_LENGTH) {
+                    send_error (E_BADCOMMAND);
+                    return;
+                  }
 
                   store->send_batch (id, ref, sample, length);
                   }
@@ -262,15 +279,18 @@ namespace Buoy {
       tokeni++;
     }
     return;
+    /* Done parser }}} */
+  }
 
-    /* Single token commands */
-simpleparser:
+  void RF::simple_parser (RF_TELEGRAM type) {
+    /* Single token commands  {{{ */
+    //SerialUSB.println ("[RF] simplep");
     switch (type) {
       // GETSTATUS {{{
       case GETSTATUS:
         // $GPS,S,[lasttype],[telegrams received],[lasttelegram],Lat,Lon,unixtime,time,date,Valid,HAS_TIME,HAS_SYNC,HAS_SYNC_REFERENCE*CS
         // Valid: Y = Yes, N = No
-        SerialUSB.println ("[RF] Sending status..");
+        //SerialUSB.println ("[RF] Sending status..");
         RF_Serial.print ("$GPS,S,");
         RF_Serial.print (gps->lasttype);
         RF_Serial.print (",");
@@ -314,8 +334,8 @@ simpleparser:
         RF_Serial.print (ad->batchfilltime);
         RF_Serial.print (",");
         RF_Serial.print (ad->value);
-        RF_Serial.print (",0");
-        //RF_Serial.print (ad->reg.raw[1]);
+        RF_Serial.print (",");
+        RF_Serial.print (ad->reg.raw[1]);
         RF_Serial.println ("*NN");
 
         /*
@@ -335,15 +355,7 @@ simpleparser:
       default: break;
     }
     return;
-
-cmderror:
-# if DIRECT_SERIAL
-    SerialUSB.println ("[RF] E_BADCOMMAND");
-# endif
-    send_error (E_BADCOMMAND);
-    return;
-
-    /* Done parser }}} */
+    // }}}
   }
 
   /* Debug and error messages {{{ */
@@ -351,6 +363,11 @@ cmderror:
     RF_Serial.print ("$ERR,");
     RF_Serial.print (code, DEC);
     RF_Serial.println ("*NN");
+
+# if DEBUG_WARN
+    SerialUSB.print ("[RF] [Error] ");
+    SerialUSB.println (code);
+# endif
     /*
     sprintf (buf, "$ERR,%d*", code);
     APPEND_CSUM (buf);
@@ -377,41 +394,6 @@ cmderror:
     RF_Serial.print   (cs>>4, HEX);
     RF_Serial.println (cs&0xf, HEX);
     */
-  } // }}}
-
-  /* Checksum {{{ */
-  byte RF::gen_checksum (const char *buf)
-  {
-  /* Generate checksum for NULL terminated string */
-
-    byte csum = 0;
-    buf++; // skip $
-
-    while (*buf != '*' && *buf != 0) {
-      csum = csum ^ ((byte)*buf);
-      buf++;
-    }
-
-    return csum;
-  }
-
-  bool RF::test_checksum (const char *buf)
-  {
-    /* Input: String including $ and * with HEX decimal checksum
-     *        to test. NULL terminated.
-     */
-    uint32_t tsum = 0;
-    buf++; // skip $
-    while (*buf != '*' && *buf != 0) {
-      tsum = tsum ^ (uint8_t)*buf;
-      buf++;
-    }
-    buf++;
-
-    uint16_t csum = 0;
-    csum = strtoul (buf, NULL, 16); // buf now points to first digit of CS
-
-    return tsum == csum;
   } // }}}
 }
 

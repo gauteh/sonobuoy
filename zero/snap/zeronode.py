@@ -34,7 +34,10 @@ def connect_buoy ():
   global buoyaddress
   ucastSerial (buoyaddress)
 
-
+def reset_buoy ():
+  global buoyaddress
+  rpc (buoyaddress, 'reset_maple')
+  
 # state, 0 = waiting for start of command, '$'
 #        1 = recording command, waiting for *
 #        2 = waiting for first CS digit
@@ -109,6 +112,7 @@ def parse ():
   # $ZT*           : Connect stdout to transparent
   # $ZU*           : Connect stdout to uart1
   # $ZC*           : Connect to previously specified address
+  # $ZR*           : Reset current buoy
   c = -1
 
   while i < l:
@@ -144,6 +148,9 @@ def parse ():
       elif token == '$ZS':
         print "$Z,S," + buoyaddress + "*NN"
         
+        return
+      elif token == '$ZR':
+        reset_buoy ()
         return
       else:
         # Not zeronode command, relay to buoy

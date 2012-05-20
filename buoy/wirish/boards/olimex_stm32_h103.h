@@ -37,36 +37,36 @@
 #define CYCLES_PER_MICROSECOND  72
 #define SYSTICK_RELOAD_VAL      71999 /* takes a cycle to reload */
 
-#define BOARD_BUTTON_PIN        23
-#define BOARD_LED_PIN           7
+#define BOARD_BUTTON_PIN        38 
+#define BOARD_LED_PIN           13 
 
 /* Number of USARTs/UARTs whose pins are broken out to headers */
 #define BOARD_NR_USARTS         3
 
 /* Default USART pin numbers (not considering AFIO remap) */
-#define BOARD_USART1_TX_PIN     3
-#define BOARD_USART1_RX_PIN     4
-#define BOARD_USART2_TX_PIN     24
-#define BOARD_USART2_RX_PIN     27
-#define BOARD_USART3_TX_PIN     31
-#define BOARD_USART3_RX_PIN     32
+#define BOARD_USART1_TX_PIN     7
+#define BOARD_USART1_RX_PIN     8
+#define BOARD_USART2_TX_PIN     1 
+#define BOARD_USART2_RX_PIN     0 
+#define BOARD_USART3_TX_PIN     29 
+#define BOARD_USART3_RX_PIN     30
 
 /* Number of SPI ports */
 #define BOARD_NR_SPI            2
 
 /* Default SPI pin numbers (not considering AFIO remap) */
-#define BOARD_SPI1_NSS_PIN      28
-#define BOARD_SPI1_MOSI_PIN     19
-#define BOARD_SPI1_MISO_PIN     11
-#define BOARD_SPI1_SCK_PIN      15
-#define BOARD_SPI2_NSS_PIN      34
-#define BOARD_SPI2_MOSI_PIN     36
-#define BOARD_SPI2_MISO_PIN     35
-#define BOARD_SPI2_SCK_PIN      33
+#define BOARD_SPI1_NSS_PIN      10 
+#define BOARD_SPI1_MOSI_PIN     11
+#define BOARD_SPI1_MISO_PIN     12
+#define BOARD_SPI1_SCK_PIN      13
+#define BOARD_SPI2_NSS_PIN      31 
+#define BOARD_SPI2_MOSI_PIN     34
+#define BOARD_SPI2_MISO_PIN     33
+#define BOARD_SPI2_SCK_PIN      32
 
 /* Total number of GPIO pins that are broken out to headers and
  * intended for general use. */
-#define BOARD_NR_GPIO_PINS      46
+#define BOARD_NR_GPIO_PINS      44
 
 /* Number of pins capable of PWM output */
 #define BOARD_NR_PWM_PINS       16
@@ -87,6 +87,6 @@
 
 /* USB configuration */
 #define BOARD_USB_DISC_DEV      GPIOC
-#define BOARD_USB_DISC_BIT      11
+#define BOARD_USB_DISC_BIT      12
 
 #endif

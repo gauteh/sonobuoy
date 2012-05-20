@@ -28,8 +28,8 @@ namespace Buoy {
 
 # elif BBOARD == 1
 
-# define GPS_Serial Serial1
-# define GPS_SYNC_PIN 30 // Should be 5V tolerant
+# define GPS_Serial Serial3
+# define GPS_SYNC_PIN 2 // Should be 5V tolerant
 
 # endif
 
@@ -83,10 +83,14 @@ namespace Buoy {
       uint8_t   mode1;
       uint8_t   mode2;
       */
+      // }}}
 
       GPS ();
       void        setup (BuoyMaster *);
       void        loop  ();
+# if DEBUG_VERB
+      void        print_status ();
+# endif
 
       static void sync_pulse_int ();
       void        sync_pulse ();

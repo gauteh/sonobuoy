@@ -32,8 +32,14 @@
 # include "types.h"
 
 /* Print debug messages to USB serial */
-# define DIRECT_SERIAL 1
+# define DEBUG_VERB    0
+# define DEBUG_INFO    0
+# define DEBUG_WARN    1
 # define DEBUG_SD      0 // enable debug error messages on SdFat
+
+// Enable sections in dependant classes
+# define HASRF  1
+# define HASGPS 1
 
 /* Define board, 0 = maple_native, 1 = olimexino/maple (should be
  * compatible with BOARD in Makefile) */
@@ -46,12 +52,11 @@
 namespace Buoy {
   class BuoyMaster {
     public:
-      /*GPS       *gps;*/
+      GPS       *gps;
       ADS1282   *ad;
-      /*RF        *rf;*/
-      /*Store     *store;*/
+      RF        *rf;
+      Store     *store;
 
-      BuoyMaster ();
       void main ();
 
     private:
@@ -59,6 +64,9 @@ namespace Buoy {
   };
 
   int itoa (uint32_t, uint8_t, char *);
+  byte gen_checksum (const char *);
+  bool test_checksum (const char *);
+  //void append_checksum (char *);
 
   /* Globally available instance of BuoyMaster (i.e. for statical interrupt
    * handlers). */
