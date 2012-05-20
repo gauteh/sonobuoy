@@ -106,7 +106,7 @@ namespace Buoy {
         E_NOSUCHREF,
         E_NOSUCHSAMPLE,
         E_NOSUCHDAT,
-        E_BADDTT,
+        E_BADDAT,
       } RF_ERROR;
 
       RF ();

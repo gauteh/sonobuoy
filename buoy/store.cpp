@@ -723,7 +723,7 @@ namespace Buoy {
 
       if (_refno != refno) {
         SerialUSB.println ("nrf");
-        rf->send_error (RF::E_BADDTT);
+        rf->send_error (RF::E_BADDAT);
       }
     }
 
@@ -799,7 +799,7 @@ namespace Buoy {
     */
 
     if (bad) {
-      rf->send_error (RF::E_BADDTT);
+      rf->send_error (RF::E_BADDAT);
     }
 
     /* If this was the last sample, close file. */
