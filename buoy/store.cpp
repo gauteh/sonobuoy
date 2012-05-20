@@ -778,7 +778,8 @@ namespace Buoy {
         csum = csum ^ ((byte*)&s)[3];
 
       } else {
-        RF_Serial.write ('0');
+        for (int i = 0; i < 4; i++)
+          RF_Serial.write ((byte)0); // write 0's to complete the batch in case of error
       }
 
       delayMicroseconds (100);
@@ -787,7 +788,7 @@ namespace Buoy {
     /* Send end of data with Checksum */
     RF_Serial.print   ("$AD,DE,");
     if (bad)
-      RF_Serial.print ("XX");
+      RF_Serial.print ("XX"); // make sure cheksum does not validate in case of error
     else
       RF_Serial.print   (csum, HEX);
     RF_Serial.println ("*NN");
