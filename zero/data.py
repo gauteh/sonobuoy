@@ -53,7 +53,9 @@ class Data:
   indexf_uri  = None
   dataf_uri   = None
   indexf      = None # Index file for this data segment (refs + meta)
+  indexf_l    = threading.Lock ()
   dataf       = None # Samples with refs
+  dataf_l     = threading.Lock ()
 
   hasfull     = False # Has complete index been received
   hasalldata  = False # Has all data been received
@@ -77,7 +79,6 @@ class Data:
 
     self.logger.debug (self.me + " Initializing (enabled: " + str(self.enabled) + ")")
     self.read_index ()
-    self.read_data  ()
 
   ''' Read index file and figure out meta data and existing refs {{{
 
@@ -123,6 +124,7 @@ class Data:
 
   def write_index (self):
     if self.enabled:
+      self.indexf_l.acquire ()
       self.batches = sorted (self.batches, key = lambda r: r.no)
       self.indexf = open (self.indexf_uri, 'w') # truncate file
       self.indexf.write (str(self.id) + '\n')
@@ -137,102 +139,114 @@ class Data:
         self.indexf.write ('\n')
 
       self.indexf.close ()
+      self.indexf_l.release ()
   # }}}
-
-  ''' Read data file and figure out which refs are complete '''
-  def read_data (self):
-    if self.enabled:
-      if os.path.exists (self.dataf_uri):
-        self.dataf = open (self.dataf_uri, 'r')
-
-        # Scan for references
-        n = 0
-        for l in self.dataf.readlines ():
-          if l[0] == 'R':
-            s     = l.split (',')
-            bl    = int(s[1])
-            refno = int(s[2])
-            ref   = int(s[3])
-            stat  = int(s[4])
-
-            self.logger.debug (self.me + " Found ref no: " + str(refno) + " at " + str(n))
-            self.batches[self.indexofbatch (refno)].line = n
-
-          n = n + 1 # line no
 
   def got_chunk (self, refno, start, length, reference, status, samples):
     if self.enabled:
+      self.dataf_l.acquire ()
       b = None
       i = self.indexofbatch (refno)
 
-      first_on_batch = False
+      fresh_batch = False
 
-      # on new batch
       if i is None:
+        # on new batch
         b = Batch (refno, 0, 0, 0)
         self.batches.append (b)
         self.batches = sorted (self.batches, key = lambda r: r.no)
-        first_on_batch = True
+        fresh_batch = True
       else:
+        # on existing batch
         b = self.batches[i]
 
-      # mark chunk complete
       thischunk = start / CHUNK_SIZE
-      b.completechunks.append (thischunk)
 
       # if first sample on ref, ref has been included
       if start == 0:
         b.ref    = reference
         b.status = status
 
-      # write out updated data file
+      # read existing chunks
       lines = []
       if os.path.exists (self.dataf_uri):
         self.dataf = open (self.dataf_uri, 'r')
         lines = self.dataf.readlines ()
         self.dataf.close ()
 
+      # write out updated data file
       self.dataf = open (self.dataf_uri, 'w')
-      n = 0
+      self.dataf.truncate (0)
+      self.dataf.flush ()
+
       thischunk_written = False
 
-      for bb in self.batches:
-        if bb is not b:
-          self.dataf.write (lines[bb.line] + '\n') # write ref
+      n = 0
+      bi = 0
+      while bi < len(self.batches):
+        # on this batch
+        if self.batches[bi].no == b.no:
+          self.batches[bi].line = n
 
-          # write chunks
-          for l in lines[bb.line+1:(bb.line+1 + len(bb.completechunks) * CHUNK_SIZE)]:
-            self.dataf.write (l + '\n')
-
-          n = n + 1 + len(bb.completechunks) * CHUNK_SIZE
-
-          if thischunk_written:
-            bb.line = bb.line + CHUNK_SIZE # update line no of batch after
-                                           # new chunk.
-            if first_on_batch:
-              bb.line = bb.line + 1 # add line for ref if this is a new batch
-
-        else:
-          # on this batch
-          b.line = n
-
+          # (re)-write ref
           r = "R," + str(BATCH_LENGTH) + "," + str(b.no) + "," + str(b.ref) + "," + str(b.status)
           self.dataf.write (r + '\n')
+          
+          if not fresh_batch:
+            lines.pop (0)
 
-          if len(b.completechunks) > 1:
-            n = n + 1 # skip existing reference line
+          # write chunks
+          ci = 0
+          while ci < b.maxchunks:
+            # write this chunk
+            if not thischunk_written and thischunk == ci:
+              k = 0
+              print (len(samples))
+              while k < CHUNK_SIZE:
+                self.dataf.write (str(samples.pop(0)) + '\n')
+                k = k + 1
 
-          for c in b.completechunks:
-            if c == thischunk:
-              # on this chunk
-              for l in samples:
-                self.dataf.writelines (str(l) + '\n')
+              print (len(samples))
               thischunk_written = True
-            else:
-              self.dataf.writelines (lines[n:n + CHUNK_SIZE])
-              n = n + CHUNK_SIZE
 
+            # write existing chunks
+            elif ci in b.completechunks:
+              k = 0
+              while k < CHUNK_SIZE:
+                self.dataf.write (lines.pop (0))
+                k = k + 1
+
+            ci = ci + 1
+
+        else:
+          # on existing batch
+          # write ref
+          self.dataf.write (lines.pop (0))
+          n = n + 1
+
+          # write chunks
+          ci = 0
+          while ci < len(self.batches[bi].completechunks):
+            k = 0
+            while k < CHUNK_SIZE:
+              self.dataf.write (lines.pop (0))
+              n = n + 1
+              k = k + 1
+
+            ci = ci + 1
+
+          if thischunk_written:
+            self.batches[bi].line = self.batches[bi].line + CHUNK_SIZE
+            if fresh_batch:
+              self.batches[bi].line = self.batches[bi].line + 1
+
+        bi = bi + 1
+
+      self.dataf.flush ()
       self.dataf.close ()
+
+      # mark chunk complete
+      b.completechunks.append (thischunk)
 
       # check if batch is complete
       b.complete = (len(b.completechunks) == (BATCH_LENGTH / CHUNK_SIZE))
@@ -251,6 +265,7 @@ class Data:
 
       # write indexes
       self.write_index ()
+      self.dataf_l.release ()
 
     else:
       self.logger.error (self.me + " Tried to append chunk on disabled data file.")

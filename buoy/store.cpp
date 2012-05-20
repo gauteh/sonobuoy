@@ -720,11 +720,13 @@ namespace Buoy {
       send_d->read (reinterpret_cast<char*>(&ref), sizeof(ref));
       send_d->read (reinterpret_cast<char*>(&refstat), sizeof(refstat));
       send_d->seekCur (SD_REFERENCE_PADN * SAMPLE_LENGTH); // seek to first sample
+
+      if (_refno != refno) {
+        SerialUSB.println ("nrf");
+        rf->send_error (RF::E_BADDTT);
+      }
     }
 
-    if (_refno != refno) {
-      rf->send_error (RF::E_BADDTT);
-    }
 
     RF_Serial.print   ("$AD,D,");
     RF_Serial.print   (id);
