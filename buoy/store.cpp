@@ -757,37 +757,49 @@ namespace Buoy {
     byte csum = 0;
 
     int n = 0;
+    bool bad = false;
 
     for (uint32_t i = 0; i < length; i++)
     {
-      n = send_d->read (reinterpret_cast<char*>(&s), sizeof (uint32_t));
+      if (!bad) {
+        n = send_d->read (reinterpret_cast<char*>(&s), sizeof (uint32_t));
 
-      if (n != 4) {
-        rf->send_error (RF::E_BADDTT);
-        return;
+        if (n != 4) {
+          bad = true;
+        }
+
+        /* MSB first (big endian), means concatenating bytes on RX will
+         * result in LSB first; little endian. */
+        RF_Serial.write ((byte*)(&s), 4);
+
+        csum = csum ^ ((byte*)&s)[0];
+        csum = csum ^ ((byte*)&s)[1];
+        csum = csum ^ ((byte*)&s)[2];
+        csum = csum ^ ((byte*)&s)[3];
+
+      } else {
+        RF_Serial.write ('0');
       }
-
-      /* MSB first (big endian), means concatenating bytes on RX will
-       * result in LSB first; little endian. */
-      RF_Serial.write ((byte*)(&s), 4);
-
-      csum = csum ^ ((byte*)&s)[0];
-      csum = csum ^ ((byte*)&s)[1];
-      csum = csum ^ ((byte*)&s)[2];
-      csum = csum ^ ((byte*)&s)[3];
 
       delayMicroseconds (100);
     }
 
     /* Send end of data with Checksum */
     RF_Serial.print   ("$AD,DE,");
-    RF_Serial.print   (csum, HEX);
+    if (bad)
+      RF_Serial.print ("XX");
+    else
+      RF_Serial.print   (csum, HEX);
     RF_Serial.println ("*NN");
     /*
     sprintf (buf, "$AD,DE," F_CSUM "*", csum);
     APPEND_CSUM (buf);
     RF_Serial.println (buf);
     */
+
+    if (bad) {
+      rf->send_error (RF::E_BADDTT);
+    }
 
     /* If this was the last sample, close file. */
     if (((refno * BATCH_LENGTH) + start + length) > s_samples) {

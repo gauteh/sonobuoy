@@ -203,7 +203,7 @@ class Index:
 
   # State for keeping this buoys data uptodate
   state     = 0
-  timeout   = 30 # secs
+  timeout   = 3 # secs
   pendingid = 0  # automatic request last sent (in case manual request mess up the flooooow..)
   request_t = 0
 
@@ -353,5 +353,10 @@ class Index:
     self.gotids_n = 0
     self.status   = 0
     self.pendingids = 0
+
+    # reset protocol
+    self.protocol.a_receive_state = 0
+    self.protocol.a_buf = '' 
+    self.waitforreceipt = False
 
 
