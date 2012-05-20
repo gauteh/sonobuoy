@@ -179,7 +179,7 @@ class Index:
     if self.working_data.id == id:
       self.working_data.got_chunk (refno, start, length, ref, refstat, samples)
 
-    if self.pending == 5:
+    if self.pendingid == 5:
       self.state = 0
 
   status = 0
@@ -298,14 +298,25 @@ class Index:
                         return
                       jj = jj + 1
 
+                    # all chunks done on this batch
+
                 ii = ii + 1
 
+              # all batches done
+              self.logger.info (self.me + " Finished id: " + str(self.working_data.id))
+              self.working_data.hasalldata = True
+              self.working_data.write_index ()
+              self.working_data = None
+
             else:
+              self.logger.info (self.me + " Finished id: " + str(self.working_data.id))
+              self.working_data.hasalldata = True
+              self.working_data.write_index ()
               self.working_data = None
 
           elif self.lastid > 0 and self.greatestid == self.lastid and not self.__full_data_check_done__:
             # find latest id with missing index, refs or data
-            ii = self.greatestid
+            ii = self.lastid - 1
 
             while ii > 0:
               d  = None

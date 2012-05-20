@@ -199,7 +199,10 @@ class Data:
       for bb in self.batches:
         if bb is not b:
           self.dataf.write (lines[bb.line] + '\n') # write ref
-          self.dataf.writelines (lines[bb.line+1:(bb.line+1 + len(bb.completechunks) * CHUNK_SIZE)]) # write chunks
+
+          # write chunks
+          for l in lines[bb.line+1:(bb.line+1 + len(bb.completechunks) * CHUNK_SIZE)]:
+            self.dataf.write (l + '\n')
 
           n = n + 1 + len(bb.completechunks) * CHUNK_SIZE
 
@@ -222,8 +225,8 @@ class Data:
           for c in b.completechunks:
             if c == thischunk:
               # on this chunk
-              print samples
-              self.dataf.writelines (samples)
+              for l in samples:
+                self.dataf.writelines (str(l) + '\n')
               thischunk_written = True
             else:
               self.dataf.writelines (lines[n:n + CHUNK_SIZE])

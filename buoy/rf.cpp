@@ -366,7 +366,7 @@ namespace Buoy {
 
 # if DEBUG_WARN
     SerialUSB.print ("[RF] [Error] ");
-    SerialUSB.print (code);
+    SerialUSB.println (code);
 # endif
     /*
     sprintf (buf, "$ERR,%d*", code);

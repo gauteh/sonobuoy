@@ -91,7 +91,7 @@ namespace Buoy {
 
     while (n > 0) {
       buf[i] = (n % base);
-      buf[i]  += (buf[i] < 10 ? '0' : 'A');
+      buf[i] += (buf[i] < 10 ? '0' : 'A');
       n /= base;
       i++;
     }
@@ -99,10 +99,10 @@ namespace Buoy {
     /* swap */
     i--;
     char c;
-    while ( n < (i/2) ) {
-      c = buf[i-n];
-      buf[i-n] = buf[n];
-      buf[n] = c;
+    while (n <= (i/2)) {
+      c         = buf[i-n];
+      buf[i-n]  = buf[n];
+      buf[n]    = c;
 
       n++;
     }

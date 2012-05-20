@@ -118,7 +118,7 @@ class Zero:
       self.protocol.adressedbuoy = 0 # reset adressed buoy
       try:
         try:
-          self.ser = serial.Serial (port = self.port, baudrate = self.baud, timeout = 0)
+          self.ser = serial.Serial (port = self.port, baudrate = self.baud) #, timeout = 0)
           self.logger.info ("[Zero] Serial port open.")
         except serial.SerialException as e:
           if not msg:
@@ -169,7 +169,6 @@ class Zero:
             if self.current is not None:
               self.protocol.handle (r)
 
-            time.sleep (0.001)
 
         except serial.SerialException as e:
           self.logger.exception ("[Zero] Exception with serial link, reconnecting..: " + str(e))
