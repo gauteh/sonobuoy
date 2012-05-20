@@ -110,7 +110,7 @@ namespace Buoy {
  *
  * Entry:
  *  - SAMPLE    (4 bytes)
- *  Total length: 8 bytes.
+ *  Total length: 4 bytes.
  *
  * }}} */
 

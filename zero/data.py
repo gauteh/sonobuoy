@@ -124,7 +124,7 @@ class Data:
   def write_index (self):
     if self.enabled:
       self.batches = sorted (self.batches, key = lambda r: r.no)
-      self.indexf = open (self.indexf_uri, 'w+') # truncate file
+      self.indexf = open (self.indexf_uri, 'w') # truncate file
       self.indexf.write (str(self.id) + '\n')
       self.indexf.write (str(self.samples) + '\n')
       self.indexf.write (str(self.refs_no) + '\n')

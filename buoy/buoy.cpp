@@ -30,8 +30,8 @@ namespace Buoy {
       rf->loop ();
 
       if (millis () - lasts >= 1000) {
-        SerialUSB.print ("Position: ");
-        SerialUSB.println (ad->position);
+        SerialUSB.print ("V ");
+        SerialUSB.println (ad->value);
         //ad->print_status ();
         //gps->print_status ();
         lasts = millis ();
@@ -59,7 +59,7 @@ namespace Buoy {
     }
 
 
-    SerialUSB.println ("[**] Gautebøye 1 [" BUOY_NAME "] version: " GIT_DESC);
+    //SerialUSB.println ("[**] Gautebøye 1 [" BUOY_NAME "] version: " GIT_DESC);
 
     /* Set up devices */
     rf    = new RF ();

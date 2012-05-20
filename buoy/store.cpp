@@ -542,7 +542,6 @@ namespace Buoy {
   } // }}}
 
   void Store::_reset_index () { // {{{
-    SerialUSB.println ("reset");
     if (send_i != NULL) {
       delete send_i;
       send_i = NULL;
@@ -568,7 +567,6 @@ namespace Buoy {
 
     // Should not happen (index is always closed at the end of this function)
     if (send_i != NULL) {
-      SerialUSB.println ("i ! NULL");
       _reset_index ();
     }
 
@@ -577,7 +575,6 @@ namespace Buoy {
 
       if (current_index.id == id) {
 
-        SerialUSB.println ("cid");
         s_id      = id;
         s_samples = current_index.samples;
         s_nrefs   = current_index.nrefs;
@@ -589,7 +586,6 @@ namespace Buoy {
         strcpy (&(buf[p]), ".IND");
         //sprintf (buf, "%lu.IND", id);
 
-        SerialUSB.println (id);
         send_i = new SdFile ();
 
         if (!send_i->open (root, buf, O_READ)) {
@@ -600,8 +596,6 @@ namespace Buoy {
           rf->send_error (RF::E_NOSUCHID);
           return false;
         }
-
-        SerialUSB.println (buf);
 
         /* Reading first part of Index */
         send_i->seekCur (  sizeof(Index::version)
@@ -643,8 +637,6 @@ namespace Buoy {
                           uint32_t length) {
     if (!_check_index (id)) return;
 
-    SerialUSB.println ("sb2");
-
     // refno is ref number in this id
     if (refno >= s_nrefs) {
       rf->send_error (RF::E_NOSUCHREF);
@@ -661,11 +653,6 @@ namespace Buoy {
       }
 
 
-      SD_AVAILABLE = (card->errorCode () == 0);
-      if (!SD_AVAILABLE) {
-        rf->send_error (RF::E_SDUNAVAILABLE);
-        return;
-      }
       rf->send_error (RF::E_NOSUCHSAMPLE);
       return;
     }
@@ -692,11 +679,6 @@ namespace Buoy {
       }
     }
 
-    SD_AVAILABLE = (card->errorCode () == 0);
-    if (!SD_AVAILABLE) {
-      rf->send_error (RF::E_SDUNAVAILABLE);
-      return;
-    }
     /* Search to beginning of desired ref + start */
     uint32_t pos = (SD_REFERENCE_LENGTH * refno) + (BATCH_LENGTH * SAMPLE_LENGTH * refno);
 
@@ -705,6 +687,12 @@ namespace Buoy {
 
     SerialUSB.println (pos);
     send_d->seekSet (pos);
+
+    SD_AVAILABLE = (card->errorCode () == 0);
+    if (!SD_AVAILABLE) {
+      rf->send_error (RF::E_SDUNAVAILABLE);
+      return;
+    }
 
     /* Format and protocol:
 
@@ -722,14 +710,20 @@ namespace Buoy {
 
      */
 
+    uint32_t _refno   = 0;
     uint64_t ref      = 0;
     uint32_t refstat  = 0;
 
     if (start == 0) {
       send_d->seekCur (SD_REFERENCE_PADN * SAMPLE_LENGTH); // seek past padding
+      send_d->read (reinterpret_cast<char*>(&_refno), sizeof(_refno));
       send_d->read (reinterpret_cast<char*>(&ref), sizeof(ref));
       send_d->read (reinterpret_cast<char*>(&refstat), sizeof(refstat));
       send_d->seekCur (SD_REFERENCE_PADN * SAMPLE_LENGTH); // seek to first sample
+    }
+
+    if (_refno != refno) {
+      rf->send_error (RF::E_BADDTT);
     }
 
     RF_Serial.print   ("$AD,D,");
@@ -760,9 +754,17 @@ namespace Buoy {
     uint32_t s;
     byte csum = 0;
 
+    int n = 0;
+
     for (uint32_t i = 0; i < length; i++)
     {
-      sd_data->read (reinterpret_cast<char*>(&s), sizeof (s));
+      n = send_d->read (reinterpret_cast<char*>(&s), sizeof (uint32_t));
+
+      if (n != 4) {
+        rf->send_error (RF::E_BADDTT);
+        return;
+      }
+
       /* MSB first (big endian), means concatenating bytes on RX will
        * result in LSB first; little endian. */
       RF_Serial.write ((byte*)(&s), 4);
@@ -797,6 +799,7 @@ namespace Buoy {
       s_samples = 0;
       s_nrefs   = 0;
     }
+    delayMicroseconds (100);
   } // }}}
 
   void Store::send_lastid () { // {{{
