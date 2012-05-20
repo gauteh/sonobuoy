@@ -827,56 +827,6 @@ namespace Buoy {
     RF_Serial.print (current_index.id);
     RF_Serial.println ("*NN");
   } // }}}
-
-# if 0
-  void Store::send_refs (uint32_t id, uint32_t start, uint32_t length) { // {{{
-    if (current_index.id == id) {
-      s_id = id;
-      s_samples = current_index.samples;
-      s_nrefs   = current_index.nrefs;
-    } else {
-      if (!_check_index (id)) return;
-    }
-
-    if ((start + length) >= s_nrefs) {
-      rf->send_error (RF::E_NOSUCHREF);
-      return;
-    }
-
-    /* Send references, _not_ reference positions */
-    if (current_index.id != id) {
-      uint32_t pos = REFPOS_START + s_nrefs * sizeof(uint32_t) + start * sizeof(uint64_t);
-      send_i->seekSet (pos);
-    }
-
-    uint64_t ref;
-    while (length > 0) {
-      // format: $REF,id,refnumber,ref*CS
-      if (current_index.id != id)
-        send_i->read (reinterpret_cast<char*>(&ref), sizeof(uint64_t));
-      else
-        ref = current_index.refs[start];
-
-      RF_Serial.print ("$REF,");
-      RF_Serial.print (id);
-      RF_Serial.print (",");
-      RF_Serial.print (start);
-      RF_Serial.print (",");
-      RF_Serial.print (ref);
-      RF_Serial.println ("*NN");
-
-      /*
-      sprintf (rf->buf, "$REF,%lu,%lu,%llu*", id, start, ref);
-      APPEND_CSUM (rf->buf);
-      RF_Serial.println (rf->buf);
-      */
-
-      start++;
-      length--;
-    }
-  } // }}}
-# endif
-
 # endif
 }
 

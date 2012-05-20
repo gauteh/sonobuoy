@@ -205,7 +205,6 @@ namespace Buoy {
 
       void send_indexes (uint32_t, uint32_t);
       void send_index (uint32_t);
-      //void send_refs (uint32_t, uint32_t, uint32_t);
       void send_batch (uint32_t id, uint32_t ref, uint32_t start, uint32_t length);
       void send_lastid ();
 # endif
