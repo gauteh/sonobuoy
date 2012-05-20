@@ -184,11 +184,12 @@ class Index:
 
   status = 0
   def getstatus (self):
-    if self.state == 0 or self:
+    if self.state == 0:
       self.request_t = time.time ()
       self.status = 0
       self.state = 1
       self.protocol.send ("GS")
+      self.pendingid = 1
 
   def gotstatus (self):
     self.sync_status_t = time.time ()

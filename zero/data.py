@@ -127,6 +127,7 @@ class Data:
       self.indexf_l.acquire ()
       self.batches = sorted (self.batches, key = lambda r: r.no)
       self.indexf = open (self.indexf_uri, 'w') # truncate file
+      self.indexf.truncate (0)
       self.indexf.write (str(self.id) + '\n')
       self.indexf.write (str(self.samples) + '\n')
       self.indexf.write (str(self.refs_no) + '\n')
