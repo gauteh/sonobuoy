@@ -35,17 +35,17 @@ while ~feof(fh)
   if (feof(fh)), break; end
 
   % Got referenceline in l
-  R = sscanf (l, '%c,%u,%lu,%u');
+  R = sscanf (l, '%c,%u,%u,%lu,%u');
   L = R(2); % Length of samples
   
-  if (T>R(3))
-    fprintf ('[%d] [Warning] Time going backwards: %lu -> %lu\n', ref, T, R(3));
+  if (T>R(4))
+    fprintf ('[%d] [Warning] Time going backwards: %lu -> %lu\n', ref, T, R(4));
     disp (pl);
     disp (l);
   end
   pl = l;
-  T = R(3); % Reference (microseconds)
-  S = R(4); % Status
+  T = R(4) % Reference (microseconds)
+  S = R(5); % Status
 
   ref = ref + 1;
   samples = samples + L;

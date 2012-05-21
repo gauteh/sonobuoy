@@ -91,11 +91,10 @@ class Index:
     self.gotids_n = self.gotids_n + 1
 
     # check if id is in special check list
-    if not self.__incremental_id_check_done__:
-      if self.__unchecked_ids__ is not None:
-        if id in self.__unchecked_ids__:
-          self.__unchecked_ids__.remove (id)
-          self.logger.debug (self.me + " Got missing id: " + str(id) + ", remaining: " + str(self.__unchecked_ids__))
+    if self.__unchecked_ids__ is not None:
+      if id in self.__unchecked_ids__:
+        self.__unchecked_ids__.remove (id)
+        self.logger.debug (self.me + " Got missing id: " + str(id) + ", remaining: " + str(self.__unchecked_ids__))
 
     if id <= self.lastid:
       if enabled == 1:
@@ -105,6 +104,8 @@ class Index:
 
       if self.greatestid < id:
         self.greatestid = id
+        self.__full_data_check_done__ = False
+        self.__incremental_id_check_done__ = False
 
       if self.indexofdata(id) is None:
         self.logger.info (self.me +  " Got id: " + str(id))

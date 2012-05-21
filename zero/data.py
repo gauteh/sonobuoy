@@ -61,13 +61,13 @@ class Data:
   dataf       = None # Samples with refs
   dataf_l     = None
 
-  hasfull     = False # Has complete index been received
-  hasalldata  = False # Has all data been received
+  hasfull     = None # Has complete index been received
+  hasalldata  = None # Has all data been received
 
-  id            = 0
-  enabled       = False
-  samples       = 0
-  refs_no       = 0
+  id            = None 
+  enabled       = None 
+  samples       = None 
+  refs_no       = None 
 
   def __init__ (self, l, _buoy, _index, _id, _enabled):
     self.logger = l
@@ -79,6 +79,11 @@ class Data:
     self.batches = []
     self.indexf_l = threading.Lock ()
     self.dataf_l  = threading.Lock ()
+
+    self.hasfull = False
+    self.hasalldata = False
+    self.samples = 0
+    self.refs_no = 0
 
 
     self.indexf_uri = os.path.join (self.buoy.logdir, str(self.id) + '.ITT')
