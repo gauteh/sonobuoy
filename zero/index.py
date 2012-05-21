@@ -59,12 +59,12 @@ class Index:
 
       self.indexf.close ()
 
-    self.data = sorted (self.data, key = lambda d: d.id)
+    self.data.sort (key = lambda d: d.id)
 
   ''' Write out all known indexes '''
   def write_index (self):
     self.indexf = open (self.indexf_uri, 'w+') # truncate file
-    self.data = sorted (self.data, key = lambda d: d.id)
+    self.data.sort (key = lambda d: d.id)
     for i in self.data:
       self.indexf.write (str(i.id) + "," + str(i.enabled) + '\n')
 
@@ -204,7 +204,7 @@ class Index:
 
   # State for keeping this buoys data uptodate
   state     = 0
-  timeout   = 3 # secs
+  timeout   = 10 # secs
   pendingid = 0  # automatic request last sent (in case manual request mess up the flooooow..)
   request_t = 0
 
@@ -357,7 +357,7 @@ class Index:
 
     # reset protocol
     self.protocol.a_receive_state = 0
-    self.protocol.a_buf = '' 
+    self.protocol.a_buf = ''
     self.waitforreceipt = False
 
 

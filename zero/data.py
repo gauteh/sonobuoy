@@ -29,6 +29,9 @@ class Batch:
     self.line = _l
     self.completechunks = []
 
+  def __repr__ (self):
+    return str(self.no) + ", ref: " + str(self.ref) + ", completechunks: " + str(self.completechunks)
+
 class Data:
   buoy  = None
   index = None
@@ -47,8 +50,9 @@ class Data:
 
     return None
 
-  batches = [] # Known batches available on buoy, with flag indicating complete
-               # download.
+  # Known batches available on buoy, with flag indicating complete
+  # download.
+  batches = None
 
   indexf_uri  = None
   dataf_uri   = None
@@ -72,6 +76,7 @@ class Data:
     self.id = _id
     self.enabled = _enabled
     self.me = "[" + self.buoy.name + "] [Data] [" + str(_id) + "]"
+    self.batches = []
 
 
     self.indexf_uri = os.path.join (self.buoy.logdir, str(self.id) + '.ITT')
@@ -102,6 +107,7 @@ class Data:
         self.hasfull        = bool(self.indexf.readline ())
 
         for l in self.indexf.readlines ():
+          l = l.strip()
           s = l.split (',')
           b = Batch (int(s[0]), int(s[1]), int(s[2]), int(s[3]))
 
@@ -117,7 +123,8 @@ class Data:
           self.batches.append (b)
 
         self.indexf.close ()
-        self.batches = sorted (self.batches, key = lambda r: r.no)
+
+        self.batches.sort (key=lambda r: r.no)
 
       else:
         self.write_index ()
@@ -125,7 +132,7 @@ class Data:
   def write_index (self):
     if self.enabled:
       self.indexf_l.acquire ()
-      self.batches = sorted (self.batches, key = lambda r: r.no)
+      self.batches.sort (key=lambda r: r.no)
       self.indexf = open (self.indexf_uri, 'w') # truncate file
       self.indexf.truncate (0)
       self.indexf.write (str(self.id) + '\n')
@@ -146,6 +153,7 @@ class Data:
 
   def got_chunk (self, refno, start, length, reference, status, samples):
     if self.enabled:
+      self.logger.info (self.me + " Got chunk ref: " + str(refno) + ", start: " + str(start) + ", length: " + str(length))
       self.dataf_l.acquire ()
       b = None
       i = self.indexofbatch (refno)
@@ -156,7 +164,7 @@ class Data:
         # on new batch
         b = Batch (refno, 0, 0, 0)
         self.batches.append (b)
-        self.batches = sorted (self.batches, key = lambda r: r.no)
+        self.batches.sort (key=lambda r: r.no)
         fresh_batch = True
       else:
         # on existing batch
@@ -193,7 +201,7 @@ class Data:
           # (re)-write ref
           r = "R," + str(BATCH_LENGTH) + "," + str(b.no) + "," + str(b.ref) + "," + str(b.status)
           self.dataf.write (r + '\n')
-          
+
           if not fresh_batch:
             lines.pop (0)
 
