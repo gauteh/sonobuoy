@@ -1,0 +1,12 @@
+= Installation of buoy.py on node =
+
+  Checklist:
+    Parameters:
+    [ ] Channel: 4
+    [ ] Radio LQ Threshold set to lowest: 0
+
+    [ ] Device name set to corresponding buoy name
+
+    [ ] Mesh Rejection LQ Threshold set to lowest: 0
+    [ ] Mesh Routing Maximum Hop Limit: 100
+
