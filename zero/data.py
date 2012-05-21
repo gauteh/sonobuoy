@@ -57,9 +57,9 @@ class Data:
   indexf_uri  = None
   dataf_uri   = None
   indexf      = None # Index file for this data segment (refs + meta)
-  indexf_l    = threading.Lock ()
+  indexf_l    = None
   dataf       = None # Samples with refs
-  dataf_l     = threading.Lock ()
+  dataf_l     = None
 
   hasfull     = False # Has complete index been received
   hasalldata  = False # Has all data been received
@@ -77,6 +77,8 @@ class Data:
     self.enabled = _enabled
     self.me = "[" + self.buoy.name + "] [Data] [" + str(_id) + "]"
     self.batches = []
+    self.indexf_l = threading.Lock ()
+    self.dataf_l  = threading.Lock ()
 
 
     self.indexf_uri = os.path.join (self.buoy.logdir, str(self.id) + '.ITT')
