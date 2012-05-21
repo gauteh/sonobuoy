@@ -132,6 +132,7 @@ class Data:
       self.indexf.write (str(self.samples) + '\n')
       self.indexf.write (str(self.refs_no) + '\n')
       self.indexf.write (str(self.hasfull) + '\n')
+
       for i in self.batches:
         self.indexf.write (str(i.no) + ',' + str(i.ref) + ',' + str(i.status)  + ',' + str(i.line))
         for c in i.completechunks:
