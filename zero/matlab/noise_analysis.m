@@ -2,11 +2,7 @@
 
 %data = load('One.log');
 
-% Data is 32 bits twos complement:
-% - Last bit is redundant sign bit
-% - AD is specified to maximum 24 bits
-
-d = bitshift(twos_comp(data(:,2)),-1);
+% d should be as returned from readdtt with complement and bitshift
 
 noiserange = max(d) - min(d);
 

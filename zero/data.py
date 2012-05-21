@@ -19,7 +19,7 @@ class Batch:
   line      = None   # Where in data file does this ref start
 
 
-  completechunks  = [] # list of chunks received
+  completechunks  = None # list of chunks received
   maxchunks       = (BATCH_LENGTH / CHUNK_SIZE)
 
   def __init__ (self, _n, _r, _s, _l):
@@ -64,10 +64,10 @@ class Data:
   hasfull     = None # Has complete index been received
   hasalldata  = None # Has all data been received
 
-  id            = None 
-  enabled       = None 
-  samples       = None 
-  refs_no       = None 
+  id            = None
+  enabled       = None
+  samples       = None
+  refs_no       = None
 
   def __init__ (self, l, _buoy, _index, _id, _enabled):
     self.logger = l
