@@ -17,7 +17,7 @@ if (fig > 0)
   clf('reset');
 end
 
-plot (t,d, '-x');
+plot (t,d, '-');
 
 if magnitudes
   hold on;

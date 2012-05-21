@@ -44,7 +44,7 @@ while ~feof(fh)
     disp (l);
   end
   pl = l;
-  T = R(4) % Reference (microseconds)
+  T = R(4); % Reference (microseconds)
   S = R(5); % Status
 
   ref = ref + 1;

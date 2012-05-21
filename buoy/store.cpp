@@ -748,7 +748,6 @@ namespace Buoy {
     RF_Serial.println (buf);
     */
 
-    delayMicroseconds (100);
 
     /* Write '$' to signal start of binary data */
     RF_Serial.write ('$');
@@ -782,7 +781,6 @@ namespace Buoy {
           RF_Serial.write ((byte)0); // write 0's to complete the batch in case of error
       }
 
-      delayMicroseconds (100);
     }
 
     /* Send end of data with Checksum */
@@ -814,7 +812,6 @@ namespace Buoy {
       s_samples = 0;
       s_nrefs   = 0;
     }
-    delayMicroseconds (100);
   } // }}}
 
   void Store::send_lastid () { // {{{
