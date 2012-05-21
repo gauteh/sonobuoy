@@ -11,5 +11,5 @@ fi
 
 echo "Enabling Portal mode on node connected to: ${usb}.."
 
-echo '$ZP*NN' > $usb
+echo '$ZP*0A' > $usb
 
