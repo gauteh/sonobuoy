@@ -219,126 +219,125 @@ class Index:
 
   def loop (self):
     # idle
-    if self.buoy.zero.ser is not None:
+    if self.buoy.zero.ser is not None and self.buoy.zero.acquire:
       if self.state == 0:
-        if self.buoy.zero.acquire:
-          # Get status and lastid {{{
-          if time.time () - self.sync_status_t > self.sync_status:
-            self.pendingid = 1
-            self.getstatus ()
+        # Get status and lastid {{{
+        if time.time () - self.sync_status_t > self.sync_status:
+          self.pendingid = 1
+          self.getstatus ()
+          return
+
+        if time.time() - self.sync_lastid > self.sync_lastid_t:
+          self.pendingid = 2
+          self.getlastid ()
+          return
+        # }}}
+
+        # check if we have all ids {{{
+        if self.lastid > 0:
+          # get ids from greatestid to lastid
+          if self.greatestid < self.lastid:
+            self.pendingid = 3
+            self.getids (self.greatestid + 1)
             return
 
-          if time.time() - self.sync_lastid > self.sync_lastid_t:
-            self.pendingid = 2
-            self.getlastid ()
-            return
-          # }}}
-
-          # check if we have all ids {{{
-          if self.lastid > 0:
-            # get ids from greatestid to lastid
-            if self.greatestid < self.lastid:
-              self.pendingid = 3
-              self.getids (self.greatestid + 1)
-              return
-
-            # Get possibly missing ids
-            elif not self.__incremental_id_check_done__:
-              if self.__unchecked_ids__ is None:
-                self.__unchecked_ids__ = []
-                ii = 1
-                while ii < self.greatestid:
-                  if self.indexofdata (ii) is None:
-                    self.__unchecked_ids__.append (ii)
-                  ii = ii + 1
-
-                self.logger.debug (self.me + " Getting missing ids: " + str(self.__unchecked_ids__))
-                return
-
-              else:
-                if len(self.__unchecked_ids__) > 0:
-                  self.pendingid = 3
-                  self.getids (self.__unchecked_ids__[0]) # take first, but leave it in list, is removed when received
-                  return
-                else:
-                  self.__unchecked_ids__              = None
-                  self.__incremental_id_check_done__  = True
-                  self.logger.debug (self.me + " All missing ids got.")
-          # }}}
-
-          # download data, strategy:
-          #
-          # start on last id, get full id then start to get batches and chunks
-          # from beginning of corresponding data file to id.
-
-          if self.working_data is not None:
-
-            if not self.working_data.hasfull:
-              # get full index
-              self.getid (self.working_data.id)
-              return
-
-            elif not self.working_data.hasalldata:
-              # continue to get refs on this id
-              # figure out which refs are missing
-              ii = 0
-              while ii < self.working_data.refs_no:
-                i = self.working_data.indexofbatch (ii)
-                if i is None:
-                  # start on new batch
-                  self.getbatch (self.working_data.id, ii, 0, CHUNK_SIZE)
-                  return
-                else:
-                  # check if this batch has been completed
-                  i = self.working_data.batches[i]
-                  if not i.complete:
-                    # get rest of this batch, figure out which next chunk is missing
-                    jj = 0
-                    while jj < i.maxchunks:
-                      if not jj in i.completechunks:
-                        self.getbatch (self.working_data.id, ii, CHUNK_SIZE * jj, CHUNK_SIZE)
-                        return
-                      jj = jj + 1
-
-                    # all chunks done on this batch
-
+          # Get possibly missing ids
+          elif not self.__incremental_id_check_done__:
+            if self.__unchecked_ids__ is None:
+              self.__unchecked_ids__ = []
+              ii = 1
+              while ii < self.greatestid:
+                if self.indexofdata (ii) is None:
+                  self.__unchecked_ids__.append (ii)
                 ii = ii + 1
 
-              # all batches done
-              self.logger.info (self.me + " Finished id: " + str(self.working_data.id))
-              self.working_data.hasalldata = True
-              self.working_data.write_index ()
-              self.working_data = None
+              self.logger.debug (self.me + " Getting missing ids: " + str(self.__unchecked_ids__))
+              return
 
             else:
-              self.logger.info (self.me + " Finished id: " + str(self.working_data.id))
-              self.working_data.hasalldata = True
-              self.working_data.write_index ()
-              self.working_data = None
+              if len(self.__unchecked_ids__) > 0:
+                self.pendingid = 3
+                self.getids (self.__unchecked_ids__[0]) # take first, but leave it in list, is removed when received
+                return
+              else:
+                self.__unchecked_ids__              = None
+                self.__incremental_id_check_done__  = True
+                self.logger.debug (self.me + " All missing ids got.")
+        # }}}
 
-          elif self.lastid > 0 and self.greatestid == self.lastid and not self.__full_data_check_done__:
-            # find latest id with missing index, refs or data
-            ii = self.lastid - 1
+        # download data, strategy:
+        #
+        # start on last id, get full id then start to get batches and chunks
+        # from beginning of corresponding data file to id.
 
-            while ii > 0:
-              d  = None
-              di = self.indexofdata (ii)
-              if di is not None:
-                d = self.data[di]
+        if self.working_data is not None:
 
-              if d is not None:
-                if d.enabled and not (d.hasfull and d.hasalldata):
-                  self.working_data = d
-                  self.logger.info (self.me + " Working on id: " + str(d.id))
-                  return
-                else:
-                  ii = ii - 1
-
-            # none missing found
-            self.working_data = None
-            self.__full_data_check_done__ = True
-            self.logger.info (self.me + " All data up to date.")
+          if not self.working_data.hasfull:
+            # get full index
+            self.getid (self.working_data.id)
             return
+
+          elif not self.working_data.hasalldata:
+            # continue to get refs on this id
+            # figure out which refs are missing
+            ii = 0
+            while ii < self.working_data.refs_no:
+              i = self.working_data.indexofbatch (ii)
+              if i is None:
+                # start on new batch
+                self.getbatch (self.working_data.id, ii, 0, CHUNK_SIZE)
+                return
+              else:
+                # check if this batch has been completed
+                i = self.working_data.batches[i]
+                if not i.complete:
+                  # get rest of this batch, figure out which next chunk is missing
+                  jj = 0
+                  while jj < i.maxchunks:
+                    if not jj in i.completechunks:
+                      self.getbatch (self.working_data.id, ii, CHUNK_SIZE * jj, CHUNK_SIZE)
+                      return
+                    jj = jj + 1
+
+                  # all chunks done on this batch
+
+              ii = ii + 1
+
+            # all batches done
+            self.logger.info (self.me + " Finished id: " + str(self.working_data.id))
+            self.working_data.hasalldata = True
+            self.working_data.write_index ()
+            self.working_data = None
+
+          else:
+            self.logger.info (self.me + " Finished id: " + str(self.working_data.id))
+            self.working_data.hasalldata = True
+            self.working_data.write_index ()
+            self.working_data = None
+
+        elif self.lastid > 0 and self.greatestid == self.lastid and not self.__full_data_check_done__:
+          # find latest id with missing index, refs or data
+          ii = self.lastid - 1
+
+          while ii > 0:
+            d  = None
+            di = self.indexofdata (ii)
+            if di is not None:
+              d = self.data[di]
+
+            if d is not None:
+              if d.enabled and not (d.hasfull and d.hasalldata):
+                self.working_data = d
+                self.logger.info (self.me + " Working on id: " + str(d.id))
+                return
+              else:
+                ii = ii - 1
+
+          # none missing found
+          self.working_data = None
+          self.__full_data_check_done__ = True
+          self.logger.info (self.me + " All data up to date.")
+          return
 
 
       # waiting for response
