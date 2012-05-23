@@ -48,6 +48,8 @@ class ReadMaple:
   def run (self):
     multiprocessing.process.current_process ().name = 'Maple'
 
+    TIMESTAMPINT = 1*60
+    lasttime = 0
     # Log to file aswell
     if len(sys.argv) > 1:
       pass
@@ -60,6 +62,9 @@ class ReadMaple:
       while self.run:
         try:
           if not self.ser == None:
+            if time.time () - lasttime > TIMESTAMPINT:
+              lasttime = time.time ()
+              sys.stdout.write ('======= ' + time.asctime () + ' =======\n')
             r = self.ser.readline ()
             sys.stdout.write (r)
 
