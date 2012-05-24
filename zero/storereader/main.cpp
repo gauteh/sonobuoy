@@ -208,7 +208,7 @@ namespace Zero {
 
               /* Output DTT format */
               if (dtt) {
-                cout << "R," << i.samples_per_reference << "," << reft << "," << refstatus << endl;
+                cout << "R," << i.samples_per_reference << "," << refid << "," << reft << "," << refstatus << endl;
               }
 
               ref++;
