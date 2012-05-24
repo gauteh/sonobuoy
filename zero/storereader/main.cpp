@@ -263,7 +263,8 @@ namespace Zero {
           sam++;
           sam_ref++;
 
-          /*
+          /* Used as a test for a while since getting exactly 0 is sort
+           * of unlikely :D
           if (s == 0) {
             cerr << "=> [ERROR] Sample == 0" << endl;
             corrupt = true;
