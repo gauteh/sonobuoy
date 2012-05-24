@@ -9,7 +9,7 @@ import time
 import os
 
 BATCH_LENGTH = 1024
-CHUNK_SIZE   = 512
+CHUNK_SIZE   = 1024
 
 class Batch:
   no      = 0   # no of ref/batch in data file
