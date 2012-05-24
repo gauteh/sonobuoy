@@ -67,6 +67,7 @@ class ReadMaple:
               sys.stdout.write ('======= ' + time.asctime () + ' =======\n')
             r = self.ser.readline ()
             sys.stdout.write (r)
+            sys.stdout.flush ()
 
         except serial.SerialException as e:
           #self.logger.info ("Exception with serial link, reconnecting..: " + str(e))
