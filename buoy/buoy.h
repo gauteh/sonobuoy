@@ -37,6 +37,8 @@
 # define DEBUG_WARN    1
 # define DEBUG_SD      0 // enable debug error messages on SdFat
 
+# define WATCHDOG_RELOAD 120 * (40000 / 256) // ca 2 minutes
+
 // Enable sections in dependant classes
 # define HASRF  1
 # define HASGPS 1

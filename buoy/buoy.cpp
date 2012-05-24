@@ -11,6 +11,7 @@
 # include "buoy.h"
 
 # include "wirish.h"
+# include "iwdg.h"
 
 # include "ads1282.h"
 # include "rf.h"
@@ -36,6 +37,8 @@ namespace Buoy {
         //gps->print_status ();
         lasts = millis ();
       }
+
+      iwdg_feed (); // reset watchdog
     }
   }
 
@@ -60,6 +63,9 @@ namespace Buoy {
 
 
     //SerialUSB.println ("[**] Gautebøye 1 [" BUOY_NAME "] version: " GIT_DESC);
+
+    /* Set up independent watchdog */
+    iwdg_init (IWDG_PRE_256, WATCHDOG_RELOAD);
 
     /* Set up devices */
     rf    = new RF ();

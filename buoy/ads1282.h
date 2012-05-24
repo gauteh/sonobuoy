@@ -224,9 +224,9 @@ namespace Buoy {
 
 # endif
 
-# define FREQUENCY      250
-# define QUEUE_LENGTH  2*(1024)
-# define BATCHES          2 // _must_ be multiple of QUEUE_LENGTH (min 2!)
+# define FREQUENCY      250     // configured separately setting registers
+# define QUEUE_LENGTH   2*1024  // 2KB seems to be about max
+# define BATCHES        2       // _must_ be multiple of QUEUE_LENGTH (min 2!)
 # define BATCH_LENGTH (QUEUE_LENGTH / BATCHES)
 
 # ifndef ONLY_SPEC
