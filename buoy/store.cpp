@@ -374,6 +374,8 @@ namespace Buoy {
       lastbatch  =  (lastbatch + 1) % BATCHES;
 
     if (lastbatch != ad->batch) {
+      rf->send_error (RF::E_SDLAG);
+      SerialUSB.println ("R");
 # if DEBUG_VERB
       SerialUSB.println ("[SD] [Error] Out of sync with AD, might not finish writing batch before it is swapped.");
 # endif
@@ -722,7 +724,7 @@ namespace Buoy {
       send_d->seekCur (SD_REFERENCE_PADN * SAMPLE_LENGTH); // seek to first sample
 
       if (_refno != refno) {
-        SerialUSB.println ("nrf");
+        //SerialUSB.println ("nrf");
         rf->send_error (RF::E_BADDAT);
       }
     }

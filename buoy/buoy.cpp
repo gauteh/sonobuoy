@@ -55,7 +55,7 @@ namespace Buoy {
     /* Count down.. */
 
     for (int i = 0; i < 3; i++) {
-      SerialUSB.print ("Starting soon: ");
+      SerialUSB.print ("S ");
       SerialUSB.println (i);
       delay(1000);
       //togglePin (3);
