@@ -263,11 +263,13 @@ namespace Zero {
           sam++;
           sam_ref++;
 
+          /*
           if (s == 0) {
             cerr << "=> [ERROR] Sample == 0" << endl;
             corrupt = true;
             break;
           }
+          */
         }
 
         cerr << "=> Read " << sam << " samples (of " << i.samples << " expected)." << endl;
