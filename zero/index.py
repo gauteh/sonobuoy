@@ -209,7 +209,7 @@ class Index:
   pendingid = 0  # automatic request last sent (in case manual request mess up the flooooow..)
   request_t = 0
 
-  sync_lastid   = 4 * 60 # time between syncs of last id
+  sync_lastid   = 1 * 60 # time between syncs of last id
   sync_lastid_t = 0
 
   sync_status   = 20 # time between status updates
