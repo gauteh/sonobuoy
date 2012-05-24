@@ -48,12 +48,9 @@ class Index:
       self.indexf = open (self.indexf_uri, 'r')
       for l in self.indexf.readlines ():
         s = l.split (",")
-        if s[1].strip () == "True":
-          e = True
-        else:
-          e = False
-
+        e = (s[1].strip () == "True")
         self.data.append (Data (self.logger, self.buoy, self, int(s[0]), e))
+
         if int(s[0]) > self.greatestid:
           self.greatestid = int(s[0])
 
@@ -77,7 +74,7 @@ class Index:
 
     self.write_index ()
 
-  ''' Update local list of segments from buoy, going backwards '''
+  ''' Update local list of ids from buoy, working backwards '''
   gotids_n = 0
 
   def getids (self, start):
