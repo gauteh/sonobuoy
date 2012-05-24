@@ -49,7 +49,7 @@ class AD:
 
   ''' Handle received binary samples '''
   def ad_handle_samples (self):
-    self.logger.info ("[AD] Got " + str(self.ad_k_samples) + " samples starting at: " + str(self.ad_reference))
+    self.logger.debug ("[AD] Got " + str(self.ad_k_samples) + " samples starting at: " + str(self.ad_reference))
 
     self.nsamples += self.ad_k_samples
 

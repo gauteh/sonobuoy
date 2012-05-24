@@ -176,7 +176,7 @@ class Index:
       self.request_t = time.time ()
 
   def gotbatch (self, id, refno, start, length, ref, refstat, samples):
-    self.logger.info (self.me + " Got batch, id: " + str(id) + ", ref no: " + str(refno) + ", start: " + str(start) + ", length: " + str(length))
+    self.logger.debug (self.me + " Got batch, id: " + str(id) + ", ref no: " + str(refno) + ", start: " + str(start) + ", length: " + str(length))
     if self.working_data.id == id:
       self.working_data.got_chunk (refno, start, length, ref, refstat, samples)
 

@@ -13,6 +13,7 @@ def startup():
   setRadioRate (3)
 
   # Full power
+  saveNvParam(70,'\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11')
   txPwr (17)
 
   # Set up relays

@@ -80,7 +80,7 @@ class Data:
     self.indexf_l = threading.Lock ()
     self.dataf_l  = threading.Lock ()
 
-    self.hasfull = False
+    self.hasfull    = False
     self.hasalldata = False
     self.samples = 0
     self.refs_no = 0
@@ -111,7 +111,8 @@ class Data:
         self.id             = int(self.indexf.readline ())
         self.samples        = int(self.indexf.readline ())
         self.refs_no        = int(self.indexf.readline ())
-        self.hasfull        = bool(self.indexf.readline ())
+        r = self.indexf.readline ().strip ()
+        self.hasfull        = (r == "True")
 
         for l in self.indexf.readlines ():
           l = l.strip()
