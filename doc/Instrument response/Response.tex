@@ -2,7 +2,10 @@
 \usepackage[fleqn]{amsmath}
 \usepackage{graphicx}
 %\usepackage{times}
+\usepackage[framed,numbered,autolinebreaks,useliterate]{mcode}
+\usepackage{listing}
 \usepackage[small,compact]{titlesec}
+\usepackage[utf8x]{inputenc}
 
 \usepackage[paper=a4paper,
             %includefoot, % Uncomment to put page number above margin
@@ -35,9 +38,23 @@
 \end{figure}
 
 The figure above (\ref{fig:hydrophone_decoupling}) shows an equivalent
-circuit of the input decoupling to the hydrophone.
+circuit of the deployed input decoupling to the hydrophone.
 
-\paragraph{Derivation of transfer function}
+\paragraph{}The circuit was based on the suggested decoupling in figure
+\ref{fig:suggested_decoupling} seen below, it was designed to have the
+same properties, but also low-pass the signal at cutoff frequency
+$f_{LP}$. The original design already decouples, and high-passes, the
+signal at frequency $f_{HP}$.
+
+\begin{figure}[h!]
+  \begin{center}
+    \includegraphics[width=200px]{AQ-18-decoupling-and-wiring.jpg}
+  \end{center}
+  \caption{AQ-18 suggested decoupling and wiring}
+  \label{fig:suggested_decoupling}
+\end{figure}
+
+\section{Derivation of transfer function}
 
 $i_1$ and $i_2$ signify the current loops passing through respectively left
 and right loop. Using Kirchoff's equation:
@@ -63,21 +80,29 @@ Solving for $H(s)$ gives:
 
 \begin{equation}
   H(s) = \frac{8.218 \cdot 10^{60} \times s^2}
-  {1.822 \cdot 10^{56} \times s^3 + 
+  {1.822 \cdot 10^{56} \times s^3 +
    1.972 \cdot 10^{61} \times s^2 +
    4.196 \cdot 10^{60} \times s}
   \label{eqn:transferfunction}
 \end{equation}
 
-\newpage
-A bode plot of the transfer function (instrument response):
-\begin{figure}[h]
+A bode plot of the transfer function (instrument response) is shown in
+figure \ref{fig:bodeplot} below.
+\begin{figure}[h!]
   \begin{center}
     \includegraphics[width=400px]{bodeplot.png}
   \end{center}
   \caption{Bode plot of transfer function}
   \label{fig:bodeplot}
 \end{figure}
+
+Equation \ref{eqn:transferfunction} can be solved by using the MATLAB
+script response.m, the Bode plot in figure \ref{fig:bodeplot} was
+created with the same script.
+\newpage
+\section{response.m}
+\lstinputlisting{response.m}
+
 
 \end{document}
 
