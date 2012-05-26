@@ -25,6 +25,59 @@
 \makeheading{Gautebøye, rev1, Instrument response}{Gaute Hope
 (gaute.hope@student.uib.no)}
 
+\section{Hydrophone decoupling}
+\begin{figure}[h]
+  \begin{center}
+  \includegraphics[width=400px]{Hydrophone_decoupling.png}
+\end{center}
+  \caption{Hydrophone decoupling circuit}
+  \label{fig:hydrophone_decoupling}
+\end{figure}
+
+The figure above (\ref{fig:hydrophone_decoupling}) shows an equivalent
+circuit of the input decoupling to the hydrophone.
+
+\paragraph{Derivation of transfer function}
+
+$i_1$ and $i_2$ signify the current loops passing through respectively left
+and right loop. Using Kirchoff's equation:
+
+\begin{align}
+  \label{eqn:currents_1}
+  V_s &= i_1 (Z_{C_1} + Z_{R_1}) + (i_1 - i_2) \cdot Z_{R_2} \\
+  0   &= (i_2 - i_1) \cdot Z_{R_2} + i_2 \cdot Z_{C_2}
+  \label{eqn:currents_2}
+\end{align}
+
+$V_s$ is the signal source, the hydrophone. See separate data sheet for
+hydrophone frequency response. $V_o$, output, is measured at the
+terminals $T_+$ and $T_-$.
+
+\begin{align}
+  \label{eqn:vo}
+  V_o &= i_2 \cdot Z_{C_2} \\
+  H(s) &= \frac{V_o}{V_s}, s = i\omega
+\end{align}
+
+Solving for $H(s)$ gives:
+
+\begin{equation}
+  H(s) = \frac{8.218 \cdot 10^{60} \times s^2}
+  {1.822 \cdot 10^{56} \times s^3 + 
+   1.972 \cdot 10^{61} \times s^2 +
+   4.196 \cdot 10^{60} \times s}
+  \label{eqn:transferfunction}
+\end{equation}
+
+\newpage
+A bode plot of the transfer function (instrument response):
+\begin{figure}[h]
+  \begin{center}
+    \includegraphics[width=400px]{bodeplot.png}
+  \end{center}
+  \caption{Bode plot of transfer function}
+  \label{fig:bodeplot}
+\end{figure}
 
 \end{document}
 
