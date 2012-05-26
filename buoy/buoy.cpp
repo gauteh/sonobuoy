@@ -87,6 +87,10 @@ namespace Buoy {
     ad->start_continuous_read ();
   }
 
+  inline bool BuoyMaster::hasusb () {
+    return SerialUSB.isConnected ();
+  }
+
   int itoa (uint32_t n, uint8_t base, char *buf) // {{{
   {
     unsigned long i = 0;

@@ -61,6 +61,8 @@ namespace Buoy {
 
       void main ();
 
+      static bool hasusb ();
+
     private:
       void setup ();
   };
