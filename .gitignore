@@ -25,3 +25,5 @@ hardware/simulations/*.raw
 hardware/simulations/*.imp
 hardware/simulations/*.net
 
+doc/Instrument response/Response.aux
+doc/Instrument response/Response.pdf
