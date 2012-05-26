@@ -106,7 +106,7 @@ namespace Buoy {
  *  - Reference:    uint64_t referencesecond [unix time + microdelta]
  *  - Status bit:   uint32_t status
  *  - 3 * (SAMPLE_LENGTH) with 0
- *  Total length: 54 bytes.
+ *  Total length: 40 bytes.
  *
  * Entry:
  *  - SAMPLE    (4 bytes)
