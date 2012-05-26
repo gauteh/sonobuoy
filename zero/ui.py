@@ -52,7 +52,6 @@ class ZeroCliService:
   def buoy_status (self, b):
     return [b.active, b.name, b.ad.ad_value, b.ad.ad_config, b.ad.ad_qposition, b.ad.ad_queue_time, b.ad.nsamples, b.gps.latitude, b.gps.north, b.gps.longitude, b.gps.east, b.gps.valid, b.gps.gps_time, b.gps.unix_time, b.gps.gps_date, b.gps.has_time, b.gps.has_sync, b.gps.has_sync_reference, b.ad.ad_batch_length]
 
-
 class ZeroUIManager (BaseManager):
   AUTHKEY = u'sdfaf2faeoidfasdfiasdufoasdiyfa'
 

@@ -25,6 +25,10 @@ class zCLI:
   r_monitor = True
 
   def __init__ (self):
+    if sys.argv[1] == "help":
+      self.go ()
+      sys.exit (0)
+
     try:
       self.m = ZeroUIManager ()
       self.m.setup_client ()
@@ -161,6 +165,14 @@ class zCLI:
       self.show (b)
       time.sleep (1)
 
+  def chunks (self, b):
+    print "Complete chunks for buoy: " + b
+    print "================================="
+
+    print "Not implemented."
+    return
+
+
   def stop (self):
     print "Stopping Zero Manager.."
     try:
@@ -185,6 +197,7 @@ class zCLI:
     print "summary                  Print summary of connected nodes"
     print "show [buoy name]         Show detailed information about buoy"
     print "monitor [buoy name]      Regularily print information about buoy"
+    print "chunks [buoy name]       Show completeness of data for buoy"
     print ""
     print "=> Buoy commands:"
     print "getstatus                Request status from current buoy"
@@ -204,6 +217,9 @@ class zCLI:
     print "stopacquire              Stop continuous data transmission from buoys"
     print "startacquire             Start contnuous data transmission from buoys"
     print "stop                     Stop Zero Manager"
+    print ""
+    print "=> Other:"
+    print "help                     Show this help message"
 
   def go (self):
     # Parse options
@@ -255,6 +271,15 @@ class zCLI:
         self.help ()
         return
       self.show (sys.argv[2])
+
+    elif sys.argv[1] == 'chunks':
+      if len(sys.argv) != 3:
+        print "Error: No Buoy identifier specified."
+        self.help ()
+        return
+
+      self.chunks (sys.argv[2])
+
 
     elif sys.argv[1] == 'monitor':
       if len(sys.argv) != 3:
