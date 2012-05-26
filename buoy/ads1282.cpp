@@ -658,9 +658,6 @@ namespace Buoy {
   void ADS1282::shift_in_n (uint8_t *v, int n) {
     /* Shift in n bytes to byte array v */
 
-    /* TODO: Shifts bytes a bit too much.. seems to be correct for data values,
-     * but incorrect for register values. */
-
     /* Read each byte */
     for (int j = 0; j < n; j++) {
 
@@ -674,7 +671,6 @@ namespace Buoy {
         digitalWrite (AD_SCLK, LOW);
       }
 
-      // TODO: delay doesn't work inside interrupts; verify returned data
       if (j < n) delayMicroseconds (11); // delay, min: 24 / fclk
     }
   }
