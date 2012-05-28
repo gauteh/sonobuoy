@@ -79,10 +79,10 @@ namespace Buoy {
     store->setup  (this);
 
 # if DEBUG_INFO
-    /* Start reading data continuously and writing to SD card */
     SerialUSB.println ("[Buoy] Initiating continuous transfer and write.");
 # endif
 
+    /* Start reading data continuously and writing to SD card */
     store->start_continuous_write ();
     ad->start_continuous_read ();
   }
