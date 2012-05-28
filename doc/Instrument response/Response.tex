@@ -154,7 +154,10 @@ The OPA627 is used as a buffer with gain 1 to provide a high impedance input and
 impedance output. It has a gain bandwidth product of 16 MHz at this
 gain \cite{opa627_ds}. With the first low pass filter, $f_{LP_1}$, well
 below this it should be able to relay the signal without problems. The
-transfer function would simply be 1 for this step.
+transfer function would simply be 1 for this step. It is important that
+the OPA627 has well mounted bypass capacitors to avoid oscillations when
+configured for this low gain. An buffer designed for unity gain, like
+the OPA633 \cite{opa633_ds} or BUF634 \cite{buf634_ds} could prove a better choice.
 
 \subsubsection{Stability}
 The system, $H(s)$ from equation \eqref{eqn:transferfunction}, is
