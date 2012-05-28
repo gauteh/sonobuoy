@@ -45,10 +45,17 @@
 The figure above (\ref{fig:hydrophone_decoupling}) shows an equivalent
 circuit of the deployed input decoupling to the hydrophone.
 
+\begin{align*}
+  C_1 &= 47 \mu F \\
+  C_2 &= 380 pF \\
+  R_1 &= 58.33 k \Omega \\
+  R_2 &= 41.67 k \Omega
+\end{align*}
+
 \paragraph{}The circuit was based on the suggested decoupling in figure
 \ref{fig:suggested_decoupling} seen below, it was designed to have the
 same properties, but also low-pass the signal at cutoff frequency
-$f_{LP}$. The original design already decouples, and high-passes, the
+$f_{LP_1}$. The original design already decouples, and high-passes, the
 signal at frequency $f_{HP}$.
 
 \begin{figure}[h!]
@@ -120,8 +127,10 @@ frequency at $f_{HP} = 0.0339$ Hz or a period of $29.4985$ s.
 \subsubsection{Low pass filter and operational amplifier}
 
 To avoid aliasing due to the speed of the opamps (operational
-amplifiers) in the signal path, first the OPA629 \cite{opa629_ds} acting as buffer with
-unity gain and then the OPA1632 \cite{opa1632_ds} at the ADS1282EVM \cite{ads1282evm_ds}.
+amplifiers) in the signal path, first the OPA629 (see \cite{opa629_ds} and
+figure \ref{fig:hydrophone_decoupling}) acting as buffer with
+unity gain and then the OPA1632 \cite{opa1632_ds} at the input terminals
+of the ADS1282EVM \cite{ads1282evm_ds}.
 An additional low pass stage is added with a corner frequency of
 $f_{LP_1} = 17.189 $ kHz.
 
@@ -137,8 +146,8 @@ output speed of $ f_s = f_{clk}/4 = 1.024$ Mhz \cite{ads1282_ds}. The
 Nyquist frequency is then: $f_{Nq} = 1.024 \times 10^6 / 2 = 512 $ kHz.
 
 \subsubsection{Anti-alias filter}
-The 10 nF capacitor utilized on the ADS1282EVM
-\cite{ads1282evm_ds}, creates in a low-pass filter with an upper corner frequency of $f_{LP_2} =
+The 10 nF capacitor used on the ADS1282EVM
+\cite{ads1282evm_ds}, results in a low-pass filter with an upper corner frequency of $f_{LP_2} =
 \frac{1}{2 \pi \times 600 \times 10 \times 10^{-9}} = 26525.82 $ Hz
 \footnote{Equation (3), p.15, \cite{ads1282_ds}; \citetitle{ads1282_ds}}.
 
