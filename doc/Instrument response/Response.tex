@@ -5,7 +5,10 @@
 \usepackage[framed,numbered,autolinebreaks,useliterate]{mcode}
 \usepackage{listing}
 \usepackage[small,compact]{titlesec}
-\usepackage[utf8x]{inputenc}
+%\usepackage[utf8x]{inputenc}
+
+\usepackage{biblatex}
+\bibliography{Response}
 
 \usepackage[paper=a4paper,
             %includefoot, % Uncomment to put page number above margin
@@ -24,6 +27,8 @@
 
 \newlength{\figurewidth}
 \setlength{\figurewidth}{500px}
+
+
 \begin{document}
 \makeheading{Gautebøye, rev1, Instrument response}{Gaute Hope
 (gaute.hope@student.uib.no)}
@@ -50,7 +55,8 @@ signal at frequency $f_{HP}$.
   \begin{center}
     \includegraphics[width=200px]{AQ-18-decoupling-and-wiring.jpg}
   \end{center}
-  \caption{AQ-18 suggested decoupling and wiring}
+  \caption{AQ-18 suggested decoupling and wiring
+    \cite{aq-18_decoupling}.}
   \label{fig:suggested_decoupling}
 \end{figure}
 
@@ -97,12 +103,26 @@ figure \ref{fig:bodeplot} below.
 \end{figure}
 
 Equation \ref{eqn:transferfunction} can be solved by using the MATLAB
-script response.m, the Bode plot in figure \ref{fig:bodeplot} was
-created with the same script.
+script response.m (listing \ref{code:response_m}), the Bode plot in figure \ref{fig:bodeplot} was created with the same script.
+
+\subsection{Analysis} The transfer function is a bandpass filter with
+the suggested decoupling creating a high-pass filter with corner
+frequency at $f_{LP} = 0.0339$ Hz or a period of $29.4985$ s. The
+higher corner frequency is at $f_{HP} = 17.189 $ kHz. The corner
+frequency is well above the band of interest ($< 1$ kHz), but should
+provide sufficient damping at the Nyquist frequency of the digitizer
+which has a modulator speed of ca $f_{clk}/4 = 4\ \text{MHz} / 4 = 1\ 
+\text{Mhz}$ \cite{ads1282_ds}.
+
 \newpage
-\section{response.m}
+\section{Attachments}
+\subsection{response.m}
+
+\lstset{caption={response.m, MATLAB code for calculating instrument
+response},label=code:response_m}
 \lstinputlisting{response.m}
 
 
+\printbibliography
 \end{document}
 
