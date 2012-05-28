@@ -14,7 +14,7 @@
             %includefoot, % Uncomment to put page number above margin
             marginparwidth=30.5mm,    % Length of section titles
             marginparsep=1.5mm,       % Space between titles and text
-            margin=25mm,              % 25mm margins
+            margin=15mm,              % 25mm margins
             includemp]{geometry}
 
 
@@ -98,7 +98,8 @@ figure \ref{fig:bodeplot} below.
   \begin{center}
     \includegraphics[width=400px]{bodeplot.png}
   \end{center}
-  \caption{Bode plot of transfer function}
+  \caption{Bode plot of transfer function, showing peak response at
+  $33.9$ Hz.}
   \label{fig:bodeplot}
 \end{figure}
 
@@ -108,21 +109,39 @@ script response.m (listing \ref{code:response_m}), the Bode plot in figure \ref{
 \subsection{Analysis} The transfer function is a bandpass filter with
 the suggested decoupling creating a high-pass filter with corner
 frequency at $f_{LP} = 0.0339$ Hz or a period of $29.4985$ s. The
-higher corner frequency is at $f_{HP} = 17.189 $ kHz. The corner
-frequency is well above the band of interest ($< 1$ kHz), but should
-provide sufficient damping at the Nyquist frequency of the digitizer
-which has a modulator speed of ca $f_{clk}/4 = 4\ \text{MHz} / 4 = 1\ 
-\text{Mhz}$ \cite{ads1282_ds}.
+upper corner frequency is at $f_{HP} = 17.189 $ kHz. $f_{HP}$ 
+was chosen arbitrary to be well above the band of interest ($< 1$ kHz),
+but to provide sufficient damping at the Nyquist frequency of the AD
+converter 
+which has a modulator speed of $f_{clk}/4 = 4\ \text{MHz} / 4 = 1\ 
+\text{Mhz}$ \cite{ads1282_ds} and a Nyquist presumabley\ldots at
+$f_{Nyquist} = 1 \cdot 10^{6} / 2 = 500 $ kHz.
+
+\subsubsection{Stability} System stability was ensured using the
+Routh-Hurwitz method, MATLAB code is included in listing
+\ref{code:routhtable_m}.
+
+\subsubsection{Output} The output is scaled by $-7.6\ \text{dB} =
+0.4169 \frac{V}{V}$ which is to scale the input from $\pm 6V$ to $\pm 2.5V$, $0.4169
+\approx 5 / 12 = 0.4167$, which is the input range of the ADS1282EVM
+(\cite{ads1282evm_ds} and \cite{ads1282_ds}) in bipolar mode. The
+slightly inaccurate scaling is due to available resistor values.
+
+\printbibliography
 
 \newpage
 \section{Attachments}
 \subsection{response.m}
-
 \lstset{caption={response.m, MATLAB code for calculating instrument
 response},label=code:response_m}
 \lstinputlisting{response.m}
 
+\subsection{routhtable.m}
+\lstset{caption={routhtable.m, MATLAB code for determining system
+stability},label=code:routhtable_m}
+\lstinputlisting{routhtable.m}
 
-\printbibliography
+
+
 \end{document}
 
