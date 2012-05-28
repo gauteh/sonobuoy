@@ -5,7 +5,7 @@
 \usepackage[framed,numbered,autolinebreaks,useliterate]{mcode}
 \usepackage{listing}
 \usepackage[small,compact]{titlesec}
-%\usepackage[utf8x]{inputenc}
+\usepackage[utf8]{inputenc}
 
 \usepackage{biblatex}
 \bibliography{Response}
@@ -119,7 +119,6 @@ $f_{Nyquist} = 1 \cdot 10^{6} / 2 = 500 $ kHz.
 
 \subsubsection{Stability} System stability was ensured using the
 Routh-Hurwitz method, MATLAB code is included in listing
-\ref{code:routhtable_m}.
 
 \subsubsection{Output} The output is scaled by $-7.6\ \text{dB} =
 0.4169 \frac{V}{V}$ which is to scale the input from $\pm 6V$ to $\pm 2.5V$, $0.4169
@@ -137,9 +136,6 @@ response},label=code:response_m}
 \lstinputlisting{response.m}
 
 \subsection{routhtable.m}
-\lstset{caption={routhtable.m, MATLAB code for determining system
-stability},label=code:routhtable_m}
-\lstinputlisting{routhtable.m}
 
 
 
