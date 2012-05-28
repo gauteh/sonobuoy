@@ -127,12 +127,13 @@ frequency at $f_{HP} = 0.0339$ Hz or a period of $29.4985$ s.
 \subsubsection{Low pass filter and operational amplifier}
 
 To avoid aliasing due to the speed of the opamps (operational
-amplifiers) in the signal path, first the OPA629 (see \cite{opa629_ds} and
+amplifiers) in the signal path; the OPA629 (see \cite{opa629_ds} and
 figure \ref{fig:hydrophone_decoupling}) acting as buffer with
 unity gain and then the OPA1632 \cite{opa1632_ds} at the input terminals
 of the ADS1282EVM \cite{ads1282evm_ds}.
 An additional low pass stage is added with a corner frequency of
-$f_{LP_1} = 17.189 $ kHz.
+$f_{LP_1} = 17.189 $ kHz. The speed of the opamp is in the order of Mhz
+so this corner frequency should be well within their capabilities.
 
 \subsubsection{Stability}
 The system, $H(s)$ from equation \eqref{eqn:transferfunction}, is
