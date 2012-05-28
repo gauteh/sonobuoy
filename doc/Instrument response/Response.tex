@@ -127,13 +127,34 @@ frequency at $f_{HP} = 0.0339$ Hz or a period of $29.4985$ s.
 \subsubsection{Low pass filter and operational amplifier}
 
 To avoid aliasing due to the speed of the opamps (operational
-amplifiers) in the signal path; the OPA629 (see \cite{opa629_ds} and
+amplifiers) in the signal path; the OPA627 (see \cite{opa627_ds} and
 figure \ref{fig:hydrophone_decoupling}) acting as buffer with
 unity gain and then the OPA1632 \cite{opa1632_ds} at the input terminals
 of the ADS1282EVM \cite{ads1282evm_ds}.
 An additional low pass stage is added with a corner frequency of
 $f_{LP_1} = 17.189 $ kHz. The speed of the opamp is in the order of Mhz
 so this corner frequency should be well within their capabilities.
+
+\paragraph{OPA1632} \ \\
+The OPA1632 \cite{opa1632_ds} is set up with a 1 nF capacitor in its
+feedback loop on the ADS1282EVM \cite{ads1282evm_ds}, this low passes
+the signal with an cut off frequency at $f_{LP_2} = 151.99$ kHz. Its
+gain bandwidth is specified to be 180 MHz, given that the gain is 1 and
+the load is large it should have a well defined response. The
+OPA1632-setups simplified transfer function is \cite{fully_diff_opamps}:
+
+\begin{equation}
+  H_{OPA1632}(s) = \frac{9.551 \times 10^5}
+                        {(s + 9.551 \times 10^5)}
+  \label{eqn:opa1632_tf}
+\end{equation}
+
+\paragraph{OPA627} \ \\
+The OPA627 is used as a buffer with gain 1 to provide a high impedance input and low
+impedance output. It has a gain bandwidth product of 16 MHz at this
+gain \cite{opa627_ds}. With the first low pass filter, $f_{LP_1}$, well
+below this it should be able to relay the signal without problems. The
+transfer function would simply be 1 for this step.
 
 \subsubsection{Stability}
 The system, $H(s)$ from equation \eqref{eqn:transferfunction}, is
@@ -148,11 +169,11 @@ Nyquist frequency is then: $f_{Nq} = 1.024 \times 10^6 / 2 = 512 $ kHz.
 
 \subsubsection{Anti-alias filter}
 The 10 nF capacitor used on the ADS1282EVM
-\cite{ads1282evm_ds}, results in a low-pass filter with an upper corner frequency of $f_{LP_2} =
+\cite{ads1282evm_ds}, results in a low-pass filter with an upper corner frequency of $f_{LP_3} =
 \frac{1}{2 \pi \times 600 \times 10 \times 10^{-9}} = 26525.82 $ Hz
 \footnote{Equation (3), p.15, \cite{ads1282_ds}; \citetitle{ads1282_ds}}.
 
-$f_{LP_2}$ is thus well below $f_{Nq}$ and any signal component above $f_{LP_2}$ should
+$f_{LP_3}$ is thus well below $f_{Nq}$ and any signal component above $f_{LP_3}$ should
 be almost completely damped before it reaches $f_{Nq}$, resulting in no
 or very small aliasing effects.
 
@@ -166,8 +187,9 @@ This equation represents the upper low pass filter:
 
 The complete analog transfer function is then:
 \begin{equation}
-  H_{analog} = \frac{7.5192 \times 10^9}
-                { (s + 1.667 \times 10^5)
+  H_{analog} = \frac{7.1817 \times 10^15}
+                { (s + 9.551 \times 10^5)
+                  (s + 1.667 \times 10^5)
                   (s + 1.083 \times 10^5)
                   (s + 0.2128) }
   \label{eqn:transfer_analog}

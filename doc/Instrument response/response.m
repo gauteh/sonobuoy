@@ -42,6 +42,12 @@ end
 
 zpk(T)
 
+% opa1632 low pass
+UOPA = zpk([], [-(1/(1047*10^-9))], 1/(1047*10^-9))
+figure(4); clf('reset');
+bodeplot (UOPA, P);
+title ('Bode Diagram (OPA1632)');
+
 % upper low pass
 U = zpk([], [-(1/(600*10*10^-9))], 1/(600*10*10^-9));
 figure(2); clf('reset');
@@ -49,7 +55,7 @@ bodeplot (U, P);
 title ('Bode Diagram (Upper low pass filter)');
 
 % final response
-C = U * T;
+C = UOPA * U * T;
 figure(3); clf('reset');
 bodeplot (C, P);
 title ('Bode Diagram (Complete analog response)');  
