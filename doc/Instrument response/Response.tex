@@ -85,10 +85,9 @@ terminals $T_+$ and $T_-$.
 Solving for $H(s)$ gives:
 
 \begin{equation}
-  H(s) = \frac{8.218 \cdot 10^{60} \times s^2}
-  {1.822 \cdot 10^{56} \times s^3 +
-   1.972 \cdot 10^{61} \times s^2 +
-   4.196 \cdot 10^{60} \times s}
+  H(s) = \frac{45115.36 s}
+  { (s + 1.083 \times 10^5)
+    (s + 0.2128) }
   \label{eqn:transferfunction}
 \end{equation}
 
@@ -106,19 +105,84 @@ figure \ref{fig:bodeplot} below.
 Equation \ref{eqn:transferfunction} can be solved by using the MATLAB
 script response.m (listing \ref{code:response_m}), the Bode plot in figure \ref{fig:bodeplot} was created with the same script.
 
-\subsection{Analysis} The transfer function is a bandpass filter with
-the suggested decoupling creating a high-pass filter with corner
-frequency at $f_{LP} = 0.0339$ Hz or a period of $29.4985$ s. The
-upper corner frequency is at $f_{HP} = 17.189 $ kHz. $f_{HP}$ 
-was chosen arbitrary to be well above the band of interest ($< 1$ kHz),
-but to provide sufficient damping at the Nyquist frequency of the AD
-converter 
-which has a modulator speed of $f_{clk}/4 = 4\ \text{MHz} / 4 = 1\ 
-\text{Mhz}$ \cite{ads1282_ds} and a Nyquist presumabley\ldots at
-$f_{Nyquist} = 1 \cdot 10^{6} / 2 = 500 $ kHz.
+\subsection{Analysis}
+The initial frequency band of interest reaches
+from periods of 20 s (0.05 Hz) to approximately $100$ Hz. The analog input part as
+well as the configuration of the analog-digital converter has been
+configured to as best and simple as possible to record the signal
+within this frequency band.
 
-\subsubsection{Stability} System stability was ensured using the
-Routh-Hurwitz method, MATLAB code is included in listing
+\subsubsection{Decoupling and analog high pass filter}
+The transfer function is a bandpass filter with
+the suggested decoupling creating a high-pass filter with corner
+frequency at $f_{HP} = 0.0339$ Hz or a period of $29.4985$ s.
+
+\subsubsection{Low pass filter and operational amplifier}
+
+To avoid aliasing due to the speed of the opamps (operational
+amplifiers) in the signal path, first the OPA629 \cite{opa629_ds} acting as buffer with
+unity gain and then the OPA1632 \cite{opa1632_ds} at the ADS1282EVM \cite{ads1282evm_ds}.
+An additional low pass stage is added with a corner frequency of
+$f_{LP_1} = 17.189 $ kHz.
+
+\subsubsection{Stability}
+The system, $H(s)$ from equation \eqref{eqn:transferfunction}, is
+passive and has all
+its poles in the left half plane and is stable.
+
+\subsubsection{Analog-Digital Converter (ADC)}
+The ADS1282EVM equips its ADS1282 with a crystal with the recommended clock frequency of
+$f_{clk} = 4.096$ Mhz \cite{ads1282evm_ds}. This results in a modulator
+output speed of $ f_s = f_{clk}/4 = 1.024$ Mhz \cite{ads1282_ds}. The
+Nyquist frequency is then: $f_{Nq} = 1.024 \times 10^6 / 2 = 512 $ kHz.
+
+\subsubsection{Anti-alias filter}
+The 10 nF capacitor utilized on the ADS1282EVM
+\cite{ads1282evm_ds}, creates in a low-pass filter with an upper corner frequency of $f_{LP_2} =
+\frac{1}{2 \pi \times 600 \times 10 \times 10^{-9}} = 26525.82 $ Hz
+\footnote{Equation (3), p.15, \cite{ads1282_ds}; \citetitle{ads1282_ds}}.
+
+$f_{LP_2}$ is thus well below $f_{Nq}$ and any signal component above $f_{LP_2}$ should
+be almost completely damped before it reaches $f_{Nq}$, resulting in no
+or very small aliasing effects.
+
+This equation represents the upper low pass filter:
+\begin{equation}
+  H_{UL}(s) = \frac{1 \div 600 \times 10 \times 10^{-9}}
+                   {(s + 1 \div 600 \times 10 \times 10^{-9})}
+            = \frac{1.667 \times 10^5}{(s + 1.667 \times 10^5)}
+  \label{eqn:transfer_upper_lowpass}
+\end{equation}
+
+The complete analog transfer function is then:
+\begin{equation}
+  H_{analog} = \frac{7.5192 \times 10^9}
+                { (s + 1.667 \times 10^5)
+                  (s + 1.083 \times 10^5)
+                  (s + 0.2128) }
+  \label{eqn:transfer_analog}
+\end{equation}
+
+With the following frequency response:
+\begin{figure}[h!]
+  \begin{center}
+    \includegraphics[width=400px]{bode_complete_analog.png}
+  \end{center}
+  \caption{Frequency response of complete analog system, equation
+    \eqref{eqn:transfer_analog}.}
+  \label{fig:bode_complete_analog}
+\end{figure}
+
+\subsubsection{Digital filter}
+Further the ADS1282 is configured to digitally filter the decimation
+output so that the final output signal of 250 Hz contains no alias. The
+built-in sinc and FIR filters are activated, see the ADS1282 datasheet
+\cite{ads1282_ds} for details. Further, the high pass filter has been
+set to filter at $f_{HP} = 0.05\ \text{Hz} = 20s$.
+
+\paragraph{}The
+ADS1282 can be configured for an sample rate of as high as 4000 Hz
+\cite{ads1282_ds}. This would be possible without changes in the analog interface, although it would come at an cost of resolution.
 
 \subsubsection{Output} The output is scaled by $-7.6\ \text{dB} =
 0.4169 \frac{V}{V}$ which is to scale the input from $\pm 6V$ to $\pm 2.5V$, $0.4169
@@ -126,6 +190,7 @@ Routh-Hurwitz method, MATLAB code is included in listing
 (\cite{ads1282evm_ds} and \cite{ads1282_ds}) in bipolar mode. The
 slightly inaccurate scaling is due to available resistor values.
 
+\newpage
 \printbibliography
 
 \newpage
@@ -134,10 +199,6 @@ slightly inaccurate scaling is due to available resistor values.
 \lstset{caption={response.m, MATLAB code for calculating instrument
 response},label=code:response_m}
 \lstinputlisting{response.m}
-
-\subsection{routhtable.m}
-
-
 
 \end{document}
 
