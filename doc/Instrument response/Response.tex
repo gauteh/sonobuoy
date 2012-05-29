@@ -11,12 +11,18 @@
 \bibliography{Response}
 
 \usepackage[paper=a4paper,
-            %includefoot, % Uncomment to put page number above margin
+            includefoot, % Uncomment to put page number above margin
             marginparwidth=30.5mm,    % Length of section titles
             marginparsep=1.5mm,       % Space between titles and text
-            margin=15mm,              % 25mm margins
+            margin=10mm,              % 25mm margins
             includemp]{geometry}
 
+%\setlength{\oddsidemargin}{10mm}
+%\setlength{\evensidemargin}{10mm}
+\usepackage{fullpage}
+
+\usepackage{multicol}
+\usepackage{caption}
 
 \newcommand{\makeheading}[2]%
         {\hspace*{-\marginparsep minus \marginparwidth}%
@@ -40,17 +46,20 @@ during AD conversion is briefly discussed, but its properties are well
 defined in the manual of the ADC.
 \vspace{2em}
 
+\begin{multicols}{2}
 \section{Hydrophone decoupling}
-\begin{figure}[h]
-  \begin{center}
-  \includegraphics[width=400px]{Hydrophone_decoupling.png}
-\end{center}
-  \caption{Hydrophone decoupling circuit}
-  \label{fig:hydrophone_decoupling}
-\end{figure}
 
-The figure above (\ref{fig:hydrophone_decoupling}) shows an equivalent
+The figure below (\ref{fig:hydrophone_decoupling}) shows an equivalent
 circuit of the deployed input decoupling to the hydrophone.
+
+\end{multicols}
+\begin{center}
+  \includegraphics[width=400px]{Hydrophone_decoupling.png}
+  \captionof{figure}{Hydrophone decoupling circuit}
+  \label{fig:hydrophone_decoupling}
+\end{center}
+
+\begin{multicols}{2}
 
 \begin{align*}
   C_1 &= 47 \mu F \\
@@ -65,14 +74,12 @@ same properties, but also low-pass the signal at cutoff frequency
 $f_{LP_1}$. The original design already decouples, and high-passes, the
 signal at frequency $f_{HP}$.
 
-\begin{figure}[h!]
   \begin{center}
     \includegraphics[width=200px]{AQ-18-decoupling-and-wiring.jpg}
   \end{center}
-  \caption{AQ-18 suggested decoupling and wiring
+  \captionof{figure}{AQ-18 suggested decoupling and wiring
     \cite{aq-18_decoupling}.}
   \label{fig:suggested_decoupling}
-\end{figure}
 
 \section{Derivation of transfer function}
 
@@ -107,15 +114,16 @@ Solving for $H(s)$ gives:
 
 A bode plot of the transfer function (instrument response) is shown in
 figure \ref{fig:bodeplot} below.
-\begin{figure}[h!]
+
+\end{multicols}
   \begin{center}
     \includegraphics[width=400px]{bodeplot.png}
   \end{center}
-  \caption{Bode plot of transfer function, showing peak response at
+  \captionof{figure}{Bode plot of transfer function, showing peak response at
   $33.9$ Hz.}
   \label{fig:bodeplot}
-\end{figure}
 
+\begin{multicols}{2}
 Equation \ref{eqn:transferfunction} can be solved by using the MATLAB
 script response.m (listing \ref{code:response_m}), the Bode plot in figure \ref{fig:bodeplot} was created with the same script.
 
@@ -187,6 +195,17 @@ $f_{clk} = 4.096$ Mhz \cite{ads1282evm_ds}. This results in a modulator
 output speed of $ f_s = f_{clk}/4 = 1.024$ Mhz \cite{ads1282_ds}. The
 Nyquist frequency is then: $f_{Nq} = 1.024 \times 10^6 / 2 = 512 $ kHz.
 
+\end{multicols}
+
+  \begin{center}
+    \includegraphics[width=400px]{bode_complete_analog.png}
+  \end{center}
+  \captionof{figure}{Frequency response of complete analog system, equation
+    \eqref{eqn:transfer_analog}.}
+  \label{fig:bode_complete_analog}
+
+  \begin{multicols}{2}
+
 \subsubsection{Anti-alias filter}
 The 10 nF capacitor used on the ADS1282EVM
 \cite{ads1282evm_ds}, results in a low-pass filter with an upper corner frequency of $f_{LP_3} =
@@ -198,33 +217,36 @@ be almost completely damped before it reaches $f_{Nq}$, resulting in no
 or very small aliasing effects.
 
 This equation represents the upper low pass filter:
+\begin{center}
 \begin{equation}
-  H_{UL}(s) = \frac{1 \div 600 \times 10 \times 10^{-9}}
-                   {(s + 1 \div 600 \times 10 \times 10^{-9})}
-            = \frac{1.667 \times 10^5}{(s + 1.667 \times 10^5)}
+  \begin{aligned}
+  H_{UL}(s) &= \frac{1 \div 600 \times 10 \times 10^{-9}}
+                   {(s + 1 \div 600 \times 10 \times 10^{-9})} \\
+            &= \frac{1.667 \times 10^5}{(s + 1.667 \times 10^5)}
+  \end{aligned}
   \label{eqn:transfer_upper_lowpass}
 \end{equation}
+\end{center}
 
 The complete analog transfer function is then:
+\begin{center}
 \begin{equation}
-  H_{analog} = \frac{7.1817 \times 10^15}
-                { (s + 9.551 \times 10^5)
-                  (s + 1.667 \times 10^5)
-                  (s + 1.083 \times 10^5)
+  \begin{aligned}
+  H_{a} = &\frac{7.1817 \times 10^{15}}
+                { (s + 9.551 \times 10^5) \times
+                   (s + 1.667 \times 10^5)
+                 } \times \\
+          & \frac{1}
+                 {(s + 1.083 \times 10^5) \times
                   (s + 0.2128) }
+  \end{aligned}
   \label{eqn:transfer_analog}
 \end{equation}
+\end{center}
 
-With the following frequency response:
-\begin{figure}[h!]
-  \begin{center}
-    \includegraphics[width=400px]{bode_complete_analog.png}
-  \end{center}
-  \caption{Frequency response of complete analog system, equation
-    \eqref{eqn:transfer_analog}.}
-  \label{fig:bode_complete_analog}
-\end{figure}
 
+The frequency response is illustrated in figure
+(\ref{fig:bode_complete_analog}).
 \subsubsection{Output of decoupling and buffer} The output is scaled by $-7.6\ \text{dB} =
 0.4169 \frac{V}{V}$ which is to scale the input from $\pm 6V$ to $\pm 2.5V$, $0.4169
 \approx 5 / 12 = 0.4167$, which is the input range of the ADS1282EVM
@@ -249,6 +271,7 @@ transducer (including its built-in preamplifier).
 
 \vspace{5em}
 \printbibliography
+\end{multicols}
 
 \newpage
 \section*{Attachments}
