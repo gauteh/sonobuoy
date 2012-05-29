@@ -173,7 +173,8 @@ gain. The feedback loop is internally connected. But otherwise the same
 wiring scheme applies. Closely mounted and well chosen bypass capacitors
 are still needed on the power supplies to ensure stability. The input
 impedance of the ADS1282EVM should be sufficient to for the gain to
-approach unity. The OPA633 has a gain bandwidth of 260 MHz.
+approach unity. The OPA633 has a gain bandwidth of 260 MHz, however it
+requires $\pm 15$ mA current, which is about twice that of the OPA627.
 
 \subsubsection{Stability}
 The system, $H(s)$ from equation \eqref{eqn:transferfunction}, is
