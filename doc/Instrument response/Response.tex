@@ -159,6 +159,15 @@ the OPA627 has well mounted bypass capacitors to avoid oscillations when
 configured for this low gain. An buffer designed for unity gain, like
 the OPA633 \cite{opa633_ds} or BUF634 \cite{buf634_ds} could prove a better choice.
 
+\paragraph{OPA633} \ \\
+The OPA633 \cite{opa633_ds} is a strong candidate for an drop-in replacement of the
+OPA627, it is specifically designed to be a buffer working at unity
+gain. The feedback loop is internally connected. But otherwise the same
+wiring scheme applies. Closely mounted and well chosen bypass capacitors
+are still needed on the power supplies to ensure stability. The input
+impedance of the ADS1282EVM should be sufficient to for the gain to
+approach unity. The OPA633 has a gain bandwidth of 260 MHz.
+
 \subsubsection{Stability}
 The system, $H(s)$ from equation \eqref{eqn:transferfunction}, is
 passive and has all
