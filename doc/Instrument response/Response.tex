@@ -217,22 +217,26 @@ With the following frequency response:
   \label{fig:bode_complete_analog}
 \end{figure}
 
+\subsubsection{Output of decoupling and buffer} The output is scaled by $-7.6\ \text{dB} =
+0.4169 \frac{V}{V}$ which is to scale the input from $\pm 6V$ to $\pm 2.5V$, $0.4169
+\approx 5 / 12 = 0.4167$, which is the input range of the ADS1282EVM
+(\cite{ads1282evm_ds} and \cite{ads1282_ds}) in bipolar mode. The
+slightly inaccurate scaling is due to available resistor values.
+
 \subsubsection{Digital filter}
 Further the ADS1282 is configured to digitally filter the decimation
 output so that the final output signal of 250 Hz contains no alias. The
 built-in sinc and FIR filters are activated, see the ADS1282 datasheet
-\cite{ads1282_ds} for details. Further, the high pass filter has been
+\cite{ads1282_ds} for details. The high pass filter has been
 set to filter at $f_{HP} = 0.05\ \text{Hz} = 20s$.
 
 \paragraph{}The
 ADS1282 can be configured for an sample rate of as high as 4000 Hz
 \cite{ads1282_ds}. This would be possible without changes in the analog interface, although it would come at an cost of resolution.
 
-\subsubsection{Output} The output is scaled by $-7.6\ \text{dB} =
-0.4169 \frac{V}{V}$ which is to scale the input from $\pm 6V$ to $\pm 2.5V$, $0.4169
-\approx 5 / 12 = 0.4167$, which is the input range of the ADS1282EVM
-(\cite{ads1282evm_ds} and \cite{ads1282_ds}) in bipolar mode. The
-slightly inaccurate scaling is due to available resistor values.
+\section{Hydrophone characteristics}
+Refer to the datasheet of the AQ-18 \cite{aq_18_ds} for the frequency response of the
+transducer (including its built-in preamplifier).
 
 \newpage
 \printbibliography
