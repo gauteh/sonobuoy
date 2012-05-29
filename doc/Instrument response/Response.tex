@@ -33,6 +33,13 @@
 \makeheading{Gautebøye - Instrument Response}{Gaute Hope
 (gaute.hope@student.uib.no), 29.05.2012, Revision 1}
 
+\vspace{2em}
+\section*{Introduction} Here is presented the theoretical derivation of
+the analog instrument response of the digitizer. The digital filtering
+during AD conversion is briefly discussed, but its properties are well
+defined in the manual of the ADC.
+\vspace{2em}
+
 \section{Hydrophone decoupling}
 \begin{figure}[h]
   \begin{center}
@@ -223,6 +230,7 @@ With the following frequency response:
 (\cite{ads1282evm_ds} and \cite{ads1282_ds}) in bipolar mode. The
 slightly inaccurate scaling is due to available resistor values.
 
+\label{digitalfilter}
 \subsubsection{Digital filter}
 Further the ADS1282 is configured to digitally filter the decimation
 output so that the final output signal of 250 Hz contains no alias. The
@@ -238,15 +246,16 @@ ADS1282 can be configured for an sample rate of as high as 4000 Hz
 Refer to the datasheet of the AQ-18 \cite{aq_18_ds} for the frequency response of the
 transducer (including its built-in preamplifier).
 
-\newpage
+\vspace{5em}
 \printbibliography
 
 \newpage
-\section{Attachments}
-\subsection{response.m}
+\section*{Attachments}
+\subsection*{response.m}
 \lstset{caption={response.m, MATLAB code for calculating instrument
 response},label=code:response_m}
 \lstinputlisting{response.m}
+
 
 \end{document}
 
