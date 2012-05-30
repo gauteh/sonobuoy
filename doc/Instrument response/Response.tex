@@ -37,7 +37,7 @@
 
 \begin{document}
 \makeheading{Gautebøye - Instrument Response}{Gaute Hope
-(gaute.hope@student.uib.no), 29.05.2012, Revision 1}
+(gaute.hope@student.uib.no), 29.05.2012, Revision 2 (30.05.2012)}
 
 \vspace{2em}
 \section*{Introduction} Here is presented the theoretical derivation of
@@ -251,6 +251,31 @@ The frequency response is illustrated in figure
 \approx 5 / 12 = 0.4167$, which is the input range of the ADS1282EVM
 (\cite{ads1282evm_ds} and \cite{ads1282_ds}) in bipolar mode. The
 slightly inaccurate scaling is due to available resistor values.
+
+\paragraph{}
+The impulse response of the system is plotted in figure
+\ref{fig:impulse_complete_analog}:
+
+\includegraphics[width=220pt]{impulse_complete_analog.png}
+\captionof{figure}{Impulse response of complete analog system, equation
+  \eqref{eqn:transfer_analog}.}
+\label{fig:impulse_complete_analog}
+
+\paragraph{}
+The step response, large is plotted in figure
+\ref{fig:step_complete_analog}:
+\includegraphics[width=220pt]{step_complete_analog.png}
+\captionof{figure}{Step response of complete analog system, equation
+  \eqref{eqn:transfer_analog}.}
+\label{fig:step_complete_analog}
+
+\paragraph{}
+A zoomed in section of the high frequency response is shown in figure
+\ref{fig:step_zoom_complete_analog}, the first tens of microseconds.
+\includegraphics[width=220pt]{step_zoom_complete_analog.png}
+\captionof{figure}{Step response (zoomed) of complete analog system, equation
+  \eqref{eqn:transfer_analog}.}
+\label{fig:step_zoom_complete_analog}
 
 \label{digitalfilter}
 \section{Digital filter}
