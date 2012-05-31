@@ -298,8 +298,15 @@ The theoretical maximum dynamic range is specified to be 130
 dB\footnote{Table 1, p. 13, \cite{ads1282_ds}; \citetitle{ads1282_ds}}.
 But before reaching the frequencies of any signals not attenuated at
 \eqref{eqn:attenuation_nyquist} that wraps around to the 125 Hz passband of
-the digital filter \ref{digitalfilter} they will be additionally
+the digital filter (section \ref{digitalfilter}) they will be additionally
 attenuated. The next periods will be increasingly attenuated.
+\paragraph{} Depending on the noise spectra there will
+be only a fraction of the noise that is in this passband. Any tones or
+oscillations from the electrical components or environment are, although
+unlikely to be entirely in this passband, the biggest worry. Other noise
+is likelier to have a flatter spectra, where only a fraction of its
+amplitude will wrap into the 125 Hz passband.
+
 
 \label{digitalfilter}
 \section{Digital filter}
@@ -309,8 +316,7 @@ built-in sinc and FIR filters are activated, see the ADS1282 datasheet
 \cite{ads1282_ds} for details. The high pass filter has been
 set to filter at $f_{HP} = 0.05\ \text{Hz} = 20s$. This provides more
 than $140$ dB of attenuation above the Nyquist frequency of the output
-sample rate \cite{ads1282_ds}.
-
+sample rate \cite{ads1282_ds}. 
 \paragraph{}The
 ADS1282 can be configured for an sample rate of as high as 4000 Hz
 \cite{ads1282_ds}. This would be possible without changes in the analog interface, although it would come at an cost of resolution.
