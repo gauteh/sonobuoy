@@ -296,6 +296,10 @@ frequency, $512$ kHz, equation \eqref{eqn:nyquist} using
 
 The theoretical maximum dynamic range is specified to be 130
 dB\footnote{Table 1, p. 13, \cite{ads1282_ds}; \citetitle{ads1282_ds}}.
+But before reaching the frequencies of any signals not attenuated at
+\eqref{eqn:attenuation_nyquist} that wraps around to the 125 Hz passband of
+the digital filter \ref{digitalfilter} they will be additionally
+attenuated. The next periods will be increasingly attenuated.
 
 \label{digitalfilter}
 \section{Digital filter}
