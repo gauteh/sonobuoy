@@ -62,4 +62,4 @@ title ('Bode Diagram (Complete analog response)');
 
 % attenuation at nyquist
 a = abs(freqresp(C, 512e3*2*pi))
-adb = 20*log(a)
+adb = 20*log10(a)
