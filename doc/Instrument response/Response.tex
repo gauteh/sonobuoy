@@ -192,7 +192,12 @@ its poles in the left half plane and is stable.
 The ADS1282EVM equips its ADS1282 with a crystal with the recommended clock frequency of
 $f_{clk} = 4.096$ Mhz \cite{ads1282evm_ds}. This results in a modulator
 output speed of $ f_s = f_{clk}/4 = 1.024$ Mhz \cite{ads1282_ds}. The
-Nyquist frequency is then: $f_{Nq} = 1.024 \times 10^6 / 2 = 512 $ kHz.
+Nyquist frequency is then:
+
+\begin{equation}
+  f_{Nq} = 1.024 \times 10^6 / 2 = 512\ \text{kHz}
+  \label{eqn:nyquist}
+\end{equation}
 
 \end{multicols}
 
@@ -276,6 +281,18 @@ A zoomed in section of the high frequency response is shown in figure
 \captionof{figure}{Step response (zoomed) of complete analog system, equation
   \eqref{eqn:transfer_analog}.}
 \label{fig:step_zoom_complete_analog}
+
+\paragraph{Attenuation at Nyquist frequency}\ \\
+The attenuation at the Nyquist
+frequency, $512$ kHz, equation \eqref{eqn:nyquist} using
+\eqref{eqn:transfer_analog}, is evaluated to be:
+\begin{equation}
+  \begin{aligned}
+  | H_a(512 \times 10^3 \times 2 \pi) | &= 0.00020640 \\
+                                        &= -169.7141\ \text{dB}
+  \end{aligned}
+  \label{eqn:attenuation_nyquist}
+\end{equation}
 
 \label{digitalfilter}
 \section{Digital filter}

@@ -59,3 +59,7 @@ C = UOPA * U * T;
 figure(3); clf('reset');
 bodeplot (C, P);
 title ('Bode Diagram (Complete analog response)');  
+
+% attenuation at nyquist
+a = abs(freqresp(C, 512e3*2*pi))
+adb = 20*log(a)
