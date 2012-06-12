@@ -1,0 +1,15 @@
+= Buoy One / 1 =
+  == Radio address ==
+  ...
+
+  == Hardware ==
+
+  GPS:
+  The colors matching number are non-standard compared to pin map
+  specification.
+
+  +10V regulator:
+  Has a 10 uF tantulum capacitor on output, none on input.
+
+  == History ==
+

@@ -13,9 +13,15 @@
 # include "wirish.h"
 # include "iwdg.h"
 
+# if HASRF
+  # include "rf.h"
+# endif
+
+# if HASGPS
+  # include "gps.h"
+# endif
+
 # include "ads1282.h"
-# include "rf.h"
-# include "gps.h"
 # include "store.h"
 
 namespace Buoy {
@@ -25,10 +31,14 @@ namespace Buoy {
     uint32_t lasts = 0;
 
     while (true) {
+# if HASGPS
       gps->loop ();
+# endif
       ad->loop ();
       store->loop ();
+# if HASRF
       rf->loop ();
+# endif
 
       if (millis () - lasts >= 1000) {
         SerialUSB.print ("V ");
@@ -64,27 +74,35 @@ namespace Buoy {
 
     //SerialUSB.println ("[**] Gautebøye 1 [" BUOY_NAME "] version: " GIT_DESC);
 
-    /* Set up independent watchdog */
-    iwdg_init (IWDG_PRE_256, WATCHDOG_RELOAD);
-
     /* Set up devices */
+# if HASRF
     rf    = new RF ();
+# endif
+# if HASGPS
     gps   = new GPS ();
+# endif
     store = new Store ();
     ad    = new ADS1282 ();
 
+# if HASRF
     rf->setup     (this);
+# endif
+# if HASGPS
     gps->setup    (this);
+# endif
     ad->setup     (this);
     store->setup  (this);
+
+    /* Set up independent watchdog */
+    iwdg_init (IWDG_PRE_256, WATCHDOG_RELOAD);
 
 # if DEBUG_INFO
     SerialUSB.println ("[Buoy] Initiating continuous transfer and write.");
 # endif
 
     /* Start reading data continuously and writing to SD card */
-    store->start_continuous_write ();
-    ad->start_continuous_read ();
+    //store->start_continuous_write ();
+    //ad->start_continuous_read ();
   }
 
   inline bool BuoyMaster::hasusb () {

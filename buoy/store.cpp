@@ -30,12 +30,14 @@ namespace Buoy {
     root    = NULL;
     sd_data = NULL;
 
+# if HASRF
     s_id = 0;
     s_samples = 0;
     s_nrefs = 0;
     s_lastbatch = 0;
     send_i = NULL;
     send_d = NULL;
+# endif
 
   }
 
@@ -374,7 +376,9 @@ namespace Buoy {
       lastbatch  =  (lastbatch + 1) % BATCHES;
 
     if (lastbatch != ad->batch) {
+# if HASRF
       rf->send_error (RF::E_SDLAG);
+# endif
       SerialUSB.println ("R");
 # if DEBUG_VERB
       SerialUSB.println ("[SD] [Error] Out of sync with AD, might not finish writing batch before it is swapped.");

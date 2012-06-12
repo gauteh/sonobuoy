@@ -190,9 +190,9 @@ namespace Buoy {
       void start_continuous_write ();
       void stop_continuous_write ();
 
-# if HASRF
       /* ID and files currently being sent */
 # define GET_IDS_N 10 // no of ids to send in one go
+# if HASRF
       uint32_t s_id;
       uint32_t s_samples;
       uint32_t s_nrefs;
