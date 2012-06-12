@@ -41,8 +41,9 @@ namespace Buoy {
 # endif
 
       if (millis () - lasts >= 1000) {
-        SerialUSB.print ("V ");
-        SerialUSB.println (ad->value);
+        SerialUSB.print ("V");
+        SerialUSB.println (ad->values[ad->position-1]);
+        SerialUSB.println (ad->position);
         //ad->print_status ();
         //gps->print_status ();
         lasts = millis ();
@@ -65,7 +66,7 @@ namespace Buoy {
     /* Count down.. */
 
     for (int i = 0; i < 3; i++) {
-      SerialUSB.print ("S ");
+      //SerialUSB.print ("S ");
       SerialUSB.println (i);
       delay(1000);
       //togglePin (3);
@@ -101,8 +102,8 @@ namespace Buoy {
 # endif
 
     /* Start reading data continuously and writing to SD card */
-    //store->start_continuous_write ();
-    //ad->start_continuous_read ();
+    store->start_continuous_write ();
+    ad->start_continuous_read ();
   }
 
   inline bool BuoyMaster::hasusb () {

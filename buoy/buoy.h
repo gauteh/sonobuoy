@@ -40,7 +40,7 @@
 # define WATCHDOG_RELOAD 120 * (40000 / 256) // ca 2 minutes
 # define WATCHDOG_RELOAD_INIT (WATCHDOG_RELOAD * 2)
 
-// Enable sections in dependant classes
+// Enable sections for peripherals in dependant classes
 # define HASRF  1
 # define HASGPS 1
 

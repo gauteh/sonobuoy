@@ -36,8 +36,8 @@ namespace Buoy {
 
 // SPI
 # define AD_SCLK 12
-# define AD_DOUT 10 // (D13 = led 1)
-# define AD_DIN  11
+# define AD_DOUT 11 // (D13 = led 1)
+# define AD_DIN  10
 
 # define AD_nDRDY 4 // (D3 = led 2)
 

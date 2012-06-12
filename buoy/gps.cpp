@@ -606,11 +606,11 @@ namespace Buoy {
 # if DEBUG_VERB
   void GPS::print_status () {
     SerialUSB.print ("[GPS] lat: ");
-    SerialUSB.print (ad->gps->latitude);
+    SerialUSB.print (latitude);
     SerialUSB.print (", lon: ");
-    SerialUSB.print (ad->gps->longitude);
+    SerialUSB.print (longitude);
     SerialUSB.print (", time: ");
-    SerialUSB.print (ad->gps->time);
+    SerialUSB.print (time);
     SerialUSB.print (", date: ");
     SerialUSB.print (day);
     SerialUSB.print (month);
