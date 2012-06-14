@@ -164,7 +164,7 @@ class Index:
 
   def getbatch (self, id, ref, start, length):
     if self.state == 0:
-      self.logger.info (self.me + " Getting batch, id: " + str(id) + ", ref no: " + str(ref) + ", start: " + str(start) + ", length: " + str(length))
+      self.logger.info (self.me + "[" + str(id) + "] Req chunk, ref: " + str(ref) + ", start: " + str(start) + ", length: " + str(length))
       self.pendingid = 5
       self.state     = 1
 
