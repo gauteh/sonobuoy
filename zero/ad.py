@@ -93,9 +93,6 @@ class AD:
       # Successfully received samples and time stamps
       self.buoy.index.gotbatch (self.ad_batch_id, self.ad_refno, self.ad_start, self.ad_k_samples, self.ad_reference, self.ad_reference_status, s)
 
-      # Write reference line as described in buoy.py, log ()
-      #r = "R," + str(self.ad_k_samples) + "," + str(self.ad_reference) + "," + str(self.ad_reference_status)
-
       #print "[AD] Successfully received ", self.ad_k_samples, " samples.. (time of first: " + str(self.ad_time_of_first) + ")"
       #print "[AD] Frequency: " + str(self.freq) + "[Hz]"
 

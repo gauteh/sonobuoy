@@ -162,7 +162,9 @@ class Data:
   def got_chunk (self, refno, start, length, reference, status, samples):
     if self.enabled:
       self.logger.info (self.me + " Got chunk ref: " + str(refno) + ", start: " + str(start) + ", length: " + str(length))
+
       self.dataf_l.acquire ()
+
       b = None
       i = self.indexofbatch (refno)
 
