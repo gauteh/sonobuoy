@@ -10,6 +10,7 @@ fsr = 2^31 - 1;
 
 snr  = 20 * log10(fsr / noiserange);
 bits = log2(fsr / noiserange);
-fprintf ('SNR (FSR / range): %4.7f dB\n', snr);
+
+fprintf ('SNR (FSR / signal range): %4.7f dB\n', snr);
 fprintf ('Bits: %1.2f\n', bits);
 
