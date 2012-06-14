@@ -41,8 +41,9 @@
 # define WATCHDOG_RELOAD_INIT (WATCHDOG_RELOAD * 2)
 
 /* Enable drivers for peripherals (disable to run without these
- * connected or to save program size) */
-# define HASRF  1 define HASGPS 1
+ * connected or to * save program size) */
+# define HASRF  1
+# define HASGPS 1
 
 /* Define board, 0 = maple_native, 1 = olimexino/maple (should be
  * compatible with BOARD in Makefile) */
