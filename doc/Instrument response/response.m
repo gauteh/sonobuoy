@@ -3,7 +3,7 @@ r1 = 58.33e3;  % ohm
 r2 = 41.67e3;  % ohm
 
 c1 = 47e-6;    % farad
-c2 = 380e-12;  % farad
+c2 = 330e-12;  % farad
 
 syms s i1 i2 vs;
 zc1 = 1/(s*c1);

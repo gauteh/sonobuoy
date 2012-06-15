@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Author: Gaute Hope <eg@gaute.vetsj.com> / 2011-09-26
 #
 # buoy.py: Represents one Buoy with AD and GPS

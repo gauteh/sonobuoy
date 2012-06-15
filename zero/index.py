@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Author: Gaute Hope <eg@gaute.vetsj.com> / 2012-05-14
 #
 # index.py: Keep track of indexes for buoy
@@ -10,16 +11,16 @@ import os
 from data import *
 
 class Index:
-  buoy = None
-  logger = None
-  protocol = None
+  buoy      = None
+  logger    = None
+  protocol  = None
 
-  indexf_uri = None
-  indexf = None
+  indexf_uri  = None
+  indexf      = None
 
-  data = []
-  greatestid = 0
-  lastid = 0
+  data        = []
+  greatestid  = 0
+  lastid      = 0
   __incremental_id_check_done__ = False
   __unchecked_ids__             = None
 

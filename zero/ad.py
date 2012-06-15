@@ -1,7 +1,7 @@
-"""
-Gaute Hope <eg@gaute.vetsj.com> (c) 2011-08-29
-
-"""
+# -*- coding: utf-8 -*-
+# Author: Gaute Hope <eg@gaute.vetsj.com> (c) 2011-08-29
+#
+# ad.py: Handle incoming data batches
 
 import time
 import threading

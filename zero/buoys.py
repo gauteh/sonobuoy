@@ -1,5 +1,4 @@
-#! /usr/bin/python2
-#
+# -*- coding: utf-8 -*-
 # Author: Gaute Hope <eg@gaute.vetsj.com> / 2012-04-10
 #
 # Defines buoys and addresses
