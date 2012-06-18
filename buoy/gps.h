@@ -73,8 +73,10 @@ namespace Buoy {
       bool      north;
       char      longitude[12];
       bool      east;
+      /*
       char      speedoverground[6];
       char      courseoverground[6]; // Ref. to True north
+      */
 
       /*
       uint8_t   fixtype;

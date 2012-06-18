@@ -396,8 +396,8 @@ namespace Buoy {
     strcpy (&(fname[p]), ".DAT");
     //sprintf (fname, "%lu.DAT", current_index.id);
 
-    SerialUSB.print ("[SD] Opening: ");
-    SerialUSB.println (fname);
+    //SerialUSB.print ("[SD] Opening: ");
+    //SerialUSB.println (fname);
 
     SD_AVAILABLE &= sd_data->open (root, fname, O_CREAT | O_WRITE | O_TRUNC);
     SD_AVAILABLE &= (card->errorCode () == 0);
@@ -691,7 +691,7 @@ namespace Buoy {
     if (start > 0)
       pos += SD_REFERENCE_LENGTH + (SAMPLE_LENGTH * start);
 
-    SerialUSB.println (pos);
+    //SerialUSB.println (pos);
     send_d->seekSet (pos);
 
     SD_AVAILABLE = (card->errorCode () == 0);

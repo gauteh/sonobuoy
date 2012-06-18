@@ -48,8 +48,8 @@ namespace Buoy {
     north     = false;
     *longitude = 0;
     east      = false;
-    *speedoverground = 0;
-    *courseoverground = 0;
+    //*speedoverground = 0;
+    //*courseoverground = 0;
   }
 
   void GPS::setup (BuoyMaster *b) {
@@ -114,12 +114,13 @@ namespace Buoy {
   }
 
   void GPS::assert_time () {
-    /* Check state of timing and PPS, is called from within interrupt - may not output */
+    /* Check state of timing and PPS, is called from within interrupt.
+     * Should not output */
 
-    /* We have a tolerance of 1 millisecond to catch sync loss */
-# define LOST_SYNC 1001
+    /* We have a tolerance of 30 millisecond to catch sync loss */
+# define LOST_SYNC 1030
 
-    /* Check if we still have sync */
+    /* Check if we have lost sync */
     if ((millis () - lastsync) > LOST_SYNC) {
       HAS_SYNC = false;
 
@@ -134,12 +135,16 @@ namespace Buoy {
        *
        */
 
-      if (( (millis() - lastsync) > (REFERENCE_TIMEOUT * 1000) ) && ( (lastsecond - reference) > REFERENCE_TIMEOUT )) {
+      if (
+          ( (lastsecond - reference) > REFERENCE_TIMEOUT ) &&
+          ( (millis () - lastsync) > (REFERENCE_TIMEOUT * 1000) )
+         )
+      {
         HAS_SYNC_REFERENCE = false;
 
         /* Un-reliable, using time telegram */
-        reference = lastsecond;
-        microdelta = micros () + ((millis () - lastsecond_time) * 1000);
+        reference   = lastsecond;
+        microdelta  = micros () + ((millis () - lastsecond_time) * 1000);
 
         //rf_send_debug_f ("[GPS] [Error] Setting reference manually: %llu", reference);
       }
@@ -223,7 +228,7 @@ namespace Buoy {
       {
         case 0:
           if (c == '$') {
-            gps_buf[0] = '$';
+            gps_buf[0]  = '$';
             gps_buf_pos = 1;
             state = 1;
           }
@@ -308,8 +313,8 @@ namespace Buoy {
       if (i < len) {
         if (tokeni == 0) {
           /* Determine telegram type */
-          if (strcmp(token, "$GPRMC") == 0)
-            type = GPRMC;
+          if (token[3] == 'R') type = GPRMC;
+
           /*
           else if (strcmp(token, "$GPGGA") == 0)
             type = GPGGA;
@@ -324,7 +329,7 @@ namespace Buoy {
           */
           else {
             /* Cancel parsing */
-            type = UNKNOWN;
+            //type = UNKNOWN;
             return;
           }
           lasttype = type;
@@ -379,11 +384,11 @@ namespace Buoy {
                   break;
 
                 case 7:
-                  strcpy (speedoverground, token);
+                  //strcpy (speedoverground, token);
                   break;
 
                 case 8:
-                  strcpy (courseoverground, token);
+                  //strcpy (courseoverground, token);
                   break;
 
                 case 9:

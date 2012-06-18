@@ -143,7 +143,7 @@ namespace Buoy {
   /* Checksum {{{ */
   byte gen_checksum (const char *buf)
   {
-  /* Generate checksum for NULL terminated string */
+  /* Generate checksum for NULL or * terminated string */
 
     byte csum = 0;
     buf++; // skip $
