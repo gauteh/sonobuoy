@@ -123,7 +123,7 @@ namespace Buoy {
        *   interrupt handler.
        *
        */
-      bool HAS_TIME;                     // Has valid time from GPS
+      volatile bool HAS_TIME;            // Has valid time from GPS
 
       volatile bool HAS_SYNC;            // Has PPS synced
       volatile bool HAS_SYNC_REFERENCE;  // Reference is set using PPS
@@ -144,14 +144,14 @@ namespace Buoy {
 
       /* The last unix time calculated from GPS telegram, with timestamp
        * in millis (). Is also incremented by a PPS signal. */
-      uint64_t lastsecond;
-      uint64_t lastsecond_time;
+      volatile uint64_t lastsecond;
+      volatile uint64_t lastsecond_time;
 
       /* The latest most reliable reference for picking by AD */
-      uint64_t reference;
-      uint64_t microdelta;
-      uint64_t lastsync;
-      uint64_t lastmicros;
+      volatile uint64_t reference;
+      volatile uint64_t microdelta;
+      volatile uint64_t lastsync;
+      volatile uint64_t lastmicros;
 
 
       /* Time to wait before manually updating reference (in case of no sync)
