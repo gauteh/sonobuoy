@@ -1,8 +1,11 @@
-= Buoy One / 1 =
+= Buoy One [1] =
   Version:  1
   Storage:  16 GB (SDHC), Class 10, FAT32
   Chipset:  Olimexino STM32 H103 rev. B
   Radio:    RF200 with external antenna
+
+  == Notes ==
+  ...
 
   == Address ==
   ...
