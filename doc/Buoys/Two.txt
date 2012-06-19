@@ -13,7 +13,8 @@
   ...
 
   == Hardware ==
-  ...
+  GPS: - The colors matching number are non-standard compared to pin map
+         specification.
 
   == History ==
 
