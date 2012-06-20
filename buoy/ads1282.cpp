@@ -8,8 +8,11 @@
 
 # include "buoy.h"
 
-# include "wirish.h"
-# include "Wire.h"
+
+# if 0 // No need to configure PCA9535 for our usage, it is wired up though.
+  # include "wirish.h"
+  # include "Wire.h"
+# endif
 
 # include "ads1282.h"
 
@@ -67,8 +70,10 @@ namespace Buoy {
     SerialUSB.println ("[AD] Setting up ADS1282..");
 # endif
 
+# if 0
     /* Set up I2C */
     Wire.begin (AD_SDA, AD_SCL);
+# endif
 
     /* Set up SPI */
     pinMode (AD_SCLK, OUTPUT);
