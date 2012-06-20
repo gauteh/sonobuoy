@@ -212,7 +212,8 @@ class Data:
           r = "R," + str(BATCH_LENGTH) + "," + str(b.no) + "," + str(b.ref) + "," + str(b.status)
           self.dataf.write (r + '\n')
 
-          if not fresh_batch:
+          # throw away old ref
+          if not fresh_batch and len(b.completechunks) > 0:
             lines.pop (0)
 
           # write chunks
