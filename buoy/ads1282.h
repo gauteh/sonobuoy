@@ -98,6 +98,7 @@ namespace Buoy {
       GPS  * gps;
 # endif
 
+# if 0
       typedef struct _control {
         /* Control registers of U7 / PCA9535RGE {{{ */
 
@@ -121,6 +122,7 @@ namespace Buoy {
         // }}}
       } control;
       control state;
+# endif
 
       typedef struct _registers {
         /* Registers of ADS1282 {{{ */
@@ -186,6 +188,7 @@ namespace Buoy {
 
       registers reg;
 
+# if 0
       typedef enum _pca9535register {
         /* Register id, corresponds to register id on device {{{ */
         INPUT0 = 0,
@@ -198,6 +201,7 @@ namespace Buoy {
         CONTROL1
         // }}}
       } PCA9535REGISTER;
+# endif
 
       typedef enum _command {
       /* SPI commands for ADS1282 {{{ */
@@ -277,7 +281,7 @@ namespace Buoy {
       static void drdy ();
 
       void    shift_out (uint8_t v, bool delay = true);
-      uint8_t shift_in  ();
+      //uint8_t shift_in  ();
       void    shift_in_n (uint8_t *, int);
 
       void error (uint16_t);

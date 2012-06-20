@@ -29,6 +29,7 @@ namespace Buoy {
     continuous_read = false;
     run = 0;
 
+    /*
     state.ports0 = 0;
     state.ports1 = 0;
     state.polarity0 = 0;
@@ -37,6 +38,7 @@ namespace Buoy {
     state.sync  = false;
     state.reset = false;
     state.pdwn  = false;
+    */
 
     for (int i = 0; i < 11; i++) reg.raw[i] = 0;
 
@@ -653,6 +655,7 @@ namespace Buoy {
   // }}}
 
   /* SPI clocking operations: in and out {{{ */
+# if 0
   uint8_t ADS1282::shift_in () {
     /* Read each bit, MSB first */
     uint8_t v = 0;
@@ -665,6 +668,7 @@ namespace Buoy {
 
     return v;
   }
+# endif
 
   void ADS1282::shift_in_n (uint8_t *v, int n) {
     /* Shift in n bytes to byte array v */
