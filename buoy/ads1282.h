@@ -278,7 +278,7 @@ namespace Buoy {
       uint8_t shift_in  ();
       void    shift_in_n (uint8_t *, int);
 
-      void error ();
+      void error (uint16_t);
 
 # if DEBUG_VERB
       void print_status ();

@@ -176,7 +176,7 @@ namespace Buoy {
     Wire.send (AD_I2C_OUTPUT0);
     Wire.send (AD_I2C_OUTPUT1);
     n = Wire.endTransmission ();
-    if (n != SUCCESS) { error (); return; }
+    if (n != SUCCESS) { error (__LINE__); return; }
 
     read_pca9535 (OUTPUT0);
     */
@@ -242,7 +242,7 @@ namespace Buoy {
     Wire.beginTransmission (AD_I2C_ADDRESS);
     Wire.send (reg);
     n = Wire.endTransmission ();
-    if (n != SUCCESS) { error (); return; }
+    if (n != SUCCESS) { error (__LINE__); return; }
 
     // Read outputs
     Wire.beginTransmission (AD_I2C_ADDRESS);
@@ -304,7 +304,7 @@ namespace Buoy {
     }
 
     n = Wire.endTransmission ();
-    if (n != SUCCESS) { error (); return; }
+    if (n != SUCCESS) { error (__LINE__); return; }
     // }}}
   }
 
@@ -351,7 +351,7 @@ namespace Buoy {
     Wire.send (AD_I2C_OUTPUT0);
     Wire.send (AD_I2C_OUTPUT1 & !AD_I2C_RESET);
     n = Wire.endTransmission ();
-    if (n != SUCCESS) { error (); return; }
+    if (n != SUCCESS) { error (__LINE__); return; }
 
     read_pca9535 (OUTPUT0);
     //digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
@@ -363,7 +363,7 @@ namespace Buoy {
     Wire.send (AD_I2C_OUTPUT0);
     Wire.send (AD_I2C_OUTPUT1);
     n = Wire.endTransmission ();
-    if (n != SUCCESS) { error (); return; }
+    if (n != SUCCESS) { error (__LINE__); return; }
 
     read_pca9535 (OUTPUT0);
     //digitalWrite (BOARD_LED_PIN, !digitalRead (AD_nDRDY));
@@ -690,10 +690,11 @@ namespace Buoy {
 
   // }}}
 
-  void ADS1282::error () {
+  void ADS1282::error (uint16_t code) {
     /* Some error on the ADS1282 - disable {{{ */
 # if DEBUG_WARN
-    SerialUSB.println ("[AD] Error. Disabling.");
+    SerialUSB.print ("[AD] E: ");
+    SerialUSB.println (code);
 # endif
 
     disabled = true;
