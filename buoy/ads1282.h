@@ -258,9 +258,11 @@ namespace Buoy {
       ADS1282 ();
       void setup (BuoyMaster *);
       void configure ();
+      /*
       void reset ();
       void reset_spi ();
       void read_pca9535 (PCA9535REGISTER);
+      */
 
       void send_command (COMMAND cmd, uint8_t start = 0, uint8_t n = 0);
       void read_registers ();

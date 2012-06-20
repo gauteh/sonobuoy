@@ -152,8 +152,8 @@ namespace Buoy {
     */
 
     // Read configuration
-    read_pca9535 (CONTROL0);
-    read_pca9535 (POLARITY0);
+    //read_pca9535 (CONTROL0);
+    //read_pca9535 (POLARITY0);
 
     /* Set up outputs: (defined in header file)
      * - SYNC:   HIGH  (active low)
@@ -181,9 +181,9 @@ namespace Buoy {
     read_pca9535 (OUTPUT0);
     */
 
-    delay (100); // Allow EVM and AD to power up..
-    reset ();
-    delay (100);
+    delay (1000); // Allow EVM and AD to power up..
+    //reset ();
+    //delay (100);
 
 # if DEBUG_VERB
     SerialUSB.println ("[AD] Reset by command and stop read data continuous..");
@@ -233,6 +233,7 @@ namespace Buoy {
     continuous_read = false;
   } // }}}
 
+# if 0
   void ADS1282::read_pca9535 (PCA9535REGISTER reg) {
     /* Read registers of PCA9535RGE {{{
      *
@@ -307,7 +308,9 @@ namespace Buoy {
     if (n != SUCCESS) { error (__LINE__); return; }
     // }}}
   }
+# endif
 
+# if 0
   void ADS1282::reset_spi () {
     /* Reset SPI interface: Hold SCLK low for 64 nDRDY cycles
      * (warning: may block), is not used in buoy implementation.
@@ -327,7 +330,9 @@ namespace Buoy {
 
     // }}}
   }
+# endif
 
+# if 0
   void ADS1282::reset () {
     // Reset ADS1282 over I2C / U7 {{{
 # if DEBUG_VERB
@@ -375,6 +380,7 @@ namespace Buoy {
 # endif
     // }}}
   }
+# endif
 
   void ADS1282::send_command (COMMAND cmd, uint8_t start, uint8_t n) {
     /* Send SPI command to ADS1282 {{{ */
