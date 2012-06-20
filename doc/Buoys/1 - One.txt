@@ -11,14 +11,12 @@
   ...
 
   == Hardware ==
-
   GPS:
-  - Power supply wire is bad, danger of short.
+  - Power supply wire might be bad, danger of short or loss of GPS.
 
-  +10V regulator:
-  Has a 10 uF tantulum capacitor on output, none on input (should be a
-  0.1 uF).
+  Missing:
+    - 1 cap on +10V
 
   == History ==
-  2012-06-13: Finished initial build, missing correct box.
+  2012-06-13: Finished initial build.
 
