@@ -115,6 +115,7 @@ class Zero:
 
     msg = False
     while ((self.ser == None or not self.ser.isOpen ()) and self.go):
+      self.protocol.zerooutput = -1 # reset zeronode outputmode to undef.
       self.protocol.adressedbuoy = 0 # reset adressed buoy
       try:
         try:

@@ -15,6 +15,7 @@ class Protocol:
   logger  = None
 
   adressedbuoy = 0     # id of buoy addressed on zeronode
+  zerooutput   = -1    # output mode of zeronode, 0 = ota, 1 = uart, -1 = undef.
 
   tokens = [0, 0, 0, 0, 0, 0, 0, 0] # temp for storing tokens during parsing
 
@@ -25,7 +26,7 @@ class Protocol:
 # Commands (buoy and zeronode) and ouput {{{
   def znsetaddress (self):
     # Address buoy
-    self.logger.info ("[ZeroNode] Setting to address: " + str(self.zero.current.address_p))
+    self.logger.info ("[ZeroNode] Setting to buoy: " + self.zero.current.name + "[" + str(self.zero.current.id) + "] address: " + str(self.zero.current.address_p))
     _msg = 'ZA,' + self.zero.current.address_p
     self.zero.send ('$' + _msg + '*' + gen_checksum (_msg))
     self.adressedbuoy = self.zero.current.id
@@ -35,7 +36,7 @@ class Protocol:
     self.zero.send ('$ZS*' + gen_checksum ('ZS'))
 
   def znconnect (self):
-    self.logger.info ("[ZeroNode] Connecting to current buoy..")
+    self.logger.info ("[ZeroNode] Connecting to current buoy: " + self.zero.current.name + "[" + str(self.zero.current.id) + "]")
     self.zero.send ('$ZC*' + gen_checksum ('ZA'))
 
   def znportalmode (self):
@@ -54,16 +55,19 @@ class Protocol:
   def znoutputuart (self):
     self.logger.info ("[ZeroNode] Setting Zero RF to output locally.")
     self.zero.send ("$ZU*" + gen_checksum ('ZU'))
+    self.zerooutput = 1
 
   def znoutputwireless (self):
     self.logger.info ("[ZeroNode] Setting Zero RF to output on air.")
     self.zero.send ("$ZT*" + gen_checksum ('ZT'))
+    self.zerooutput = 0
 
   def send (self, msg):
     if self.zero.current.id != self.adressedbuoy:
       self.znsetaddress ()
       self.znconnect ()
-      self.znoutputwireless ()
+      if self.zerooutput != 0:
+        self.znoutputwireless ()
 
     # Encapsulate and add checksum
     msg = '$' + msg + '*' + gen_checksum (msg)

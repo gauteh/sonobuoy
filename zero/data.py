@@ -170,6 +170,8 @@ class Data:
 
       fresh_batch = False
 
+      thischunk = start / CHUNK_SIZE
+
       if i is None:
         # on new batch
         b = Batch (refno, 0, 0, 0)
@@ -180,7 +182,11 @@ class Data:
         # on existing batch
         b = self.batches[i]
 
-      thischunk = start / CHUNK_SIZE
+        if thischunk in b.completechunks:
+          self.logger.error (self.me + " Chunk already exists on reference, discarding.")
+          self.dataf_l.release ()
+          return
+
 
       # if first sample on ref, ref has been included
       if start == 0:
