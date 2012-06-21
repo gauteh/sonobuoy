@@ -18,5 +18,5 @@
     - 1 cap on +10V
 
   == History ==
-  2012-06-13: Finished initial build.
+  2012-06-13: Finished build.
 

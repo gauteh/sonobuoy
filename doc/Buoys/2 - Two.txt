@@ -21,5 +21,6 @@
     - 1 cap  on +6V
 
   == History ==
+  2012-06-21: Finished build.
   2012-06-20: Finished digital part. Buffer remains.
 

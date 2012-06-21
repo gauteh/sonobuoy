@@ -17,4 +17,5 @@
     - caps on +10V / +6V
 
   == History ==
+  2012-06-21: Finished build.
 
