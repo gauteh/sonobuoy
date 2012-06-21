@@ -73,6 +73,7 @@ namespace Buoy {
     }
 
 
+    SerialUSB.println ("Gautebøye [" STRINGIFY(BUOY) "] v" GIT_DESC);
     //SerialUSB.println ("[**] Gautebøye 1 [" BUOY_NAME "] version: " GIT_DESC);
 
     /* Set up devices */

@@ -51,6 +51,7 @@ GIT_DESC = \"$(shell git describe --tags --always)\"
 ## Compilation flags
 ##
 
+
 GLOBAL_FLAGS    := -D$(VECT_BASE_ADDR)					     \
 		   -DBOARD_$(BOARD) -DMCU_$(MCU)			     \
 		   -DERROR_LED_PORT=$(ERROR_LED_PORT)			     \
@@ -58,6 +59,11 @@ GLOBAL_FLAGS    := -D$(VECT_BASE_ADDR)					     \
 		   -D$(DENSITY)															 \
 			 -DGIT_DESC=$(GIT_DESC) \
 			 -DUSART_SAFE_INSERT
+
+ifneq ($(BUOY),)
+	GLOBAL_FLAGS += -DBUOY=$(BUOY)
+endif
+
 GLOBAL_CFLAGS   := -Os -g3 -gdwarf-2  -mcpu=cortex-m3 -mthumb -march=armv7-m \
 		   -nostdlib -ffunction-sections -fdata-sections	     \
 		   -Wl,--gc-sections $(GLOBAL_FLAGS)

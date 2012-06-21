@@ -10,9 +10,13 @@
 /* Version and settings */
 # define VERSION GIT_DESC
 
+# ifndef BUOY
+  # warning "BUOY is not defined, setting to 0!"
+  # define BUOY 0
+# endif
+
 /* ID for this Buoy */
-# define BUOY_ID    1
-# define BUOY_NAME  "One"
+# define BUOY_ID BUOY
 
 /* ONLY_SPEC may be defined when including any of the headers to only include
  * any definitions and constants without code or code dependant parts. */
