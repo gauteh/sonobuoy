@@ -365,7 +365,7 @@ namespace Buoy {
     RF_Serial.println ("*NN");
 
 # if DEBUG_WARN
-    SerialUSB.print ("[RF] [Error] ");
+    SerialUSB.print ("[RF] E: ");
     SerialUSB.println (code);
 # endif
     /*
