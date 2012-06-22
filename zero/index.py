@@ -18,10 +18,10 @@ class Index:
   indexf_uri  = None
   indexf      = None
 
-  idle        = True  # all data received, all up to date
+  idle        = False # all data received, all up to date
   cleanup     = False # indicate to buoy that it should send no more requests
 
-  data        = []
+  data        = None
   greatestid  = 0
   lastid      = 0
   __incremental_id_check_done__ = False
@@ -33,6 +33,7 @@ class Index:
   me = ""
 
   def __init__ (self, l, _buoy):
+    self.data = []
     self.logger = l
     self.buoy = _buoy
     self.protocol = self.buoy.protocol
@@ -271,6 +272,7 @@ class Index:
         # start on last id, get full id then start to get batches and chunks
         # from beginning of corresponding data file to id.
 
+        # get data {{{
         if self.working_data is not None:
 
           if not self.working_data.hasfull:
@@ -338,10 +340,12 @@ class Index:
           self.working_data = None
           self.__full_data_check_done__ = True
           self.logger.info (self.me + " All data up to date.")
-          return
 
-        self.logger.info (self.me + " Idle.")
-        self.idle = True
+          self.logger.info (self.me + " Idle.")
+          self.idle = True
+          return
+        # }}}
+
 
       elif self.state == 0 and self.cleanup:
         self.logger.info (self.me + " Cleaned up. Idle.")
