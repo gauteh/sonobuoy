@@ -73,6 +73,12 @@ namespace Buoy {
       bool      north;
       char      longitude[12];
       bool      east;
+
+      /* For use in references */
+      volatile bool     ref_position_lock; // lock ref positions 
+      volatile uint16_t ref_latitude;
+      volatile uint16_t ref_longitude;
+
       /*
       char      speedoverground[6];
       char      courseoverground[6]; // Ref. to True north
@@ -100,6 +106,7 @@ namespace Buoy {
       void        disable_sync ();
 
       void        update_second ();
+      void        update_ref_position ();
       void        assert_time ();
 
       /* Timing

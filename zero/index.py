@@ -177,10 +177,10 @@ class Index:
 
       self.request_t = time.time ()
 
-  def gotbatch (self, id, refno, start, length, ref, refstat, samples):
+  def gotbatch (self, id, refno, start, length, ref, refstat, latitude, longitude, samples):
     self.logger.debug (self.me + " Got batch, id: " + str(id) + ", ref no: " + str(refno) + ", start: " + str(start) + ", length: " + str(length))
     if self.working_data.id == id:
-      self.working_data.got_chunk (refno, start, length, ref, refstat, samples)
+      self.working_data.got_chunk (refno, start, length, ref, refstat, latitude, longitude, samples)
 
     if self.pendingid == 5:
       self.state = 0

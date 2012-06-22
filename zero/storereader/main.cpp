@@ -154,6 +154,8 @@ namespace Zero {
         uint32_t refid      = 0;
         uint64_t reft       = 0;
         uint32_t refstatus  = 0;
+        uint16_t latitude   = 0;
+        uint16_t longitude  = 0;
 
         while (!fd.eof ())
         {
@@ -175,6 +177,8 @@ namespace Zero {
               fd.read (reinterpret_cast<char*>(&refid), sizeof(uint32_t));
               fd.read (reinterpret_cast<char*>(&reft), sizeof(uint64_t));
               fd.read (reinterpret_cast<char*>(&refstatus), sizeof(uint32_t));
+              fd.read (reinterpret_cast<char*>(&latitude), sizeof(uint16_t));
+              fd.read (reinterpret_cast<char*>(&longitude), sizeof(uint16_t));
 
               for (int k = 0; k < (3 * (SAMPLE_LENGTH)); k++) {
                 int r = fd.get ();
@@ -192,7 +196,8 @@ namespace Zero {
               }
 
               cerr << "=> Reference [" << refid << "]: "
-                   << reft << " (status: " << refstatus << ")" << endl;
+                   << reft << " (status: " << refstatus << ")" <<
+                   << "Lat: " << latitude << "Lon: " << longitude << endl;
 
               if (reft == 0) {
                 cerr << "=> [WARNING] Reference is 0, store has no time reference." << endl;
@@ -208,7 +213,7 @@ namespace Zero {
 
               /* Output DTT format */
               if (dtt) {
-                cout << "R," << i.samples_per_reference << "," << refid << "," << reft << "," << refstatus << endl;
+                cout << "R," << i.samples_per_reference << "," << refid << "," << reft << "," << refstatus << "," << latitude << "," longitude << endl;
               }
 
               ref++;

@@ -598,6 +598,12 @@ namespace Buoy {
       reference_status[batch] = (gps->HAS_TIME & GPS::TIME) |
                                 (gps->HAS_SYNC & GPS::SYNC) |
                                 (gps->HAS_SYNC_REFERENCE & GPS::SYNC_REFERENCE);
+
+      if (!gps->ref_position_lock)
+        gps->update_ref_position (); // if locked, use previous position.
+
+      reference_latitudes[batch] = gps->ref_latitude;
+      reference_longitudes[batch] = gps->ref_longitude;
 # endif
       togglePin (13);
     }

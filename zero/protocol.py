@@ -62,12 +62,15 @@ class Protocol:
     self.zero.send ("$ZT*" + gen_checksum ('ZT'))
     self.zerooutput = 0
 
-  def send (self, msg):
+  def ensure_zn_address (self):
     if self.zero.current.id != self.adressedbuoy:
       self.znsetaddress ()
       self.znconnect ()
       if self.zerooutput != 0:
         self.znoutputwireless ()
+
+  def send (self, msg):
+    self.ensure_zn_address ()
 
     # Encapsulate and add checksum
     msg = '$' + msg + '*' + gen_checksum (msg)
@@ -340,6 +343,22 @@ class Protocol:
               elif (tokeni == 7):
                 try:
                   self.zero.current.ad.ad_reference_status = int (token)
+                except ValueError:
+                  self.zero.current.index.reset ()
+                  self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
+                  return
+
+              elif (tokeni == 8):
+                try:
+                  self.zero.current.ad.ad_reference_latitude = int (token)
+                except ValueError:
+                  self.zero.current.index.reset ()
+                  self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
+                  return
+
+              elif (tokeni == 9):
+                try:
+                  self.zero.current.ad.ad_reference_longitude = int (token)
                 except ValueError:
                   self.zero.current.index.reset ()
                   self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")

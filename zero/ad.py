@@ -30,6 +30,8 @@ class AD:
   AD_K_SAMPLES_MAX  = 10000 # protect from erronous infinite large batches
   ad_reference      = 0
   ad_reference_status = 0
+  ad_reference_latitude = 0
+  ad_reference_longitude = 0
   ad_sample_csum    = '' # String rep of hex value
   ad_samples        = '' # Array of bytes (3 * byte / value)
 
@@ -91,7 +93,7 @@ class AD:
 
     else:
       # Successfully received samples and time stamps
-      self.buoy.index.gotbatch (self.ad_batch_id, self.ad_refno, self.ad_start, self.ad_k_samples, self.ad_reference, self.ad_reference_status, s)
+      self.buoy.index.gotbatch (self.ad_batch_id, self.ad_refno, self.ad_start, self.ad_k_samples, self.ad_reference, self.ad_reference_status, self.ad_reference_latitude, self.ad_reference_longitude, s)
 
       #print "[AD] Successfully received ", self.ad_k_samples, " samples.. (time of first: " + str(self.ad_time_of_first) + ")"
       #print "[AD] Frequency: " + str(self.freq) + "[Hz]"

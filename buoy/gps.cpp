@@ -48,6 +48,10 @@ namespace Buoy {
     north     = false;
     *longitude = 0;
     east      = false;
+
+    ref_latitude = 0;
+    ref_longitude = 0;
+    ref_position_lock = 0;
     //*speedoverground = 0;
     //*courseoverground = 0;
   }
@@ -198,8 +202,33 @@ namespace Buoy {
 
     HAS_TIME = valid;
 
+    SerialUSB.println (ref_latitude);
+    SerialUSB.println (ref_longitude);
+
     enable_sync ();
     // }}}
+  }
+
+  void GPS::update_ref_position () {
+    ref_latitude  = atoi (latitude) * 1e4;
+    uint16_t n = atoi (&(latitude[5]));
+
+    for (int i = 5; i < 8; i++)
+      if (latitude[i] == '0') n *= 10;
+      else break;
+
+    ref_latitude += n;
+    if (north) ref_latitude |= 0x8000; // first bit positive: north
+
+    ref_longitude = atoi (longitude) * 1e4;
+    n = atoi (&(longitude[6]));
+
+    for (int i = 6; i < 9; i++)
+      if (longitude[i] == '0') n *= 10;
+      else break;
+
+    ref_longitude += n;
+    if (east) ref_longitude |= 0x8000; // first bit positive: east
   }
 
   void GPS::loop () {
@@ -368,6 +397,7 @@ namespace Buoy {
                   break;
 
                 case 3:
+                  ref_position_lock = true;
                   strcpy (latitude, token);
                   break;
 
@@ -381,6 +411,7 @@ namespace Buoy {
 
                 case 6:
                   east = (token[0] == 'E');
+                  ref_position_lock = false;
                   break;
 
                 case 7:

@@ -12,7 +12,7 @@ buoys = [ { 'id' :        1,
           { 'id' :        2,
             'name' :      'Two',
             'address' :   '00:00:FF',
-            'enabled' :   True,
+            'enabled' :   False,
           },
 
           { 'id' :        3,

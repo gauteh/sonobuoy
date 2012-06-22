@@ -56,6 +56,8 @@ class Zero:
 
     self.currenti = self.buoys.index(b)
 
+    self.protocol.ensure_zn_address ()
+
     self.current.active = True
     self.current.index.cleanup = False
     self.current.index.idle    = False

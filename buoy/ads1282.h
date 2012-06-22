@@ -253,7 +253,9 @@ namespace Buoy {
        */
 
       volatile uint64_t references[BATCHES];
-      volatile uint32_t reference_status[BATCHES];
+      volatile uint32_t reference_latitudes[BATCHES];
+      volatile uint16_t reference_longitudes[BATCHES];
+      volatile uint16_t reference_status[BATCHES];
 
       volatile uint32_t totalsamples;
 
