@@ -18,19 +18,19 @@ buoys = [ { 'id' :        1,
           { 'id' :        3,
             'name' :      'Three',
             'address' :   '04:3C:64',
-            'enabled' :   True,
+            'enabled' :   False,
           },
 
           { 'id' :        4,
             'name' :      'Four',
             'address' :   '04:3C:93',
-            'enabled' :   True,
+            'enabled' :   False,
           },
 
           { 'id' :        5,
             'name' :      'Five',
             'address' :   '03:FF:40',
-            'enabled' :   True,
+            'enabled' :   False,
           },
         ]
 

@@ -11,8 +11,7 @@
   ...
 
   == Hardware ==
-  GPS:
-  - Power supply wire might be bad, danger of short or loss of GPS.
+  Seems to be a bad contact somewhere, may be solderpoints on Olimexino.
 
   Missing:
     - 1 cap on +10V
