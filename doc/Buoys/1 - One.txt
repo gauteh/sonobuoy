@@ -13,9 +13,6 @@
   == Hardware ==
   Seems to be a bad contact somewhere, may be solderpoints on Olimexino.
 
-  Missing:
-    - 1 cap on +10V
-
   == History ==
   2012-06-13: Finished build.
 
