@@ -194,7 +194,7 @@ class Zero:
 
   def current_thread (self):
     self.logger.info ("[Zero] Starting current buoy thread..")
-    MAX_BUOY_TIME = 10 # max time (seconds) before changing buoys
+    MAX_BUOY_TIME = 40 # max time (seconds) before changing buoys
     lastchange    = time.time ()
 
     # if all is good, sync time within limits alternate through all buoys
