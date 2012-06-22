@@ -52,11 +52,12 @@ class Zero:
 
   def set_current (self, b):
     if self.current:
-      self.current.active = False
+      self.current.active  = False
 
     self.currenti = self.buoys.index(b)
 
     self.current.active = True
+    self.current.index.cleanup = False
     self.logger.info ("[Zero] Setting current Buoy to: " + b.name)
 
   current  = property(get_current, set_current) # Current Buoy
@@ -73,12 +74,6 @@ class Zero:
     self.logger.info ("==================================================")
     self.logger.info ("[Zero] Starting Zero..")
     self.logger.info ("[Zero] Logging to console and to file log/zero.log.")
-
-    # Currently receiving buoy object, hardcode to 'One'.
-    # TODO: Do multicast to map available buoys, also do every now and then.
-    #       Or have ZeroNode do that..
-    #
-    # Each node should register now and then as well..
 
     for b in buoys:
       if b['enabled']:
@@ -196,11 +191,60 @@ class Zero:
 
   def current_thread (self):
     self.logger.info ("[Zero] Starting current buoy thread..")
+    MAX_BUOY_TIME = 2 * 60 # max time (seconds) before changing buoys
+    lastchange    = time.time ()
+
+    # if all is good, sync time within limits alternate through all buoys
+    GOOD_BUOY_TIME = 10 # seconds before sorting on seconds
+
     while self.go:
       if self.current is not None:
         self.current.loop ()
 
+        if self.ser is not None and self.acquire:
+          # when current is done, go to next
+          if self.current.index.idle or (lastchange - time.time () > MAX_BUOY_TIME):
+
+            if not self.current.index.idle and not self.current.index.cleanup:
+              # give current buoy time to cleanup (timeout or receive)
+              self.logger.info ("[Zero] Requesting current buoy to cleanup..")
+              self.current.index.cleanup = True
+
+            elif self.current.index.idle:
+              # find next most urgent buoy
+              # priority by: last status sync time
+
+              bn = range (0, len(self.buoys))
+              bn.remove (self.currenti)
+              bn.sort (key = lambda bn: self.buoys[bn].index.sync_status_t)
+
+              # pick first item with too long sort time, or alternate
+              i = -1
+              for bs in bn:
+                if (self.buoys[bs].index.sync_status_t - time.time () > GOOD_BUOY_TIME):
+                  i = bs
+
+              # alternate
+              if i == -1:
+                i = (self.currenti + 1) % len(self.buoys)
+
+              self.logger.info ("[Zero] Changing to buoy: " + self.buoys[i].name + " [" + str(self.buoys[i].id) + "]..")
+
+              self.set_current (self.buoys[i])
+
+              lastchange = time.time ()
+
       time.sleep (0.001)
+
+  # go through list of buoys and return index of id
+  def indexofid (self, id):
+    c = 0
+    for b in self.buoys:
+      if b.id == id:
+        return c
+      c = c + 1
+
+    return None
 
   def startacquire (self):
     self.logger.info ("[Zero] Starting continuous acquistion from buoys..")
@@ -228,6 +272,8 @@ class Zero:
     self.go = False
 
     # Stop all Buoys..
+    self.cthread.join ()
+
     if self.current:
       self.current.deactivate ()
       self.current = None

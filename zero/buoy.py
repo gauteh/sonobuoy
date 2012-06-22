@@ -15,8 +15,8 @@ from data  import *
 from index import *
 
 class Buoy:
-  zero = None
-  protocol = None
+  zero      = None
+  protocol  = None
 
   gps  = None
   ad   = None

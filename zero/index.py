@@ -18,6 +18,9 @@ class Index:
   indexf_uri  = None
   indexf      = None
 
+  idle        = True  # all data received, all up to date
+  cleanup     = False # indicate to buoy that it should send no more requests
+
   data        = []
   greatestid  = 0
   lastid      = 0
@@ -36,7 +39,7 @@ class Index:
     self.me = "[" + self.buoy.name + "] [Index]"
     self.indexf_uri = os.path.join (self.buoy.logdir, 'indexes')
 
-    self.logger.info (self.me + " Initializing and opening index..")
+    self.logger.info (self.me + " Initializing and opening index..: " + self.indexf_uri)
     self.open_index ()
 
   ''' Open index list file and read known data segments and status {{{
@@ -218,7 +221,7 @@ class Index:
   def loop (self):
     # idle
     if self.buoy.zero.ser is not None and self.buoy.zero.acquire:
-      if self.state == 0:
+      if self.state == 0 and not self.cleanup:
         # Get status and lastid {{{
         if time.time () - self.sync_status_t > self.sync_status:
           self.pendingid = 1
@@ -337,6 +340,12 @@ class Index:
           self.logger.info (self.me + " All data up to date.")
           return
 
+        self.logger.info (self.me + " Idle.")
+        self.idle = True
+
+      elif self.state == 0 and self.cleanup:
+        self.logger.info (self.me + " Cleaned up. Idle.")
+        self.idle = True
 
       # waiting for response
       elif self.state == 1:
