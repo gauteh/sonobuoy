@@ -31,6 +31,15 @@ class Buoy:
   BASEDIR = 'log'
   logdir  = ''    # Will be BASEDIR/name
 
+  # position track (file)
+  track_u = ''
+  trackf  = None
+
+  # log (file)
+  log_u   = ''
+  logf    = None
+  t_format = "%Y-%M-%d %H:%M:%S"
+
   active  = False
   logger  = None
 
@@ -47,7 +56,15 @@ class Buoy:
 
     self.logdir = os.path.join (self.BASEDIR, self.name)
 
-    self.filelock = threading.Lock ()
+    # open track and log files
+    self.track_u = os.path.join (self.logdir, 'position_track.txt')
+    self.log_u   = os.path.join (self.logdir, self.name + '.log')
+
+    self.trackf = open (self.track_u, 'a')
+    self.logf   = open (self.log_u, 'a')
+
+    self.log   ("========== Initialization ==========")
+    self.track ("[" + time.strftime(self.t_format) + "] ========== Initialization ==========")
 
     if not os.path.exists (self.logdir):
       os.makedirs (self.logdir)
@@ -66,6 +83,21 @@ class Buoy:
   def stop (self):
     self.logger.info ("[" + self.name + "] Stopping..")
     self.index.close ()
+
+    self.trackf.close ()
+    self.trackf = None
+
+    self.logf.close ()
+    self.logf = None
+
+  def log (self, s):
+    if not self.logf is None:
+      self.logf.write ("[" + time.strftime (self.t_format) + "] " + str(s) + "\n")
+
+  def track (self, s):
+    # input is formatted gps log string
+    if not self.trackf is None:
+      self.trackf.write (s + '\n')
 
   def activate (self):
     self.active = True
