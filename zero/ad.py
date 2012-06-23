@@ -49,6 +49,9 @@ class AD:
     # Gets called when an AD status message has been received and interpreted
     self.logger.debug ("[AD] Sample rate: " + str((self.ad_batch_length * 1000 / float(self.ad_queue_time if self.ad_queue_time > 0 else 1))) + " [Hz], value: " + str(self.ad_value) + ", Queue postion: " + str(self.ad_qposition) + ", Config: " + self.ad_config)
 
+    # log to buoy log
+    self.buoy.log ("[AD] Sample rate: " + str((self.ad_batch_length * 1000 / float(self.ad_queue_time if self.ad_queue_time > 0 else 1))) + " [Hz], value: " + str(self.ad_value) + ", Queue postion: " + str(self.ad_qposition) + ", Config: " + self.ad_config)
+
   ''' Handle received binary samples '''
   def ad_handle_samples (self):
     self.logger.debug ("[AD] Got " + str(self.ad_k_samples) + " samples starting at: " + str(self.ad_reference))
