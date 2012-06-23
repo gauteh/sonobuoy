@@ -11,7 +11,7 @@
   ...
 
   == Hardware ==
-  ...
+  Must fix: Appears to be some digital crosstalk on signal.
 
   == History ==
   2012-06-21: Finished build.
