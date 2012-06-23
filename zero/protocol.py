@@ -458,8 +458,10 @@ class Protocol:
           if (tokeni == 1):
             try:
               self.logger.error ("[Buoy] Received error: [" + token + "] " + Buoy.error_strings[int(token)])
+              self.zero.current.log ("[Buoy] Received error: [" + token + "] " + Buoy.error_strings[int(token)])
             except ValueError:
               self.logger.error ("[Buoy] Received error: [" + token + "]")
+              self.zero.current.log ("[Buoy] Received error: [" + token + "]")
               self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
               return
 
