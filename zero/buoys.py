@@ -6,7 +6,7 @@
 buoys = [ { 'id' :        1,
             'name' :      'One',
             'address' :   '04:3C:60',
-            'enabled' :   True,
+            'enabled' :   False,
           },
 
           { 'id' :        2,
@@ -18,7 +18,7 @@ buoys = [ { 'id' :        1,
           { 'id' :        3,
             'name' :      'Three',
             'address' :   '04:3C:64',
-            'enabled' :   False,
+            'enabled' :   True,
           },
 
           { 'id' :        4,
