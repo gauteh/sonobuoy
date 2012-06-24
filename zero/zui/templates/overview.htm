@@ -1,0 +1,51 @@
+{% extends "skeleton.htm" %}
+
+{% block content %}
+<div class="header">
+  <h2> Overview </h2>
+</div>
+
+<div class="left">
+  <h2>Buoys:</h2>
+  {% for b in statues %}
+  <div class="buoyitem">
+    <div class="name">
+      <b>{{ b.1 }} [] {% if b.0 %}( active ){% endif %}</b>
+    </div>
+    <div class="sub">
+      <div class="item">
+        Position: 80.2032N, 13.3434E
+      </div>
+      <div class="item">
+        Time: 2012-12-12 24:60:60
+      </div>
+    </div>
+
+    <div class="sub">
+      <div class="item">
+        Sync: Yes 
+      </div>
+      <div class="item">
+        Valid: Yes
+      </div>
+      <div class="item">
+        Sync reference: Yes
+      </div>
+      <div class="item">
+        Last status: 30 minutes ago
+      </div>
+
+    </div>
+
+    <div class="clear"></div>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="right">
+  <h2>Details</h2>
+</div>
+
+
+{% endblock %}
+

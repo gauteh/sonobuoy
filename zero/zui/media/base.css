@@ -1,0 +1,45 @@
+body {
+}
+
+.header {
+  display: block;
+  border-bottom: 1px solid black;
+  width: 100%;
+}
+
+.left {
+  float: left;
+  width: 45%;
+}
+
+.right {
+  float: right;
+  width: 45%;
+}
+
+.item {
+  display: block;
+  float: left;
+  margin-left: 5px;
+  padding: 5px;
+  /*border: 1px solid gray;*/
+}
+
+.sub {
+  float: left;
+  margin-bottom: 5px;
+  display: block;
+  margin-left: 10px;
+  clear: both;
+}
+
+.clear {
+  clear: both;
+}
+
+.buoyitem {
+  padding: 5px;
+  border: 1px solid black;
+}
+
+
