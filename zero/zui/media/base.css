@@ -21,7 +21,7 @@ body {
   display: block;
   float: left;
   margin-left: 5px;
-  padding: 5px;
+  padding: 0px;
   /*border: 1px solid gray;*/
 }
 
@@ -39,7 +39,15 @@ body {
 
 .buoyitem {
   padding: 5px;
+  margin: 2px;
   border: 1px solid black;
 }
 
+.True {
+  background: green;
+}
+
+.False {
+  background: red;
+}
 

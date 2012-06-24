@@ -6,33 +6,34 @@
 </div>
 
 <div class="left">
-  <h2>Buoys:</h2>
   {% for b in statues %}
   <div class="buoyitem">
     <div class="name">
       <b>{{ b.name }} [{{ b.id }}] {% if b.active %}( active ){% endif %}</b>
     </div>
     <div class="sub">
-      <div class="item">
-        Position: 80.2032N, 13.3434E
+      <div class="item {{ b.valid }}">
+        <b>Position:</b> {{ b.latitude }} {% if b.north %}N{% else %} S {% endif %}, {{ b.longitude }}{% if b.east %}E{% else %} W {% endif %} ( Valid: {{ b.valid }} )
       </div>
-      <div class="item">
-        Time: 2012-12-12 24:60:60
+    </div>
+    <div class="sub">
+      <div class="item {{ b.has_time }}">
+        <b>Time:</b> {{ b.datetime|date }} ( Gps time: {{ b.time }}, date: {{ b.date }} ) ( Time: {{ b.has_time }} )
       </div>
     </div>
 
     <div class="sub">
-      <div class="item">
-        Sync: Yes 
+      <div class="item {{b.has_sync }}">
+        <b>Sync:</b> {{ b.has_sync }} 
+      </div>
+      <div class="item {{ b.valid }}">
+        <b>Valid:</b> {{ b.valid }} 
+      </div>
+      <div class="item {{ b.has_sync_reference }}">
+        <b>Sync reference:</b> {{ b.has_sync_reference }} 
       </div>
       <div class="item">
-        Valid: Yes
-      </div>
-      <div class="item">
-        Sync reference: Yes
-      </div>
-      <div class="item">
-        Last status: 30 minutes ago
+        <b>Last status:</b> 30 minutes ago
       </div>
 
     </div>
