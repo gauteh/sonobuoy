@@ -109,9 +109,9 @@ class zCLI:
 
     try:
       for s in self.z.buoy_statuses ():
-        q_length = s[18]
-        f = "{0:.2f} Hz".format(0 if s[5] == 0 else q_length * 1000 / s[5])
-        t.add_row ([("X" if s[0] else ""),] + s[1:5] + [f,] + [s[6]])
+        q_length = s['batch_length']
+        f = "{0:.2f} Hz".format(0 if s['ad_queue_time'] == 0 else q_length * 1000 / s['ad_queue_time'])
+        t.add_row ([("X" if s['active'] else ""),] + [s['name'], s['ad_value'], s['ad_config'], s['ad_qposition']] + [f,] + [s['ad_nsamples']])
     except:
       print "Error: Lost connection to Zero"
       os._exit (1)
@@ -138,20 +138,20 @@ class zCLI:
       print "Error: No such buoy."
       sys.exit (1)
 
-    q_length = s[18]
+    q_length = s['batch_length']
 
     t.header (['Buoy:', b])
     t.set_cols_align (["r", "l"])
     t.set_cols_width ([20, 50])
 
-    t.add_rows ([ ["Active:", s[0]],
-                  ["Current value:", s[2]],
-                  ["Queue position:", s[4]],
-                  ["Sample rate:", "{0:.2f} Hz".format(0 if s[5] == 0 else q_length * 1000 / s[5]) + " ( Control register: " + s[3] + " )"],
-                  ["Total samples:", s[6]],
-                  ["Position:", "{0:.4f}{1}, {2:.4f}{3}".format(s[7], ("N" if s[8] else "S"), s[9], ("E" if s[10] else "W")) + " ( Valid: " + str(s[11]) + " )"],
-                  ["Synchronization:", "( Sync: " + str(s[16]) + " )" + '( Time: ' + str(s[15]) + " )" + '( Sync ref: ' + str(s[17]) + ' )'],
-                  ["Time:", time.asctime(time.gmtime(float(s[13]))) + ' (' + str(s[12]) + ', ' + str(s[14]) + ')']
+    t.add_rows ([ ["Active:", s['active']],
+                  ["Current value:", s['ad_value']],
+                  ["Queue position:", s['ad_qposition']],
+                  ["Sample rate:", "{0:.2f} Hz".format(0 if s['ad_queue_time'] == 0 else q_length * 1000 / s['ad_queue_time']) + " ( Control register: " + s['ad_config'] + " )"],
+                  ["Total samples:", s['ad_nsamples']],
+                  ["Position:", "{0:.4f}{1}, {2:.4f}{3}".format(s['latitude'], ("N" if s['north'] else "S"), s['longitude'], ("E" if s['east'] else "W")) + " ( Valid: " + str(s['valid']) + " )"],
+                  ["Synchronization:", "( Sync: " + str(s['has_sync']) + " )" + '( Time: ' + str(s['has_time']) + " )" + '( Sync ref: ' + str(s['has_sync_reference']) + ' )'],
+                  ["Time:", time.asctime(time.gmtime(float(s['unix_time']))) + ' (' + str(s['time']) + ', ' + str(s['date']) + ')']
                   ], False)
 
 

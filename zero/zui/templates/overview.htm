@@ -10,7 +10,7 @@
   {% for b in statues %}
   <div class="buoyitem">
     <div class="name">
-      <b>{{ b.1 }} [] {% if b.0 %}( active ){% endif %}</b>
+      <b>{{ b.name }} [{{ b.id }}] {% if b.active %}( active ){% endif %}</b>
     </div>
     <div class="sub">
       <div class="item">

@@ -50,7 +50,29 @@ class ZeroCliService:
     return None
 
   def buoy_status (self, b):
-    return [b.active, b.name, b.ad.ad_value, b.ad.ad_config, b.ad.ad_qposition, b.ad.ad_queue_time, b.ad.nsamples, b.gps.latitude, b.gps.north, b.gps.longitude, b.gps.east, b.gps.valid, b.gps.gps_time, b.gps.unix_time, b.gps.gps_date, b.gps.has_time, b.gps.has_sync, b.gps.has_sync_reference, b.ad.ad_batch_length]
+    #return [b.active, b.name, b.ad.ad_value, b.ad.ad_config, b.ad.ad_qposition, b.ad.ad_queue_time, b.ad.nsamples, b.gps.latitude, b.gps.north, b.gps.longitude, b.gps.east, b.gps.valid, b.gps.gps_time, b.gps.unix_time, b.gps.gps_date, b.gps.has_time, b.gps.has_sync, b.gps.has_sync_reference, b.ad.ad_batch_length]
+    return {'active'       : b.active,
+            'name'         : b.name,
+            'id'           : b.id,
+            'ad_value'     : b.ad.ad_value,
+            'ad_config'    : b.ad.ad_config,
+            'ad_qposition' : b.ad.ad_qposition,
+            'ad_queue_time' : b.ad.ad_queue_time,
+            'ad_nsamples'   : b.ad.nsamples,
+            'latitude'      : b.gps.latitude,
+            'north'         : b.gps.north,
+            'longitude'     : b.gps.longitude,
+            'east'          : b.gps.east,
+            'valid'         : b.gps.valid,
+            'time'          : b.gps.gps_time,
+            'unix_time'     : b.gps.unix_time,
+            'date'          : b.gps.gps_date,
+            'has_time'      : b.gps.has_time,
+            'has_sync'      : b.gps.has_sync,
+            'has_sync_reference' : b.gps.has_sync_reference,
+            'batch_length'  : b.ad.ad_batch_length,
+            }
+
 
 class ZeroUIManager (BaseManager):
   AUTHKEY = u'sdfaf2faeoidfasdfiasdufoasdiyfa'
