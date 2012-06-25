@@ -14,5 +14,6 @@
   Seems to be a bad contact somewhere, may be solderpoints on Olimexino.
 
   == History ==
+  2012-06-25: Initial test: all components working.
   2012-06-13: Finished build.
 

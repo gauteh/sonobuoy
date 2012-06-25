@@ -14,5 +14,6 @@
   ...
 
   == History ==
+  2012-06-25: Initial test: all components working.
   2012-06-21: Finished build.
 

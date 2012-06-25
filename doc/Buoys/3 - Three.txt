@@ -13,6 +13,7 @@
   == Hardware ==
 
   == History ==
+  2012-06-25: Initial test: all components working.
   2012-06-25: Must fix: Appears to be some digital crosstalk on signal.
               Solution: Solder point on Olimexino D11 (DOUT) was not
               good. Small ball on top. Re-heating, and properly heating
