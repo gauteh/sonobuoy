@@ -350,7 +350,10 @@ class Index:
           self.working_data = None
           self.__full_data_check_done__ = True
           self.logger.info (self.me + " All data up to date.")
+          return
 
+        # Everything is happy dandy.. I'm idle.
+        else:
           self.logger.info (self.me + " Idle.")
           self.idle = True
           return

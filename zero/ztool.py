@@ -107,14 +107,14 @@ class zCLI:
     t.set_cols_valign (["m", "m", "m", "m", "m", "m", "m"])
     t.set_cols_width  ([1, 6, 10, 10, 8, 12, 10,])
 
-    try:
-      for s in self.z.buoy_statuses ():
-        q_length = s['batch_length']
-        f = "{0:.2f} Hz".format(0 if s['ad_queue_time'] == 0 else q_length * 1000 / s['ad_queue_time'])
-        t.add_row ([("X" if s['active'] else ""),] + [s['name'], s['ad_value'], s['ad_config'], s['ad_qposition']] + [f,] + [s['ad_nsamples']])
-    except:
-      print "Error: Lost connection to Zero"
-      os._exit (1)
+    for s in self.z.buoy_statuses ():
+      q_length = s['batch_length']
+      f = "{0:.2f} Hz".format(0 if s['ad_queue_time'] == 0 else q_length * 1000 / s['ad_queue_time'])
+      t.add_row ([("X" if s['active'] else ""),] + [s['name'], s['ad_value'], s['ad_config'], s['ad_qposition']] + [f,] + [s['ad_nsamples']])
+      #print e
+      #print "Error: Lost connection to Zero"
+      #raise e
+      #os._exit (1)
 
     print t.draw ()
 

@@ -68,7 +68,7 @@ class ZeroCliService:
             'valid'         : b.gps.valid,
             'time'          : b.gps.gps_time,
             'unix_time'     : b.gps.unix_time,
-            'datetime'      : datetime.fromtimestamp (b.gps.unix_time),
+            'datetime'      : datetime.fromtimestamp (float(b.gps.unix_time)),
             'date'          : b.gps.gps_date,
             'has_time'      : b.gps.has_time,
             'has_sync'      : b.gps.has_sync,
