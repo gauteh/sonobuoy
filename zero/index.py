@@ -43,6 +43,15 @@ class Index:
     self.logger.info (self.me + " Initializing and opening index..: " + self.indexf_uri)
     self.open_index ()
 
+  def complete (self):
+    return ( self.__full_data_check_done__ and
+             self.__incremental_id_check_done__ and
+            (self.__unchecked_ids__ is None) )
+
+  # return percent complete
+  def completeness (self):
+    pass
+
   ''' Open index list file and read known data segments and status {{{
 
       Index file format, text, one line per data segment (as returned by GETIDS):
@@ -204,6 +213,7 @@ class Index:
       self.status = 0
       self.sync_status_t = time.time ()
       self.logger.debug (self.me + " Status updated.")
+
 
   # State for keeping this buoys data uptodate
   state     = 0

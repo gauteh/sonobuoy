@@ -11,8 +11,12 @@
   ...
 
   == Hardware ==
-  Must fix: Appears to be some digital crosstalk on signal.
 
   == History ==
+  2012-06-25: Must fix: Appears to be some digital crosstalk on signal.
+              Solution: Solder point on Olimexino D11 (DOUT) was not
+              good. Small ball on top. Re-heating, and properly heating
+              Olimexino-socket makes solder align properly.
+
   2012-06-21: Finished build.
 

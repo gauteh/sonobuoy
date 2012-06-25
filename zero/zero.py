@@ -222,6 +222,11 @@ class Zero:
             #bn.remove (self.currenti)
             #bn.sort (key = lambda bn: self.buoys[bn].index.sync_status_t)
 
+            # priority:
+            # 1. out of sync
+            # 2. next incomplete
+            # 3. next in line
+
             # pick next item with too long sync time, or just next if all are good
             i = -1
             ii = (self.currenti + 1) % len (self.buoys)
@@ -231,6 +236,14 @@ class Zero:
                 break
               ii = (ii + 1) % len(self.buoys)
 
+            # pick next buoy with incomplete data
+            if i == -1:
+              ii = (self.currenti + 1) % len (self.buoys)
+              while ii != self.currenti:
+                if not self.buoys[ii].complete:
+                  i = ii
+                  break
+                ii = (ii + 1) % len(self.buoys)
 
             # iterate: all good, pick next buoy
             if i == -1:
