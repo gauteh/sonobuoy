@@ -255,7 +255,7 @@ class Zero:
 
             lastchange = time.time ()
 
-      time.sleep (0.001)
+      time.sleep (0.0001)
 
   # go through list of buoys and return index of id
   def indexofid (self, id):
