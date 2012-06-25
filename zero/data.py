@@ -80,21 +80,26 @@ class Data:
     self.id = _id
     self.enabled = _enabled
     self.me = "[" + self.buoy.name + "] [Data] [" + str(_id) + "]"
-    self.batches = []
     self.indexf_l = threading.Lock ()
     self.dataf_l  = threading.Lock ()
-
-    self.hasfull    = False
-    self.hasalldata = False
-    self.samples = 0
-    self.refs_no = 0
-
 
     self.indexf_uri = os.path.join (self.buoy.logdir, str(self.id) + '.ITT')
     self.dataf_uri  = os.path.join (self.buoy.logdir, str(self.id) + '.DTT')
 
+    self.reset ()
+
     self.logger.debug (self.me + " Initializing (enabled: " + str(self.enabled) + ")")
     self.read_index ()
+
+  def reset (self):
+    self.hasfull    = False
+    self.hasalldata = False
+    self.samples = 0
+    self.refs_no = 0
+    if self.batches is not None:
+      del (self.batches)
+    self.batches = []
+
 
   ''' Read index file and figure out meta data and existing refs {{{
 
@@ -169,134 +174,143 @@ class Data:
 
       self.dataf_l.acquire ()
 
-      b = None
-      i = self.indexofbatch (refno)
+      try:
+        b = None
+        i = self.indexofbatch (refno)
 
-      fresh_batch = False
+        fresh_batch = False
 
-      thischunk = start / CHUNK_SIZE
+        thischunk = start / CHUNK_SIZE
 
-      if i is None:
-        # on new batch
-        b = Batch (refno, 0, 0, 0, 0, 0)
-        self.batches.append (b)
-        self.batches.sort (key=lambda r: r.no)
-        fresh_batch = True
-      else:
-        # on existing batch
-        b = self.batches[i]
+        if i is None:
+          # on new batch
+          b = Batch (refno, 0, 0, 0, 0, 0)
+          self.batches.append (b)
+          self.batches.sort (key=lambda r: r.no)
+          fresh_batch = True
+        else:
+          # on existing batch
+          b = self.batches[i]
 
-        if thischunk in b.completechunks:
-          self.logger.error (self.me + " Chunk already exists on reference, discarding.")
-          self.dataf_l.release ()
-          return
+          if thischunk in b.completechunks:
+            self.logger.error (self.me + " Chunk already exists on reference, discarding.")
+            self.dataf_l.release ()
+            self.reset_data ()
+            return
 
 
-      # if first sample on ref, ref has been included
-      if start == 0:
-        b.ref    = reference
-        b.status = status
-        b.latitude = latitude
-        b.longitude = longitude
+        # if first sample on ref, ref has been included
+        if start == 0:
+          b.ref    = reference
+          b.status = status
+          b.latitude = latitude
+          b.longitude = longitude
 
-      # read existing chunks
-      lines = []
-      if os.path.exists (self.dataf_uri):
-        self.dataf = open (self.dataf_uri, 'r')
-        lines = self.dataf.readlines ()
-        self.dataf.close ()
+        # read existing chunks
+        lines = []
+        if os.path.exists (self.dataf_uri):
+          self.dataf = open (self.dataf_uri, 'r')
+          lines = self.dataf.readlines ()
+          self.dataf.close ()
 
-      # write out updated data file
-      self.dataf = open (self.dataf_uri, 'w')
-      self.dataf.truncate (0)
-      self.dataf.flush ()
+        # write out updated data file
+        self.dataf = open (self.dataf_uri, 'w')
+        self.dataf.truncate (0)
+        self.dataf.flush ()
 
-      thischunk_written = False
+        thischunk_written = False
 
-      n = 0
-      bi = 0
-      while bi < len(self.batches):
-        # on this batch
-        if self.batches[bi].no == b.no:
-          self.batches[bi].line = n
+        n = 0
+        bi = 0
+        while bi < len(self.batches):
+          # on this batch
+          if self.batches[bi].no == b.no:
+            self.batches[bi].line = n
 
-          # (re)-write ref
-          r = "R," + str(BATCH_LENGTH) + "," + str(b.no) + "," + str(b.ref) + "," + str(b.status) + "," + str(b.latitude) + "," + str(b.longitude)
-          self.dataf.write (r + '\n')
+            # (re)-write ref
+            r = "R," + str(BATCH_LENGTH) + "," + str(b.no) + "," + str(b.ref) + "," + str(b.status) + "," + str(b.latitude) + "," + str(b.longitude)
+            self.dataf.write (r + '\n')
 
-          # throw away old ref
-          if not fresh_batch and len(b.completechunks) > 0:
-            lines.pop (0)
+            # throw away old ref
+            if not fresh_batch and len(b.completechunks) > 0:
+              lines.pop (0)
 
-          # write chunks
-          ci = 0
-          while ci < b.maxchunks:
-            # write this chunk
-            if not thischunk_written and thischunk == ci:
-              k = 0
-              while k < CHUNK_SIZE:
-                self.dataf.write (str(samples.pop(0)) + '\n')
-                k = k + 1
+            # write chunks
+            ci = 0
+            while ci < b.maxchunks:
+              # write this chunk
+              if not thischunk_written and thischunk == ci:
+                k = 0
+                while k < CHUNK_SIZE:
+                  self.dataf.write (str(samples.pop(0)) + '\n')
+                  k = k + 1
 
-              thischunk_written = True
+                thischunk_written = True
 
-            # write existing chunks
-            elif ci in b.completechunks:
+              # write existing chunks
+              elif ci in b.completechunks:
+                k = 0
+                while k < CHUNK_SIZE:
+                  self.dataf.write (lines.pop (0))
+                  k = k + 1
+
+              ci = ci + 1
+
+          else:
+            # on existing batch
+            # write ref
+            self.dataf.write (lines.pop (0))
+            n = n + 1
+
+            # write chunks
+            ci = 0
+            while ci < len(self.batches[bi].completechunks):
               k = 0
               while k < CHUNK_SIZE:
                 self.dataf.write (lines.pop (0))
+                n = n + 1
                 k = k + 1
 
-            ci = ci + 1
+              ci = ci + 1
+
+            if thischunk_written:
+              self.batches[bi].line = self.batches[bi].line + CHUNK_SIZE
+              if fresh_batch:
+                self.batches[bi].line = self.batches[bi].line + 1
+
+          bi = bi + 1
+
+        self.dataf.flush ()
+        self.dataf.close ()
+
+        # mark chunk complete
+        b.completechunks.append (thischunk)
+
+        # check if batch is complete
+        b.complete = (len(b.completechunks) == (BATCH_LENGTH / CHUNK_SIZE))
+
+        # check if datafile is complete
+        if self.refs_no == len(self.batches):
+          self.hasalldata = True
+          for b in self.batches:
+            self.hasalldata = (self.hasalldata and b.complete)
 
         else:
-          # on existing batch
-          # write ref
-          self.dataf.write (lines.pop (0))
-          n = n + 1
+          self.hasalldata = False
 
-          # write chunks
-          ci = 0
-          while ci < len(self.batches[bi].completechunks):
-            k = 0
-            while k < CHUNK_SIZE:
-              self.dataf.write (lines.pop (0))
-              n = n + 1
-              k = k + 1
+        if self.hasalldata:
+          self.logger.info (self.me + " All batches complete for data file.")
 
-            ci = ci + 1
+        # write indexes
+        self.write_index ()
 
-          if thischunk_written:
-            self.batches[bi].line = self.batches[bi].line + CHUNK_SIZE
-            if fresh_batch:
-              self.batches[bi].line = self.batches[bi].line + 1
+        self.dataf_l.release ()
 
-        bi = bi + 1
-
-      self.dataf.flush ()
-      self.dataf.close ()
-
-      # mark chunk complete
-      b.completechunks.append (thischunk)
-
-      # check if batch is complete
-      b.complete = (len(b.completechunks) == (BATCH_LENGTH / CHUNK_SIZE))
-
-      # check if datafile is complete
-      if self.refs_no == len(self.batches):
-        self.hasalldata = True
-        for b in self.batches:
-          self.hasalldata = (self.hasalldata and b.complete)
-
-      else:
-        self.hasalldata = False
-
-      if self.hasalldata:
-        self.logger.info (self.me + " All batches complete for data file.")
-
-      # write indexes
-      self.write_index ()
-      self.dataf_l.release ()
+      except Exception as e:
+        self.dataf_l.release ()
+        self.logger.error (self.me + " Error while receiving and writing chunk, resetting..")
+        self.logger.exception (e)
+        self.reset_data ()
 
     else:
       self.logger.error (self.me + " Tried to append chunk on disabled data file.")
@@ -311,6 +325,20 @@ class Data:
       self.hasalldata = False
 
     self.write_index ()
+
+  def reset_data (self):
+    self.dataf_l.acquire ()
+
+    self.logger.info (self.me + " Deleting index and data files and resetting..")
+
+    # remove index and data file and reload
+    os.unlink (self.dataf_uri)
+    os.unlink (self.indexf_uri)
+
+    self.reset ()
+    self.read_index ()
+
+    self.dataf_l.release ()
 
   def __eq__ (self, other):
     return (self.id == other)
