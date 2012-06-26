@@ -2,11 +2,12 @@ function traces ()
 % Plot traces and map of five buoys
 
 names = [ {'One'}, {'Two'}, {'Three'}, {'Four'}, {'Five'} ];
+cols  = [ 'b', 'k', 'c', 'r', 'g' ];
 
 figure(2); clf('reset');
 
 for i=1:5
-  subplot (5, 1, i);
+  %subplot (5, 1, i);
 
   f = names{i};
   
@@ -32,11 +33,18 @@ for i=1:5
     d = [d; nd];
   end
   
-  % Plot
-  plot (t, d);
-  title (names{i});
+  d = d + 2^30 * i;
   
+  % Plot
+  plot (d, cols(i));
+
+  hold on;
+  drawnow;
 end
+
+title ('Traces');
+legend (names);
+ylim([0 2^30 * (length(names)+1)]);
 
 
 end
