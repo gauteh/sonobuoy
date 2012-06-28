@@ -60,10 +60,6 @@ GLOBAL_FLAGS    := -D$(VECT_BASE_ADDR)					     \
 			 -DGIT_DESC=$(GIT_DESC) \
 			 -DUSART_SAFE_INSERT
 
-ifneq ($(BUOY),)
-	GLOBAL_FLAGS += -DBUOY=$(BUOY)
-endif
-
 GLOBAL_CFLAGS   := -Os -g3 -gdwarf-2  -mcpu=cortex-m3 -mthumb -march=armv7-m \
 		   -nostdlib -ffunction-sections -fdata-sections	     \
 		   -Wl,--gc-sections $(GLOBAL_FLAGS)
@@ -74,6 +70,15 @@ LDFLAGS  = -T$(LDDIR)/$(LDSCRIPT) -L$(LDDIR)    \
             -mcpu=cortex-m3 -mthumb -Xlinker -L $(LD_FAMILY_PATH)    \
             -Xlinker --gc-sections \
 						-Xassembler --march=armv7-m -Wall
+
+
+ifdef BUOY
+	ifneq ($(BUOY),)
+		GLOBAL_CFLAGS += -DBUOY=$(BUOY)
+
+	endif
+endif
+
 
 # Removed LDFLAGS
 # -Xlinker --print-gc-sections
@@ -135,8 +140,13 @@ install: $(BUILD_PATH)/$(BOARD).bin
 
 # Force a rebuild if the target changed
 PREV_BUILD_TYPE = $(shell cat $(BUILD_PATH)/build-type 2>/dev/null)
+PREV_BUOY = $(shell cat $(BUILD_PATH)/buoy_id 2>/dev/null)
 build-check:
 ifneq ($(PREV_BUILD_TYPE), $(MEMORY_TARGET))
+	$(shell rm -rf $(BUILD_PATH))
+endif
+# Force a rebuild if the BUOY variable changed
+ifneq ($(PREV_BUOY),$(BUOY))
 	$(shell rm -rf $(BUILD_PATH))
 endif
 

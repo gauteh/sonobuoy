@@ -511,13 +511,14 @@ namespace Buoy {
     }
   } // }}}
 
+  /* Continuous write {{{ */
   void Store::start_continuous_write () {
     continuous_write = true;
   }
 
   void Store::stop_continuous_write () {
     continuous_write = false;
-  }
+  } // }}}
 
 # if HASRF
   void Store::send_indexes (uint32_t start, uint32_t length) { // {{{

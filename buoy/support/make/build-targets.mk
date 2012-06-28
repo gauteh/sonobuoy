@@ -27,6 +27,7 @@ $(BUILD_PATH)/$(BOARD).bin: $(BUILD_PATH)/$(BOARD).elf
 	@echo "Final Size:"
 	@$(SIZE) $<
 	@echo $(MEMORY_TARGET) > $(BUILD_PATH)/build-type
+	@echo $(BUOY) > $(BUILD_PATH)/buoy_id
 
 $(BUILDDIRS):
 	@mkdir -p $@
