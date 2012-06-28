@@ -79,7 +79,7 @@ namespace Buoy {
       # define MAX_SANE_REF     MAX_REFERENCES
       # define MAX_SANE_ID      MAXID
       # define MAX_SANE_SAMPLE  MAX_SAMPLES_PER_FILE
-      # define MAX_SANE_LENGTH  BATCH_LENGTH
+      # define MAX_SANE_LENGTH  (50 * BATCH_LENGTH)
 
 # define RF_SERIAL_BUFLEN 80
       char rf_buf[RF_SERIAL_BUFLEN];

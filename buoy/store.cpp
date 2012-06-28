@@ -644,12 +644,18 @@ namespace Buoy {
     */
   } // }}}
 
-  void Store::send_batch (uint32_t id, uint32_t refno, uint32_t start,  // {{{
-                          uint32_t length) {
+  void Store::send_batches (uint32_t id, uint32_t refno, uint32_t start, // {{{
+                            uint32_t length) {
+    /* Length / BATCH_LENGTH indicates number of batches/references to send */
+
+
     if (!_check_index (id)) return;
 
+    uint8_t batches_to_send = (length / BATCH_LENGTH);
+    if (length % BATCH_LENGTH) batches_to_send++;
+
     // refno is ref number in this id
-    if (refno >= s_nrefs) {
+    if ((refno + batches_to_send - 1) >= s_nrefs) {
       rf->send_error (RF::E_NOSUCHREF);
       return;
     }
@@ -666,6 +672,11 @@ namespace Buoy {
 
       rf->send_error (RF::E_NOSUCHSAMPLE);
       return;
+    }
+
+    bool closedat = false;
+    if (((refno * BATCH_LENGTH) + start + length) >= s_samples) {
+      closedat = true;
     }
 
     /* Open data file, otherwise it must already be the data file for this id */
@@ -705,122 +716,117 @@ namespace Buoy {
       return;
     }
 
-    /* Format and protocol:
-
-     * 1. Initiate binary data stream:
-
-     if start = 0, send reference
-     $AD,D,[k = number of samples],[reference],[reference_status]*CC
-
-     else send empty:
-     $AD,D,[k = number of samples],0,0*CC
-
-     * 2. Send one $ to indicate start of data
-     * 3. Send k number of samples: 4 bytes * k
-     * 4. Send end of data with checksum
-
-     */
-
-    uint32_t _refno   = 0;
-    uint64_t ref      = 0;
-    uint32_t refstat  = 0;
-    uint16_t lat      = 0;
-    uint16_t lon      = 0;
-
-    if (start == 0) {
-      send_d->seekCur (SD_REFERENCE_PADN * SAMPLE_LENGTH); // seek past padding
-      send_d->read (reinterpret_cast<char*>(&_refno), sizeof(_refno));
-      send_d->read (reinterpret_cast<char*>(&ref), sizeof(ref));
-      send_d->read (reinterpret_cast<char*>(&refstat), sizeof(refstat));
-      send_d->read (reinterpret_cast<char*>(&lat), sizeof(lat));
-      send_d->read (reinterpret_cast<char*>(&lon), sizeof(lon));
-      send_d->seekCur (SD_REFERENCE_PADN * SAMPLE_LENGTH); // seek to first sample
-
-      if (_refno != refno) {
-        //SerialUSB.println ("nrf");
-        rf->send_error (RF::E_BADDAT);
-      }
-    }
-
-
-    RF_Serial.print   ("$AD,D,");
-    RF_Serial.print   (id);
-    RF_Serial.print   (",");
-    RF_Serial.print   (refno);
-    RF_Serial.print   (",");
-    RF_Serial.print   (start);
-    RF_Serial.print   (",");
-    RF_Serial.print   (length);
-    RF_Serial.print   (",");
-    RF_Serial.print   (ref);
-    RF_Serial.print   (",");
-    RF_Serial.print   (refstat);
-    RF_Serial.print   (",");
-    RF_Serial.print   (lat);
-    RF_Serial.print   (",");
-    RF_Serial.print   (lon);
-    RF_Serial.println ("*NN");
-
-    /*
-    sprintf (buf, "$AD,D,%lu,%llu,%lu*", length, ref, refstat);
-    APPEND_CSUM (buf);
-    RF_Serial.println (buf);
-    */
-
-
-    /* Write '$' to signal start of binary data */
-    RF_Serial.write ('$');
-
-    uint32_t s;
-    byte csum = 0;
-
-    int n = 0;
     bool bad = false;
+    uint32_t myrefno, mystart, mylength;
 
-    for (uint32_t i = 0; i < length; i++)
-    {
-      if (!bad) {
-        n = send_d->read (reinterpret_cast<char*>(&s), sizeof (uint32_t));
+    mystart = start;
+    myrefno = refno;
 
-        if (n != 4) {
-          bad = true;
+    for (int j = 0; j < batches_to_send; j++) {
+
+      mylength = min (length, BATCH_LENGTH);
+
+      /* Format and protocol:
+
+       * 1. Initiate binary data stream:
+
+       if start = 0, send reference
+       $AD,D,[k = number of samples],[reference],[reference_status]*CC
+
+       else send empty:
+       $AD,D,[k = number of samples],0,0*CC
+
+       * 2. Send one $ to indicate start of data
+       * 3. Send k number of samples: 4 bytes * k
+       * 4. Send end of data with checksum
+
+       */
+
+      uint32_t _refno   = 0;
+      uint64_t ref      = 0;
+      uint32_t refstat  = 0;
+      uint16_t lat      = 0;
+      uint16_t lon      = 0;
+
+      if (mystart == 0) {
+        send_d->seekCur (SD_REFERENCE_PADN * SAMPLE_LENGTH); // seek past padding
+        send_d->read (reinterpret_cast<char*>(&_refno), sizeof(_refno));
+        send_d->read (reinterpret_cast<char*>(&ref), sizeof(ref));
+        send_d->read (reinterpret_cast<char*>(&refstat), sizeof(refstat));
+        send_d->read (reinterpret_cast<char*>(&lat), sizeof(lat));
+        send_d->read (reinterpret_cast<char*>(&lon), sizeof(lon));
+        send_d->seekCur (SD_REFERENCE_PADN * SAMPLE_LENGTH); // seek to first sample
+
+        if (_refno != myrefno) {
+          //SerialUSB.println ("nrf");
+          rf->send_error (RF::E_BADDAT);
         }
-
-        /* MSB first (big endian), means concatenating bytes on RX will
-         * result in LSB first; little endian. */
-        RF_Serial.write ((byte*)(&s), 4);
-
-        csum = csum ^ ((byte*)&s)[0];
-        csum = csum ^ ((byte*)&s)[1];
-        csum = csum ^ ((byte*)&s)[2];
-        csum = csum ^ ((byte*)&s)[3];
-
-      } else {
-        for (int i = 0; i < 4; i++)
-          RF_Serial.write ((byte)0); // write 0's to complete the batch in case of error
       }
 
+
+      RF_Serial.print   ("$AD,D,");
+      RF_Serial.print   (id);
+      RF_Serial.print   (",");
+      RF_Serial.print   (myrefno);
+      RF_Serial.print   (",");
+      RF_Serial.print   (mystart);
+      RF_Serial.print   (",");
+      RF_Serial.print   (mylength);
+      RF_Serial.print   (",");
+      RF_Serial.print   (ref);
+      RF_Serial.print   (",");
+      RF_Serial.print   (refstat);
+      RF_Serial.print   (",");
+      RF_Serial.print   (lat);
+      RF_Serial.print   (",");
+      RF_Serial.print   (lon);
+      RF_Serial.println ("*NN");
+
+      /* Write '$' to signal start of binary data */
+      RF_Serial.write ('$');
+
+      uint32_t s;
+      byte csum = 0;
+
+      int n = 0;
+
+      for (uint32_t i = 0; i < mylength; i++)
+      {
+        if (!bad) {
+          n = send_d->read (reinterpret_cast<char*>(&s), sizeof (uint32_t));
+
+          if (n != 4) { bad = true; }
+
+          /* MSB first (big endian), means concatenating bytes on RX will
+           * result in LSB first; little endian. */
+          RF_Serial.write ((byte*)(&s), 4);
+
+          csum = csum ^ ((byte*)&s)[0];
+          csum = csum ^ ((byte*)&s)[1];
+          csum = csum ^ ((byte*)&s)[2];
+          csum = csum ^ ((byte*)&s)[3];
+
+        } else {
+          for (int i = 0; i < 4; i++)
+            RF_Serial.write ((byte)0); // write 0's to complete the batch in case of error
+        }
+      }
+
+      /* Send end of data with Checksum */
+      RF_Serial.print   ("$AD,DE,");
+      if (bad) RF_Serial.print ("XX"); // make sure cheksum does not validate in case of error
+      else RF_Serial.print   (csum, HEX);
+      RF_Serial.println ("*NN");
+
+      /* Ready for next batch in this go */
+      myrefno++;
+      length -= mylength;
     }
 
-    /* Send end of data with Checksum */
-    RF_Serial.print   ("$AD,DE,");
-    if (bad)
-      RF_Serial.print ("XX"); // make sure cheksum does not validate in case of error
-    else
-      RF_Serial.print   (csum, HEX);
-    RF_Serial.println ("*NN");
-    /*
-    sprintf (buf, "$AD,DE," F_CSUM "*", csum);
-    APPEND_CSUM (buf);
-    RF_Serial.println (buf);
-    */
-
-    if (bad) {
-      rf->send_error (RF::E_BADDAT);
-    }
+    if (bad) rf->send_error (RF::E_BADDAT);
 
     /* If this was the last sample, close file. */
-    if (((refno * BATCH_LENGTH) + start + length) > s_samples) {
+    if (closedat) {
       if (send_d != NULL) {
         send_d->close ();
         delete send_d;
@@ -830,8 +836,8 @@ namespace Buoy {
       s_id      = 0;
       s_samples = 0;
       s_nrefs   = 0;
-    }
-  } // }}}
+    } // }}}
+  }
 
   void Store::send_lastid () { // {{{
     if (!SD_AVAILABLE) {

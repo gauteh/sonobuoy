@@ -230,7 +230,6 @@ class Index:
   working_data  = None  # working data object, getting full index, refs and data
 
   def loop (self):
-    # idle
     if self.buoy.zero.ser is not None and self.buoy.zero.acquire:
       if self.state == 0 and not self.cleanup:
         # Get status and lastid {{{
@@ -354,7 +353,10 @@ class Index:
 
         # Everything is happy dandy.. I'm idle.
         else:
-          self.logger.info (self.me + " Idle.")
+          if not self.idle_msg:
+            self.logger.info (self.me + " Idle.")
+            self.idle_msg = True
+
           self.idle = True
           return
         # }}}

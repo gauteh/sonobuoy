@@ -260,7 +260,7 @@ namespace Buoy {
                     return;
                   }
 
-                  store->send_batch (id, ref, sample, length);
+                  store->send_batches (id, ref, sample, length);
                   }
                   break;
               }

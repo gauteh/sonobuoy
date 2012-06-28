@@ -61,6 +61,7 @@ class Zero:
     self.current.active = True
     self.current.index.cleanup = False
     self.current.index.idle    = False
+    self.current.index.idle_msg = False
 
     self.logger.info ("[Zero] Setting current Buoy to: " + b.name)
 
@@ -206,54 +207,56 @@ class Zero:
       if self.current is not None:
         self.current.loop ()
 
-        if self.ser is not None and self.acquire:
-          # when current is done, go to next
-          if (time.time () - lastchange > MAX_BUOY_TIME) and not self.current.index.cleanup and not self.current.index.idle:
-            # give current buoy time to cleanup (timeout or receive)
-            self.logger.info ("[Zero] Requesting current buoy to cleanup..")
-            self.current.index.cleanup = True
+        if len(self.buoys) > 1:
+          if self.ser is not None and self.acquire:
+            # when current is done, go to next
+            if (time.time () - lastchange > MAX_BUOY_TIME) and not self.current.index.cleanup and not self.current.index.idle:
+              # give current buoy time to cleanup (timeout or receive)
+              self.logger.info ("[Zero] Requesting current buoy to cleanup..")
+              self.current.index.cleanup = True
 
 
-          if self.current.index.idle:
-            # iterate through buoys, skipping those with recent updates. if
-            # all are uptodate, iterate.
+            if self.current.index.idle:
+              # iterate through buoys, skipping those with recent updates. if
+              # all are uptodate, iterate.
 
-            #bn = range (0, len(self.buoys))
-            #bn.remove (self.currenti)
-            #bn.sort (key = lambda bn: self.buoys[bn].index.sync_status_t)
+              #bn = range (0, len(self.buoys))
+              #bn.remove (self.currenti)
+              #bn.sort (key = lambda bn: self.buoys[bn].index.sync_status_t)
 
-            # priority:
-            # 1. out of sync
-            # 2. next incomplete
-            # 3. next in line
+              # priority:
+              # 1. out of sync
+              # 2. next incomplete
+              # 3. next in line
 
-            # pick next item with too long sync time, or just next if all are good
-            i = -1
-            ii = (self.currenti + 1) % len (self.buoys)
-            while ii != self.currenti:
-              if (time.time () - self.buoys[ii].index.sync_status_t > STATUS_INTERVAL):
-                i = ii
-                break
-              ii = (ii + 1) % len(self.buoys)
-
-            # pick next buoy with incomplete data
-            if i == -1:
+              # pick next item with too long sync time, or just next if all are good
+              i = -1
               ii = (self.currenti + 1) % len (self.buoys)
               while ii != self.currenti:
-                if not self.buoys[ii].complete:
+                if (time.time () - self.buoys[ii].index.sync_status_t > STATUS_INTERVAL):
                   i = ii
                   break
                 ii = (ii + 1) % len(self.buoys)
 
-            # iterate: all good, pick next buoy
-            if i == -1:
-              i = (self.currenti + 1) % len(self.buoys)
+              # pick next buoy with incomplete data
+              if i == -1:
+                ii = (self.currenti + 1) % len (self.buoys)
+                while ii != self.currenti:
+                  if not self.buoys[ii].complete:
+                    i = ii
+                    break
+                  ii = (ii + 1) % len(self.buoys)
 
-            self.logger.info ("[Zero] Changing to buoy: " + self.buoys[i].name + " [" + str(self.buoys[i].id) + "]..")
+              # iterate: all good, pick next buoy
+              if i == -1:
+                i = (self.currenti + 1) % len(self.buoys)
 
-            self.set_current (self.buoys[i])
+              if (i != self.currenti):
+                self.logger.info ("[Zero] Changing to buoy: " + self.buoys[i].name + " [" + str(self.buoys[i].id) + "]..")
 
-            lastchange = time.time ()
+                self.set_current (self.buoys[i])
+
+                lastchange = time.time ()
 
       time.sleep (0.0001)
 

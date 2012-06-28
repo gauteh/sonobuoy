@@ -25,7 +25,7 @@ class zCLI:
   r_monitor = True
 
   def __init__ (self):
-    if sys.argv[1] == "help":
+    if len(sys.argv) == 1 or sys.argv[1] == "help":
       self.go ()
       sys.exit (0)
 
