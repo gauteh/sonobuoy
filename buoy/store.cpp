@@ -341,7 +341,8 @@ namespace Buoy {
 
     write_reference (ad->references[lastbatch], ad->reference_status[lastbatch],
                      ad->reference_latitudes[lastbatch],
-                     ad->reference_longitudes[lastbatch]);
+                     ad->reference_longitudes[lastbatch],
+                     ad->checksums[lastbatch]);
 
     if (!SD_AVAILABLE) return;
 
@@ -399,7 +400,7 @@ namespace Buoy {
     SD_AVAILABLE &= (card->errorCode () == 0);
   } // }}}
 
-  void Store::write_reference (uint64_t ref, uint32_t refstat, uint16_t lat, uint16_t lon) // {{{
+  void Store::write_reference (uint64_t ref, uint32_t refstat, uint16_t lat, uint16_t lon, uint32_t crc) // {{{
   {
     if (!SD_AVAILABLE) {
       return;
@@ -421,6 +422,7 @@ namespace Buoy {
     sd_data->write (reinterpret_cast<char*>(&(refstat)), sizeof(uint32_t));
     sd_data->write (reinterpret_cast<char*>(&(lat)), sizeof(uint16_t));
     sd_data->write (reinterpret_cast<char*>(&(lon)), sizeof(uint16_t));
+    sd_data->write (reinterpret_cast<char*>(&(crc)), sizeof(uint32_t));
 
     /* Pad with 0 */
     for (uint32_t i = 0; i < (SD_REFERENCE_PADN * (SAMPLE_LENGTH)); i++)
@@ -737,6 +739,7 @@ namespace Buoy {
       uint32_t refstat  = 0;
       uint16_t lat      = 0;
       uint16_t lon      = 0;
+      uint32_t crc      = 0;
 
       if (mystart == 0) {
         send_d->seekCur (SD_REFERENCE_PADN * SAMPLE_LENGTH); // seek past padding
@@ -745,6 +748,7 @@ namespace Buoy {
         send_d->read (reinterpret_cast<char*>(&refstat), sizeof(refstat));
         send_d->read (reinterpret_cast<char*>(&lat), sizeof(lat));
         send_d->read (reinterpret_cast<char*>(&lon), sizeof(lon));
+        send_d->read (reinterpret_cast<char*>(&crc), sizeof(crc));
         send_d->seekCur (SD_REFERENCE_PADN * SAMPLE_LENGTH); // seek to first sample
 
         if (_refno != myrefno) {
@@ -770,6 +774,8 @@ namespace Buoy {
       RF_Serial.print   (lat);
       RF_Serial.print   (",");
       RF_Serial.print   (lon);
+      RF_Serial.print   (",");
+      RF_Serial.print   (crc);
       RF_Serial.println ("*NN");
 
       /* Write '$' to signal start of binary data */

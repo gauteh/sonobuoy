@@ -367,6 +367,17 @@ class Protocol:
                 #print "[AD] Initiating binary transfer.. samples: ", self.zero.current.ad.ad_k_samples
                 return
 
+              elif (tokeni == 10):
+                try:
+                  self.zero.current.ad.ad_reference_checksum = int (token)
+                except ValueError:
+                  self.zero.current.index.reset ()
+                  self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
+                  return
+
+                #print "[AD] Initiating binary transfer.. samples: ", self.zero.current.ad.ad_k_samples
+                return
+
               else:
                 self.zero.current.index.reset ()
                 self.logger.error ("[Protocol] Too many tokens for message: " + msgtype + ", subtype: " + subtype)

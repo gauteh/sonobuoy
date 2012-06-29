@@ -156,10 +156,12 @@ namespace Zero {
         uint32_t refstatus  = 0;
         uint16_t latitude   = 0;
         uint16_t longitude  = 0;
+        uint32_t crc        = 0;
 
 
         /* Next file position expecting a reference */
         uint32_t nextrefpos = 0;
+        uint32_t testcsum   = 0;
 
         while (!fd.eof ())
         {
@@ -170,6 +172,19 @@ namespace Zero {
             if (fd.tellg() == nextrefpos) {
               /* On reference, reading.. */
               failref = false;
+
+              /* Checking checksum for previous ref/batch.. */
+              if (ref > 0) {
+                if (crc != testcsum) {
+                  failref = true;
+                  corrupt = true;
+                  cerr << "=> [ERROR] [Checksum mismatch] For reference: " << (ref - 1) << endl;
+                }
+
+                testcsum = 0;
+              }
+
+
 
               for (int k = 0; k < (3 * (SAMPLE_LENGTH)); k++) {
                 int r = fd.get ();
@@ -183,6 +198,7 @@ namespace Zero {
               fd.read (reinterpret_cast<char*>(&refstatus), sizeof(uint32_t));
               fd.read (reinterpret_cast<char*>(&latitude), sizeof(uint16_t));
               fd.read (reinterpret_cast<char*>(&longitude), sizeof(uint16_t));
+              fd.read (reinterpret_cast<char*>(&crc), sizeof(uint32_t));
 
               for (int k = 0; k < (3 * (SAMPLE_LENGTH)); k++) {
                 int r = fd.get ();
@@ -211,7 +227,8 @@ namespace Zero {
 
               /* Output DTT format */
               if (dtt) {
-                cout << "R," << i.samples_per_reference << "," << refid << "," << reft << "," << refstatus << "," << latitude << "," << longitude << endl;
+                cout << "R," << i.samples_per_reference << "," << refid << "," << reft << "," << refstatus << "," << latitude << "," << longitude
+                     << "," << crc << endl;
               }
 
               ref++;
@@ -235,6 +252,7 @@ namespace Zero {
           }
 
           s = ss;
+          testcsum ^= s;
 
           // TODO: Endianness probs?
           // __builtin_bswap32 (tt);

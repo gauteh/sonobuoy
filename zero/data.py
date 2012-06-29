@@ -24,12 +24,13 @@ class Batch:
   completechunks  = None # list of chunks received
   maxchunks       = (BATCH_LENGTH / CHUNK_SIZE)
 
-  def __init__ (self, _n, _r, _s, _lat, _lon, _l):
+  def __init__ (self, _n, _r, _s, _lat, _lon, _crc, _l):
     self.no   = _n
     self.ref  = _r
     self.status = _s
     self.latitude  = _lat
     self.longitude = _lon
+    self.checksum  = _crc
     self.line = _l
     self.completechunks = []
 
@@ -110,7 +111,7 @@ class Data:
       hasfull
 
       After this, one line for each batch:
-      refno,ref,refstatus,latitude,longitude,line,list of completechunks
+      refno,ref,refstatus,latitude,longitude,checksum,line,list of completechunks
   '''
   def read_index (self):
     if self.enabled:
@@ -126,7 +127,7 @@ class Data:
         for l in self.indexf.readlines ():
           l = l.strip()
           s = l.split (',')
-          b = Batch (int(s[0]), int(s[1]), int(s[2]), int(s[3]), int(s[4]), int(s[5]))
+          b = Batch (int(s[0]), int(s[1]), int(s[2]), int(s[3]), int(s[4]), int(s[5]), int(s[6]))
 
           c = []
           i = 4
@@ -168,7 +169,7 @@ class Data:
       self.indexf_l.release ()
   # }}}
 
-  def got_chunk (self, refno, start, length, reference, status, latitude, longitude, samples):
+  def got_chunk (self, refno, start, length, reference, status, latitude, longitude, checksum, samples):
     if self.enabled:
       self.logger.info (self.me + " Got chunk, ref: " + str(refno) + ", start: " + str(start) + ", length: " + str(length))
 
@@ -184,7 +185,7 @@ class Data:
 
         if i is None:
           # on new batch
-          b = Batch (refno, 0, 0, 0, 0, 0)
+          b = Batch (refno, 0, 0, 0, 0, 0, 0)
           self.batches.append (b)
           self.batches.sort (key=lambda r: r.no)
           fresh_batch = True
@@ -205,6 +206,7 @@ class Data:
           b.status = status
           b.latitude = latitude
           b.longitude = longitude
+          b.checksum = checksum
 
         # read existing chunks
         lines = []
@@ -228,7 +230,7 @@ class Data:
             self.batches[bi].line = n
 
             # (re)-write ref
-            r = "R," + str(BATCH_LENGTH) + "," + str(b.no) + "," + str(b.ref) + "," + str(b.status) + "," + str(b.latitude) + "," + str(b.longitude)
+            r = "R," + str(BATCH_LENGTH) + "," + str(b.no) + "," + str(b.ref) + "," + str(b.status) + "," + str(b.latitude) + "," + str(b.longitude) + "," + str(b.checksum)
             self.dataf.write (r + '\n')
 
             # throw away old ref

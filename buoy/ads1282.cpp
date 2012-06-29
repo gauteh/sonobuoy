@@ -605,6 +605,8 @@ namespace Buoy {
       reference_latitudes[batch] = gps->ref_latitude;
       reference_longitudes[batch] = gps->ref_longitude;
 # endif
+
+      checksums[batch] = 0;
       togglePin (13);
     }
 
@@ -628,7 +630,8 @@ namespace Buoy {
      */
 
     /* Fill batch */
-    values[position] = value;
+    values[position]  = value;
+    checksums[batch] ^= value;
 
     position++;
     totalsamples++;

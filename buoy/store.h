@@ -94,6 +94,7 @@ namespace Buoy {
  *  - Status bit:   uint32_t status
  *  - Latitude:     uint16_t (first bit positive: north)
  *  - Longitude:    uint16_t (first bit positive: east)
+ *  - Checksum:     uint32_t (of samples in batch)
  *  - 3 * (SAMPLE_LENGTH) with 0
  *  Total length: 40 bytes.
  *
@@ -172,7 +173,7 @@ namespace Buoy {
       void open_data ();
 
       void write_batch ();
-      void write_reference (uint64_t, uint32_t, uint16_t, uint16_t);
+      void write_reference (uint64_t, uint32_t, uint16_t, uint16_t, uint32_t);
 
       void start_continuous_write ();
       void stop_continuous_write ();
