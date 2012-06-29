@@ -245,7 +245,7 @@ namespace Zero {
             }
           }
 
-          /* On timestamp / sample pair */
+          /* On sample */
           uint64_t timestamp;
           sample ss;
           uint32_t s = 0;
@@ -293,7 +293,7 @@ namespace Zero {
           sam++;
           sam_ref++;
 
-          /* Used as a test for a while since getting exactly 0 is sort
+          /* Used as a crappy test for a while since getting exactly 0 is fairly 
            * of unlikely :D
           if (s == 0) {
             cerr << "=> [ERROR] Sample == 0" << endl;
