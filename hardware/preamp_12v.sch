@@ -98,7 +98,7 @@ device=terminal
 T 55390 45800 5 10 0 0 180 0 1
 footprint=CONNECTOR 1 1
 T 55450 46350 5 10 1 1 180 6 1
-refdes=Hyd (GND)
+refdes=Hyd (gnd)
 }
 C 53100 45300 1 180 0 connector2-1.sym
 {
@@ -132,3 +132,5 @@ T 50100 40700 9 10 1 0 0 0 1
 Pre-amplifier with hydrophone decoupling and ADC buffer
 T 54000 40100 9 10 1 0 0 0 1
 G. Hope
+T 54800 50400 9 10 1 0 0 0 1
+Hyrdophone interface
