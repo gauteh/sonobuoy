@@ -365,7 +365,6 @@ class Protocol:
                   return
 
                 #print "[AD] Initiating binary transfer.. samples: ", self.zero.current.ad.ad_k_samples
-                return
 
               elif (tokeni == 10):
                 try:
@@ -376,7 +375,6 @@ class Protocol:
                   return
 
                 #print "[AD] Initiating binary transfer.. samples: ", self.zero.current.ad.ad_k_samples
-                return
 
               else:
                 self.zero.current.index.reset ()
