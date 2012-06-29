@@ -28,6 +28,7 @@ $(BUILD_PATH)/$(BOARD).bin: $(BUILD_PATH)/$(BOARD).elf
 	@$(SIZE) $<
 	@echo $(MEMORY_TARGET) > $(BUILD_PATH)/build-type
 	@echo $(BUOY) > $(BUILD_PATH)/buoy_id
+	@echo '$(GIT_DESC)' > $(BUILD_PATH)/git_desc
 
 $(BUILDDIRS):
 	@mkdir -p $@

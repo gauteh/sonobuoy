@@ -141,12 +141,16 @@ install: $(BUILD_PATH)/$(BOARD).bin
 # Force a rebuild if the target changed
 PREV_BUILD_TYPE = $(shell cat $(BUILD_PATH)/build-type 2>/dev/null)
 PREV_BUOY = $(shell cat $(BUILD_PATH)/buoy_id 2>/dev/null)
+PREV_GIT_DESC = $(shell cat $(BUILD_PATH)/git_desc 2>/dev/null)
 build-check:
 ifneq ($(PREV_BUILD_TYPE), $(MEMORY_TARGET))
 	$(shell rm -rf $(BUILD_PATH))
 endif
 # Force a rebuild if the BUOY variable changed
 ifneq ($(PREV_BUOY),$(BUOY))
+	$(shell rm -rf $(BUILD_PATH))
+endif
+ifneq ($(PREV_GIT_DESC),$(GIT_DESC))
 	$(shell rm -rf $(BUILD_PATH))
 endif
 
