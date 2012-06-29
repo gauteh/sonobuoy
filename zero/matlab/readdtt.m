@@ -36,6 +36,7 @@ while ~feof(fh)
 
   % Got referenceline in l
   R = sscanf (l, '%c,%u,%u,%lu,%u,%u,%u,%u');
+  crc = R(8);
   L = R(2); % Length of samples
   
   if (T>R(4))
