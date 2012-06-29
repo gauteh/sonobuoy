@@ -105,7 +105,7 @@ namespace Buoy {
  * }}} */
 
 # define SD_REFERENCE_PADN 3
-# define SD_REFERENCE_LENGTH (2 * 3 * (SAMPLE_LENGTH) + 4 * 4 + 2 * 2)
+# define SD_REFERENCE_LENGTH (2 * 3 * (SAMPLE_LENGTH) + 4 * 4 + 2 * 2 + 4)
 
 # define MAX_SAMPLES_PER_FILE (BATCH_LENGTH * 40)
 # define MAX_REFERENCES (MAX_SAMPLES_PER_FILE / BATCH_LENGTH)

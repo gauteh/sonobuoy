@@ -752,8 +752,11 @@ namespace Buoy {
         send_d->seekCur (SD_REFERENCE_PADN * SAMPLE_LENGTH); // seek to first sample
 
         if (_refno != myrefno) {
-          //SerialUSB.println ("nrf");
+          SerialUSB.println ("nrf");
+          SerialUSB.println (myrefno);
+          SerialUSB.println (_refno);
           rf->send_error (RF::E_BADDAT);
+          bad = true;
         }
       }
 
