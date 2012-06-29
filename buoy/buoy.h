@@ -10,6 +10,11 @@
 /* Version and settings */
 # define VERSION GIT_DESC
 
+/* ONLY_SPEC may be defined when including any of the headers to only include
+ * any definitions and constants without code or code dependant parts. */
+
+# ifndef ONLY_SPEC
+#
 # ifndef BUOY
   # warning "BUOY is not defined, setting to 0!"
   # define BUOY 0
@@ -17,11 +22,6 @@
 
 /* ID for this Buoy */
 # define BUOY_ID BUOY
-
-/* ONLY_SPEC may be defined when including any of the headers to only include
- * any definitions and constants without code or code dependant parts. */
-
-# ifndef ONLY_SPEC
 
 /* Disable any ASSERT() and serial line debugger (decreases program size
  * slightly).

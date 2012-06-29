@@ -82,21 +82,8 @@ namespace Buoy {
       typedef uint32_t sample;
 
 /* Data format */
-# define STORE_VERSION 4u
-# define SAMPLE_LENGTH 4u
-
-/* Maximum number of timestamp, sample pairs for each datafile */
-/*
-# define MINUTES_PER_DATAFILE 5uL
-# define MAX_SAMPLES_PER_FILE (FREQUENCY * 60uL * MINUTES_PER_DATAFILE)
-# define MAX_REFERENCES (MAX_SAMPLES_PER_FILE / BATCH_LENGTH)
-
-# define _SD_DATA_FILE_SIZE (MAX_SAMPLES_PER_FILE * (SAMPLE_LENGTH) + MAX_REFERENCES * 50uL)
-# define SD_DATA_FILE_SIZE (_SD_DATA_FILE_SIZE + (_SD_DATA_FILE_SIZE % 512uL))
-*/
-# define SD_DATA_FILE_SIZE (500 * 4 * 1024)
-# define MAX_REFERENCES (SD_DATA_FILE_SIZE / (BATCH_LENGTH * 50))
-# define MAX_SAMPLES_PER_FILE (MAX_REFERENCES * BATCH_LENGTH)
+# define STORE_VERSION 5
+# define SAMPLE_LENGTH 4
 
 /* Data file format {{{
  *
@@ -119,6 +106,12 @@ namespace Buoy {
 # define SD_REFERENCE_PADN 3
 # define SD_REFERENCE_LENGTH (2 * 3 * (SAMPLE_LENGTH) + 4 * 4 + 2 * 2)
 
+# define MAX_SAMPLES_PER_FILE (BATCH_LENGTH * 40)
+# define MAX_REFERENCES (MAX_SAMPLES_PER_FILE / BATCH_LENGTH)
+
+/* Maximum number of bytes in each data file */
+# define SD_DATA_FILE_SIZE (MAX_SAMPLES_PER_FILE * SAMPLE_LENGTH + MAX_REFERENCES * SD_REFERENCE_LENGTH)
+
       /* Last ID is one unsigned long */
       typedef uint32_t LASTID;
 
@@ -131,15 +124,7 @@ namespace Buoy {
         uint32_t samples;     // Can maximum reach MAX_SAMPLES_PER_FILE
         uint32_t samples_per_reference; // Is defined by BATCH_LENGTH
         uint32_t nrefs;       // Current number of references
-
-        /* Only nrefs will be written out for each of the following arrays */
-        uint32_t refpos[MAX_REFERENCES]; // List with position of reference points.
-        uint64_t refs[MAX_REFERENCES];   // List with references, matches list of positions.
       } Index;
-
-      /* Start of references in index file */
-      // # define REFPOS_START (2 * sizeof(uint16_t) + 4 * sizeof(uint32_t))
-
 
 /* Using 8.3 file names limits the ID */
 # define MAXID (100000000L -1L)

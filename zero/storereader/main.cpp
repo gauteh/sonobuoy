@@ -157,13 +157,17 @@ namespace Zero {
         uint16_t latitude   = 0;
         uint16_t longitude  = 0;
 
+
+        /* Next file position expecting a reference */
+        uint32_t nextrefpos = 0;
+
         while (!fd.eof ())
         {
           char timebuf[400];
           string out;
 
           if (ref < i.nrefs) {
-            if (fd.tellg() == i.refpos[ref]) {
+            if (fd.tellg() == nextrefpos) {
               /* On reference, reading.. */
               failref = false;
 
@@ -196,8 +200,8 @@ namespace Zero {
               }
 
               cerr << "=> Reference [" << refid << "]: "
-                   << reft << " (status: " << refstatus << ")" <<
-                   << "Lat: " << latitude << "Lon: " << longitude << endl;
+                   << reft << " (status: " << refstatus << "), "
+                   << "Lat: " << latitude << ", Lon: " << longitude << endl;
 
               if (reft == 0) {
                 cerr << "=> [WARNING] Reference is 0, store has no time reference." << endl;
@@ -205,19 +209,16 @@ namespace Zero {
                 corrupt = true;
               }
 
-              if (reft != i.refs[ref]) {
-                cerr << "=> [ERROR] Reference does not match reference in index." << endl;
-                failref = true;
-                corrupt = true;
-              }
-
               /* Output DTT format */
               if (dtt) {
-                cout << "R," << i.samples_per_reference << "," << refid << "," << reft << "," << refstatus << "," << latitude << "," longitude << endl;
+                cout << "R," << i.samples_per_reference << "," << refid << "," << reft << "," << refstatus << "," << latitude << "," << longitude << endl;
               }
 
               ref++;
               sam_ref = 0; // reset sample on reference count
+
+              /* Calculate next refpos */
+              nextrefpos += BATCH_LENGTH + SD_REFERENCE_LENGTH;
             }
           }
 
@@ -316,8 +317,6 @@ namespace Zero {
       fi.read (reinterpret_cast<char*>(&i.samples), sizeof(i.samples));
       fi.read (reinterpret_cast<char*>(&i.samples_per_reference), sizeof(i.samples_per_reference));
       fi.read (reinterpret_cast<char*>(&i.nrefs), sizeof(i.nrefs));
-      fi.read (reinterpret_cast<char*>(&i.refpos), i.nrefs * sizeof(uint32_t));
-      fi.read (reinterpret_cast<char*>(&i.refs), i.nrefs * sizeof(uint64_t));
 
       if (verbose)
         cerr << "done." << endl;
@@ -332,9 +331,6 @@ namespace Zero {
       cerr << "=> Samples:           " << i.samples << endl;
       cerr << "=> Samples per ref:   " << i.samples_per_reference << endl;
       cerr << "=> References:        " << i.nrefs << endl;
-      for (int j = 0; j < i.nrefs; j++) {
-        cerr << "=>        [" << j << "]: " << (i.refs[j]) << " (filepos: " << i.refpos[j] << ")" << endl;
-      }
     }
 
     void usage (string argv) {
@@ -371,7 +367,7 @@ namespace Zero {
       cerr << "Store version .........: " << STORE_VERSION << endl;
       cerr << "Max samples ...........: " << MAX_SAMPLES_PER_FILE << endl;
       cerr << "Max references ........: " << MAX_REFERENCES << endl;
-      cerr << "Standard file size [B] : " << SD_DATA_FILE_SIZE << endl;
+      cerr << "Max file size [B] .....: " << SD_DATA_FILE_SIZE << endl;
       cerr << endl;
     }
   }

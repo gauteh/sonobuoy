@@ -271,12 +271,6 @@ namespace Buoy {
       fi.write (reinterpret_cast<char*>(&current_index.samples_per_reference), sizeof(current_index.samples_per_reference));
       fi.write (reinterpret_cast<char*>(&current_index.nrefs), sizeof(current_index.nrefs));
 
-      for (uint32_t i = 0; i < current_index.nrefs; i++)
-        fi.write (reinterpret_cast<char*>(&(current_index.refpos[i])), sizeof(uint32_t));
-
-      for (uint32_t i = 0; i < current_index.nrefs; i++)
-        fi.write (reinterpret_cast<char*>(&(current_index.refs[i])), sizeof(uint64_t));
-
       fi.sync ();
       fi.close ();
 
@@ -417,10 +411,6 @@ namespace Buoy {
 # endif
       roll_data_file ();
     }
-
-    /* Update index */
-    current_index.refpos[current_index.nrefs] = sd_data->curPosition ();
-    current_index.refs[current_index.nrefs]   = ref;
 
     /* Pad with 0 */
     for (uint32_t i = 0; i < (SD_REFERENCE_PADN * (SAMPLE_LENGTH)); i++)
@@ -836,8 +826,8 @@ namespace Buoy {
       s_id      = 0;
       s_samples = 0;
       s_nrefs   = 0;
-    } // }}}
-  }
+    }
+  } // }}}
 
   void Store::send_lastid () { // {{{
     if (!SD_AVAILABLE) {
