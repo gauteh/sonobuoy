@@ -559,10 +559,13 @@ namespace Buoy {
     shift_out (AD_CONFIG1);
     */
 
-    // High pass filter configuration
+    // High pass filter configuration (see Instrument Response in docs)
     // HPF[1:0] = 0x0337 => fHP = 0.5 Hz @ 250 SPS
-# define AD_HPF1 0x03
-# define AD_HPF0 0x37
+    // HPF[1:0] = 0x0052 => fHP = 0.05 Hz @ 250 SPS
+//# define AD_HPF1 0x03
+//# define AD_HPF0 0x37
+# define AD_HPF1 0x00
+# define AD_HPF0 0x52
     send_command (WREG, 3, 1);
 # if DEBUG_VERB
     SerialUSB.print   ("[AD] [SPI] Sending: 0b");

@@ -45,7 +45,7 @@
 # define WATCHDOG_RELOAD_INIT (WATCHDOG_RELOAD * 2)
 
 /* Enable drivers for peripherals (disable to run without these
- * connected or to * save program size) */
+ * connected or to save program size) */
 # define HASRF  1
 # define HASGPS 1
 

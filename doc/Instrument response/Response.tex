@@ -321,6 +321,31 @@ sample rate \cite{ads1282_ds}.
 ADS1282 can be configured for an sample rate of as high as 4000 Hz
 \cite{ads1282_ds}. This would be possible without changes in the analog interface, although it would come at an cost of resolution.
 
+\paragraph{High Pass Filter (HPF)} The ADS1282 is configured to have an high
+pass corner frequency as close to 20 seconds as possible, the built in
+IIR HPF is set according to p. 22 in \citetitle{ads1282_ds}:
+
+\begin{equation}
+  \begin{aligned}
+    & HPF[1:0] = 65,536 \times \\
+    & \left[ 1 - \sqrt{1 - 2 \frac{\cos (\omega_n) +
+    \sin (\omega_n) - 1}{\cos
+    (\omega_n)}}\right]
+  \end{aligned}
+  \label{eqn:hpf}
+\end{equation}
+
+with:
+
+\begin{equation}
+  \omega_n = 2 \pi f_{HP} / f_{DATA}
+  \label{eqn:nat_freq}
+\end{equation}
+
+An $f_{HP} = 1/20 = 0.05 $ Hz gives an $\omega_n = 0,001256637$ normalized
+radians. And an $HPF = 82.3550098$ truncated to $HPF = 82_{10} =
+52_{16}$.
+
 \section{Hydrophone characteristics}
 Refer to the datasheet of the AQ-18 \cite{aq_18_ds} for the frequency response of the
 transducer (including its built-in preamplifier).
