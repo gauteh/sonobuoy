@@ -178,7 +178,7 @@ namespace Zero {
                 if (crc != testcsum) {
                   failref = true;
                   corrupt = true;
-                  cerr << "=> [ERROR] [Checksum mismatch] For reference: " << (ref - 1) << endl;
+                  cerr << "=> [ERROR] [Checksum mismatch] For reference: " << (ref - 1) << ", from ref: " << ios::hex << crc << ", samples: " << ios::hex << testcsum << endl;
                 }
 
                 testcsum = 0;
@@ -215,6 +215,12 @@ namespace Zero {
                 break;
               }
 
+              if (ref != refid) {
+                corrupt = true;
+                failref = true;
+                cerr << "=> [ERROR] Reference id does not match reference number." << endl;
+              }
+
               cerr << "=> Reference [" << refid << "]: "
                    << reft << " (status: " << refstatus << "), "
                    << "Lat: " << latitude << ", Lon: " << longitude << endl;
@@ -235,7 +241,7 @@ namespace Zero {
               sam_ref = 0; // reset sample on reference count
 
               /* Calculate next refpos */
-              nextrefpos += BATCH_LENGTH + SD_REFERENCE_LENGTH;
+              nextrefpos += BATCH_LENGTH * SAMPLE_LENGTH + SD_REFERENCE_LENGTH;
             }
           }
 
