@@ -228,9 +228,9 @@ namespace Buoy {
 
 # endif
 
-# define FREQUENCY      250     // configured separately setting registers
-# define QUEUE_LENGTH   2*1024  // 2KB seems to be about max
-# define BATCHES        2       // _must_ be multiple of QUEUE_LENGTH (min 2!)
+# define FREQUENCY      250      // configured separately setting registers
+# define QUEUE_LENGTH   (2*1024) // 2KB seems to be about max
+# define BATCHES        2        // _must_ be multiple of QUEUE_LENGTH (min 2!)
 # define BATCH_LENGTH (QUEUE_LENGTH / BATCHES) // this should preferably be a
                                                // multiple of 512 to speed up
                                                // SD card writing.
