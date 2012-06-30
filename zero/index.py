@@ -95,6 +95,7 @@ class Index:
     if self.state == 0:
       self.protocol.send ("GIDS," + str(start))
       self.request_t = time.time ()
+      self.timeout   = self.getids_timeout
       self.gotids_n = 0
       self.state    = 1
 
@@ -142,6 +143,7 @@ class Index:
   def getlastid (self):
     if self.state == 0:
       self.request_t = time.time ()
+      self.timeout   = self.sync_lastid_timeout
       self.state = 1
       self.protocol.send ("GLID")
 
@@ -161,6 +163,7 @@ class Index:
       self.logger.info (self.me + " Getting full index for: " + str(id))
       self.pendingid = 4
       self.state     = 1
+      self.timeout   = self.getid_timeout
 
       self.protocol.send ("GID," + str(id))
 
@@ -176,15 +179,18 @@ class Index:
     if self.pendingid == 4:
       self.state = 0
 
+  requested_chunks = 0
   def getbatch (self, id, ref, start, length):
     if self.state == 0:
       self.logger.info (self.me + "[" + str(id) + "] Req chunk, ref: " + str(ref) + ", start: " + str(start) + ", length: " + str(length))
       self.pendingid = 5
       self.state     = 1
+      self.requested_chunks = (length / CHUNK_SIZE) + (1 if (length % CHUNK_SIZE > 0) else 0)
 
       self.protocol.send ("GB," + str(id) + "," + str(ref) + "," + str(start) + "," + str(length))
 
       self.request_t = time.time ()
+      self.timeout   = self.getbatch_timeout
 
   def gotbatch (self, id, refno, start, length, ref, refstat, latitude, longitude, checksum, samples):
     self.logger.debug (self.me + " Got batch, id: " + str(id) + ", ref no: " + str(refno) + ", start: " + str(start) + ", length: " + str(length))
@@ -192,12 +198,15 @@ class Index:
       self.working_data.got_chunk (refno, start, length, ref, refstat, latitude, longitude, checksum, samples)
 
     if self.pendingid == 5:
-      self.state = 0
+      self.requested_chunks -= 1
+      if self.requested_chunks <= 0:
+        self.state = 0
 
   status = 0
   def getstatus (self):
     if self.state == 0:
       self.request_t = time.time ()
+      self.timeout = self.sync_status_timeout
       self.status = 0
       self.state = 1
       self.protocol.send ("GS")
@@ -217,15 +226,23 @@ class Index:
 
   # State for keeping this buoys data uptodate
   state     = 0
-  timeout   = 10 # secs
+  timeout   = 0  # seconds, should be set relevant to appropriate request
   pendingid = 0  # automatic request last sent (in case manual request mess up the flooooow..)
   request_t = 0
 
   sync_lastid   = 1 * 60 # time between syncs of last id
   sync_lastid_t = 0
+  sync_lastid_timeout = 3
 
   sync_status   = 20 # time between status updates
   sync_status_t = 0
+  sync_status_timeout = 3
+
+  getid_timeout     = 3
+  getids_timeout    = 10
+  getbatch_timeout  = 10
+
+  default_chunks    = 10
 
   working_data  = None  # working data object, getting full index, refs and data
 
@@ -297,7 +314,7 @@ class Index:
               i = self.working_data.indexofbatch (ii)
               if i is None:
                 # start on new batch
-                self.getbatch (self.working_data.id, ii, 0, CHUNK_SIZE)
+                self.getbatch (self.working_data.id, ii, 0, self.default_chunks * CHUNK_SIZE)
                 return
               else:
                 # check if this batch has been completed
@@ -307,7 +324,14 @@ class Index:
                   jj = 0
                   while jj < i.maxchunks:
                     if not jj in i.completechunks:
-                      self.getbatch (self.working_data.id, ii, CHUNK_SIZE * jj, CHUNK_SIZE)
+                      # found missing chunks, figure out how many of the
+                      # following are missing for inclusion in this request.
+                      kk = jj
+                      while kk < i.maxchunks and kk not in i.completechunks:
+                        kk = kk + 1
+
+                      chunks_to_get = min (kk - jj, self.default_chunks)
+                      self.getbatch (self.working_data.id, ii, CHUNK_SIZE * jj, chunks_to_get * CHUNK_SIZE)
                       return
                     jj = jj + 1
 
