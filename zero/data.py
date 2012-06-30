@@ -218,7 +218,6 @@ class Data:
         # write out updated data file
         self.dataf = open (self.dataf_uri, 'w')
         self.dataf.truncate (0)
-        self.dataf.flush ()
 
         thischunk_written = False
 
@@ -282,7 +281,6 @@ class Data:
 
           bi = bi + 1
 
-        self.dataf.flush ()
         self.dataf.close ()
 
         # mark chunk complete

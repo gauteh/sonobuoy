@@ -242,7 +242,7 @@ class Index:
   getids_timeout    = 10
   getbatch_timeout  = 10
 
-  default_chunks    = 10
+  default_chunks    = 10 # number of chunks/batches to request in one go
 
   working_data  = None  # working data object, getting full index, refs and data
 
@@ -404,6 +404,7 @@ class Index:
     self.gotids_n = 0
     self.status   = 0
     self.pendingids = 0
+    self.requested_chunks = 0
 
     # reset protocol
     self.protocol.a_receive_state = 0
