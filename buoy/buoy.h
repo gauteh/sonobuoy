@@ -66,6 +66,8 @@ namespace Buoy {
       Store     *store;
 
       void main ();
+      void loop ();
+      void critical_loop ();
 
       static bool hasusb ();
 

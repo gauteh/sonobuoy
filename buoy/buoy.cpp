@@ -28,29 +28,40 @@ namespace Buoy {
   void BuoyMaster::main () {
     setup ();
 
-    uint32_t lasts = 0;
+    while (true) loop ();
 
-    while (true) {
-# if HASGPS
-      gps->loop ();
-# endif
-      ad->loop ();
-      store->loop ();
+  }
+
+  void BuoyMaster::loop () {
+    static uint32_t lasts = 0;
+
+    critical_loop ();
+
 # if HASRF
-      rf->loop ();
+    rf->loop ();
 # endif
 
-      if (millis () - lasts >= 1000) {
-        SerialUSB.print ("V");
-        SerialUSB.println (ad->values[ad->position-1]);
-        SerialUSB.println (ad->position);
-        //ad->print_status ();
-        //gps->print_status ();
-        lasts = millis ();
-      }
-
-      iwdg_feed (); // reset watchdog
+    if (millis () - lasts >= 1000) {
+      SerialUSB.print ("V");
+      SerialUSB.println (ad->values[ad->position-1]);
+      SerialUSB.println (ad->position);
+      //ad->print_status ();
+      //gps->print_status ();
+      lasts = millis ();
     }
+
+  }
+
+  void BuoyMaster::critical_loop () {
+    /* Critical functions */
+# if HASGPS
+    gps->loop ();
+# endif
+
+    ad->loop ();
+    store->loop ();
+
+    iwdg_feed (); // reset watchdog
   }
 
   void BuoyMaster::setup () {
