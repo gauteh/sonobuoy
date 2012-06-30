@@ -242,7 +242,7 @@ class Index:
   getids_timeout    = 10
   getbatch_timeout  = 10
 
-  default_chunks    = 10 # number of chunks/batches to request in one go
+  default_chunks    = 15 # number of chunks/batches to request in one go
 
   working_data  = None  # working data object, getting full index, refs and data
 
@@ -314,7 +314,15 @@ class Index:
               i = self.working_data.indexofbatch (ii)
               if i is None:
                 # start on new batch
-                self.getbatch (self.working_data.id, ii, 0, self.default_chunks * CHUNK_SIZE)
+                # found missing chunks, figure out how many of the
+                # following are missing for inclusion in this request.
+                kk = ii + 1
+                while kk < self.working_data.refs_no and self.working_data.indexofbatch(kk) is None:
+                  kk = kk + 1
+
+                chunks_to_get = min ((kk - ii) * Batch.maxchunks, self.default_chunks)
+
+                self.getbatch (self.working_data.id, ii, 0, chunks_to_get * CHUNK_SIZE)
                 return
               else:
                 # check if this batch has been completed
@@ -326,11 +334,20 @@ class Index:
                     if not jj in i.completechunks:
                       # found missing chunks, figure out how many of the
                       # following are missing for inclusion in this request.
-                      kk = jj
+                      kk = jj + 1 # on this batch
                       while kk < i.maxchunks and kk not in i.completechunks:
                         kk = kk + 1
 
-                      chunks_to_get = min (kk - jj, self.default_chunks)
+                      chunks_to_get = kk - jj
+
+                      # on following empty batches
+                      kk = ii + 1
+                      while kk < self.working_data.refs_no and self.working_data.indexofbatch(kk) is None:
+                        kk = kk + 1
+
+                      chunks_to_get += (kk - ii) * Batch.maxchunks
+
+                      chunks_to_get = min (chunks_to_get, self.default_chunks)
                       self.getbatch (self.working_data.id, ii, CHUNK_SIZE * jj, chunks_to_get * CHUNK_SIZE)
                       return
                     jj = jj + 1
