@@ -224,7 +224,6 @@ namespace Buoy {
       } COMMAND;
 
       bool disabled;
-      int run;
 
 # endif
 

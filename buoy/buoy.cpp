@@ -41,6 +41,8 @@ namespace Buoy {
     rf->loop ();
 # endif
 
+    ad->loop ();
+
     if (millis () - lasts >= 1000) {
       SerialUSB.print ("V");
       SerialUSB.println (ad->values[ad->position-1]);
@@ -58,7 +60,6 @@ namespace Buoy {
     gps->loop ();
 # endif
 
-    ad->loop ();
     store->loop ();
 
     iwdg_feed (); // reset watchdog

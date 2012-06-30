@@ -27,7 +27,6 @@ namespace Buoy {
     // Init class {{{
     disabled        = false;
     continuous_read = false;
-    run = 0;
 
     /*
     state.ports0 = 0;
@@ -101,26 +100,17 @@ namespace Buoy {
   }
 
   void ADS1282::loop () {
-    static uint32_t lasts;
     /* Run as part of main loop {{{ */
-    if (!disabled) {
-      run++;
+    /*
 
-      /*
-      SerialUSB.print ("[AD] Loop: ");
-      SerialUSB.print (run);
-      */
+    static uint32_t lasts;
 
-      //rf_send_debug_f ("[AD] Queue pos: %lu samples: %lu value: 0x%lX", position, totalsamples, value);
+    if (!disabled)
+    {
 
-      if (millis() - lasts >= (1000 / 250))
-      {
-        //status ();
-        //acquire_on_command ();
-        lasts = millis ();
-      }
-    } // }}}
-  }
+    }
+    */
+  } // }}}
 
 # if DEBUG_VERB
   void ADS1282::print_status () {
