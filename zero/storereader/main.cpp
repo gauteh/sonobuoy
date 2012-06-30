@@ -294,7 +294,7 @@ namespace Zero {
           sam_ref++;
 
           /* Used as a crappy test for a while since getting exactly 0 is fairly 
-           * of unlikely :D
+           * unlikely :D
           if (s == 0) {
             cerr << "=> [ERROR] Sample == 0" << endl;
             corrupt = true;
