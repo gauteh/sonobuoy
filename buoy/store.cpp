@@ -420,8 +420,8 @@ namespace Buoy {
     sd_data->write (reinterpret_cast<char*>(&(current_index.nrefs)), sizeof(uint32_t));
     sd_data->write (reinterpret_cast<char*>(&(ref)), sizeof(uint64_t));
     sd_data->write (reinterpret_cast<char*>(&(refstat)), sizeof(uint32_t));
-    sd_data->write (reinterpret_cast<char*>(&(lat)), sizeof(char) * 12);
-    sd_data->write (reinterpret_cast<char*>(&(lon)), sizeof(char) * 12);
+    sd_data->write (reinterpret_cast<char*>(lat), sizeof(char) * 12);
+    sd_data->write (reinterpret_cast<char*>(lon), sizeof(char) * 12);
     sd_data->write (reinterpret_cast<char*>(&(crc)), sizeof(uint32_t));
 
     /* Pad with 0 */
@@ -749,8 +749,8 @@ namespace Buoy {
         send_d->read (reinterpret_cast<char*>(&_refno), sizeof(_refno));
         send_d->read (reinterpret_cast<char*>(&ref), sizeof(ref));
         send_d->read (reinterpret_cast<char*>(&refstat), sizeof(refstat));
-        send_d->read (reinterpret_cast<char*>(&lat), sizeof(char) * 12);
-        send_d->read (reinterpret_cast<char*>(&lon), sizeof(char) * 12);
+        send_d->read (reinterpret_cast<char*>(lat), sizeof(char) * 12);
+        send_d->read (reinterpret_cast<char*>(lon), sizeof(char) * 12);
         send_d->read (reinterpret_cast<char*>(&crc), sizeof(crc));
         send_d->seekCur (SD_REFERENCE_PADN * SAMPLE_LENGTH); // seek to first sample
 

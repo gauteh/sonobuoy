@@ -1,4 +1,4 @@
-function [t, d] = readdtt(f, complement_and_bitshift)
+function [t, d, refs] = readdtt(f, complement_and_bitshift)
 % Reads DTT format file
 
 % complement_and_bitshift defaults to true and takes the second complement
@@ -12,6 +12,7 @@ freq = 250;
 
 t = [];
 d = [];
+refs = [];
 
 ref = 0;
 samples = 0;
@@ -35,11 +36,10 @@ while ~feof(fh)
   if (feof(fh)), break; end
 
   % Got referenceline in l
-  R = sscanf (l, '%c,%u,%u,%lu,%u,%u,%u,%u');
+  R = sscanf (l, '%c,%u,%u,%lu,%u,%c,%c,%u');
+  refs = [refs; R'];
   crc = R(8);
   L = R(2); % Length of samples
-  
-  [lat, lon] = getlatlon (l)
   
   if (T>R(4))
     fprintf ('[%d] [Warning] Time going backwards: %lu -> %lu\n', ref, T, R(4));

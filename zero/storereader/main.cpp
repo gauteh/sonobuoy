@@ -154,8 +154,8 @@ namespace Zero {
         uint32_t refid      = 0;
         uint64_t reft       = 0;
         uint32_t refstatus  = 0;
-        uint16_t latitude   = 0;
-        uint16_t longitude  = 0;
+        char latitude[12];
+        char longitude[12];
         uint32_t crc        = 0;
 
 
@@ -196,8 +196,8 @@ namespace Zero {
               fd.read (reinterpret_cast<char*>(&refid), sizeof(uint32_t));
               fd.read (reinterpret_cast<char*>(&reft), sizeof(uint64_t));
               fd.read (reinterpret_cast<char*>(&refstatus), sizeof(uint32_t));
-              fd.read (reinterpret_cast<char*>(&latitude), sizeof(uint16_t));
-              fd.read (reinterpret_cast<char*>(&longitude), sizeof(uint16_t));
+              fd.read (reinterpret_cast<char*>(&latitude), sizeof(char) * 12);
+              fd.read (reinterpret_cast<char*>(&longitude), sizeof(char) * 12);
               fd.read (reinterpret_cast<char*>(&crc), sizeof(uint32_t));
 
               for (int k = 0; k < (3 * (SAMPLE_LENGTH)); k++) {
@@ -293,7 +293,7 @@ namespace Zero {
           sam++;
           sam_ref++;
 
-          /* Used as a crappy test for a while since getting exactly 0 is fairly 
+          /* Used as a crappy test for a while since getting exactly 0 is fairly
            * unlikely :D
           if (s == 0) {
             cerr << "=> [ERROR] Sample == 0" << endl;

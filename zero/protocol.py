@@ -349,20 +349,10 @@ class Protocol:
                   return
 
               elif (tokeni == 8):
-                try:
-                  self.zero.current.ad.ad_reference_latitude = int (token)
-                except ValueError:
-                  self.zero.current.index.reset ()
-                  self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
-                  return
+                self.zero.current.ad.ad_reference_latitude  = token
 
               elif (tokeni == 9):
-                try:
-                  self.zero.current.ad.ad_reference_longitude = int (token)
-                except ValueError:
-                  self.zero.current.index.reset ()
-                  self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
-                  return
+                self.zero.current.ad.ad_reference_longitude = token
 
                 #print "[AD] Initiating binary transfer.. samples: ", self.zero.current.ad.ad_k_samples
 

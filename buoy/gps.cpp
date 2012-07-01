@@ -216,10 +216,18 @@ namespace Buoy {
     }
 
     strcpy ((char*) ref_latitude, latitude);
-    if (north) ref_latitude[10] = 'N';
+    volatile char * t = ref_latitude;
+    while (*t != 0 && t < &(ref_latitude[11]))
+      t++;
+    if (north)  *t = 'N';
+    else        *t = 'S';
 
     strcpy ((char*) ref_longitude, longitude);
-    if (east) ref_longitude[10] = 'E';
+    t = ref_longitude;
+    while (*t != 0 && t < &(ref_longitude[11]))
+      t++;
+    if (east) *t = 'E';
+    else      *t = 'W';
   }
 
   void GPS::loop () {
