@@ -82,7 +82,7 @@ namespace Buoy {
       typedef uint32_t sample;
 
 /* Data format */
-# define STORE_VERSION 5
+# define STORE_VERSION 6
 # define SAMPLE_LENGTH 4
 
 /* Data file format {{{
@@ -92,8 +92,8 @@ namespace Buoy {
  *  - Reference id: uint32_t
  *  - Reference:    uint64_t referencesecond [unix time + microdelta]
  *  - Status bit:   uint32_t status
- *  - Latitude:     uint16_t (first bit positive: north)
- *  - Longitude:    uint16_t (first bit positive: east)
+ *  - Latitude:     char * 12
+ *  - Longitude:    char * 12
  *  - Checksum:     uint32_t (of samples in batch)
  *  - 3 * (SAMPLE_LENGTH) with 0
  *  Total length: 48 bytes.
@@ -105,7 +105,7 @@ namespace Buoy {
  * }}} */
 
 # define SD_REFERENCE_PADN 3
-# define SD_REFERENCE_LENGTH (2 * 3 * (SAMPLE_LENGTH) + 4 * 4 + 2 * 2 + 4)
+# define SD_REFERENCE_LENGTH (2 * 3 * (SAMPLE_LENGTH) + 4 * 4 + 2 * 12 + 4)
 
 # define MAX_SAMPLES_PER_FILE (BATCH_LENGTH * 40)
 # define MAX_REFERENCES (MAX_SAMPLES_PER_FILE / BATCH_LENGTH)
@@ -173,7 +173,7 @@ namespace Buoy {
       void open_data ();
 
       void write_batch ();
-      void write_reference (uint64_t, uint32_t, uint16_t, uint16_t, uint32_t);
+      void write_reference (uint64_t, uint32_t, char*, char*, uint32_t);
 
       void start_continuous_write ();
       void stop_continuous_write ();

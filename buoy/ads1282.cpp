@@ -14,6 +14,8 @@
   # include "Wire.h"
 # endif
 
+# include <string.h>
+
 # include "ads1282.h"
 
 # if HASGPS
@@ -595,8 +597,9 @@ namespace Buoy {
       if (!gps->ref_position_lock)
         gps->update_ref_position (); // if locked, use previous position.
 
-      reference_latitudes[batch] = gps->ref_latitude;
-      reference_longitudes[batch] = gps->ref_longitude;
+      strcpy((char*) (reference_latitudes[batch]), (const char*) (gps->ref_latitude));
+      strcpy((char*) (reference_longitudes[batch]), (const char*) (gps->ref_longitude));
+
 # endif
 
       checksums[batch] = 0;

@@ -75,9 +75,9 @@ namespace Buoy {
       bool      east;
 
       /* For use in references */
-      volatile bool     ref_position_lock; // lock ref positions 
-      volatile uint16_t ref_latitude;
-      volatile uint16_t ref_longitude;
+      volatile bool     ref_position_lock; // lock ref positions
+      volatile char ref_latitude[12];
+      volatile char ref_longitude[12];
 
       /*
       char      speedoverground[6];

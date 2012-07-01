@@ -49,8 +49,8 @@ namespace Buoy {
     *longitude = 0;
     east      = false;
 
-    ref_latitude = 0;
-    ref_longitude = 0;
+    ref_latitude[0] = 0;
+    ref_longitude[0] = 0;
     ref_position_lock = 0;
     //*speedoverground = 0;
     //*courseoverground = 0;
@@ -202,33 +202,24 @@ namespace Buoy {
 
     HAS_TIME = valid;
 
-    SerialUSB.println (ref_latitude);
-    SerialUSB.println (ref_longitude);
+    SerialUSB.println ((char*) ref_latitude);
+    SerialUSB.println ((char*) ref_longitude);
 
     enable_sync ();
     // }}}
   }
 
   void GPS::update_ref_position () {
-    ref_latitude  = atoi (latitude) * 1e4;
-    uint16_t n = atoi (&(latitude[5]));
+    for (uint8_t i = 0; i < 12; i++) {
+      ref_latitude[i] = 0;
+      ref_longitude[i] = 0;
+    }
 
-    for (int i = 5; i < 8; i++)
-      if (latitude[i] == '0') n *= 10;
-      else break;
+    strcpy ((char*) ref_latitude, latitude);
+    if (north) ref_latitude[10] = 'N';
 
-    ref_latitude += n;
-    if (north) ref_latitude |= 0x8000; // first bit positive: north
-
-    ref_longitude = atoi (longitude) * 1e4;
-    n = atoi (&(longitude[6]));
-
-    for (int i = 6; i < 9; i++)
-      if (longitude[i] == '0') n *= 10;
-      else break;
-
-    ref_longitude += n;
-    if (east) ref_longitude |= 0x8000; // first bit positive: east
+    strcpy ((char*) ref_longitude, longitude);
+    if (east) ref_longitude[10] = 'E';
   }
 
   void GPS::loop () {

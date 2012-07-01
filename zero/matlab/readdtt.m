@@ -39,6 +39,8 @@ while ~feof(fh)
   crc = R(8);
   L = R(2); % Length of samples
   
+  [lat, lon] = getlatlon (l)
+  
   if (T>R(4))
     fprintf ('[%d] [Warning] Time going backwards: %lu -> %lu\n', ref, T, R(4));
     disp (pl);

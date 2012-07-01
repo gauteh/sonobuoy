@@ -340,8 +340,8 @@ namespace Buoy {
     }
 
     write_reference (ad->references[lastbatch], ad->reference_status[lastbatch],
-                     ad->reference_latitudes[lastbatch],
-                     ad->reference_longitudes[lastbatch],
+                     (char*) ad->reference_latitudes[lastbatch],
+                     (char*) ad->reference_longitudes[lastbatch],
                      ad->checksums[lastbatch]);
 
     if (!SD_AVAILABLE) return;
@@ -400,7 +400,7 @@ namespace Buoy {
     SD_AVAILABLE &= (card->errorCode () == 0);
   } // }}}
 
-  void Store::write_reference (uint64_t ref, uint32_t refstat, uint16_t lat, uint16_t lon, uint32_t crc) // {{{
+  void Store::write_reference (uint64_t ref, uint32_t refstat, char * lat, char * lon, uint32_t crc) // {{{
   {
     if (!SD_AVAILABLE) {
       return;
@@ -420,8 +420,8 @@ namespace Buoy {
     sd_data->write (reinterpret_cast<char*>(&(current_index.nrefs)), sizeof(uint32_t));
     sd_data->write (reinterpret_cast<char*>(&(ref)), sizeof(uint64_t));
     sd_data->write (reinterpret_cast<char*>(&(refstat)), sizeof(uint32_t));
-    sd_data->write (reinterpret_cast<char*>(&(lat)), sizeof(uint16_t));
-    sd_data->write (reinterpret_cast<char*>(&(lon)), sizeof(uint16_t));
+    sd_data->write (reinterpret_cast<char*>(&(lat)), sizeof(char) * 12);
+    sd_data->write (reinterpret_cast<char*>(&(lon)), sizeof(char) * 12);
     sd_data->write (reinterpret_cast<char*>(&(crc)), sizeof(uint32_t));
 
     /* Pad with 0 */
@@ -740,8 +740,8 @@ namespace Buoy {
       uint32_t _refno   = 0;
       uint64_t ref      = 0;
       uint32_t refstat  = 0;
-      uint16_t lat      = 0;
-      uint16_t lon      = 0;
+      char lat[12];
+      char lon[12];
       uint32_t crc      = 0;
 
       if (mystart == 0) {
@@ -749,8 +749,8 @@ namespace Buoy {
         send_d->read (reinterpret_cast<char*>(&_refno), sizeof(_refno));
         send_d->read (reinterpret_cast<char*>(&ref), sizeof(ref));
         send_d->read (reinterpret_cast<char*>(&refstat), sizeof(refstat));
-        send_d->read (reinterpret_cast<char*>(&lat), sizeof(lat));
-        send_d->read (reinterpret_cast<char*>(&lon), sizeof(lon));
+        send_d->read (reinterpret_cast<char*>(&lat), sizeof(char) * 12);
+        send_d->read (reinterpret_cast<char*>(&lon), sizeof(char) * 12);
         send_d->read (reinterpret_cast<char*>(&crc), sizeof(crc));
         send_d->seekCur (SD_REFERENCE_PADN * SAMPLE_LENGTH); // seek to first sample
 
