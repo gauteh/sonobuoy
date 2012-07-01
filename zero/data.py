@@ -116,34 +116,38 @@ class Data:
   def read_index (self):
     if self.enabled:
       if os.path.exists (self.indexf_uri):
-        self.indexf = open (self.indexf_uri, 'r')
+        try:
+          self.indexf = open (self.indexf_uri, 'r')
 
-        self.id             = int(self.indexf.readline ())
-        self.samples        = int(self.indexf.readline ())
-        self.refs_no        = int(self.indexf.readline ())
-        r = self.indexf.readline ().strip ()
-        self.hasfull        = (r == "True")
+          self.id             = int(self.indexf.readline ())
+          self.samples        = int(self.indexf.readline ())
+          self.refs_no        = int(self.indexf.readline ())
+          r = self.indexf.readline ().strip ()
+          self.hasfull        = (r == "True")
 
-        for l in self.indexf.readlines ():
-          l = l.strip()
-          s = l.split (',')
-          b = Batch (int(s[0]), int(s[1]), int(s[2]), int(s[3]), int(s[4]), int(s[5]), int(s[6]))
+          for l in self.indexf.readlines ():
+            l = l.strip()
+            s = l.split (',')
+            b = Batch (int(s[0]), int(s[1]), int(s[2]), int(s[3]), int(s[4]), int(s[5]), int(s[6]))
 
-          c = []
-          i = 4
-          while i < len(s):
-            c.append (int(s[i]))
-            i = i + 1
+            c = []
+            i = 4
+            while i < len(s):
+              c.append (int(s[i]))
+              i = i + 1
 
-          b.completechunks = c
-          b.complete = (len(b.completechunks) == (BATCH_LENGTH / CHUNK_SIZE))
+            b.completechunks = c
+            b.complete = (len(b.completechunks) == (BATCH_LENGTH / CHUNK_SIZE))
 
-          self.batches.append (b)
+            self.batches.append (b)
 
-        self.indexf.close ()
+          self.indexf.close ()
 
-        self.batches.sort (key=lambda r: r.no)
-
+          self.batches.sort (key=lambda r: r.no)
+        except Exception as e:
+          self.logger.error (self.me + " Error while opening data index..")
+          self.logger.exception (e)
+          self.reset_data ()
       else:
         self.write_index ()
 

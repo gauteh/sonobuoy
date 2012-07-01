@@ -4,7 +4,7 @@
 
 % d should be as returned from readdtt with complement and bitshift
 
-noiserange = max(d) - min(d);
+noiserange = max(d) - min(d) +1;
 
 fsr = 2^31 - 1;
 
