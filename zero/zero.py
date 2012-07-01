@@ -25,6 +25,7 @@ class Zero:
   port = '/dev/ttyUSB0'
   baud = 115200
   ser  = None
+  version = ''
 
   uimanager       = None
   uimanagerserver = None
@@ -79,6 +80,10 @@ class Zero:
     self.logger.info ("==================================================")
     self.logger.info ("[Zero] Starting Zero..")
     self.logger.info ("[Zero] Logging to console and to file log/zero.log.")
+
+    self.version = os.popen ('git describe --always --tags').read ().strip ()
+    self.logger.info ("[Zero] Version: " + self.version)
+
 
     for b in buoys:
       if b['enabled']:
