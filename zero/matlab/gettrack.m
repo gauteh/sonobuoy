@@ -10,13 +10,21 @@ for i=1:m
   lon_ = R(8:9);
   
   if (lat_(2) == 'S')
-    lat_ = -lat_(1);
+    if (lat_(1) == 0)
+      lat_ = NaN;
+    else
+      lat_ = -lat_(1);
+    end
   else
     lat_ = lat_(1);
   end
   
   if (lon_(2) == 'W')
-    lon_ = -lon_(1);
+    if (lon_(1) == 0)
+      lon_ = NaN;
+    else
+      lon_ = -lon_(1);
+    end
   else
     lon_ = lon_(1);
   end

@@ -194,7 +194,7 @@ class Index:
 
   def gotbatch (self, id, refno, start, length, ref, refstat, latitude, longitude, checksum, samples):
     self.logger.debug (self.me + " Got batch, id: " + str(id) + ", ref no: " + str(refno) + ", start: " + str(start) + ", length: " + str(length))
-    if self.working_data.id == id:
+    if self.working_data is not None and self.working_data.id == id:
       self.working_data.got_chunk (refno, start, length, ref, refstat, latitude, longitude, checksum, samples)
 
     if self.pendingid == 5:

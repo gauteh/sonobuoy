@@ -247,7 +247,7 @@ class Zero:
               if i == -1:
                 ii = (self.currenti + 1) % len (self.buoys)
                 while ii != self.currenti:
-                  if not self.buoys[ii].complete:
+                  if not self.buoys[ii].index.complete ():
                     i = ii
                     break
                   ii = (ii + 1) % len(self.buoys)

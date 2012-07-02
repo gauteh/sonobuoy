@@ -1,4 +1,4 @@
-function plottrack (refs)
+function [lat, lon] = plottrack (refs)
 % plots track
 
 [lat, lon] = gettrack (refs);
