@@ -1,5 +1,11 @@
-function [lat, lon] = plottrack (refs)
+function [lat, lon] = plottrack (refs, fig)
 % plots track
+if (~exist('fig', 'var')), fig = 3; end
+
+if (fig > 0)
+  figure (fig);
+  clf('reset');
+end
 
 [lat, lon] = gettrack (refs);
 
