@@ -13,6 +13,7 @@
 # include <getopt.h>
 # include <math.h>
 # include <time.h>
+# include <string.h>
 
 using namespace std;
 
@@ -229,6 +230,18 @@ namespace Zero {
                 cerr << "=> [WARNING] Reference is 0, store has no time reference." << endl;
                 failref = true;
                 corrupt = true;
+              }
+
+              if (strlen(latitude) < 2) {
+                latitude[1] = latitude[0];
+                latitude[0] = '0';
+                latitude[2] = 0;
+              }
+
+              if (strlen(longitude) < 2) {
+                longitude[1] = longitude[0];
+                longitude[0] = '0';
+                longitude[2] = 0;
               }
 
               /* Output DTT format */

@@ -209,7 +209,13 @@ class Data:
           b.ref    = reference
           b.status = status
           b.latitude = latitude
+          if len(b.latitude) < 2:
+            b.latitude = '0' + b.latitude
+
           b.longitude = longitude
+          if len(b.longitude) < 2:
+            b.longitude = '0' + b.longitude
+
           b.checksum = checksum
 
         # read existing chunks
