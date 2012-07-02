@@ -42,7 +42,6 @@
 # define DEBUG_SD      0 // enable debug error messages on SdFat
 
 # define WATCHDOG_RELOAD 120 * (40000 / 256) // ca 2 minutes
-# define WATCHDOG_RELOAD_INIT (WATCHDOG_RELOAD * 2)
 
 /* Enable drivers for peripherals (disable to run without these
  * connected or to save program size) */

@@ -51,7 +51,6 @@ namespace Buoy {
       //gps->print_status ();
       lasts = millis ();
     }
-
   }
 
   void BuoyMaster::critical_loop () {
@@ -67,9 +66,6 @@ namespace Buoy {
 
   void BuoyMaster::setup () {
     /* Configure LED */
-    //pinMode (BOARD_LED_PIN, OUTPUT);
-    //digitalWrite (BOARD_LED_PIN, LOW);
-
     //SerialUSB.begin ();
 
     pinMode (13, OUTPUT);
@@ -84,9 +80,7 @@ namespace Buoy {
       //togglePin (3);
     }
 
-
     SerialUSB.println ("Gautebøye [" STRINGIFY(BUOY) "] " GIT_DESC);
-    //SerialUSB.println ("[**] Gautebøye 1 [" BUOY_NAME "] version: " GIT_DESC);
 
     /* Set up devices */
 # if HASRF
