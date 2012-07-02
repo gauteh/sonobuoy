@@ -3,7 +3,7 @@ function [lat, lon] = plottrack (refs)
 
 [lat, lon] = gettrack (refs);
 
-latlim = [80 90];
+latlim = [55 90];
 lonlim = [-180 180];
 
 ax = worldmap (latlim, lonlim);
@@ -13,7 +13,7 @@ c = load ('coast');
 geoshow (ax, land);
 plotm (c.lat, c.long);
 
-plotm (lat, lon, 'r');
+plotm (lat/100, lon/100, 'rx-');
 
 
 end
