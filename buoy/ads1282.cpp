@@ -590,10 +590,11 @@ namespace Buoy {
       /* Pick new reference for batch */
 # if HASGPS
       references[batch] = (gps->reference * 1e6) + (micros () - gps->microdelta);
-      reference_status[batch] = (gps->HAS_TIME & GPS::TIME) |
-                                (gps->HAS_SYNC & GPS::SYNC) |
-                                (gps->HAS_SYNC_REFERENCE & GPS::SYNC_REFERENCE) |
-                                (gps->valid & GPS::POSITION);
+      reference_status[batch] = 0;
+      if (gps->HAS_TIME) reference_status[batch] |= GPS::TIME;
+      if (gps->HAS_SYNC) reference_status[batch] |= GPS::SYNC;
+      if (gps->HAS_SYNC_REFERENCE) reference_status[batch] |= GPS::SYNC_REFERENCE;
+      if (gps->valid) reference_status[batch] |= GPS::POSITION;
 
       if (!gps->ref_position_lock)
         gps->update_ref_position (); // if locked, use previous position.

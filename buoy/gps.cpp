@@ -331,6 +331,11 @@ namespace Buoy {
       while ((gps_buf[i] != ',' && gps_buf[i] != '*') && i < len) {
         token[j] = gps_buf[i];
 
+        if (token[j] == '$' or token[j] == '*') {
+          ref_position_lock = false;
+          return;
+        }
+
         i++;
         j++;
       }

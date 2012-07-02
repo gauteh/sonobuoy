@@ -9,11 +9,18 @@ lonlim = [-180 180];
 ax = worldmap (latlim, lonlim);
 
 land = shaperead ('landareas', 'UseGeoCoords', true);
-c = load ('coast');
 geoshow (ax, land);
-plotm (c.lat, c.long);
 
-plotm (lat/100, lon/100, 'rx-');
+% Todo: This probably considers minutes to be decimals of degree
+minutes = mod(lat, 100) - mod(lat, 1);
+lat = (lat - minutes) / 100;
+lat = lat + minutes / 60;
+
+minutes = mod(lon, 100) - mod(lon, 1);
+lon = (lon - minutes) / 100;
+lon = lon + minutes / 60;
+
+plotm (lat, lon, 'rx-');
 
 
 end
