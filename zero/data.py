@@ -128,7 +128,7 @@ class Data:
           for l in self.indexf.readlines ():
             l = l.strip()
             s = l.split (',')
-            b = Batch (int(s[0]), int(s[1]), int(s[2]), int(s[3]), int(s[4]), int(s[5]), int(s[6]))
+            b = Batch (int(s[0]), int(s[1]), int(s[2]), s[3], s[4], int(s[5]), int(s[6]))
 
             c = []
             i = 4
@@ -163,7 +163,7 @@ class Data:
       self.indexf.write (str(self.hasfull) + '\n')
 
       for i in self.batches:
-        self.indexf.write (str(i.no) + ',' + str(i.ref) + ',' + str(i.status)  + ',' + str(i.latitude) + "," + str(i.longitude) + "," + str(i.line))
+        self.indexf.write (str(i.no) + ',' + str(i.ref) + ',' + str(i.status)  + ',' + i.latitude + "," + i.longitude + "," + str(i.checksum) + ',' + str(i.line))
         for c in i.completechunks:
           self.indexf.write (',' + str(c))
 

@@ -253,8 +253,8 @@ class Zero:
                   ii = (ii + 1) % len(self.buoys)
 
               # iterate: all good, pick next buoy
-              if i == -1:
-                i = (self.currenti + 1) % len(self.buoys)
+              #if i == -1:
+                #i = (self.currenti + 1) % len(self.buoys)
 
               if (i != self.currenti):
                 self.logger.info ("[Zero] Changing to buoy: " + self.buoys[i].name + " [" + str(self.buoys[i].id) + "]..")

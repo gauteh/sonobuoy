@@ -168,11 +168,14 @@ namespace Buoy {
     /* Input: String including $ and * with HEX decimal checksum
      *        to test. NULL terminated.
      */
+    uint8_t  n = 0;
+# define MAX_CHARS 80
     uint32_t tsum = 0;
     buf++; // skip $
-    while (*buf != '*' && *buf != 0) {
+    while (*buf != '*' && *buf != 0 && n < MAX_CHARS) {
       tsum = tsum ^ (uint8_t)*buf;
       buf++;
+      n++;
     }
     buf++;
 
