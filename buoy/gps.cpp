@@ -311,7 +311,9 @@ namespace Buoy {
     */
 
     /* Test checksum before parsing */
-    if (!test_checksum (gps_buf)) return;
+    if (!test_checksum (gps_buf)) {
+      return;
+    }
 
     /* Update time, should be set in case time data has been received */
     bool doseconds = false;
@@ -330,11 +332,6 @@ namespace Buoy {
       /* Get next token */
       while ((gps_buf[i] != ',' && gps_buf[i] != '*') && i < len) {
         token[j] = gps_buf[i];
-
-        if (token[j] == '$' or token[j] == '*') {
-          ref_position_lock = false;
-          return;
-        }
 
         i++;
         j++;

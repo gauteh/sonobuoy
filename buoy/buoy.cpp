@@ -177,7 +177,9 @@ namespace Buoy {
       buf++;
       n++;
 
-      if (n > MAX_CHARS) return false;
+      if (n > MAX_CHARS) {
+        return false;
+      }
     }
     buf++;
 
