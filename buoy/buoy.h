@@ -76,7 +76,7 @@ namespace Buoy {
 
   int itoa (uint32_t, uint8_t, char *);
   byte gen_checksum (const char *);
-  bool test_checksum (const char *);
+  bool test_checksum (char *);
   //void append_checksum (char *);
 
   /* Globally available instance of BuoyMaster (i.e. for statical interrupt

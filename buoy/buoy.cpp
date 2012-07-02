@@ -163,7 +163,7 @@ namespace Buoy {
     return csum;
   }
 
-  bool test_checksum (const char *buf)
+  bool test_checksum (char *buf)
   {
     /* Input: String including $ and * with HEX decimal checksum
      *        to test. NULL terminated.
@@ -172,12 +172,16 @@ namespace Buoy {
 # define MAX_CHARS 80
     uint32_t tsum = 0;
     buf++; // skip $
-    while (*buf != '*' && *buf != 0 && n < MAX_CHARS) {
+    while (*buf != '*' && *buf != 0) {
       tsum = tsum ^ (uint8_t)*buf;
       buf++;
       n++;
+
+      if (n > MAX_CHARS) return false;
     }
     buf++;
+
+    *(buf+2) = 0; // Make sure buf is terminated.
 
     uint16_t csum = 0;
     csum = strtoul (buf, NULL, 16); // buf now points to first digit of CS
