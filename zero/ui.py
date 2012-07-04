@@ -22,6 +22,12 @@ class ZeroCliService:
   def resetbuoy (self):
     self.zero.protocol.resetbuoy ()
 
+  def setznradiorate (self, rate):
+    self.zero.protocol.znradiorate (rate)
+
+  def setbuoyradiorate (self, rate):
+    self.zero.protocol.znbuoyradiorate (rate)
+
   def getlatestbatch (self):
     self.zero.current.getlatestbatch ()
 

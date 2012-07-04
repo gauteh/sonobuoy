@@ -60,6 +60,22 @@ class zCLI:
     self.z.resetbuoy ()
     print "done."
 
+  def znradiorate (self, rate):
+    print "Setting ZeroNode radiorate..",
+    if rate >= 0 and rate <= 3:
+      self.z.setznradiorate (rate)
+      print "done."
+    else:
+      print "error: range."
+
+  def radiorate (self, rate):
+    print "Setting current buoy radiorate..",
+    if rate >= 0 and rate <= 3:
+      self.z.setbuoyradiorate (rate)
+      print "done."
+    else:
+      print "error: range."
+
   def getlatestbatch (self):
     print "Getting latest batch..",
     self.z.getlatestbatch ()
@@ -203,6 +219,7 @@ class zCLI:
     print "getstatus                Request status from current buoy"
     print "getlatestbatch           Request latest batch from current buoy"
     print "getids [start]           Get ids"
+    print "radiorate [rate]         Set radio rate of current buoy (0-3)"
     print "reset                    Reset CPU card on current buoy"
     print ""
     print "=> ZeroNode commands:"
@@ -212,6 +229,7 @@ class zCLI:
     print "znconnect                Connect to currently specified address"
     print "znoutputuart             Configure output of Zero to go to uart"
     print "znoutputwireless         Configure output of Zero to go to wireless"
+    print "znradiorate [rate]       Set radio rate of Zero (0-3)"
     print ""
     print "=> Zero Manager commands:"
     print "stopacquire              Stop continuous data transmission from buoys"
@@ -249,6 +267,18 @@ class zCLI:
 
     elif sys.argv[1] == 'reset':
       self.resetbuoy ()
+
+    elif sys.argv[1] == 'znradiorate':
+      if len(sys.argv) != 3:
+        print "Error: Must specify radio rate"
+        return
+      self.znradiorate (int(sys.argv[2]))
+
+    elif sys.argv[1] == 'radiorate':
+      if len(sys.argv) != 3:
+        print "Error: Must specify radio rate"
+        return
+      self.radiorate (int(sys.argv[2]))
 
     elif sys.argv[1] == 'znportalmode':
       self.znportalmode ()

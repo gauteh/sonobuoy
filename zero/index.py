@@ -96,6 +96,7 @@ class Index:
     # try to set goal radiorate for data transfer
     # be a little more clever, keeping it down if we dont get a signal
     if self.buoy.radiorate < self.goal_radiorate:
+      self.logger.info (self.me + " Setting buoy radio rate to goal: " + str(rate))
       self.protocol.znbuoyradiorate (self.goal_radiorate)
 
   ''' Update local list of ids from buoy, working backwards '''
@@ -262,6 +263,7 @@ class Index:
     # Check if radiorate has been reset
     if self.buoy.radiorate != 0:
       if time.time () - self.buoy.set_radiorate_t > self.buoy.RADIORATE_TIMEOUT:
+        self.logger.info (self.me + " Buoy radio rate timed out, resetting status.")
         self.buoy.radiorate = 0
 
     if self.buoy.zero.ser is not None and self.buoy.zero.acquire:

@@ -65,29 +65,44 @@ class Protocol:
 
   def znradiorate (self, rate):
     self.logger.info ("[ZeroNode] Setting Zero RF radio rate to: " + str(rate))
-    self.zero.send ("$Z" + str(rate) + "*")
-    self.zeroradiorate = rate
+    if rate >= 0 and rate <= 3:
+      self.zero.send ("$Z" + str(rate) + "*")
+      self.zeroradiorate = rate
+    else:
+      self.logger.error ("[ZeroNode] Zero RF radio rate: Rate out of range.")
 
   def znbuoyradiorate (self, rate):
-    self.logger.info ("[ZeroNode] Setting radio rate on current buoy to: " + str(rate))
-    self.zero.send ("$ZB" + str(rate) + "*")
-    self.zero.current.radiorate = rate
-    self.zero.current.set_radiorate_t = time.time ()
+    if self.zero.current is not None:
+      self.logger.info ("[ZeroNode] Setting radio rate on current buoy to: " + str(rate))
+      if rate >= 0 and rate <= 3:
+        self.zero.send ("$ZB" + str(rate) + "*")
+        self.zero.current.radiorate = rate
+        self.zero.current.set_radiorate_t = time.time ()
+      else:
+        self.logger.error ("[ZeroNode] Buoy radio rate: Rate out of range.")
+
+    else:
+      self.logger.error ("[ZeroNode] Set radio rate on buoy: No current buoy.")
 
   def ensure_zn_address (self):
-    if self.zero.current.id != self.adressedbuoy:
-      self.znsetaddress ()
-      self.znconnect ()
+    if self.zero.current is not None:
+      if self.zero.current.id != self.adressedbuoy:
+        self.znsetaddress ()
+        self.znconnect ()
+
       if self.zerooutput != 0:
         self.znoutputwireless ()
 
-    if self.zero.current.radiorate != self.zeroradiorate:
-      self.znradiorate (zelf.zero.current.radiorate)
+      if self.zero.current.radiorate != self.zeroradiorate:
+        self.znradiorate (zelf.zero.current.radiorate)
 
-    # check whether timeout for radiorate is approaching
-    RADIORATE_RESET_TIMER = 10 # secs margin before reseting timer on buoy
-    if (time.time () - self.zero.current.set_radiorate_t) <= RADIORATE_RESET_TIMER:
-      self.znbuoyradiorate (self.zero.current.radiorate)
+      # check whether timeout for radiorate is approaching
+      RADIORATE_RESET_TIMER = 10 # secs margin before reseting timer on buoy
+      if (time.time () - self.zero.current.set_radiorate_t) <= RADIORATE_RESET_TIMER:
+        self.znbuoyradiorate (self.zero.current.radiorate)
+
+    else:
+      self.logger.error ("[ZeroNode] Ensure address: No current buoy set.")
 
   def send (self, msg):
     self.ensure_zn_address ()
