@@ -66,18 +66,25 @@ class Protocol:
   def znradiorate (self, rate):
     self.logger.info ("[ZeroNode] Setting Zero RF radio rate to: " + str(rate))
     if rate >= 0 and rate <= 3:
-      self.zero.send ("$Z" + str(rate) + "*")
+      msg = "$Z" + str(rate) + "*"
+      self.zero.send (msg + gen_checksum(msg))
       self.zeroradiorate = rate
     else:
       self.logger.error ("[ZeroNode] Zero RF radio rate: Rate out of range.")
 
   def znbuoyradiorate (self, rate):
+    # this one also sets the ZN radiorate
     if self.zero.current is not None:
       self.logger.info ("[ZeroNode] Setting radio rate on current buoy to: " + str(rate))
       if rate >= 0 and rate <= 3:
-        self.zero.send ("$ZB" + str(rate) + "*")
+        msg = "$ZB" + str(rate) + "*"
+        self.zero.send (msg + gen_checksum(msg))
         self.zero.current.radiorate = rate
         self.zero.current.set_radiorate_t = time.time ()
+        #time.sleep (2) # allow rpc to be sent
+        # snap script on zero node waits for rpc to be sent, then
+        # changes rate of itself
+        self.zeroradiorate = rate
       else:
         self.logger.error ("[ZeroNode] Buoy radio rate: Rate out of range.")
 
@@ -94,11 +101,12 @@ class Protocol:
         self.znoutputwireless ()
 
       if self.zero.current.radiorate != self.zeroradiorate:
-        self.znradiorate (zelf.zero.current.radiorate)
+        self.znradiorate (self.zero.current.radiorate)
 
       # check whether timeout for radiorate is approaching
       RADIORATE_RESET_TIMER = 10 # secs margin before reseting timer on buoy
-      if (time.time () - self.zero.current.set_radiorate_t) <= RADIORATE_RESET_TIMER:
+      if (time.time () - self.zero.current.set_radiorate_t) >= (Buoy.RADIORATE_TIMEOUT - RADIORATE_RESET_TIMER):
+        self.logger.info ("[ZeroNode] Ensure radiorate.")
         self.znbuoyradiorate (self.zero.current.radiorate)
 
     else:

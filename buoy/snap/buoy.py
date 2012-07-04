@@ -15,14 +15,16 @@ RESET_PIN = GPIO_18
 RADIORATE_TIMEOUT = 60 # seconds
 counter = 0
 myrate  = 0 # currently set rate
+gorate  = 0 # go to this rate next ms
+countdown_gorate = 0
 
 @setHook (HOOK_STARTUP)
 def startup ():
-  initProtoHw ()
-  
   # Full power
   saveNvParam(70,'\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11')
   txPwr(17)
+  
+  setRadioRate (0)
 
   # Set up serial and cross connect Buoy to ZeroNode
   initUart (1, 1, 8, 'N', 1)
@@ -50,27 +52,27 @@ def reset_maple ():
 
 # timeout
 @setHook(HOOK_1S)
-def countdown_radiorate_reset ():
+def countdown_radiorate_reset (tick):
   global counter, RADIORATE_TIMEOUT, myrate
-  if counter > 1:
-    counter -= 1
-  elif counter == 1:
-    # reset
-    setRadioRate (0)
-    myrate = 0
-  else:
-    pass # idle
+  if myrate != 0:
+    if counter > 1:
+      counter -= 1
+    elif counter == 1:
+      # reset
+      setRadioRate (0)
+      myrate = 0
+
 
 def mysetradiorate (rate):
-  global counter, RADIORATE_TIMEOUT, myrate
+  global counter, RADIORATE_TIMEOUT, myrate, gorate, countdown_gorate
 
   if rate >= 0 and rate <= 3:
       
     counter = RADIORATE_TIMEOUT
     
     if myrate != rate:
-      setRadioRate (rate)
       myrate = rate
+      setRadioRate (rate)
 
       # rates (Synapse Reference Manual, p. 153):
       # 0 = 250 kbps (default)

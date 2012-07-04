@@ -339,11 +339,15 @@ class Data:
   def reset_data (self):
     self.dataf_l.acquire ()
 
-    self.logger.info (self.me + " Deleting index and data files and resetting..")
+    self.logger.error (self.me + " Deleting index and data files and resetting..")
 
     # remove index and data file and reload
-    os.unlink (self.dataf_uri)
-    os.unlink (self.indexf_uri)
+    try:
+      os.unlink (self.dataf_uri)
+    except: pass
+    try:
+      os.unlink (self.indexf_uri)
+    except: pass
 
     self.reset ()
     self.read_index ()

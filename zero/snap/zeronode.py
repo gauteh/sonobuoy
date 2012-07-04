@@ -6,10 +6,14 @@ from synapse import *
 mode        = 0 # 0 = stdout -> transparent, 1 = stdout -> uart1
 buoyaddress = 0
 
+rate_rpc    = 0
+noderate    = 0
+
 @setHook(HOOK_STARTUP)
 def startup():
   global buoyaddress
-
+  setRadioRate(0)
+  
   # Full power
   saveNvParam(70,'\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11')
   txPwr (17)
@@ -37,9 +41,19 @@ def reset_buoy ():
   global buoyaddress
   rpc (buoyaddress, 'reset_maple')
 
+@setHook(HOOK_RPC_SENT)
+def radiorate_complete (ref):
+  global rate_rpc, noderate
+  if rate_rpc == ref:
+    setRadioRate (noderate)
+    rate_rpc = 0
+    
+
 def setradiorate_buoy (rate):
-  global buoyaddress
-  rpc (buoyaddress, 'mysetradiorate', rate)
+  global buoyaddress, rate_rpc, noderate
+  rpc (buoyaddress, 'mysetradiorate', int(rate))
+  noderate = rate
+  rate_rpc = getInfo (9) # bufRef of prev rpc call
 
 # state, 0 = waiting for start of command, '$'
 #        1 = recording command, waiting for *
@@ -240,4 +254,5 @@ def find(s, c):
 def get_energy ():
   pass
 
-  
+def setrr (rate):
+  setRadioRate(rate)
