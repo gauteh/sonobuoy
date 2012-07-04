@@ -89,8 +89,9 @@ class Buoy:
     self.logger.info ("[" + self.name + "] Stopping..")
     self.index.close ()
 
-    self.trackf.close ()
-    self.trackf = None
+    if self.track is not None:
+      self.trackf.close ()
+      self.trackf = None
 
     self.logf.close ()
     self.logf = None
