@@ -57,6 +57,8 @@ class Zero:
 
     self.currenti = self.buoys.index(b)
 
+    self.current.index.checkradiorate ()
+
     self.protocol.ensure_zn_address ()
 
     self.current.active = True

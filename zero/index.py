@@ -92,7 +92,7 @@ class Index:
 
     self.write_index ()
 
-  def checkradiorate (self):
+  def fastradiorate (self):
     # try to set goal radiorate for data transfer
     # be a little more clever, keeping it down if we dont get a signal
     if self.buoy.radiorate != self.goal_radiorate:
@@ -102,9 +102,15 @@ class Index:
   ''' Update local list of ids from buoy, working backwards '''
   gotids_n = 0
 
+  def checkradiorate (self):
+    if self.buoy.radiorate != 0:
+      if (time.time () - self.buoy.set_radiorate_t) > self.buoy.RADIORATE_TIMEOUT:
+        self.logger.info (self.me + " Buoy radio rate timed out, resetting rate.")
+        self.buoy.radiorate = 0
+
   def getids (self, start):
     if self.state == 0:
-      self.checkradiorate ()
+      self.fastradiorate ()
       self.protocol.send ("GIDS," + str(start))
       self.request_t = time.time ()
       self.timeout   = self.getids_timeout
@@ -194,7 +200,7 @@ class Index:
   requested_chunks = 0
   def getbatch (self, id, ref, start, length):
     if self.state == 0:
-      self.checkradiorate ()
+      self.fastradiorate ()
       self.logger.info (self.me + "[" + str(id) + "] Req chunk, ref: " + str(ref) + ", start: " + str(start) + ", length: " + str(length))
       self.pendingid = 5
       self.state     = 1
@@ -261,10 +267,7 @@ class Index:
 
   def loop (self):
     # Check if radiorate has been reset
-    if self.buoy.radiorate != 0:
-      if (time.time () - self.buoy.set_radiorate_t) > self.buoy.RADIORATE_TIMEOUT:
-        self.logger.info (self.me + " Buoy radio rate timed out, resetting status.")
-        self.buoy.radiorate = 0
+    self.checkradiorate ()
 
     if self.buoy.zero.ser is not None and self.buoy.zero.acquire:
       if self.state == 0 and not self.cleanup:
