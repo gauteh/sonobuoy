@@ -84,6 +84,11 @@ class Protocol:
     if self.zero.current.radiorate != self.zeroradiorate:
       self.znradiorate (zelf.zero.current.radiorate)
 
+    # check whether timeout for radiorate is approaching
+    RADIORATE_RESET_TIMER = 10 # secs margin before reseting timer on buoy
+    if (time.time () - self.zero.current.set_radiorate_t) <= RADIORATE_RESET_TIMER:
+      self.znbuoyradiorate (self.zero.current.radiorate)
+
   def send (self, msg):
     self.ensure_zn_address ()
 
