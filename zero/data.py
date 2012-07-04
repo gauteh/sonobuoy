@@ -131,7 +131,7 @@ class Data:
             b = Batch (int(s[0]), int(s[1]), int(s[2]), s[3], s[4], int(s[5]), int(s[6]))
 
             c = []
-            i = 4
+            i = 7
             while i < len(s):
               c.append (int(s[i]))
               i = i + 1
