@@ -442,7 +442,7 @@ class Index:
     self.pendingids = 0
     self.requested_chunks = 0
 
-    if ((time.time () - self.buoy.set_radiorate_t) > self.buoy.RADIORATE_TIMEOUT) or (self.radiorate_confirmed == False):
+    if ((time.time () - self.buoy.set_radiorate_t) > self.buoy.RADIORATE_TIMEOUT) or (self.protocol.radiorate_confirmed == False):
       self.buoy.radiorate = 0
 
     # reset protocol
