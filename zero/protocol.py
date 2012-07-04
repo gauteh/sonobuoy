@@ -20,6 +20,9 @@ class Protocol:
 
   tokens = [0, 0, 0, 0, 0, 0, 0, 0] # temp for storing tokens during parsing
 
+  radiorate_confirmed = False # is set true on first received telegram after
+                              # radio change
+
   def __init__ (self, z):
     self.zero     = z
     self.logger   = z.logger
@@ -77,6 +80,7 @@ class Protocol:
         msg = "$Z" + str(rate) + "*"
         self.zero.send (msg + gen_checksum(msg))
         self.zeroradiorate = rate
+        self.radiorate_confirmed = False
       else:
         self.logger.error ("[ZeroNode] Zero RF radio rate: Rate out of range.")
 
@@ -94,6 +98,7 @@ class Protocol:
           # snap script on zero node waits for rpc to be sent, then
           # changes rate of itself
           self.zeroradiorate = rate
+          self.radiorate_confirmed = False
         else:
           self.logger.error ("[ZeroNode] Buoy radio rate: Rate out of range.")
 
@@ -222,6 +227,9 @@ class Protocol:
 
     i = 0
     l = len (buf)
+
+    # Telegram received, so radio rate must be correctly set
+    self.radiorate_confirmed = False
 
     while (i < l):
 

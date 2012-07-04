@@ -33,7 +33,7 @@ class Index:
   me = ""
 
   # goal radiorate, try to achieve this radiorate (only for data transfer)
-  goal_radiorate = 0
+  goal_radiorate = 3
 
 
   def __init__ (self, l, _buoy):
@@ -442,7 +442,8 @@ class Index:
     self.pendingids = 0
     self.requested_chunks = 0
 
-    self.buoy.radiorate = 0
+    if ((time.time () - self.buoy.set_radiorate_t) > self.buoy.RADIORATE_TIMEOUT) or (self.radiorate_confirmed == False):
+      self.buoy.radiorate = 0
 
     # reset protocol
     self.protocol.a_receive_state = 0
