@@ -26,6 +26,11 @@ class Buoy:
   name    = ''    # Unique friendly name
   address = ''    # Node address
   address_p = ''  # Synapse format address
+
+  radiorate = 0           # Radio rate currently set
+  RADIORATE_TIMEOUT = 60  # seconds before buoy node reset to default (0) rate
+  set_radiorate_t   = 0   # time radio rate was set
+
   enabled = False
 
   BASEDIR = 'log'

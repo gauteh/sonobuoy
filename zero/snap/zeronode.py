@@ -9,8 +9,6 @@ buoyaddress = 0
 @setHook(HOOK_STARTUP)
 def startup():
   global buoyaddress
-  # 2 Mbps radio rate
-  setRadioRate (3)
 
   # Full power
   saveNvParam(70,'\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11')
@@ -38,7 +36,11 @@ def connect_buoy ():
 def reset_buoy ():
   global buoyaddress
   rpc (buoyaddress, 'reset_maple')
-  
+
+def setradiorate_buoy (rate):
+  global buoyaddress
+  rpc (buoyaddress, 'mysetradiorate', rate)
+
 # state, 0 = waiting for start of command, '$'
 #        1 = recording command, waiting for *
 #        2 = waiting for first CS digit
@@ -114,6 +116,14 @@ def parse ():
   # $ZU*           : Connect stdout to uart1
   # $ZC*           : Connect to previously specified address
   # $ZR*           : Reset current buoy
+  # $Z0*           : Set local radiorate to 0
+  # $Z1*           : Set local radiorate to 1
+  # $Z2*           : Set local radiorate to 2
+  # $Z3*           : Set local radiorate to 3
+  # $ZB0*          : Set current buoy radiorate to 0
+  # $ZB1*          : Set current buoy radiorate to 1
+  # $ZB2*          : Set current buoy radiorate to 2
+  # $ZB3*          : Set current buoy radiorate to 3
   c = -1
 
   while i < l:
@@ -148,11 +158,37 @@ def parse ():
         return
       elif token == '$ZS':
         print "$Z,S," + buoyaddress + "*NN"
-        
         return
       elif token == '$ZR':
         reset_buoy ()
         return
+    
+      elif token == '$Z0':
+        setRadioRate(0)
+        return
+      elif token == '$Z1':
+        setRadioRate(1)
+        return
+      elif token == '$Z2':
+        setRadioRate(2)
+        return
+      elif token == '$Z3':
+        setRadioRate(3)
+        return
+    
+      elif token == '$ZB0':
+        setradiorate_buoy (0)
+        return
+      elif token == '$ZB1':
+        setradiorate_buoy (1)
+        return
+      elif token == '$ZB2':
+        setradiorate_buoy (2)
+        return
+      elif token == '$ZB3':
+        setradiorate_buoy (3)
+        return
+    
       else:
         # Not zeronode command, relay to buoy
         print cmd

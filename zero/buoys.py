@@ -6,14 +6,14 @@
 buoys = [ { 'id' :        1,
             'name' :      'One',
             'address' :   '04:3C:60',
-            'enabled' :   True,
+            'enabled' :   False,
             'version' :   1,
           },
 
           { 'id' :        2,
             'name' :      'Two',
             'address' :   '00:00:FF',
-            'enabled' :   False,
+            'enabled' :   True,
             'version' :   1,
           },
 

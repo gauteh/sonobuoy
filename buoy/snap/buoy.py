@@ -12,13 +12,13 @@ PORTAL_ADDR = "\x00\x00\x01"
 ZERO_ADDR = "\x03\xFF\x37"
 
 RESET_PIN = GPIO_18
+RADIORATE_TIMEOUT = 60 # seconds
+counter = 0
+myrate  = 0 # currently set rate
 
 @setHook (HOOK_STARTUP)
 def startup ():
   initProtoHw ()
-
-  # 2Mbps
-  setRadioRate(3)
   
   # Full power
   saveNvParam(70,'\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11\x11')
@@ -47,3 +47,33 @@ def reset_maple ():
   sleep (1, 2) # sleep 2 seconds
   writePin (RESET_PIN, True)
   setPinDir (RESET_PIN, False)
+
+# timeout
+@setHook(HOOK_1S)
+def countdown_radiorate_reset ():
+  global counter, RADIORATE_TIMEOUT, myrate
+  if counter > 1:
+    counter -= 1
+  elif counter == 1:
+    # reset
+    setRadioRate (0)
+    myrate = 0
+  else:
+    pass # idle
+
+def mysetradiorate (rate):
+  global counter, RADIORATE_TIMEOUT, myrate
+
+  if rate >= 0 and rate <= 3:
+      
+    counter = RADIORATE_TIMEOUT
+    
+    if myrate != rate:
+      setRadioRate (rate)
+      myrate = rate
+
+      # rates (Synapse Reference Manual, p. 153):
+      # 0 = 250 kbps (default)
+      # 1 = 500 kbps
+      # 2 =   1 mbps
+      # 3 =   2 mbps

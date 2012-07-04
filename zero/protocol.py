@@ -14,8 +14,9 @@ class Protocol:
   zero    = None
   logger  = None
 
-  adressedbuoy = 0     # id of buoy addressed on zeronode
-  zerooutput   = -1    # output mode of zeronode, 0 = ota, 1 = uart, -1 = undef.
+  adressedbuoy  = 0     # id of buoy addressed on zeronode
+  zerooutput    = -1    # output mode of zeronode, 0 = ota, 1 = uart, -1 = undef.
+  zeroradiorate = 0     # radiorate of zeronode
 
   tokens = [0, 0, 0, 0, 0, 0, 0, 0] # temp for storing tokens during parsing
 
@@ -62,12 +63,26 @@ class Protocol:
     self.zero.send ("$ZT*" + gen_checksum ('ZT'))
     self.zerooutput = 0
 
+  def znradiorate (self, rate):
+    self.logger.info ("[ZeroNode] Setting Zero RF radio rate to: " + str(rate))
+    self.zero.send ("$Z" + str(rate) + "*")
+    self.zeroradiorate = rate
+
+  def znbuoyradiorate (self, rate):
+    self.logger.info ("[ZeroNode] Setting radio rate on current buoy to: " + str(rate))
+    self.zero.send ("$ZB" + str(rate) + "*")
+    self.zero.current.radiorate = rate
+    self.zero.current.set_radiorate_t = time.time ()
+
   def ensure_zn_address (self):
     if self.zero.current.id != self.adressedbuoy:
       self.znsetaddress ()
       self.znconnect ()
       if self.zerooutput != 0:
         self.znoutputwireless ()
+
+    if self.zero.current.radiorate != self.zeroradiorate:
+      self.znradiorate (zelf.zero.current.radiorate)
 
   def send (self, msg):
     self.ensure_zn_address ()
