@@ -16,7 +16,7 @@ class Protocol:
 
   adressedbuoy  = 0     # id of buoy addressed on zeronode
   zerooutput    = -1    # output mode of zeronode, 0 = ota, 1 = uart, -1 = undef.
-  zeroradiorate = 0     # radiorate of zeronode
+  zeroradiorate = -1     # radiorate of zeronode
 
   tokens = [0, 0, 0, 0, 0, 0, 0, 0] # temp for storing tokens during parsing
 
@@ -26,73 +26,82 @@ class Protocol:
 
 # Commands (buoy and zeronode) and ouput {{{
   def znsetaddress (self):
-    # Address buoy
-    self.logger.info ("[ZeroNode] Setting to buoy: " + self.zero.current.name + "[" + str(self.zero.current.id) + "] address: " + str(self.zero.current.address_p))
-    _msg = 'ZA,' + self.zero.current.address_p
-    self.zero.send ('$' + _msg + '*' + gen_checksum (_msg))
-    self.adressedbuoy = self.zero.current.id
+    if self.zero.ser is not None:
+      # Address buoy
+      self.logger.info ("[ZeroNode] Setting to buoy: " + self.zero.current.name + "[" + str(self.zero.current.id) + "] address: " + str(self.zero.current.address_p))
+      _msg = 'ZA,' + self.zero.current.address_p
+      self.zero.send ('$' + _msg + '*' + gen_checksum (_msg))
+      self.adressedbuoy = self.zero.current.id
 
   # Request status from zeronode
   def zngetstatus (self):
-    self.zero.send ('$ZS*' + gen_checksum ('ZS'))
+    if self.zero.ser is not None:
+      self.zero.send ('$ZS*' + gen_checksum ('ZS'))
 
   def znconnect (self):
-    self.logger.info ("[ZeroNode] Connecting to current buoy: " + self.zero.current.name + "[" + str(self.zero.current.id) + "]")
-    self.zero.send ('$ZC*' + gen_checksum ('ZA'))
+    if self.zero.ser is not None:
+      self.logger.info ("[ZeroNode] Connecting to current buoy: " + self.zero.current.name + "[" + str(self.zero.current.id) + "]")
+      self.zero.send ('$ZC*' + gen_checksum ('ZA'))
 
   def znportalmode (self):
-    # Put into portal mode and exit
-    self.logger.info ("[ZeroNode] Going into portal mode..")
-    self.zero.send ("$ZP*" + gen_checksum ('ZP'))
-    self.zero.stop ()
+    if self.zero.ser is not None:
+      # Put into portal mode and exit
+      self.logger.info ("[ZeroNode] Going into portal mode..")
+      self.zero.send ("$ZP*" + gen_checksum ('ZP'))
+      self.zero.stop ()
 
   def resetbuoy (self):
-    self.logger.info ("[ZeroNode] Resetting current buoy.")
-    if self.zero.current.id != self.adressedbuoy:
-      self.znsetaddress ()
-      self.znconnect ()
-    self.zero.send ("$ZR*" + gen_checksum ('ZR'))
+    if self.zero.ser is not None:
+      self.logger.info ("[ZeroNode] Resetting current buoy.")
+      if self.zero.current.id != self.adressedbuoy:
+        self.znsetaddress ()
+        self.znconnect ()
+      self.zero.send ("$ZR*" + gen_checksum ('ZR'))
 
   def znoutputuart (self):
-    self.logger.info ("[ZeroNode] Setting Zero RF to output locally.")
-    self.zero.send ("$ZU*" + gen_checksum ('ZU'))
-    self.zerooutput = 1
+    if self.zero.ser is not None:
+      self.logger.info ("[ZeroNode] Setting Zero RF to output locally.")
+      self.zero.send ("$ZU*" + gen_checksum ('ZU'))
+      self.zerooutput = 1
 
   def znoutputwireless (self):
-    self.logger.info ("[ZeroNode] Setting Zero RF to output on air.")
-    self.zero.send ("$ZT*" + gen_checksum ('ZT'))
-    self.zerooutput = 0
+    if self.zero.ser is not None:
+      self.logger.info ("[ZeroNode] Setting Zero RF to output on air.")
+      self.zero.send ("$ZT*" + gen_checksum ('ZT'))
+      self.zerooutput = 0
 
   def znradiorate (self, rate):
-    self.logger.info ("[ZeroNode] Setting Zero RF radio rate to: " + str(rate))
-    if rate >= 0 and rate <= 3:
-      msg = "$Z" + str(rate) + "*"
-      self.zero.send (msg + gen_checksum(msg))
-      self.zeroradiorate = rate
-    else:
-      self.logger.error ("[ZeroNode] Zero RF radio rate: Rate out of range.")
-
-  def znbuoyradiorate (self, rate):
-    # this one also sets the ZN radiorate
-    if self.zero.current is not None:
-      self.logger.info ("[ZeroNode] Setting radio rate on current buoy to: " + str(rate))
+    if self.zero.ser is not None:
+      self.logger.info ("[ZeroNode] Setting Zero RF radio rate to: " + str(rate))
       if rate >= 0 and rate <= 3:
-        msg = "$ZB" + str(rate) + "*"
+        msg = "$Z" + str(rate) + "*"
         self.zero.send (msg + gen_checksum(msg))
-        self.zero.current.radiorate = rate
-        self.zero.current.set_radiorate_t = time.time ()
-        #time.sleep (2) # allow rpc to be sent
-        # snap script on zero node waits for rpc to be sent, then
-        # changes rate of itself
         self.zeroradiorate = rate
       else:
-        self.logger.error ("[ZeroNode] Buoy radio rate: Rate out of range.")
+        self.logger.error ("[ZeroNode] Zero RF radio rate: Rate out of range.")
 
-    else:
-      self.logger.error ("[ZeroNode] Set radio rate on buoy: No current buoy.")
+  def znbuoyradiorate (self, rate):
+    if self.zero.ser is not None:
+      # this one also sets the ZN radiorate
+      if self.zero.current is not None:
+        self.logger.info ("[ZeroNode] Setting radio rate on current buoy to: " + str(rate))
+        if rate >= 0 and rate <= 3:
+          msg = "$ZB" + str(rate) + "*"
+          self.zero.send (msg + gen_checksum(msg))
+          self.zero.current.radiorate = rate
+          self.zero.current.set_radiorate_t = time.time ()
+          #time.sleep (2) # allow rpc to be sent
+          # snap script on zero node waits for rpc to be sent, then
+          # changes rate of itself
+          self.zeroradiorate = rate
+        else:
+          self.logger.error ("[ZeroNode] Buoy radio rate: Rate out of range.")
+
+      else:
+        self.logger.error ("[ZeroNode] Set radio rate on buoy: No current buoy.")
 
   def ensure_zn_address (self):
-    if self.zero.current is not None:
+    if self.zero.current is not None and self.zero.ser is not None:
       if self.zero.current.id != self.adressedbuoy:
         self.znsetaddress ()
         self.znconnect ()
@@ -113,11 +122,12 @@ class Protocol:
       self.logger.error ("[ZeroNode] Ensure address: No current buoy set.")
 
   def send (self, msg):
-    self.ensure_zn_address ()
+    if self.zero.ser is not None:
+      self.ensure_zn_address ()
 
-    # Encapsulate and add checksum
-    msg = '$' + msg + '*' + gen_checksum (msg)
-    self.zero.send (msg)
+      # Encapsulate and add checksum
+      msg = '$' + msg + '*' + gen_checksum (msg)
+      self.zero.send (msg)
 # }}}
 
 # Parser and handler {{{

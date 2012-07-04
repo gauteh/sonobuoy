@@ -95,7 +95,7 @@ class Index:
   def checkradiorate (self):
     # try to set goal radiorate for data transfer
     # be a little more clever, keeping it down if we dont get a signal
-    if self.buoy.radiorate < self.goal_radiorate:
+    if self.buoy.radiorate != self.goal_radiorate:
       self.logger.info (self.me + " Setting buoy radio rate to goal: " + str(self.goal_radiorate))
       self.protocol.znbuoyradiorate (self.goal_radiorate)
 
@@ -441,6 +441,8 @@ class Index:
     self.status   = 0
     self.pendingids = 0
     self.requested_chunks = 0
+
+    self.buoy.radiorate = 0
 
     # reset protocol
     self.protocol.a_receive_state = 0
