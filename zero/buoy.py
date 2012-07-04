@@ -29,6 +29,7 @@ class Buoy:
 
   radiorate = 0           # Radio rate currently set
   RADIORATE_TIMEOUT = 60  # seconds before buoy node reset to default (0) rate
+                          # is set in snap/buoy.py.
   set_radiorate_t   = 0   # time radio rate was set
 
   enabled = False

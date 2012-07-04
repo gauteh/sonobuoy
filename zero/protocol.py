@@ -114,6 +114,8 @@ class Protocol:
 
       # check whether timeout for radiorate is approaching
       RADIORATE_RESET_TIMER = 10 # secs margin before reseting timer on buoy
+                                 # dont wanna risk a rate change in the middle
+                                 # of a data tx.
       if (time.time () - self.zero.current.set_radiorate_t) >= (Buoy.RADIORATE_TIMEOUT - RADIORATE_RESET_TIMER) and self.zero.current.radiorate != 0:
         self.logger.info ("[ZeroNode] Ensure radiorate.")
         self.znbuoyradiorate (self.zero.current.radiorate)
