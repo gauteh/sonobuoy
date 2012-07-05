@@ -26,5 +26,5 @@ class Gps ():
     self.logger.debug ("[GPS] [" + ("valid" if self.valid else "invalid") + "] Time: " + str(self.gps_time) + " [" + str(self.unix_time) + "] Position: " + str(self.latitude) + ('N' if self.north else 'S') +  ", " + str(self.longitude) + ('E' if self.east else 'W'))
 
     # writing gps log
-    self.buoy.track (str(self.gps_time) + "," + str(self.gps_date) + "," + ("1" if self.valid else "0") + "," + str(self.latitude).strip() + "," + ('N' if self.north else 'S') + ", " + str(self.longitude).strip() + "," + ('E' if self.east else 'W') + "," + ('1' if self.has_time else '0') + "," + ('1' if self.has_sync else '0') + "," + ('1' if self.has_sync_reference else '0'))
+    self.buoy.track (str(self.gps_time) + "," + str(self.gps_date) + "," + ("1" if self.valid else "0") + "," + str(self.latitude).strip() + "," + ('N' if self.north else 'S') + "," + str(self.longitude).strip() + "," + ('E' if self.east else 'W') + "," + ('1' if self.has_time else '0') + "," + ('1' if self.has_sync else '0') + "," + ('1' if self.has_sync_reference else '0'))
 
