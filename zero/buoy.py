@@ -44,7 +44,7 @@ class Buoy:
   # log (file)
   log_u   = ''
   logf    = None
-  t_format = "%Y-%M-%d %H:%M:%S"
+  t_format = "%Y-%m-%d %H:%M:%S"
 
   active  = False
   logger  = None
