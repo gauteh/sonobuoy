@@ -10,17 +10,16 @@ function plotdtt (t, d, magnitudes, fig)
 assert (length(d) > 1, 'No data.');
 
 if (~exist('magnitudes', 'var')), magnitudes = false; end
-if (~exist('fig', 'var')), fig = 1; end
+if (~exist('fig', 'var')), figure(1); fig = gca(1); end
 
 if (fig > 0)
-  figure (fig);
-  clf('reset');
+  cla(fig, 'reset');
 end
 
-plot (t,d, '-');
+plot (fig, t,d, '-');
 
 if magnitudes
-  hold on;
+  hold(fig, 'on');
 
   % Plot magnitude one eq. at 10 km distance, centered around mean of data
   % mb = 0 @ 10km:  2.5 uBar => 2.5 * 100 000 uPa
@@ -51,17 +50,17 @@ if magnitudes
   t0 = min(t);
   t1 = max(t);
   
-  plot ([t0 t1],  [1 1] * (A3/5*(2^30-1)) + mean(d), 'c');
-  plot ([t0 t1],  [1 1] * (A2/5*(2^30-1)) + mean(d), 'k');
-  plot ([t0 t1],  [1 1] * (A1/5*(2^30-1)) + mean(d), 'r');
-  plot ([t0 t1],  [1 1] * (A0/5*(2^30-1)) + mean(d), 'g');
+  plot (fig, [t0 t1],  [1 1] * (A3/5*(2^30-1)) + mean(d), 'c');
+  plot (fig, [t0 t1],  [1 1] * (A2/5*(2^30-1)) + mean(d), 'k');
+  plot (fig, [t0 t1],  [1 1] * (A1/5*(2^30-1)) + mean(d), 'r');
+  plot (fig, [t0 t1],  [1 1] * (A0/5*(2^30-1)) + mean(d), 'g');
 
-  plot ([t0 t1], -[1 1] * (A3/5*(2^30-1)) + mean(d), 'c');
-  plot ([t0 t1], -[1 1] * (A2/5*(2^30-1)) + mean(d), 'k');
-  plot ([t0 t1], -[1 1] * (A1/5*(2^30-1)) + mean(d), 'r');
-  plot ([t0 t1], -[1 1] * (A0/5*(2^30-1)) + mean(d), 'g');
+  plot (fig, [t0 t1], -[1 1] * (A3/5*(2^30-1)) + mean(d), 'c');
+  plot (fig, [t0 t1], -[1 1] * (A2/5*(2^30-1)) + mean(d), 'k');
+  plot (fig, [t0 t1], -[1 1] * (A1/5*(2^30-1)) + mean(d), 'r');
+  plot (fig, [t0 t1], -[1 1] * (A0/5*(2^30-1)) + mean(d), 'g');
 
-  legend ('Data', 'mb = 2 @ 50km threshold', 'mb = 2 @ 10km threshold', 'mb = 1 @ 10km threshold', 'mb = 0 @ 10km threshold');
+  legend (fig, 'Data', 'mb = 2 @ 50km threshold', 'mb = 2 @ 10km threshold', 'mb = 1 @ 10km threshold', 'mb = 0 @ 10km threshold');
 end
 
 end

@@ -24,7 +24,7 @@ end
 
 %% Normalize the values vector
 % 31 bit
-y = v - 2^30;
+y = v - mean(v);
 y = y / max(abs(y));
 %%
 
