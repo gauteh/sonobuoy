@@ -22,7 +22,7 @@ function varargout = rt_trace(varargin)
 
 % Edit the above text to modify the response to help rt_trace
 
-% Last Modified by GUIDE v2.5 31-Jul-2012 22:15:20
+% Last Modified by GUIDE v2.5 31-Jul-2012 22:30:41
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -50,11 +50,14 @@ disp ('Checking for new data..');
 persistent lastid;
 persistent last_n_traces;
 persistent last_show_seconds;
+persistent last_show_magnitudes;
 
-if isempty(lastid) || isempty(last_n_traces) || isempty(last_show_seconds)
+if isempty(lastid) || isempty(last_n_traces) || isempty(last_show_seconds) ...
+    || isempty(last_show_magnitudes)
   lastid = 0;
   last_n_traces = 0;
   last_show_seconds = 0;
+  last_show_magnitudes = 0;
 end
 
 handles = obj.UserData;
@@ -78,6 +81,12 @@ else
   seconds_axis = false;
 end
 
+if get(handles.cb_magnitude, 'Value')
+  show_magnitudes = true;
+else
+  show_magnitudes = false;
+end
+
 % Sorting by id number
 n = [];
 for i=1:l
@@ -93,18 +102,20 @@ if (length(n)) < 1
   return;
 end
 
-if (n(end) > lastid) || (seconds_axis ~= last_show_seconds) || (last_n_traces ~= n_traces)
+if (n(end) > lastid) || (seconds_axis ~= last_show_seconds) || ...
+    (last_n_traces ~= n_traces) || (last_show_magnitudes ~= show_magnitudes)
   disp ('New data or change in preferences, updating plot..');
   cd (mpath)
   [t, d] = readrangedtt (n(end-n_traces:end));
   if seconds_axis
     t = linspace (0, length(t)/250, length(t));
   end
-  plotdtt (t, d, true, handles.tr_axes);
+  plotdtt (t, d, show_magnitudes, handles.tr_axes);
   cd ('../../');
   lastid = n(end);
   last_n_traces = n_traces;
   last_show_seconds = seconds_axis;
+  last_show_magnitudes = show_magnitudes;
 end
 
 return;
@@ -159,7 +170,7 @@ function tb_monitor_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of tb_monitor
-if get(hOjbect, 'Value')
+if get(hObject, 'Value')
   start (handles.updateplot_t);
 else
   stop (handles.updateplot_t);
@@ -270,3 +281,12 @@ function cb_seconds_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hint: get(hObject,'Value') returns toggle state of cb_seconds
+
+
+% --- Executes on button press in cb_magnitude.
+function cb_magnitude_Callback(hObject, eventdata, handles)
+% hObject    handle to cb_magnitude (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of cb_magnitude
