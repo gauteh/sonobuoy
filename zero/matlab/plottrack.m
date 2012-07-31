@@ -9,8 +9,8 @@ end
 
 [lat, lon] = gettrack (refs);
 
-latlim = [55 90];
-lonlim = [-180 180];
+latlim = [82 87];
+lonlim = [-20 20];
 
 ax = worldmap (latlim, lonlim);
 
