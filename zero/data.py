@@ -8,17 +8,17 @@ import logging
 import time
 import os
 
-BATCH_LENGTH = 1024
-CHUNK_SIZE   = 1024
+BATCH_LENGTH = 1024 # samples per reference, as defined on buoy
+CHUNK_SIZE   = 1024 # samples to get in each go
 
 class Batch:
-  no        = 0   # no of ref/batch in data file
+  no        = 0     # no of ref/batch in data file
   ref       = None
   status    = None
   latitude  = None
   longitude = None
-  complete  = False # Is batch completely received
-  line      = None   # Where in data file does this ref start
+  complete  = False # is batch completely received
+  line      = None  # where in data file does this ref start
 
 
   completechunks  = None # list of chunks received
@@ -38,10 +38,9 @@ class Batch:
     return str(self.no) + ", ref: " + str(self.ref) + ", completechunks: " + str(self.completechunks)
 
 class Data:
-  buoy  = None
-  index = None
-  logger = None
-
+  buoy    = None
+  index   = None
+  logger  = None
 
   # id for log
   me = ""
@@ -57,7 +56,7 @@ class Data:
 
   # Known batches available on buoy, with flag indicating complete
   # download.
-  batches = None
+  batches     = None
 
   indexf_uri  = None
   dataf_uri   = None
@@ -75,11 +74,11 @@ class Data:
   refs_no     = None
 
   def __init__ (self, l, _buoy, _index, _id, _enabled):
-    self.logger = l
-    self.buoy = _buoy
-    self.index = _index
-    self.id = _id
-    self.enabled = _enabled
+    self.logger   = l
+    self.buoy     = _buoy
+    self.index    = _index
+    self.id       = _id
+    self.enabled  = _enabled
     self.me = "[" + self.buoy.name + "] [Data] [" + str(_id) + "]"
     self.indexf_l = threading.Lock ()
     self.dataf_l  = threading.Lock ()
@@ -100,7 +99,6 @@ class Data:
     if self.batches is not None:
       del (self.batches)
     self.batches = []
-
 
   ''' Read index file and figure out meta data and existing refs {{{
 

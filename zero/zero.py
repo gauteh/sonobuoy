@@ -55,6 +55,7 @@ class Zero:
     if self.current:
       self.current.active  = False
 
+    self.logger.info ("[Zero] Setting current Buoy to: " + b.name)
     self.currenti = self.buoys.index(b)
 
     self.current.index.checkradiorate ()
@@ -62,11 +63,13 @@ class Zero:
     self.protocol.ensure_zn_address ()
 
     self.current.active = True
-    self.current.index.cleanup = False
-    self.current.index.idle    = False
+    self.current.index.cleanup  = False
+    self.current.index.idle     = False
     self.current.index.idle_msg = False
 
-    self.logger.info ("[Zero] Setting current Buoy to: " + b.name)
+    # reset reset status
+    self.current.index.reseti = 0
+
 
   current  = property(get_current, set_current) # Current Buoy
 

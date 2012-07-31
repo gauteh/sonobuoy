@@ -35,7 +35,6 @@ class Index:
   # goal radiorate, try to achieve this radiorate (only for data transfer)
   goal_radiorate = 1
 
-
   def __init__ (self, l, _buoy):
     self.data = []
     self.logger = l
@@ -436,8 +435,11 @@ class Index:
           self.logger.debug (self.me + " Request timed out, reset..")
           self.reset ()
 
+  reseti = 0 # times tried to reset
   def reset (self):
-    self.logger.debug (self.me + " Resetting communication state.")
+    self.reseti += 1
+
+    self.logger.debug (self.me + " Resetting communication state (try: " + str(self.reseti) + ".")
     # reset in case checksum mismatch or timeout
     self.state    = 0
     self.gotids_n = 0
@@ -447,6 +449,15 @@ class Index:
 
     if ((time.time () - self.buoy.set_radiorate_t) > self.buoy.RADIORATE_TIMEOUT) or (self.protocol.radiorate_confirmed == False):
       self.buoy.radiorate = 0
+
+    elif (self.reseti % 2 == 0):
+      if self.buoy.radiorate == 0:
+        self.fastradiorate ()
+      else:
+        self.buoy.radiorate = 0
+
+      self.logger.debug (self.me + " Reset: Trying to swap to radiorate: " + str(self.buoy.radiorate))
+
 
     # reset protocol
     self.protocol.a_receive_state = 0
