@@ -12,10 +12,10 @@ BATCH_LENGTH = 1024
 CHUNK_SIZE   = 1024
 
 class Batch:
-  no      = 0   # no of ref/batch in data file
-  ref     = None
-  status  = None
-  latitude = None
+  no        = 0   # no of ref/batch in data file
+  ref       = None
+  status    = None
+  latitude  = None
   longitude = None
   complete  = False # Is batch completely received
   line      = None   # Where in data file does this ref start
@@ -69,10 +69,10 @@ class Data:
   hasfull     = None # Has complete index been received
   hasalldata  = None # Has all data been received
 
-  id            = None
-  enabled       = None
-  samples       = None
-  refs_no       = None
+  id          = None
+  enabled     = None
+  samples     = None
+  refs_no     = None
 
   def __init__ (self, l, _buoy, _index, _id, _enabled):
     self.logger = l
@@ -200,7 +200,7 @@ class Data:
           if thischunk in b.completechunks:
             self.logger.error (self.me + " Chunk already exists on reference, discarding.")
             self.dataf_l.release ()
-            self.reset_data ()
+            #self.reset_data ()
             return
 
 
