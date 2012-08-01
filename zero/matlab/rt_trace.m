@@ -105,6 +105,7 @@ end
 if (n(end) > lastid) || (seconds_axis ~= last_show_seconds) || ...
     (last_n_traces ~= n_traces) || (last_show_magnitudes ~= show_magnitudes)
   disp ('New data or change in preferences, updating plot..');
+  set (handles.txt_status, 'String', 'Updating..');
   cd (mpath)
   [t, d] = readrangedtt (n(end-n_traces:end));
   if seconds_axis
@@ -116,6 +117,7 @@ if (n(end) > lastid) || (seconds_axis ~= last_show_seconds) || ...
   last_n_traces = n_traces;
   last_show_seconds = seconds_axis;
   last_show_magnitudes = show_magnitudes;
+  set (handles.txt_status, 'String', '');
 end
 
 return;
