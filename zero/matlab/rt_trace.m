@@ -46,7 +46,7 @@ end
 
 function updateplot_fcn (obj, event)
 % Check for new batch and plot
-disp ('Checking for new data..');
+%disp ('Checking for new data..');
 persistent lastid;
 persistent last_n_traces;
 persistent last_show_seconds;
