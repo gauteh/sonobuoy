@@ -63,10 +63,11 @@ if magnitudes
   %legend (fig, 'Data', 'mb = 2 @ 50km threshold', 'mb = 2 @ 10km threshold', 'mb = 1 @ 10km threshold', 'mb = 0 @ 10km threshold');
 end
 
-  function txt = mydatatip (obj, event)
-    pos = event.Position;
-    txt = {['Value: ', num2str(pos(2))], ['Time:  ', datestr(btime2datenum(pos(1)))]};
-  end
+% Show datatip with time converted to date
+function txt = mydatatip (obj, event)
+  pos = event.Position;
+  txt = {['Value: ', num2str(pos(2))], ['Time:  ', datestr(btime2datenum(pos(1)))]};
+end
 
 h = datacursormode (get(fig, 'Parent'));
 set (h, 'UpdateFcn', @mydatatip, 'SnapToDataVertex', 'on');
