@@ -57,8 +57,12 @@ while ~feof(fh)
   %         L, ref, T, S);
   [batch, l] = fscanf (fh, '%u', L);
 
-  assert (l == L, 'Number of samples does not match length of batch.');
-
+  if (l ~= L)
+    disp ('[E] Number of samples does not match length of batch. Batch probably not completely downloaded.');
+    disp ('[E] Stopping here.');
+    return;
+  end
+    
   if (complement_and_bitshift)
     batch = bitshift (twos_comp (batch), -1);
   end
