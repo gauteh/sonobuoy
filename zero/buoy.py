@@ -101,11 +101,13 @@ class Buoy:
   def log (self, s):
     if not self.logf is None:
       self.logf.write ("[" + time.strftime (self.t_format) + "] " + str(s) + "\n")
+      self.logf.flush ()
 
   def track (self, s):
     # input is formatted gps log string
     if not self.trackf is None:
       self.trackf.write (s + '\n')
+      self.trackf.flush ()
 
   def activate (self):
     self.active = True
