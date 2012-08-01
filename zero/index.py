@@ -34,7 +34,7 @@ class Index:
 
   # goal radiorate, try to achieve this radiorate (only for data transfer)
   # range: 0 - 3
-  goal_radiorate = 3
+  goal_radiorate = 1
 
   def __init__ (self, l, _buoy):
     self.data = []
