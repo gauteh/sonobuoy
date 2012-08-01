@@ -207,12 +207,12 @@ class Data:
           b.ref    = reference
           b.status = status
           b.latitude = latitude
-          if len(b.latitude) < 2:
-            b.latitude = '0' + b.latitude
+          if len(b.latitude) < 3:
+            b.latitude = '0S'
 
           b.longitude = longitude
-          if len(b.longitude) < 2:
-            b.longitude = '0' + b.longitude
+          if len(b.longitude) < 3:
+            b.longitude = '0W'
 
           b.checksum = checksum
 
