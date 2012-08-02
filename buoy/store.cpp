@@ -541,6 +541,9 @@ namespace Buoy {
 
       start++;
       length--;
+
+      // This could be time-consuming, make sure critical parts run
+      bu->critical_loop ();
     }
   } // }}}
 
