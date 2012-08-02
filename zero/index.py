@@ -451,6 +451,7 @@ class Index:
     if ((time.time () - self.buoy.set_radiorate_t) > self.buoy.RADIORATE_TIMEOUT) or (self.protocol.radiorate_confirmed == False):
       self.buoy.radiorate = 0
 
+    """
     elif (self.reseti % 2 == 0):
       if self.buoy.radiorate == 0:
         self.fastradiorate ()
@@ -458,7 +459,7 @@ class Index:
         self.buoy.radiorate = 0
 
       self.logger.debug (self.me + " Reset: Trying to swap to radiorate: " + str(self.buoy.radiorate))
-
+    """
 
     # reset protocol
     self.protocol.a_receive_state = 0
