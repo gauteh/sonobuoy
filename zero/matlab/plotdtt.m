@@ -60,7 +60,7 @@ if magnitudes
   plot (fig, [t0 t1], -[1 1] * (A1/5*(2^30-1)) + mean(d), 'r');
   plot (fig, [t0 t1], -[1 1] * (A0/5*(2^30-1)) + mean(d), 'g');
 
-  %legend (fig, 'Data', 'mb = 2 @ 50km threshold', 'mb = 2 @ 10km threshold', 'mb = 1 @ 10km threshold', 'mb = 0 @ 10km threshold');
+  legend (fig, 'Data', 'mb = 2 @ 50km threshold', 'mb = 2 @ 10km threshold', 'mb = 1 @ 10km threshold', 'mb = 0 @ 10km threshold');
 end
 
 % Show datatip with time converted to date
