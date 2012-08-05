@@ -34,7 +34,7 @@ class Index:
 
   # goal radiorate, try to achieve this radiorate (only for data transfer)
   # range: 0 - 3
-  goal_radiorate = 1
+  goal_radiorate = 0
 
   def __init__ (self, l, _buoy):
     self.data = []
@@ -99,15 +99,14 @@ class Index:
       self.logger.info (self.me + " Setting buoy radio rate to goal: " + str(self.goal_radiorate))
       self.protocol.znbuoyradiorate (self.goal_radiorate)
 
-  ''' Update local list of ids from buoy, working backwards '''
-  gotids_n = 0
-
   def checkradiorate (self):
     if self.buoy.radiorate != 0:
       if (time.time () - self.buoy.set_radiorate_t) > self.buoy.RADIORATE_TIMEOUT:
         self.logger.info (self.me + " Buoy radio rate timed out, resetting rate.")
         self.buoy.radiorate = 0
 
+  ''' Update local list of ids from buoy, working backwards '''
+  gotids_n = 0
   def getids (self, start):
     if self.state == 0:
       self.fastradiorate ()
@@ -434,19 +433,29 @@ class Index:
         # time.time out
         if time.time () - self.request_t > self.timeout:
           self.logger.debug (self.me + " Request timed out, reset..")
-          self.reset ()
+          self.reset (timeout = True)
 
   reseti = 0 # times tried to reset
-  def reset (self, keepradiorate = False):
+  def reset (self, keepradiorate = False, timeout = False):
     self.reseti += 1
 
     self.logger.debug (self.me + " Resetting communication state (try: " + str(self.reseti) + ".")
+
     # reset in case checksum mismatch or timeout
-    self.state    = 0
-    self.gotids_n = 0
-    self.status   = 0
-    self.pendingids = 0
-    self.requested_chunks = 0
+    if self.pendingid == 5 and self.requested_chunks > 1 and not timeout:
+      # in case there was a failure on one batch the rest will still
+      # be coming these should not be re-requested yet.
+      self.requested_chunks -= 1
+
+    elif self.pendingid == 3 and self.gotids_n < 10 and not timeout:
+      self.gotids_n += 1
+
+    else:
+      self.state    = 0
+      self.gotids_n = 0
+      self.status   = 0
+      self.pendingids = 0
+      self.requested_chunks = 0
 
     if not keepradiorate:
       if ((time.time () - self.buoy.set_radiorate_t) > self.buoy.RADIORATE_TIMEOUT) or (self.protocol.radiorate_confirmed == False):
