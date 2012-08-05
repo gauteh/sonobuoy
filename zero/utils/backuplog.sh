@@ -6,8 +6,17 @@
 
 d=$(date +"%Y-%m-%d")
 
-src="/home/gaute/dev/sonobuoy/zero/log/"
-dest="/home/gaute/dev/sonobuoy/zero/log/backup/$d"
+root=$(dirname $0)/..
+
+if [[ -f "${root}/zero.py" ]]; then
+  echo "Found dir."
+else
+  echo "Cannot find Zero root directory (looking for zero.py)."
+  exit 1
+fi
+
+src="${root}/log/"
+dest="${root}/log/backup/$d"
 
 echo "Backing up to: $dest.."
 
