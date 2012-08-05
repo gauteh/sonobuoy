@@ -199,7 +199,7 @@ class Protocol:
         self.a_buf = ''
         self.a_receive_state = 0
         self.waitforreceipt = False
-        self.zero.current.index.reset ()
+        self.zero.current.index.reset (keepradiorate = True)
 
       # Check if we're receiving sane amounts of data..
       if len(self.a_buf) > 80:
@@ -215,7 +215,7 @@ class Protocol:
     elif (not test_checksum (buf)):
       self.logger.info ("[Protocol] Message discarded, checksum failed.")
       self.logger.info ("[Protocol] Discarded: " + buf)
-      self.zero.current.index.reset ()
+      self.zero.current.index.reset (keepradiorate = True)
       return
 
     # Parse message
@@ -250,7 +250,7 @@ class Protocol:
       else:
         if self.waitforreceipt:
           if msgtype != 'AD' or (tokeni > 1 and subtype != 'DE'):
-            self.zero.current.index.reset ()
+            self.zero.current.index.reset (keepradiorate = True)
             self.logger.error ("[Protocol] Did not receive receipt immediately after data batch. Discarding data batch.")
             self.waitforreceipt = False
             self.zero.current.ad.ad_k_samples = 0
@@ -268,7 +268,7 @@ class Protocol:
                 try:
                   self.zero.current.gps.telegramsreceived = int(token)
                 except ValueError:
-                  self.zero.current.index.reset ()
+                  self.zero.current.index.reset (keepradiorate = True)
                   self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
                   return
 
@@ -276,7 +276,7 @@ class Protocol:
                 try:
                   self.zero.current.gps.latitude = float(token) if len(token) else 0
                 except ValueError:
-                  self.zero.current.index.reset ()
+                  self.zero.current.index.reset (keepradiorate = True)
                   self.logger.exception ("[Protocol] Could not convert token to float. Discarding rest of message.")
                   return
 
@@ -287,7 +287,7 @@ class Protocol:
                 try:
                   self.zero.current.gps.longitude = float(token) if len(token) > 0 else 0
                 except ValueError:
-                  self.zero.current.index.reset ()
+                  self.zero.current.index.reset (keepradiorate = True)
                   self.logger.exception ("[Protocol] Could not convert token to float. Discarding rest of message.")
                   return
 
@@ -318,12 +318,12 @@ class Protocol:
                 self.zero.current.gps.gps_status ()
                 self.zero.current.index.gotstatus ()
               else:
-                self.zero.current.index.reset ()
+                self.zero.current.index.reset (keepradiorate = True)
                 self.logger.error ("[Protocol] Too many tokens for message: " + msgtype + ", subtype: " + subtype + ", token: " + token)
                 return
 
             else:
-              self.zero.current.index.reset ()
+              self.zero.current.index.reset (keepradiorate = True)
               self.logger.error ("[Protocol] Unknown subtype for message: " + str(buf))
               return
 
@@ -344,11 +344,11 @@ class Protocol:
                   self.zero.current.index.gotstatus ()
                   return
                 else:
-                  self.zero.current.index.reset ()
+                  self.zero.current.index.reset (keepradiorate = True)
                   self.logger.error ("[Protocol] Too many tokens for message: " + msgtype + ", subtype: " + subtype)
                   return
               except ValueError:
-                self.zero.current.index.reset ()
+                self.zero.current.index.reset (keepradiorate = True)
                 self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
                 return
 
@@ -357,7 +357,7 @@ class Protocol:
                 try:
                   self.zero.current.ad.ad_batch_id = int (token)
                 except ValueError:
-                  self.zero.current.index.reset ()
+                  self.zero.current.index.reset (keepradiorate = True)
                   self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
                   return
 
@@ -365,7 +365,7 @@ class Protocol:
                 try:
                   self.zero.current.ad.ad_refno = int (token)
                 except ValueError:
-                  self.zero.current.index.reset ()
+                  self.zero.current.index.reset (keepradiorate = True)
                   self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
                   return
 
@@ -373,7 +373,7 @@ class Protocol:
                 try:
                   self.zero.current.ad.ad_start = int (token)
                 except ValueError:
-                  self.zero.current.index.reset ()
+                  self.zero.current.index.reset (keepradiorate = True)
                   self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
                   return
 
@@ -381,13 +381,13 @@ class Protocol:
                 try:
                   self.zero.current.ad.ad_k_samples = int (token)
                 except ValueError:
-                  self.zero.current.index.reset ()
+                  self.zero.current.index.reset (keepradiorate = True)
                   self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
                   return
 
                 if (self.zero.current.ad.ad_k_samples > self.zero.current.ad.AD_K_SAMPLES_MAX):
                   self.logger.error ("[Protocol] Too large batch, resetting protocol.")
-                  self.zero.current.index.reset ()
+                  self.zero.current.index.reset (keepradiorate = True)
                   self.a_receive_state = 0
                 else:
 
@@ -399,7 +399,7 @@ class Protocol:
                 try:
                   self.zero.current.ad.ad_reference = int (token)
                 except ValueError:
-                  self.zero.current.index.reset ()
+                  self.zero.current.index.reset (keepradiorate = True)
                   self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
                   return
 
@@ -407,7 +407,7 @@ class Protocol:
                 try:
                   self.zero.current.ad.ad_reference_status = int (token)
                 except ValueError:
-                  self.zero.current.index.reset ()
+                  self.zero.current.index.reset (keepradiorate = True)
                   self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
                   return
 
@@ -423,20 +423,20 @@ class Protocol:
                 try:
                   self.zero.current.ad.ad_reference_checksum = int (token)
                 except ValueError:
-                  self.zero.current.index.reset ()
+                  self.zero.current.index.reset (keepradiorate = True)
                   self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
                   return
 
                 #print "[AD] Initiating binary transfer.. samples: ", self.zero.current.ad.ad_k_samples
 
               else:
-                self.zero.current.index.reset ()
+                self.zero.current.index.reset (keepradiorate = True)
                 self.logger.error ("[Protocol] Too many tokens for message: " + msgtype + ", subtype: " + subtype)
                 return
 
             elif (subtype == 'DE'):
               if not self.waitforreceipt:
-                self.zero.current.index.reset ()
+                self.zero.current.index.reset (keepradiorate = True)
                 self.logger.error ("[Protocol] Got end of batch data without getting data first.")
                 self.zero.current.ad.ad_k_samples = 0
                 self.zero.current.ad.ad_reference = 0
@@ -452,7 +452,7 @@ class Protocol:
               return
 
             else:
-              self.zero.current.index.reset ()
+              self.zero.current.index.reset (keepradiorate = True)
               self.logger.error ("[Protocol] Unknown subtype for message: " + str(buf))
               return
 
@@ -476,7 +476,7 @@ class Protocol:
             try:
               self.zero.current.index.gotlastid (int(token))
             except ValueError:
-              self.zero.current.index.reset ()
+              self.zero.current.index.reset (keepradiorate = True)
               self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
               return
 
@@ -488,7 +488,7 @@ class Protocol:
             try:
               self.zero.current.index.gotids (int(self.tokens[0]), int(token))
             except ValueError:
-              self.zero.current.index.reset ()
+              self.zero.current.index.reset (keepradiorate = True)
               self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
               return
 
@@ -503,7 +503,7 @@ class Protocol:
             try:
               self.zero.current.index.gotid (int(self.tokens[0]), int(self.tokens[1]), int(token))
             except ValueError:
-              self.zero.current.index.reset ()
+              self.zero.current.index.reset (keepradiorate = True)
               self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
               return
 
@@ -534,7 +534,7 @@ class Protocol:
               return
 
         else:
-          self.zero.current.index.reset ()
+          self.zero.current.index.reset (keepradiorate = True)
           self.logger.error ("[Protocol] Unknown message: " + str(buf))
           return
 
