@@ -516,15 +516,21 @@ class Protocol:
             self.logger.info ("[ZeroNode] [DBG] " + token)
 
         elif (msgtype == 'ERR'):
-          self.zero.current.index.reset (keepradiorate = True)
           if (tokeni == 1):
             try:
-              self.logger.error ("[Buoy] Received error: [" + token + "] " + Buoy.error_strings[int(token)])
-              self.zero.current.log ("[Buoy] Received error: [" + token + "] " + Buoy.error_strings[int(token)])
+              t = int(token)
+              self.logger.error ("[Buoy] Received error: [" + token + "] " + Buoy.error_strings[t])
+              self.zero.current.log ("[Buoy] Received error: [" + token + "] " + Buoy.error_strings[t])
+
+              # Only reset protocol in case of error with command
+              if t == 1 or t == 2 or t == 4 or t == 5 or t == 6 or t == 7 or t == 8:
+                self.zero.current.index.reset (keepradiorate = True)
+
             except ValueError:
               self.logger.error ("[Buoy] Received error: [" + token + "]")
               self.zero.current.log ("[Buoy] Received error: [" + token + "]")
               self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
+              self.zero.current.index.reset (keepradiorate = True)
               return
 
         else:
