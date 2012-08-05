@@ -250,15 +250,15 @@ class Index:
 
   sync_lastid   = 1 * 60 # time between syncs of last id
   sync_lastid_t = 0
-  sync_lastid_timeout = 3
+  sync_lastid_timeout = 10
 
   sync_status   = 20 # time between status updates
   sync_status_t = 0
-  sync_status_timeout = 3
+  sync_status_timeout = 10
 
-  getid_timeout     = 3
-  getids_timeout    = 10
-  getbatch_timeout  = 10
+  getid_timeout     = 10
+  getids_timeout    = 15
+  getbatch_timeout  = 15
 
   default_chunks    = 15 # number of chunks/batches to request in one go
 
