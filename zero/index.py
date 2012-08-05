@@ -437,7 +437,7 @@ class Index:
           self.reset ()
 
   reseti = 0 # times tried to reset
-  def reset (self):
+  def reset (self, keepradiorate = False):
     self.reseti += 1
 
     self.logger.debug (self.me + " Resetting communication state (try: " + str(self.reseti) + ".")
@@ -448,8 +448,9 @@ class Index:
     self.pendingids = 0
     self.requested_chunks = 0
 
-    if ((time.time () - self.buoy.set_radiorate_t) > self.buoy.RADIORATE_TIMEOUT) or (self.protocol.radiorate_confirmed == False):
-      self.buoy.radiorate = 0
+    if not keepradiorate:
+      if ((time.time () - self.buoy.set_radiorate_t) > self.buoy.RADIORATE_TIMEOUT) or (self.protocol.radiorate_confirmed == False):
+        self.buoy.radiorate = 0
 
     """
     elif (self.reseti % 2 == 0):

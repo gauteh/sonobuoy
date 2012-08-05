@@ -516,7 +516,7 @@ class Protocol:
             self.logger.info ("[ZeroNode] [DBG] " + token)
 
         elif (msgtype == 'ERR'):
-          self.zero.current.index.reset ()
+          self.zero.current.index.reset (keepradiorate = True)
           if (tokeni == 1):
             try:
               self.logger.error ("[Buoy] Received error: [" + token + "] " + Buoy.error_strings[int(token)])
