@@ -195,7 +195,8 @@ namespace Buoy {
     SerialUSB.println (i);
     SerialUSB.println (MAXID);
 # endif
-      i = 1;  // DEBUG
+      i = MAXID;  // Will result in this id being overwritten on each new file
+      rf->send_error (RF::E_MAXIDREACHED);
     }
 
     /* Walk through subsequent indexes above lastid and take next free */

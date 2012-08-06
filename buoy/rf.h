@@ -108,6 +108,7 @@ namespace Buoy {
         E_NOSUCHDAT,
         E_BADDAT,
         E_SDLAG,
+        E_MAXIDREACHED,
       } RF_ERROR;
 
       RF ();

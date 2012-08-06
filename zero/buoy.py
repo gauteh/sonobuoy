@@ -134,6 +134,7 @@ class Buoy:
                     "E_NOSUCHDAT",
                     "E_BADDAT",
                     "E_SDLAG",
+                    "E_MAXIDREACHED",
                   ]
 
 
