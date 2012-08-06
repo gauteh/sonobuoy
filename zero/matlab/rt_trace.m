@@ -107,13 +107,18 @@ if (n(end) > lastid) || (seconds_axis ~= last_show_seconds) || ...
   disp ('New data or change in preferences, updating plot..');
   set (handles.txt_status, 'String', 'Updating..');
   cd (mpath)
-  [t, d] = readrangedtt (n(end-n_traces:end));
+  [t, d] = readrangedtt (n(end-n_traces+1:end));
   if seconds_axis
     t = linspace (0, length(t)/250, length(t));
   end
   plotdtt (t, d, show_magnitudes, false, handles.tr_axes);
   cd ('../../');
-  lastid = n(end);
+  
+
+  if length(t) == (n_traces * 40960)
+    lastid = n(end);
+  end
+  
   last_n_traces = n_traces;
   last_show_seconds = seconds_axis;
   last_show_magnitudes = show_magnitudes;
