@@ -521,6 +521,20 @@ class Protocol:
               self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
               return
 
+        elif (msgtype == 'I'):
+          if (tokeni == 1):
+            self.tokens[0] = token
+          elif (tokeni == 2):
+            self.tokens[1] = token
+          elif (tokeni == 3):
+            self.tokens[2] = token
+            try:
+              self.zero.current.index.gotinfo (int(self.tokens[0]), self.tokens[1], int (self.tokens[2]))
+            except ValueError:
+              self.zero.current.index.reset (keepradiorate = True)
+              self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
+              return
+
         elif (msgtype == 'DBG'):
           if (tokeni == 1):
             self.logger.info ("[Buoy] [DBG] " + token)

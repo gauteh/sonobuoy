@@ -126,6 +126,10 @@ class Index:
         self.logger.debug (self.me + " Got missing id: " + str(id) + ", remaining: " + str(self.__unchecked_ids__))
 
     if id <= self.lastid:
+
+      if id == self.lastid:
+        enabled = 1
+
       if enabled == 1:
         enabled = True
       else:
@@ -248,16 +252,15 @@ class Index:
       self.protocol.send ("GIF")
       self.pendingid  = 6
 
-  def gotinfo (self, bid, version, protocolversion, uptime):
+  def gotinfo (self, bid, version, protocolversion):
     if bid != self.buoy.id:
       self.logger.error (self.me + " Got info message for another buoy. Discarding.")
       return
 
     self.buoy.remote_version = version
     self.buoy.remote_protocolversion = protocolversion
-    self.buoy.remote_uptime = uptime
 
-    self.logger.info (self.me + "Info: Remote version: " + version + ", protocol version: " + str(protocolversion))
+    self.logger.info (self.me + " [Info] Remote version: " + version + ", protocol version: " + str(protocolversion))
 
     self.has_info   = True
     self.state      = 0
@@ -298,6 +301,10 @@ class Index:
     if self.buoy.zero.ser is not None and self.buoy.zero.acquire:
       if self.state == 0 and not self.cleanup:
         # Get status and lastid {{{
+        if not self.has_info:
+          self.getinfo ()
+          return
+
         if time.time () - self.sync_status_t > self.sync_status:
           self.pendingid = 1
           self.getstatus ()

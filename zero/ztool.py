@@ -167,7 +167,9 @@ class zCLI:
                   ["Total samples:", s['ad_nsamples']],
                   ["Position:", "{0:.4f}{1}, {2:.4f}{3}".format(s['latitude'], ("N" if s['north'] else "S"), s['longitude'], ("E" if s['east'] else "W")) + " ( Valid: " + str(s['valid']) + " )"],
                   ["Synchronization:", "( Sync: " + str(s['has_sync']) + " )" + '( Time: ' + str(s['has_time']) + " )" + '( Sync ref: ' + str(s['has_sync_reference']) + ' )'],
-                  ["Time:", time.asctime(time.gmtime(float(s['unix_time']))) + ' (' + str(s['time']) + ', ' + str(s['date']) + ')']
+                  ["Time:", time.asctime(time.gmtime(float(s['unix_time']))) + ' (' + str(s['time']) + ', ' + str(s['date']) + ')'],
+                  ["Version:", s['version'] + ' (protocol: ' + str(s['protocolversion']) + ')'],
+                  ["Uptime: ", str(s['uptime'] / 1000) + ' s (latest id: ' + str(s['lastid']) + ')'],
                   ], False)
 
 
