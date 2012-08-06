@@ -208,7 +208,7 @@ class Zero:
   def current_thread (self):
     self.logger.info ("[Zero] Starting current buoy thread..")
     MAX_BUOY_TIME = 40 # max time (seconds) before changing buoys
-    MIN_BUOY_TIME =  2 # min time (seconds) before changing buoy
+    MIN_BUOY_TIME =  0 # min time (seconds) before changing buoy
                        # (otherwise index loop won't have time to do something)
     lastchange    = time.time ()
 
