@@ -360,7 +360,7 @@ namespace Buoy {
 
   /* Debug and error messages {{{ */
   void RF::send_error (RF_ERROR code) {
-    RF_Serial.print ("$ERR,");
+    RF_Serial.print ("$ERR," STRINGIFY(BUOY_ID) ",");
     RF_Serial.print (code, DEC);
     RF_Serial.println ("*NN");
 
