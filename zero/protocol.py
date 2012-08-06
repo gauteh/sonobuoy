@@ -547,6 +547,30 @@ class Protocol:
           if (tokeni == 1):
             self.tokens[0] = token
 
+            if self.zero.current.remote_protocolversion == 1:
+              try:
+                t = int(token)
+                self.logger.error ("[Buoy] Received error: [" + token + "] " + Buoy.error_strings[t])
+                self.zero.current.log ("[Buoy] Received error: [" + token + "]")
+
+                # info command not supported, must be version 1
+                if t == 2 and self.zero.current.index.pendingid == 6:
+                  self.zero.current.index.gotinfo (self.zero.current.id, 'v1.0.0', 1)
+                  return
+
+                # Only reset protocol in case of error with command
+                if t == 1 or t == 2 or t == 4 or t == 5 or t == 6 or t == 7 or t == 8:
+                  self.zero.current.index.reset (keepradiorate = True)
+
+
+              except ValueError:
+                self.logger.error ("[Buoy] [ID: " + i + "] Received error: [" + token + "]")
+                self.zero.current.log ("[Buoy] [ID: " + i + "] Received error: [" + token + "]")
+                self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
+                self.zero.current.index.reset (keepradiorate = True)
+                return
+
+
           elif (tokeni == 2):
             try:
               i = int (self.tokens[0])

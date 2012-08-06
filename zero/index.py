@@ -242,7 +242,10 @@ class Index:
         self.state  = 0
       self.status = 0
       self.sync_status_t = time.time ()
-      self.logger.debug (self.me + " Status updated, uptime: " + str(self.buoy.uptime / 1000) + " s")
+      if self.buoy.remote_protocolversion > 1:
+        self.logger.debug (self.me + " Status updated, uptime: " + str(self.buoy.uptime / 1000) + " s")
+      else:
+        self.logger.debug (self.me + " Status updated.")
 
   def getinfo (self):
     if self.state == 0:
