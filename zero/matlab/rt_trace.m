@@ -111,7 +111,7 @@ if (n(end) > lastid) || (seconds_axis ~= last_show_seconds) || ...
   if seconds_axis
     t = linspace (0, length(t)/250, length(t));
   end
-  plotdtt (t, d, show_magnitudes, handles.tr_axes);
+  plotdtt (t, d, show_magnitudes, false, handles.tr_axes);
   cd ('../../');
   lastid = n(end);
   last_n_traces = n_traces;
@@ -140,7 +140,7 @@ guidata(hObject, handles);
 set(handles.tb_monitor, 'Value', 1);
 
 % Set up buoy
-handles.buoy = 'Two';
+handles.buoy = 'Four';
 
 % Set up timer
 handles.updateplot_t = timer ('ExecutionMode', 'fixedDelay', 'BusyMode', 'drop', 'Period', 5.0, 'TimerFcn', @updateplot_fcn, 'UserData', [handles], 'StartDelay', 2);

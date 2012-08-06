@@ -1,4 +1,4 @@
-function plotdtt (t, d, magnitudes, fig)
+function plotdtt (t, d, magnitudes, fig, axes)
 % Converts and shifts dtt file before plotting
 % Returns timestamps and data values in the range of [-2^30-1 2^30-1]
 %
@@ -10,8 +10,12 @@ function plotdtt (t, d, magnitudes, fig)
 assert (length(d) > 1, 'No data.');
 
 if (~exist('magnitudes', 'var')), magnitudes = false; end
-if (~exist('fig', 'var')), figure(1); fig = gca(1); 
-else, fig = gca(fig); end
+if (exist('axes', 'var'))
+  fig = axes;
+else
+  if (~exist('fig', 'var')), figure(1); fig = gca(1); 
+  else, fig = gca(fig); end
+end
 
 if (fig > 0)
   cla(fig, 'reset');
