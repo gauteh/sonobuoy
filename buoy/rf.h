@@ -94,6 +94,7 @@ namespace Buoy {
         GETID,
         GETLASTID,
         GETBATCH,
+        GETINFO
       } RF_TELEGRAM;
 
       /* Error codes */

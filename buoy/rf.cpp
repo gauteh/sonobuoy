@@ -159,6 +159,10 @@ namespace Buoy {
             simple_parser (GETLASTID);
             return;
           }
+          else if (strcmp(token, "$GIF") == 0) {
+            simple_parser (GETINFO);
+            return;
+          }
           else if (strcmp(token, "$GIDS") == 0)
             type = GETIDS;
           else if (strcmp(token, "$GID") == 0)
@@ -343,6 +347,14 @@ namespace Buoy {
         APPEND_CSUM (buf);
         RF_Serial.println (buf);
         */
+        break;
+      // }}}
+
+      // GETINFO
+      case GETINFO:
+        RF_Serial.print ("$I," STRINGIFY(BUOY_ID) "," VERSION "," STRINGIFY(PROTOCOL_VERSION) ",");
+        RF_Serial.print (millis ());
+        RF_Serial.print ("*NN");
         break;
       // }}}
 
