@@ -315,8 +315,22 @@ class Protocol:
               elif (tokeni == 14):
                 self.zero.current.gps.has_sync_reference = (token == 'Y')
 
-                self.zero.current.gps.gps_status ()
-                self.zero.current.index.gotstatus ()
+                if self.zero.current.remote_protocolversion == 1:
+                  self.zero.current.gps.gps_status ()
+                  self.zero.current.index.gotstatus ()
+
+
+              elif (tokeni == 15) and self.zero.current.remote_protocolversion > 1:
+                try:
+                  self.zero.current.uptime = int (token)
+
+                  self.zero.current.gps.gps_status ()
+                  self.zero.current.index.gotstatus ()
+
+                except ValueError:
+                  self.zero.current.index.reset (keepradiorate = True)
+                  self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
+
               else:
                 self.zero.current.index.reset (keepradiorate = True)
                 self.logger.error ("[Protocol] Too many tokens for message: " + msgtype + ", subtype: " + subtype + ", token: " + token)

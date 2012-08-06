@@ -238,8 +238,30 @@ class Index:
         self.state  = 0
       self.status = 0
       self.sync_status_t = time.time ()
-      self.logger.debug (self.me + " Status updated.")
+      self.logger.debug (self.me + " Status updated, uptime: " + str(self.buoy.uptime / 1000) + " s")
 
+  def getinfo (self):
+    if self.state == 0:
+      self.request_t  = time.time ()
+      self.timeout    = self.getinfo_timeout
+      self.state      = 1
+      self.protocol.send ("GIF")
+      self.pendingid  = 6
+
+  def gotinfo (self, bid, version, protocolversion, uptime):
+    if bid != self.buoy.id:
+      self.logger.error (self.me + " Got info message for another buoy. Discarding.")
+      return
+
+    self.buoy.remote_version = version
+    self.buoy.remote_protocolversion = protocolversion
+    self.buoy.remote_uptime = uptime
+
+    self.logger.info (self.me + "Info: Remote version: " + version + ", protocol version: " + str(protocolversion))
+
+    self.has_info   = True
+    self.state      = 0
+    self.pendingid  = 0
 
   # State for keeping this buoys data uptodate
   state     = 0
@@ -255,6 +277,9 @@ class Index:
   sync_status_t = 0
   sync_status_timeout = 10
 
+  has_info          = False # only get info once
+  getinfo_timeout   = 10
+
   getid_timeout     = 10
   getids_timeout    = 15
   getbatch_timeout  = 15
@@ -262,6 +287,9 @@ class Index:
   default_chunks    = 10 # number of chunks/batches to request in one go
 
   working_data  = None  # working data object, getting full index, refs and data
+
+  # For developers reference when implementing new telegrams
+  # Latest used pending id: 6
 
   def loop (self):
     # Check if radiorate has been reset
