@@ -9,7 +9,7 @@ d=$(date +"%Y-%m-%d")
 root=$(dirname $0)/..
 
 if [[ -f "${root}/zero.py" ]]; then
-  echo "Found dir."
+  :
 else
   echo "Cannot find Zero root directory (looking for zero.py)."
   exit 1
