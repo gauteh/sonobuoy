@@ -20,6 +20,7 @@ from buoy     import *
 from ui       import *
 
 from buoys    import buoys
+from index    import Index
 
 class Zero:
   port = '/dev/ttyUSB0'
@@ -208,16 +209,15 @@ class Zero:
   def current_thread (self):
     self.logger.info ("[Zero] Starting current buoy thread..")
     MAX_BUOY_TIME = 40 # max time (seconds) before changing buoys
+    MIN_BUOY_TIME =  2 # min time (seconds) before changing buoy
+                       # (otherwise index loop won't have time to do something)
     lastchange    = time.time ()
-
-    # if all is good, sync time within limits alternate through all buoys
-    STATUS_INTERVAL = 10 # seconds before sorting on seconds
 
     while self.go:
       if self.current is not None:
         self.current.loop ()
 
-        if len(self.buoys) > 1:
+        if len(self.buoys) > 1 and (time.time () - lastchange > MIN_BUOY_TIME):
           if self.ser is not None and self.acquire:
             # when current is done, go to next
             if (time.time () - lastchange > MAX_BUOY_TIME) and not self.current.index.cleanup and not self.current.index.idle:
@@ -243,7 +243,7 @@ class Zero:
               i = -1
               ii = (self.currenti + 1) % len (self.buoys)
               while ii != self.currenti:
-                if (time.time () - self.buoys[ii].index.sync_status_t > STATUS_INTERVAL):
+                if (time.time () - self.buoys[ii].index.sync_status_t > Index.sync_status_timeout):
                   i = ii
                   self.logger.info ("[Zero] Pick buoy: " + str(i) + " (out of sync).")
                   break
