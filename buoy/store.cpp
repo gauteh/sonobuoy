@@ -230,6 +230,7 @@ namespace Buoy {
         fi.close ();
       }
       i++;
+      SerialUSB.println (i);
 
       // TODO: Check if trying to open non-existent file sets errorCode()
       SD_AVAILABLE &= (card->errorCode () == 0);
@@ -246,7 +247,8 @@ namespace Buoy {
     current_index.nrefs = 0;
 
     SD_AVAILABLE &= (card->errorCode () == 0);
-    write_index ();
+
+    //write_index (); // no need to write index now.
   } // }}}
 
   void Store::write_index ()  // {{{
@@ -331,15 +333,6 @@ namespace Buoy {
     }
     */
 
-    /* Check if we have room in size */
-    if (sd_data->curPosition () > (SD_DATA_FILE_SIZE - (BATCH_LENGTH * (SAMPLE_LENGTH))))
-    {
-# if DEBUG_INFO
-      SerialUSB.println ("[SD] Rolling because of SD_DATA_FILE_SIZE.");
-# endif
-      roll_data_file ();
-    }
-
     write_reference (ad->references[lastbatch], ad->reference_status[lastbatch],
                      (char*) ad->reference_latitudes[lastbatch],
                      (char*) ad->reference_longitudes[lastbatch],
@@ -366,7 +359,7 @@ namespace Buoy {
 
     current_index.samples += BATCH_LENGTH;
 
-    sd_data->sync ();
+    //sd_data->sync ();
     SD_AVAILABLE &= (card->errorCode () == 0);
 
     /* Ready for next batch if successful write */
@@ -405,13 +398,6 @@ namespace Buoy {
   {
     if (!SD_AVAILABLE) {
       return;
-    }
-
-    if (current_index.nrefs >= MAX_REFERENCES) {
-# if DEBUG_VERB
-      SerialUSB.println ("[SD] Max references reached.");
-# endif
-      roll_data_file ();
     }
 
     /* Pad with 0 */
@@ -501,6 +487,26 @@ namespace Buoy {
       if (ad->batch != lastbatch) {
         write_batch ();
       }
+
+      /* Check if we need to roll data file */
+
+      /* Have we reached MAX_REFERENCES */
+      if (current_index.nrefs >= MAX_REFERENCES) {
+# if DEBUG_VERB
+        SerialUSB.println ("[SD] Max references reached.");
+# endif
+        roll_data_file ();
+      }
+
+      /* Check if we have room in size */
+      if (sd_data->curPosition () > (SD_DATA_FILE_SIZE - (BATCH_LENGTH * (SAMPLE_LENGTH))))
+      {
+# if DEBUG_INFO
+        SerialUSB.println ("[SD] Rolling because of SD_DATA_FILE_SIZE.");
+# endif
+        roll_data_file ();
+      }
+
     }
   } // }}}
 
