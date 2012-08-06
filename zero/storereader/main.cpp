@@ -397,8 +397,7 @@ namespace Zero {
       cerr << endl;
       cerr << " -f format     Format specifies output format of data file, " \
               "follows" << endl;
-      cerr << "               printf syntax, where the first argument will be " \
-              "the" << endl;
+      cerr << "               printf syntax, where the first argument will be " << endl;
       cerr << "               the time stamp and second the sample. A newline" << endl;
       cerr << "               will be added." << endl;
       cerr << "               Default: " << DEFAULT_FORMAT; // Has newline at end
