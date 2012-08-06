@@ -10,7 +10,8 @@ function plotdtt (t, d, magnitudes, fig)
 assert (length(d) > 1, 'No data.');
 
 if (~exist('magnitudes', 'var')), magnitudes = false; end
-if (~exist('fig', 'var')), figure(1); fig = gca(1); end
+if (~exist('fig', 'var')), figure(1); fig = gca(1); 
+else, fig = gca(fig); end
 
 if (fig > 0)
   cla(fig, 'reset');
