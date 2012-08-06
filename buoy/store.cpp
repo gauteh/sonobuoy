@@ -720,7 +720,7 @@ namespace Buoy {
     for (int j = 0; j < batches_to_send; j++) {
 
       /* This can be time-consuming, make sure new samples are handled */
-      if (j > 0) bu->critical_loop ();
+      bu->critical_loop ();
 
       mylength = min (length, BATCH_LENGTH);
 
