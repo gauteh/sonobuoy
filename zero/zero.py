@@ -20,7 +20,6 @@ from buoy     import *
 from ui       import *
 
 from buoys    import buoys
-from index    import Index
 
 class Zero:
   port = '/dev/ttyUSB0'
@@ -243,7 +242,7 @@ class Zero:
               i = -1
               ii = (self.currenti + 1) % len (self.buoys)
               while ii != self.currenti:
-                if (time.time () - self.buoys[ii].index.sync_status_t > Index.sync_status_timeout):
+                if (time.time () - self.buoys[ii].index.sync_status_t > self.buoys[ii].index.sync_status):
                   i = ii
                   self.logger.info ("[Zero] Pick buoy: " + str(i) + " (out of sync).")
                   break

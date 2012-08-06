@@ -231,7 +231,6 @@ class Index:
       self.pendingid = 1
 
   def gotstatus (self):
-    self.sync_status_t = time.time ()
     if self.status == 0: # got gps status
       self.status = 1 # wait for ad status
     elif self.status == 1:
