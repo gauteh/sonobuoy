@@ -30,6 +30,7 @@ namespace Zero {
     void  header ();
 
     bool verbose = false;
+    bool sparse = false;
 
     int main (int argc, char **argv) {
       string self = argv[0];
@@ -58,9 +59,12 @@ namespace Zero {
 //# define DEFAULT_FORMAT "[%09lX] %08lu\n"
       string format;
 
-      while ((opt = getopt(argc, argv, "idcruhtHvf:")) != -1) {
+      while ((opt = getopt(argc, argv, "isdcruhtHvf:")) != -1) {
         switch (opt)
         {
+          case 's':
+            sparse = true;
+            break;
           case 'v':
             verbose = true;
             break;
@@ -106,6 +110,10 @@ namespace Zero {
 
       if (verbose) header ();
 
+      if (sparse && (references || verbose || opt_only_index)) {
+          cerr << "-s can not be combined with -r, -v or -i." << endl;
+        }
+
       if (optind >= argc) {
         cerr << "[ERROR] You must specify an id." << endl;
         exit (1);
@@ -133,10 +141,13 @@ namespace Zero {
       datafn.replace (indexfn.rfind (".IND"), 4, ".DAT");
 
       Index i = open_index (indexfn);
-      print_index (i);
+      if (!sparse)
+        print_index (i);
 
       if (i.samples > 0 && !opt_only_index) {
-        cerr << "=> Reading data.." << endl;
+        cerr << "=> Reading " << datafn << "..";
+        if (!sparse) cerr << endl;
+        else cerr << flush;
 
         /* Opening DATA */
         ifstream fd (datafn.c_str (), ios::binary);
@@ -222,9 +233,10 @@ namespace Zero {
                 cerr << "=> [ERROR] Reference id does not match reference number." << endl;
               }
 
-              cerr << "=> Reference [" << refid << "]: "
-                   << reft << " (status: " << refstatus << "), "
-                   << "Lat: " << latitude << ", Lon: " << longitude << endl;
+              if (!sparse)
+                cerr << "=> Reference [" << refid << "]: "
+                     << reft << " (status: " << refstatus << "), "
+                     << "Lat: " << latitude << ", Lon: " << longitude << endl;
 
               if (reft == 0) {
                 cerr << "=> [WARNING] Reference is 0, store has no time reference." << endl;
@@ -232,16 +244,12 @@ namespace Zero {
                 corrupt = true;
               }
 
-              if (strlen(latitude) < 2) {
-                latitude[1] = latitude[0];
-                latitude[0] = '0';
-                latitude[2] = 0;
+              if (strlen(latitude) < 3) {
+                strcpy (latitude, "0S");
               }
 
-              if (strlen(longitude) < 2) {
-                longitude[1] = longitude[0];
-                longitude[0] = '0';
-                longitude[2] = 0;
+              if (strlen(longitude) < 3) {
+                strcpy (longitude, "0W");
               }
 
               /* Output DTT format */
@@ -316,7 +324,9 @@ namespace Zero {
           */
         }
 
-        cerr << "=> Read " << sam << " samples (of " << i.samples << " expected)." << endl;
+        if (!sparse || corrupt) cerr << "=> Read ";
+        else cerr << "done, read ";
+        cerr << sam << " samples (of " << i.samples << " expected)." << endl;
 
         if (sam != i.samples) {
           corrupt = true;
@@ -335,7 +345,7 @@ namespace Zero {
     }
 
     Index open_index (string fn) {
-      if (verbose)
+      if (verbose and !sparse)
         cerr << "Opening index " << fn << "..";
 
       Index i;
@@ -377,6 +387,7 @@ namespace Zero {
       cerr << endl;
       cerr << " -u, -h or -H  Print this help text." << endl;
       cerr << " -v            Be verbose." << endl;
+      cerr << " -s            Be sparse. May not be combined with -v, -r or -i." << endl;
       cerr << " -i            Only print index." << endl;
       cerr << " -r            Only print references." << endl;
       cerr << "               (only one of -r or -i may be used at the same time)" << endl;
