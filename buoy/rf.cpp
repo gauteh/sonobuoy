@@ -323,6 +323,8 @@ namespace Buoy {
         RF_Serial.print ((gps->HAS_SYNC ? 'Y' : 'N'));
         RF_Serial.print (",");
         RF_Serial.print ((gps->HAS_SYNC_REFERENCE ? 'Y' : 'N'));
+        RF_Serial.print (",");
+        RF_Serial.print (millis ());
         RF_Serial.println ("*NN");
 
         /*
@@ -352,9 +354,7 @@ namespace Buoy {
 
       // GETINFO
       case GETINFO:
-        RF_Serial.print ("$I," STRINGIFY(BUOY_ID) "," VERSION "," STRINGIFY(PROTOCOL_VERSION) ",");
-        RF_Serial.print (millis ());
-        RF_Serial.print ("*NN");
+        RF_Serial.print ("$I," STRINGIFY(BUOY_ID) "," VERSION "," STRINGIFY(PROTOCOL_VERSION) "*NN");
         break;
       // }}}
 
