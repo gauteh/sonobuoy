@@ -14,9 +14,8 @@
   ...
 
   == History ==
-  2012-07-07: Signal back to normal, did several measurements, but nothing
-              nothing found. Could be loose contact or oscillations due to
-              unconnected terminals. Considered to be in good shape.
+  2012-07-07: Resistor connected to TLE2426 was not properly connected. But
+              problem still persists. Possibly broken OPA627.
   2012-07-06: Signal, unconnected does not make sense.
   2012-06-25: Initial test: all components working.
   2012-06-21: Finished build.
