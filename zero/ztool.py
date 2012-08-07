@@ -143,6 +143,19 @@ class zCLI:
   def show (self, b):
     t = Texttable ()
 
+    from buoys import buoys
+
+    if b.isdigit ():
+      for i in buoys:
+        if b == str(i['id']):
+          b = i['name']
+          break
+
+      if b.isdigit ():
+        print "Error: Could not find buoy: " + b
+        sys.exit (1)
+
+
     try:
       s = self.z.buoy_status_by_name (b)
     except Exception as e:
@@ -213,9 +226,9 @@ class zCLI:
     print ""
     print "=> Data commands:"
     print "summary                  Print summary of connected nodes"
-    print "show [buoy name]         Show detailed information about buoy"
-    print "monitor [buoy name]      Regularily print information about buoy"
-    print "chunks [buoy name]       Show completeness of data for buoy"
+    print "show [buoy name | id]    Show detailed information about buoy"
+    print "monitor [buoy name | id] Regularily print information about buoy"
+    print "chunks [buoy name | id]  Show completeness of data for buoy"
     print ""
     print "=> Buoy commands:"
     print "getstatus                Request status from current buoy"
