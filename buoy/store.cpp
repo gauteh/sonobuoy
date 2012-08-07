@@ -826,7 +826,7 @@ namespace Buoy {
 
       /* Send end of data with Checksum */
       RF_Serial.print   ("$AD,DE,");
-      if (bad) RF_Serial.print ("XX"); // make sure cheksum does not validate in case of error
+      if (bad) RF_Serial.print ("XX"); // make sure checksum does not validate in case of error
       else RF_Serial.print   (csum, HEX);
       RF_Serial.println ("*NN");
 
