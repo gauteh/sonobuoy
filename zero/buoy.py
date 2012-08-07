@@ -50,7 +50,7 @@ class Buoy:
   logger  = None
 
   uptime  = 0
-  remote_version = ''
+  remote_version = 'unknown'
   remote_protocolversion = 1
 
   def __init__ (self, z, b):

@@ -551,7 +551,7 @@ class Protocol:
               try:
                 t = int(token)
                 self.logger.error ("[Buoy] Received error: [" + token + "] " + Buoy.error_strings[t])
-                self.zero.current.log ("[Buoy] Received error: [" + token + "]")
+                self.zero.current.log ("[Buoy] Received error: [" + token + "] " + Buoy.error_strings[t])
 
                 # info command not supported, must be version 1
                 if t == 2 and self.zero.current.index.pendingid == 6:
