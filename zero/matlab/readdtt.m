@@ -72,7 +72,7 @@ while ~feof(fh)
   MICROSECONDS_PER_SAMPLE = 1e6 / freq;
   t = cat(1,t, (T + (0:L-1)'*MICROSECONDS_PER_SAMPLE));
 end
-
+fclose (fh);
 fprintf ('=> Read %d references with %d samples\n', ref, samples);
 
 end
