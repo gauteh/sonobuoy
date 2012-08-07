@@ -2,12 +2,15 @@
 # Author: Gaute Hope <eg@gaute.vetsj.com> / 2012-04-10
 #
 # Defines buoys and addresses
+#
+# Version field is unused at the moment. But has been incremented
+# at deployed version updates.
 
 buoys = [ { 'id' :        1,
             'name' :      'One',
             'address' :   '04:3C:60',
-            'enabled' :   True,
-            'version' :   1,
+            'enabled' :   False,
+            'version' :   2,
           },
 
           { 'id' :        2,
@@ -20,8 +23,8 @@ buoys = [ { 'id' :        1,
           { 'id' :        3,
             'name' :      'Three',
             'address' :   '04:3C:64',
-            'enabled' :   False,
-            'version' :   1,
+            'enabled' :   True,
+            'version' :   2,
           },
 
           { 'id' :        4,
