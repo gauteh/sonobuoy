@@ -207,11 +207,20 @@ class Data:
           b.ref    = reference
           b.status = status
           b.latitude = latitude
-          if len(b.latitude) < 3:
-            b.latitude = '0S'
-
           b.longitude = longitude
-          if len(b.longitude) < 3:
+
+          try:
+            _t = float (b.latitude[:-1])
+            _t = float (b.longitude[:-1])
+
+            if b.latitude[-1] is not 'N' and b.latitude[-1] is not 'S':
+              raise ValueError
+
+            if b.longitude[-1] is not 'E' and b.longitude[-1] is not 'W':
+              raise ValueError
+
+          except ValueError:
+            b.latitude  = '0S'
             b.longitude = '0W'
 
           b.checksum = checksum
