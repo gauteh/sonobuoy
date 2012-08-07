@@ -564,8 +564,8 @@ class Protocol:
 
 
               except ValueError:
-                self.logger.error ("[Buoy] [ID: " + i + "] Received error: [" + token + "]")
-                self.zero.current.log ("[Buoy] [ID: " + i + "] Received error: [" + token + "]")
+                self.logger.error ("[Buoy] Received error: [" + token + "]")
+                self.zero.current.log ("[Buoy] Received error: [" + token + "]")
                 self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
                 self.zero.current.index.reset (keepradiorate = True)
                 return
@@ -579,12 +579,12 @@ class Protocol:
               ii = self.zero.indexofid (i)
               if ii is not None:
                 self.zero.buoys[ii].log ("[Buoy] Received error: [" + token + "] " + Buoy.error_strings[t])
-              # Only reset protocol in case of error with command
-              if t == 1 or t == 2 or t == 4 or t == 5 or t == 6 or t == 7 or t == 8:
-                self.zero.buoys[ii].index.reset (keepradiorate = True)
+                # Only reset protocol in case of error with command
+                if t == 1 or t == 2 or t == 4 or t == 5 or t == 6 or t == 7 or t == 8:
+                  self.zero.buoys[ii].index.reset (keepradiorate = True)
               else:
-                self.logger.error ("[Protocol] Received error from unknown buoy.")
-                self.zero.current.index.reset (keepradiorate = True)
+                if t == 1 or t == 2 or t == 4 or t == 5 or t == 6 or t == 7 or t == 8:
+                  self.zero.current.index.reset (keepradiorate = True)
 
 
             except ValueError:
