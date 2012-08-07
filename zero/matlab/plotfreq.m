@@ -1,4 +1,4 @@
-function [F, Ft] = plotfreq (d, removemean)
+function [F, Ft] = plotfreq (d, removemean, fig)
 % Do fourier transform of data d (signed input), normalize and plot
 % Returns:
 % F  = Frequency scale
@@ -9,6 +9,7 @@ function [F, Ft] = plotfreq (d, removemean)
 % removemean, set to true to remove DC component
 
 if (~exist('removemean', 'var')), removemean = false; end
+if (~exist('fig', 'var')), fig = 3; end
 
 if removemean, d = d - mean(d); end % Remove DC component
 
@@ -24,7 +25,7 @@ X = 2*abs (fftshift (Ft));
 
 F = freq * linspace (-.5, .5, N);
 
-figure (2);
+figure (fig);
 clf ('reset');
 plot (F, X);
 title ('Frequency components');
