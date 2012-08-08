@@ -24,7 +24,7 @@ C 49700 46800 1 0 0 opamp-1.sym
 T 50400 47600 5 10 0 0 0 0 1
 device=OPAMP
 T 50400 47400 5 10 1 1 0 0 1
-refdes=U?
+refdes=OPA627
 T 50400 48200 5 10 0 0 0 0 1
 symversion=0.1
 }
