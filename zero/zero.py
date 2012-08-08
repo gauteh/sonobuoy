@@ -244,7 +244,7 @@ class Zero:
               while ii != self.currenti:
                 if (time.time () - self.buoys[ii].index.sync_status_t > self.buoys[ii].index.sync_status):
                   i = ii
-                  self.logger.info ("[Zero] Pick buoy: " + str(i) + " (out of sync).")
+                  self.logger.info ("[Zero] Pick buoy: " + str(self.buoys[i].id) + " [" + str(self.buoys[i].name) + "] (out of sync).")
                   break
                 ii = (ii + 1) % len(self.buoys)
 
@@ -254,7 +254,7 @@ class Zero:
                 while ii != self.currenti:
                   if not self.buoys[ii].index.complete ():
                     i = ii
-                    self.logger.info ("[Zero] Pick buoy: " + str(i) + " (incomplete data).")
+                    self.logger.info ("[Zero] Pick buoy: " + str(self.buoys[i].id) + " [" + str(self.buoys[i].name) + "] (incomplete data).")
                     break
                   ii = (ii + 1) % len(self.buoys)
 
