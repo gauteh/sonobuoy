@@ -1,8 +1,21 @@
 function [t, d, refs] = readdtt(f, complement_and_bitshift)
 % Reads DTT format file
-
-% complement_and_bitshift defaults to true and takes the second complement
-% of d and shifts it down to 31 bits.
+%
+% t is unix timestamp
+% d is data, complemented and bitshifted if complement_and_bitshift is
+%   true (default). The raw data comes in seconds complement form and with
+%   one extra bit (can be used for out-of-range checking).
+%
+% refs is of the following format:
+% batch length
+% ref no
+% reference
+% status
+% latitude: value
+% latitude: north (N) or south (S)
+% longitude: value
+% longitude: east (E) or west (W)
+% checksum (32 bits)
 
 if (~exist('complement_and_bitshift', 'var'))
   complement_and_bitshift = true;
