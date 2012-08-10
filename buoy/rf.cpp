@@ -352,7 +352,7 @@ namespace Buoy {
         break;
       // }}}
 
-      // GETINFO
+      // GETINFO {{{
       case GETINFO:
         RF_Serial.print ("$I," STRINGIFY(BUOY_ID) "," VERSION "," STRINGIFY(PROTOCOL_VERSION) "*NN");
         break;
