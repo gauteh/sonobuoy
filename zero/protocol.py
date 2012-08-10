@@ -195,7 +195,12 @@ class Protocol:
         self.a_buf = ''
         self.betweentelegram = self.betweentelegram.strip ()
         if len(self.betweentelegram) > 0:
-          self.logger.error (self.me + ' Discarded between telegram message received: ' + self.betweentelegram)
+          if len (self.betweentelegram) <= 256:
+            self.logger.error (self.me + ' Discarded between telegram message received: ' + self.betweentelegram)
+          else:
+            self.logger.error (self.me + ' Discarded between telegram message received, long message, see log file for details.')
+            self.logger.debug (self.me + ' Discarded between telegram message received: ' + self.betweentelegram)
+
           self.betweentelegram = ''
 
       elif (self.a_receive_state == 4):
