@@ -23,6 +23,8 @@ class Protocol:
   radiorate_confirmed = False # is set true on first received telegram after
                               # radio change
 
+  me = '[Protocol]'
+
   def __init__ (self, z):
     self.zero     = z
     self.logger   = z.logger
@@ -154,9 +156,12 @@ class Protocol:
   a_buf           = ''
   waitforreceipt  = False # Have just got a AD data batch and is waiting for
                           # a DE receipt message
+  betweentelegram = ''
+
   def handle (self, buf):
     i = 0
     l = len (buf)
+
 
     while (i < l):
       c = buf[i]
@@ -166,6 +171,9 @@ class Protocol:
         if (c == '$'):
           self.a_buf = '$'
           self.a_receive_state = 1
+        else:
+          self.betweentelegram += c
+
 
       elif (self.a_receive_state == 1):
         if (c == '*'):
@@ -182,6 +190,10 @@ class Protocol:
         self.a_receive_state = 0
         self.a_parse (self.a_buf)
         self.a_buf = ''
+        self.betweentelegram = self.betweentelegram.strip ()
+        if len(self.betweentelegram) > 0:
+          self.logger.error (self.me + ' Discarded between telegram message received: ' + self.betweentelegram)
+          self.betweentelegram = ''
 
       elif (self.a_receive_state == 4):
         if (c == '$'):
