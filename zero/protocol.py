@@ -195,11 +195,8 @@ class Protocol:
         self.a_buf = ''
         self.betweentelegram = self.betweentelegram.strip ()
         if len(self.betweentelegram) > 0:
-          if len (self.betweentelegram) <= 256:
-            self.logger.error (self.me + ' Discarded between telegram message received: ' + self.betweentelegram)
-          else:
-            self.logger.error (self.me + ' Discarded between telegram message received, long message, see log file for details.')
-            self.logger.debug (self.me + ' Discarded between telegram message received: ' + self.betweentelegram)
+          self.logger.error (self.me + ' Discarded between telegram message received, see log file for details.')
+          self.logger.debug (self.me + ' Discarded between telegram message received: ' + self.betweentelegram)
 
           self.betweentelegram = ''
 
@@ -223,7 +220,8 @@ class Protocol:
 
       # Check if we're receiving sane amounts of data..
       if len(self.a_buf) > self.MAX_TELEGRAM_LENGTH:
-        self.logger.error (self.me + ' Telegram size suspiciously high, discarding: ' + self.a_buf)
+        self.logger.error (self.me + ' Telegram size suspiciously high, discarding, see log file for details.')
+        self.logger.debug (self.me + ' Telegram size suspiciously high, discarding: ' + self.a_buf)
 
         self.a_buf = ''
         self.a_receive_state = 0
@@ -235,8 +233,8 @@ class Protocol:
       #self.logger.debug ("[Protocol] Checksum not provided on received message")
       pass
     elif (not test_checksum (buf)):
-      self.logger.info ("[Protocol] Message discarded, checksum failed.")
-      self.logger.info ("[Protocol] Discarded: " + buf)
+      self.logger.info ("[Protocol] Message discarded, checksum failed, see log for details.")
+      self.logger.debug ("[Protocol] Discarded: " + buf)
       self.zero.current.index.reset (keepradiorate = True)
       return
 
