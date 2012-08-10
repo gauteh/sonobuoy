@@ -25,6 +25,9 @@ class Protocol:
 
   me = '[Protocol]'
 
+  MAX_TELEGRAM_LENGTH = 256 # chars, maximum length of telegrams before
+                            # discarding.
+
   def __init__ (self, z):
     self.zero     = z
     self.logger   = z.logger
@@ -214,7 +217,9 @@ class Protocol:
         self.zero.current.index.reset (keepradiorate = True)
 
       # Check if we're receiving sane amounts of data..
-      if len(self.a_buf) > 80:
+      if len(self.a_buf) > self.MAX_TELEGRAM_LENGTH:
+        self.logger.error (self.me + ' Telegram size suspiciously high, discarding: ' + self.a_buf)
+
         self.a_buf = ''
         self.a_receive_state = 0
   # }}}
