@@ -175,6 +175,7 @@ class Index:
 
     self.lastid = id
     self.logger.info (self.me + " Latest id: " + str(self.lastid))
+    self.buoy.log ("[Buoy] Latest id: " + str(self.lastid))
     self.sync_lastid_t = time.time ()
     if self.pendingid == 2:
       self.state = 0
@@ -244,6 +245,7 @@ class Index:
       self.sync_status_t = time.time ()
       if self.buoy.remote_protocolversion > 1:
         self.logger.debug (self.me + " Status updated, uptime: " + str(self.buoy.uptime / 1000) + " s")
+        self.buoy.log ("[Buoy] Uptime: " + str(self.buoy.uptime / 1000) + "s")
       else:
         self.logger.debug (self.me + " Status updated.")
 
@@ -264,6 +266,7 @@ class Index:
     self.buoy.remote_protocolversion = protocolversion
 
     self.logger.info (self.me + " [Info] Remote version: " + version + ", protocol version: " + str(protocolversion))
+    self.buoy.log ("[Info] Remote version: " + version + ", protocol version: " + str(protocolversion))
 
     self.has_info   = True
     self.state      = 0

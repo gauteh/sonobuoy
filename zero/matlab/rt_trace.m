@@ -145,7 +145,7 @@ guidata(hObject, handles);
 set(handles.tb_monitor, 'Value', 1);
 
 % Set up buoy
-handles.buoy = 'One';
+handles.buoy = 'Three';
 
 % Set up timer
 handles.updateplot_t = timer ('ExecutionMode', 'fixedDelay', 'BusyMode', 'drop', 'Period', 5.0, 'TimerFcn', @updateplot_fcn, 'UserData', [handles], 'StartDelay', 2);
