@@ -25,10 +25,14 @@ from buoywidget import *
 from plot       import *
 
 class BuoyTrace:
+  _run = True
+
   UI_FILE = 'buoytrace.glade'
 
   buoywidgets = []
   plot        = None
+
+  currentbuoy = None
 
   def __init__ (self):
     Gtk.init (sys.argv)
@@ -46,6 +50,7 @@ class BuoyTrace:
     self.btn_quit = self.ui.get_object ('btn_quit')
     self.btn_quit.connect ("clicked", self.quit)
 
+    self.lbl_status = self.ui.get_object ('lbl_status')
     self.box_buoys = self.ui.get_object ('box_buoys')
 
     # Load buoys
@@ -53,6 +58,9 @@ class BuoyTrace:
       bw = BuoyWidget (self, b)
       self.buoywidgets.append (bw)
       self.box_buoys.pack_start (bw.frame, True, True, 3)
+
+    self.currentbuoy = self.buoywidgets[0]
+    self.currentbuoy.sw_monitor.set_active (True)
 
     # Set up plot
     self.plot = Plot (self)
@@ -70,11 +78,17 @@ class BuoyTrace:
 
   def run (self):
     self.plot.run ()
-    Gtk.main ()
+
+    self.gtkt = Thread (target = self.gtktl)
+    self.gtkt.start ()
+
+  def gtktl (self):
+    while self._run:
+      Gtk.main_iteration_do (True)
 
   def quit (self, event = None, args = None):
     self.plot.close ()
-    Gtk.main_quit ()
+    self._run = False
 
 if __name__ == '__main__':
   b = BuoyTrace ()
