@@ -79,7 +79,7 @@ function updateplot_fcn (obj, event)
   end
 end
 
-tim  = timer ('ExecutionMode', 'fixedDelay', 'BusyMode', 'drop', 'Period', 5.0, 'TimerFcn', @updateplot_fcn, 'StartDelay', 2);
+tim  = timer ('ExecutionMode', 'fixedDelay', 'BusyMode', 'drop', 'Period', 10.0, 'TimerFcn', @updateplot_fcn, 'StartDelay', 2);
 start (tim);
 
 disp ('rt_trace: Timer started, use delete (tim) to stop and remove the returned timer. Or delete(timerfindall()).');
