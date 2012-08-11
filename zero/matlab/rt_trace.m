@@ -4,6 +4,8 @@ function tim = rt_trace(buoy, fig)
 %
 % Returns the timer which checks for new data, stop/delete this to stop the
 % script.
+%
+% Author: Gaute Hope <eg@gaute.vetsj.com> 2012-08-11
 
 lastid          = 0;
 n_traces        = 5;
@@ -44,7 +46,7 @@ function updateplot_fcn (obj, event)
   if (n(end) > lastid)
     disp ('New data..');
     
-    newrange = n(end)-4:n(end);
+    newrange = n(end)-n_traces+1:n(end);
     
     % read new
     [nt, nd] = readrangedtt (newrange, mpath);
