@@ -1,4 +1,4 @@
-function plotdtt (t, d, magnitudes, fig, axes)
+function plotdtt (t, d, magnitudes, fig, axes, standarddatatip)
 % Converts and shifts dtt file before plotting
 % Returns timestamps and data values in the range of [-2^30-1 2^30-1]
 %
@@ -6,6 +6,9 @@ function plotdtt (t, d, magnitudes, fig, axes)
 % t and d as returned by readdtt
 % magnitudes, plot some common magnitude thresholds
 % fig, figure to plot on, if less than 0 use default
+% axes, axes to plot on
+% standarddatatip, don't use datatip which converts time to understandable
+% format.
 
 assert (length(d) > 1, 'No data.');
 
@@ -16,6 +19,7 @@ else
   if (~exist('fig', 'var')), figure(1); fig = gca(1); 
   else, fig = gca(fig); end
 end
+if (~exist('standarddatatip', 'var')), standarddatatip = false; end
 
 if (fig > 0)
   cla(fig, 'reset');
@@ -74,8 +78,10 @@ function txt = mydatatip (obj, event)
   txt = {['Value: ', num2str(pos(2))], ['Time:  ', datestr(btime2datenum(pos(1)))]};
 end
 
-h = datacursormode (get(fig, 'Parent'));
-set (h, 'UpdateFcn', @mydatatip, 'SnapToDataVertex', 'on');
+if (~standarddatatip)
+  h = datacursormode (get(fig, 'Parent'));
+  set (h, 'UpdateFcn', @mydatatip, 'SnapToDataVertex', 'on');
+end
 
 
 end
