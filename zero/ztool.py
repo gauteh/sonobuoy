@@ -16,6 +16,7 @@ import sys
 import os
 import time
 from texttable import *
+import datetime
 
 class zCLI:
   m         = None
@@ -182,7 +183,7 @@ class zCLI:
                   ["Synchronization:", "( Sync: " + str(s['has_sync']) + " )" + '( Time: ' + str(s['has_time']) + " )" + '( Sync ref: ' + str(s['has_sync_reference']) + ' )'],
                   ["Time:", time.asctime(time.gmtime(float(s['unix_time']))) + ' (' + str(s['time']) + ', ' + str(s['date']) + ')'],
                   ["Version:", s['version'] + ' (protocol: ' + str(s['protocolversion']) + ')'],
-                  ["Uptime: ", str(s['uptime'] / 1000) + ' s (latest id: ' + str(s['lastid']) + ')'],
+                  ["Uptime: ", str(datetime.timedelta(0, s['uptime'] / 1000)) + ' (latest id: ' + str(s['lastid']) + ')'],
                   ], False)
 
 
