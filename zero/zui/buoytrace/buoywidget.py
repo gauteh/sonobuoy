@@ -3,7 +3,7 @@
 # Buoywidget: Widget for each buoy
 #
 # Author: Gaute Hope <eg@gaute.vetsj.com>
-# Date:   2012-08-10
+# Date:   2012-08-11
 
 import os
 import os.path

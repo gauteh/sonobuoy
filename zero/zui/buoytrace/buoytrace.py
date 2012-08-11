@@ -22,11 +22,13 @@ from gi.repository import Gtk
 
 from buoys      import buoys
 from buoywidget import *
+from plot       import *
 
 class BuoyTrace:
   UI_FILE = 'buoytrace.glade'
 
   buoywidgets = []
+  plot        = None
 
   def __init__ (self):
     Gtk.init (sys.argv)
@@ -52,15 +54,26 @@ class BuoyTrace:
       self.buoywidgets.append (bw)
       self.box_buoys.pack_start (bw.frame, True, True, 3)
 
+    # Set up plot
+    self.plot = Plot (self)
+
+    self.sw_plot = self.ui.get_object ('sw_plot')
+    self.sw_plot.connect ('notify::active', self.sw_plot_active)
+
   def switchoffbuoys (self, ex):
     for bw in self.buoywidgets:
       if bw is not ex:
         bw.sw_monitor.set_active (False)
 
+  def sw_plot_active (self, *args):
+    self.plot.plot = self.sw_plot.get_active ()
+
   def run (self):
+    self.plot.run ()
     Gtk.main ()
 
   def quit (self, event = None, args = None):
+    self.plot.close ()
     Gtk.main_quit ()
 
 if __name__ == '__main__':
