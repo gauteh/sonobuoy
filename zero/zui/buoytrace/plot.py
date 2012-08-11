@@ -19,6 +19,7 @@ class Plot:
 
   plot = True
   ids  = []
+  greatestid = 0
 
   def __init__ (self, bt):
     self.thread = Thread (target = self.loop)
@@ -33,9 +34,17 @@ class Plot:
   def loop (self):
     print "[P] Started."
     while self._run:
-      self.checkfiles ()
+      print "iteration"
 
-      self.refreshplot.wait (5)
+      #if self.refreshplot.wait (5):
+        #self.replot ()
+      #else:
+        #self.checkfiles ()
+        #if max(self.ids) > self.greatestid:
+          #self.replot ()
+
+  def replot (self):
+    print "[P] Replot.."
 
   def checkfiles (self):
     # Check if there are new DTT's

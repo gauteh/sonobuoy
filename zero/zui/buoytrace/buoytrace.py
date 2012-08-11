@@ -82,9 +82,10 @@ class BuoyTrace:
     self.gtkt = Thread (target = self.gtktl)
     self.gtkt.start ()
 
+
   def gtktl (self):
     while self._run:
-      Gtk.main_iteration_do (True)
+      Gtk.main_iteration_do (False)
 
   def quit (self, event = None, args = None):
     self.plot.close ()
