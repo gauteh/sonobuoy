@@ -34,8 +34,13 @@ class BuoyTrace:
 
   currentbuoy = None
 
+  gtkt        = None
+
   def __init__ (self):
     Gtk.init (sys.argv)
+
+    # Set up plot
+    self.plot = Plot (self)
 
     # Load UI from glade file and set up signals
     self.ui = Gtk.Builder ()
@@ -62,26 +67,28 @@ class BuoyTrace:
     self.currentbuoy = self.buoywidgets[0]
     self.currentbuoy.sw_monitor.set_active (True)
 
-    # Set up plot
-    self.plot = Plot (self)
-
     self.sw_plot = self.ui.get_object ('sw_plot')
     self.sw_plot.connect ('notify::active', self.sw_plot_active)
 
-  def switchoffbuoys (self, ex):
+    # Thread for GTK
+    self.gtkt = Thread (target = self.gtktl)
+
+  def switchbuoys (self, ex):
     for bw in self.buoywidgets:
       if bw is not ex:
         bw.sw_monitor.set_active (False)
 
+    self.currentbuoy = ex
+    self.plot.event ()
+
   def sw_plot_active (self, *args):
     self.plot.plot = self.sw_plot.get_active ()
+    self.plot.event ()
 
   def run (self):
     self.plot.run ()
 
-    self.gtkt = Thread (target = self.gtktl)
-    self.gtkt.start ()
-
+    self.gtkt.start () # Will become current thread for GTK events
 
   def gtktl (self):
     while self._run:

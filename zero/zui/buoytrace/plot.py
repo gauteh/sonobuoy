@@ -11,8 +11,8 @@ import time
 from threading import Thread, Event
 
 class Plot:
-  _run    = True
-  thread  = None
+  _run      = True
+  thread    = None
   buoytrace = None
 
   refreshplot = None
@@ -25,6 +25,7 @@ class Plot:
     self.thread = Thread (target = self.loop)
     self.buoytrace = bt
     self.refreshplot = Event ()
+    self.refreshplot.set () # Run through initially
 
   def run (self):
     print "[P] Starting.."
@@ -34,37 +35,48 @@ class Plot:
   def loop (self):
     print "[P] Started."
     while self._run:
-      print "iteration"
+      if self.refreshplot.wait (5):
+        self.refreshplot.clear ()
 
-      #if self.refreshplot.wait (5):
-        #self.replot ()
-      #else:
-        #self.checkfiles ()
-        #if max(self.ids) > self.greatestid:
-          #self.replot ()
+        if self.plot:
+          self.checkfiles ()
+          self.replot ()
+
+      else:
+        if self.plot:
+          self.checkfiles ()
+          if max(self.ids) > self.greatestid:
+            print "[P] New ID: " + str(max(self.ids))
+            self.replot ()
 
   def replot (self):
-    print "[P] Replot.."
+    self.greatestid = max(self.ids)
+    print "[P] Replot.. (latest id: " + str(self.greatestid) + ")"
 
   def checkfiles (self):
     # Check if there are new DTT's
-    self.buoytrace.lbl_status.set_label ('Checking files..')
-    self.buoytrace.window_main.show_all ()
-    files = os.listdir (self.buoytrace.currentbuoy.datadir)
-    self.ids = []
-    for f in files:
-      if f[-3:] == 'DTT':
-        try:
-          self.ids.append (int(f[:-4]))
-        except ValueError:
-          print "[P] Could not add id: " + f
+    print "[P] Checking files.."
+    if self.buoytrace.currentbuoy is not None:
+      self.buoytrace.lbl_status.set_label ('Checking files..')
+      self.buoytrace.window_main.show_all ()
+      files = os.listdir (self.buoytrace.currentbuoy.datadir)
+      self.ids = []
+      for f in files:
+        if f[-3:] == 'DTT':
+          try:
+            self.ids.append (int(f[:-4]))
+          except ValueError:
+            print "[P] Could not add id: " + f
 
-    self.ids.sort ()
-    self.buoytrace.lbl_status.set_label ('Checking files.. done.')
+      self.ids.sort ()
+      self.buoytrace.lbl_status.set_label ('Checking files.. done.')
+    else:
+      print "[P] No current buoy."
 
   def close (self):
     print "[P] Stopping.."
     self._run = False
+    self.plot = False
     self.refreshplot.set ()
     self.thread.join ()
     print "[P] Finished."

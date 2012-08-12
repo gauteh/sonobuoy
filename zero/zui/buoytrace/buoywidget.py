@@ -43,7 +43,7 @@ class BuoyWidget (Gtk.Container):
 
   def activated (self, *args):
     if self.sw_monitor.get_active ():
-      self.buoytrace.switchoffbuoys (self)
+      self.buoytrace.switchbuoys (self)
 
 
 
