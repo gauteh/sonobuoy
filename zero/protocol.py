@@ -294,7 +294,13 @@ class Protocol:
 
               elif (tokeni == 4):
                 try:
-                  self.zero.current.gps.latitude = float(token) if len(token) else 0
+                  if len(token) > 0:
+                    self.zero.current.gps.latitude = float(token)
+                  else:
+                    self.zero.current.gps.latitude = 0
+                    self.logger.debug (self.me + ' [GPS] Token too short.')
+                    self.logger.debug (buf)
+
                 except ValueError:
                   self.zero.current.index.reset (keepradiorate = True)
                   self.logger.exception ("[Protocol] Could not convert token to float. Discarding rest of message.")
@@ -305,7 +311,13 @@ class Protocol:
 
               elif (tokeni == 6):
                 try:
-                  self.zero.current.gps.longitude = float(token) if len(token) > 0 else 0
+                  if len(token) > 0:
+                    self.zero.current.gps.longitude = float(token)
+                  else:
+                    self.zero.current.gps.longitude = 0
+                    self.logger.debug (self.me + ' [GPS] Token too short.')
+                    self.logger.debug (buf)
+
                 except ValueError:
                   self.zero.current.index.reset (keepradiorate = True)
                   self.logger.exception ("[Protocol] Could not convert token to float. Discarding rest of message.")
