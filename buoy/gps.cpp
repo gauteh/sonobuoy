@@ -327,7 +327,7 @@ namespace Buoy {
       uint32_t remainder = 0;
       */
 
-      char token[80]; // Max length of token
+      char token[MAX_TELEGRAM_CHARS]; // Max length of token
       int j = 0;
       /* Get next token */
       while ((gps_buf[i] != ',' && gps_buf[i] != '*') && i < len) {

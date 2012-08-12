@@ -17,7 +17,7 @@
 
 namespace Buoy {
   class GPS {
-# define TELEGRAM_LEN 80
+# define TELEGRAM_LEN MAX_TELEGRAM_CHARS
 
 # define GPS_BAUDRATE 4800
 

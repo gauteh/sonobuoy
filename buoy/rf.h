@@ -81,7 +81,7 @@ namespace Buoy {
       # define MAX_SANE_SAMPLE  MAX_SAMPLES_PER_FILE
       # define MAX_SANE_LENGTH  (50 * BATCH_LENGTH)
 
-# define RF_SERIAL_BUFLEN 80
+# define RF_SERIAL_BUFLEN MAX_TELEGRAM_CHARS
       char rf_buf[RF_SERIAL_BUFLEN];
       uint8_t rf_buf_pos;
 

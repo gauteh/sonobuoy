@@ -57,6 +57,10 @@
 # define STRINGIFY_I(s) #s
 # define STRINGIFY(s)   STRINGIFY_I(s)
 
+/* Used by test_checksum and various others as sanity check and limit on
+ * incomint telegrams */
+# define MAX_TELEGRAM_CHARS 256
+
 namespace Buoy {
   class BuoyMaster {
     public:

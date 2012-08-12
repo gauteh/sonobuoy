@@ -169,7 +169,6 @@ namespace Buoy {
      *        to test. NULL terminated.
      */
     uint8_t  n = 0;
-# define MAX_CHARS 80
     uint32_t tsum = 0;
     buf++; // skip $
     while (*buf != '*' && *buf != 0) {
@@ -177,7 +176,7 @@ namespace Buoy {
       buf++;
       n++;
 
-      if (n > MAX_CHARS) {
+      if (n > MAX_TELEGRAM_CHARS) {
         return false;
       }
     }
