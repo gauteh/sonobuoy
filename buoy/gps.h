@@ -168,8 +168,12 @@ namespace Buoy {
        */
 # define REFERENCE_TIMEOUT 60 // [s]
 
+# if BBOARD == 0
       /* Maple Native Beta Crystal: 535-9721-1-ND from DigiKey */
 # define TIMING_PPM  10
+# elif BBOARD == 1
+      /* TODO: Still unknown for Olimexino */
+# endif
 
 /* Overflow handling, the math.. {{{
  *
