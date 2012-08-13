@@ -96,7 +96,7 @@ namespace Buoy {
  *  - Longitude:    char * 12
  *  - Checksum:     uint32_t (of samples in batch)
  *  - 3 * (SAMPLE_LENGTH) with 0
- *  Total length: 44 bytes.
+ *  Total length: 68 bytes.
  *
  * Entry:
  *  - SAMPLE    (4 bytes)
