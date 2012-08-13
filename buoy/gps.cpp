@@ -121,8 +121,8 @@ namespace Buoy {
     /* Check state of timing and PPS, is called from within interrupt.
      * Should not output */
 
-    /* We have a tolerance of 30 millisecond to catch sync loss */
-# define LOST_SYNC 1030
+    /* We have a tolerance of 100 millisecond to catch sync loss */
+# define LOST_SYNC 1100
 
     /* Check if we have lost sync */
     if ((millis () - lastsync) > LOST_SYNC) {
@@ -147,8 +147,8 @@ namespace Buoy {
         HAS_SYNC_REFERENCE = false;
 
         /* Un-reliable, using time telegram */
-        reference   = lastsecond;
-        microdelta  = micros () + ((millis () - lastsecond_time) * 1000);
+        //reference   = lastsecond;
+        //microdelta  = micros () + ((millis () - lastsecond_time) * 1000);
 
         //rf_send_debug_f ("[GPS] [Error] Setting reference manually: %llu", reference);
       }
