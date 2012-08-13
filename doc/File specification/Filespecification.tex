@@ -143,6 +143,37 @@ buoy and on the central logging point.
     stored in the root folder of the SD card and on the central it is
     stored in a folder dedicated to its buoy.
 
+    \subsubsection{Status} The status is a 16 bits wide with bits set for
+    different conditions, the bit is set if the specified function is
+    working, these are defined in buoy/gps.h: \\
+
+    \vspace{1em}
+
+    \begin{tabular}{|l|l|}
+      \hline
+      \bfseries Bit & \bfseries Flag \\ \hline
+       0b0  &   Nothing \\ \hline
+       0b1  &   Time    \\ \hline
+       0b10 &   Sync    \\ \hline
+       0b100 &  Sync Reference \\ \hline
+       0b1000 & Position \\ \hline
+    \end{tabular}
+    \captionof{table}{Status flag bit mapping}
+    \label{tab:status_flags}
+
+    \paragraph{Time} Means that a valid time is provided by the GPS
+    unit.
+    \paragraph{Sync} Means that the PPS signal is being sent and the
+    timing can be determined accurately.
+
+    \paragraph{Sync reference} Means that the reference in use was
+    determined at a time when there was a PPS signal available. This can
+    remain true after both time and sync is lost and the accuracy will
+    deteriorate with the drift of the CPU clock.
+
+    \paragraph{Position} Means that the GPS is delivering a valid
+    position fix.
+
     \subsection{Sample} The sample is 32 bits wide and is a twos
     complement integer. The last bit indicates whether the scale was exceeded
     in either direction, that means the first 31 bits are read as twos
@@ -237,8 +268,8 @@ buoy and on the central logging point.
   recover parts of a corrupt data file as well as making it possible to
   detect a reference when none is expected.
 
-  \paragraph{Sample}Each sample is an \textbf{uint32\_t} with size 4. 
-  
+  \paragraph{Sample}Each sample is an \textbf{uint32\_t} with size 4.
+
   \paragraph{Batch}The structure of one
   batch is then:
   \vspace{1em}
