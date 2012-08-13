@@ -1,0 +1,380 @@
+\documentclass[a4paper]{article}
+\usepackage[fleqn]{amsmath}
+\usepackage{graphicx}
+%\usepackage{times}
+\usepackage[framed,numbered,autolinebreaks,useliterate]{mcode}
+\usepackage{listing}
+\usepackage[small,compact]{titlesec}
+\usepackage[utf8]{inputenc}
+
+\usepackage{biblatex}
+\bibliography{../Documentation}
+
+\usepackage[paper=a4paper,
+            includefoot, % Uncomment to put page number above margin
+            marginparwidth=30.5mm,    % Length of section titles
+            marginparsep=1.5mm,       % Space between titles and text
+            margin=10mm,              % 25mm margins
+            includemp]{geometry}
+
+%\setlength{\oddsidemargin}{10mm}
+%\setlength{\evensidemargin}{10mm}
+\usepackage{fullpage}
+
+\usepackage{multicol}
+\usepackage{caption}
+
+\newcommand{\makeheading}[2]%
+        {\hspace*{-\marginparsep minus \marginparwidth}%
+         \begin{minipage}[t]{\textwidth\marginparwidth\marginparsep}%
+           {\large \bfseries #1}\\{#2}\\[-0.15\baselineskip]%
+                 \rule{\columnwidth}{1pt}%
+         \end{minipage}}
+
+\newlength{\figurewidth}
+\setlength{\figurewidth}{500px}
+
+
+\begin{document}
+\makeheading{Gautebøye - File specification}{Gaute Hope
+(gaute.hope@student.uib.no), 13.08.2012}
+
+\vspace{2em}
+\section*{Introduction}
+This document is a specification of how data is stored locally on the
+buoy and on the central logging point.
+
+\vspace{2em}
+
+\begin{multicols}{2}
+  \section{Overview}
+  There are two file formats used: one binary
+  and one ASCII format who both may fully represent the data.
+  The binary format is used as local storage on the
+  buoy SD-card while the ASCII format is used on the central logging point
+  (Zero).
+
+  \section{Data structure}
+    \subsection{Entity}
+    The data consists of:
+    \begin{enumerate}
+      \item Sample: Values returned from AD converter (32 bit)
+      \item Timestamps
+      \item Position
+      \item Status (Validity of timing and position)
+    \end{enumerate}
+
+    \paragraph{} The formats are designed to uniquely represent these
+    entities.
+
+    \subsection{Structure}
+    The data is organized in IDs with a number of batches, each batch
+    has a reference and a set of corresponding values. The terms reference and
+    batch are used interchangeably.
+
+    \begin{tabbing}
+    Store\= \+ \\
+      ID 1 \=  \+ \\
+        Reference 0 \= \\
+        Reference 1 \= \+ \\
+          Sample 0 \\
+          Sample 1 \\
+          \dots \\
+          Sample 1023 \- \\
+        Reference 2 \\
+        \dots \\
+        Reference 39 \- \\
+      ID 2 \\
+      ID 3 \\
+      \dots
+    \end{tabbing}
+    \captionof{table}{Store structure}
+    \label{tbl:store_structure}
+
+    There is one set of data and index file for each ID, the index file
+    contains information about the number of batches (references) and
+    samples. The data file contains the references and the samples.
+    The index file is not strictly needed for anything else than
+    the data format version, but is used to check against data and as an
+    possibility to read a data file faster.
+
+    \subsubsection{Index}
+    The index contains:
+    \begin{enumerate}
+      \item Version of file format
+      \item ID
+      \item Sample length (always 32 bit)
+      \item Number of samples (batch size $\cdot$ max references)
+      \item Number of samples per reference (batch size, 1024)
+      \item Number of references (40)
+    \end{enumerate}
+
+    \subsubsection{Reference: Timing, position and status}
+    Each reference determines the position and status as well as a
+    time reference for its batch of samples. That means there is not
+    recorded a position and status, as well as timestamp, for each
+    sample - but for a predefined number of samples. The
+    time of each samples are calculated from the reference and the
+    sample rate. The batch size is chosen based on the desired resolution of
+    timestamps and position fixes and limited by the memory of the CPU
+    unit, it is put to 1024 samples per batch, which
+    results in little drift\footnote{TODO: Put some numbers on timing drift..} between each reference and provides
+    positioning every $1024 / 250 \text{Hz} \approx 4 \text{s}$.
+
+    \paragraph{Checksum}
+    As the data is sampled a 32-bit checksum is calculated for each
+    batch, this is stored along with the reference and is used to check
+    whether the stored data has not been corrupted and is the same that
+    was recorded. The checksum is the XOR between all samples in the
+    batch.
+
+    \paragraph{Entity}
+    A reference has the following entities:
+    \begin{enumerate}
+      \item Reference number
+      \item Time reference: microseconds since Unix epoch
+      \item Position (longitude and latitude)
+      \item Status
+      \item Checksum
+    \end{enumerate}
+
+    \paragraph{}
+    Both formats use this structure, on the buoys local storage it is
+    stored in the root folder of the SD card and on the central it is
+    stored in a folder dedicated to its buoy.
+
+    \subsection{Sample} The sample is 32 bits wide and is a twos
+    complement integer. The last bit indicates whether the scale was exceeded
+    in either direction, that means the first 31 bits are read as twos
+    complement, if the value is at its maximum a 0 in the last bit
+    indicates overflow while if the value is at its minium a 1 in the
+    last bit indicates underflow \cite{ads1282_ds}.
+
+  \section{Formats}
+  Since the files are stored in DAT format then read either directly
+  from the SD card or sent over the network the DTT version of an ID is
+  governed by the properties of its DAT file. The settings for size or
+  batch length in the DAT will be seen in the DTT file.
+
+  \subsection{Binary format: DAT}
+  The binary format uses the extension DAT for its data files and IND
+  for its index files, the buoy chooses the next free ID number on start
+  up and as each data file is full continues. This puts a limit at the
+  maximum number of IDs since the file system has a limit on the maximum
+  number of characters.
+
+  \paragraph{Implementation}
+  The implementation and latest version of the DAT file format is to be
+  found in the source: buoy/store.h and buoy/store.cpp.
+
+  \paragraph{Limit of IDs}
+  The SD card is formatted using the FAT32 file system and the file
+  names follow the 8.3 limit, that leaves 8 digits for the ID number and
+  a maximum ID of $10^8 - 1 = 99999999$. With a maximum number of 40 references
+  (batches) per data file and a batch size of 1024 values there will be
+  ~164 seconds of recording in each file. This means that for 14 days of
+  continuous recording 7383 IDs are needed, in other words well below
+  the limit \cite{local_data_capacity_budget}.
+
+  \paragraph{Data file size}
+  The number of references (batches) and the data file size has been
+  chosen to be in this order so that in case of data corruption in one
+  file not too many samples will be lost, but still to be balanced
+  against the overhead of more IDs and metadata. The more specific a
+  batch of samples can be addressed the easier it is to retrieve them
+  with the minimum disturbance of other batches or IDs. To avoid any
+  interference with the current logging a data file is not transmitted
+  before it is closed, that means that there is a lag the length of the
+  data file when watching the data in real time. The chosen length is a
+  reasonable compromise between these.
+
+
+  \subsubsection{Structure: Index}
+  The index file for ID is named \textit{ID.IND} and is when a data file
+  is finished written as a binary file as:
+  \vspace{1em}
+
+  \begin{tabular}{|r|c|c|l|}
+    \hline
+    \bfseries Start    &     \bfseries Field     & \bfseries  Type
+    &   \bfseries Size  \\ \hline
+    0   & Version   & uint16\_t   & 2 \\ \hline
+    2   & Id        & uint32\_t   & 4 \\ \hline
+    6   & Sample length & uint16\_t & 2 \\ \hline
+    8   & No of samples   & uint32\_t   & 4 \\ \hline
+    12  & Batch size & uint32\_t  & 4 \\ \hline
+    16  & No of references & uint32\_t & 4 \\ \hline
+    & \textbf{Total length} &  & \textbf{20} \\ \hline
+  \end{tabular}
+  \captionof{table}{Binary index file, fields, start and size is given in bytes.}
+  \label{tab:index_binary_fields}
+
+  \subsubsection{Structure: Data file}
+  The data file is made up of batches, consisting of first one reference
+  then a sequence of samples. The batches are concatenated after each
+  other without spacing as described in table \ref{tbl:store_structure}.
+  The structure of the reference is:
+  \vspace{1em}
+
+  \begin{tabular}{|r|c|c|l|}
+    \hline
+    \bfseries Start   &     \bfseries Field     &   \bfseries Type
+    &   \bfseries Size  \\ \hline
+    0   & Padding   & 0   & $3 \cdot \text{sample length} = 12 $ \\ \hline
+    12  & Reference id      & uint32\_t   & 4 \\ \hline
+    16  & Time (reference)  & uint64\_t   & 8 \\ \hline
+    24  & Status            & uint32\_t   & 4 \\ \hline
+    28  & Latitude          & char[12]    & 12 \\ \hline
+    40  & Longitude         & char[12]    & 12 \\ \hline
+    52  & Checksum          & uint32\_t   & 4 \\ \hline
+    56  & Padding   & 0   & $3 \cdot \text{sample length} = 12 $ \\ \hline
+    & \textbf{Total length} &  & \textbf{68} \\ \hline
+  \end{tabular}
+  \captionof{table}{Binary reference, fields, start and size is given in bytes.}
+  \label{tab:reference_binary_fields}
+
+  The reference is padded in both ends so that it will be easier to
+  recover parts of a corrupt data file as well as making it possible to
+  detect a reference when none is expected.
+
+  \paragraph{Sample}Each sample is an \textbf{uint32\_t} with size 4. 
+  
+  \paragraph{Batch}The structure of one
+  batch is then:
+  \vspace{1em}
+
+  \begin{tabular}{|r|c|c|l|}
+    \hline
+    \bfseries Start   &     \bfseries Field     &   \bfseries Count
+    &   \bfseries Size \\ \hline
+    0   & Reference & 1 & 68 \\ \hline
+    68  & Samples   & 1024 & 4096 \\ \hline
+    & \textbf{Total length} &  & \textbf{4164} \\ \hline
+  \end{tabular}
+  \captionof{table}{Binary batch, fields, start and size is given in bytes.}
+  \label{tab:batch_binary_fields}
+
+  \vspace{1em}
+  Such that a data file is given as: \\
+  \vspace{1em}
+
+  \begin{tabular}{|r|c|c|l|}
+    \hline
+    \bfseries Start   &     \bfseries Field     &   \bfseries Count
+    &   \bfseries Size  \\ \hline
+    0   & Reference 0 & 1 & 68 \\ \hline
+    68  & Samples   & 1024 & 4096 \\ \hline
+    4164 & Reference 1 & 1 & 68 \\ \hline
+    4232  & Samples   & 1024 & 4096 \\ \hline
+    \dots & \dots & \dots & \dots \\ \hline
+    162396 & Reference 39 & 1 & 68 \\ \hline
+    162464 & Samples   & 1024 & 4096 \\ \hline
+    & \textbf{Total length} &  & \textbf{166560} \\ \hline
+  \end{tabular}
+  \captionof{table}{Binary data file, fields, start and size is given in bytes.}
+  \label{tab:data_binary_fields}
+
+
+  \subsection{ASCII format: DTT}
+  The ASCII format uses the extension DTT for its data file and ITT for
+  its index files, they are created by the central logger (Zero) as
+  they are transmitted from the buoy. A file may be incompletely
+  downloaded and still be readable. The index file stores a list of all
+  references and how much of it has been downloaded (chunks), normally
+  a whole reference is downloaded at the time, but the logger may be
+  configured to download only parts (chunks) of the batch at the time.
+  All line endings are UNIX line endings '$\backslash$n'.
+
+  \paragraph{}The logger is written in Python so the file format has
+  been influenced by this. It is read directly by MATLAB scripts
+  which plot and do simple analyzes.
+
+  \paragraph{}The central logger also keeps another index file,
+  \textit{indexes}, with a list of available IDs on the buoy and whether
+  they are enabled (file exists and is valid on buoy).
+
+  \paragraph{}The implementation and latest version is to be found in
+  the source code: zero/data.py for index and data, and zero/index.py
+  for the index of all available ids.
+
+  \subsubsection{Structure: Index of ids}
+  This is a list with one line per id of the format: \\
+  \begin{center}
+  \textit{ID,enabled}
+  \end{center}
+
+  \begin{enumerate}
+    \item ID: integer value id
+    \item enabled: 'True' or 'False', whether this ID exists on the
+      buoy.
+  \end{enumerate}
+
+  \subsubsection{Structure: Index}
+  There is one field per line with the following fields: \\
+  \begin{enumerate}
+    \item ID (integer)
+    \item Number of samples (integer)
+    \item Number of references (integer)
+    \item HasFull, 'True' or 'False', whether the complete file has been
+     received.
+  \end{enumerate}
+
+  After that there is one line for each received reference, with a comma
+  separated list of the following fields: \\
+  \begin{enumerate}
+    \item Reference number (integer)
+    \item Reference timestamp (integer), microseconds since Unix epoch.
+    \item Status (integer)
+    \item Latitude  (string)
+    \item Longitude (string)
+    \item Checksum (integer)
+    \item Line (integer), specifying where this batch starts in data file.
+    \item Comma separated list of finished chunks (integers)
+  \end{enumerate}
+
+  If the chunk size equals the batch size, there is only one chunk per
+  reference. Meaning if the reference (batch) has been retrieved there
+  should be one 0 in the last comma separated list.
+
+  \subsubsection{Structure: Data file}
+  The data file is built up in a similar way as the binary data file,
+  where all the batches follow each other, a batch consists of a
+  reference followed by a sequence of samples. So that the timing of
+  each sample can be determined from the previous reference.
+
+  The reference is one line of a comma separated list of the fields: \\
+  \begin{enumerate}
+    \item R (the character 'R' to indicate a reference)
+    \item Batch length (integer), value: 1024
+    \item Reference number (integer)
+    \item Reference timestamp (integer)
+    \item Status (integer)
+    \item Latitude (string)
+    \item Longitude (string)
+    \item Checksum (integer)
+  \end{enumerate}
+
+  After this follows 1024 samples (integers) one on each line. The
+  references are sorted descending, but there may be missing references
+  (batches).
+
+  \section{Implementation}
+  \subsection{Buoy: Local storage}
+  The implementation is done in: buoy/store.cpp and buoy/store.h.
+
+  \subsection{Zero: Central logging point}
+  The implementation is done in: zero/data.py and zero/index.py. Reading
+  is done with: zero/matlab/readdtt.m, where there exists various other
+  scripts for working with the information.
+
+  \subsection{storereader: Conversion and reading buoy local storage on a regular
+  computer}
+  The program: zero/storereader reads and print IND and DAT file pairs
+  and can convert to DTT files as well as output a specified format.
+
+\vspace{5em}
+\printbibliography
+\end{multicols}
+
+\end{document}
+

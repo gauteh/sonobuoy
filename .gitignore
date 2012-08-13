@@ -27,8 +27,8 @@ hardware/simulations/*.raw
 hardware/simulations/*.imp
 hardware/simulations/*.net
 
-doc/Instrument response/Response.aux
-doc/Instrument response/Response-blx.bib
-doc/Instrument response/Response.bbl
-doc/Instrument response/Response.blg
-doc/Instrument response/Response.run.xml
+*.aux
+*blx.bib
+*.bbl
+*.blg
+*.run.xml
