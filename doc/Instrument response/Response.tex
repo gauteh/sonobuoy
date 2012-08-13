@@ -37,14 +37,14 @@
 
 \begin{document}
 \makeheading{Gautebøye - Instrument Response}{Gaute Hope
-(gaute.hope@student.uib.no), 29.05.2012, Revision 2 (30.05.2012)}
+(gaute.hope@student.uib.no), 29.05.2012, Revision 2 (12.08.2012)}
 
 \vspace{2em}
-\section*{Introduction} Here is presented the theoretical derivation of
-the analog instrument response of the digitizer. The digital filtering
-during AD conversion is briefly discussed, but its properties are well
-defined in the manual of the ADC.
-\vspace{2em}
+\section*{Introduction} 
+Here is presented the theoretical derivation and analysis of the analog
+instrument response of the digitizer. The digital filtering during AD
+conversion is briefly discussed, but its properties are well defined in
+the manual of the ADC. \vspace{2em}
 
 \begin{multicols}{2}
 \section{Hydrophone decoupling}
@@ -154,7 +154,7 @@ The OPA1632 \cite{opa1632_ds} is set up with a 1 nF capacitor in its
 feedback loop on the ADS1282EVM \cite{ads1282evm_ds}, this low passes
 the signal with an cut off frequency at $f_{LP_2} = 151.99$ kHz. Its
 gain bandwidth is specified to be 180 MHz, given that the gain is 1 and
-the load is large it should have a well defined response. The
+the load is large it should have a well behaved and near ideal response. The
 OPA1632-setups simplified transfer function is \cite{fully_diff_opamps}:
 
 \begin{equation}
@@ -179,7 +179,7 @@ OPA627, it is specifically designed to be a buffer working at unity
 gain. The feedback loop is internally connected. But otherwise the same
 wiring scheme applies. Closely mounted and well chosen bypass capacitors
 are still needed on the power supplies to ensure stability. The input
-impedance of the ADS1282EVM should be sufficient to for the gain to
+impedance of the ADS1282EVM should be sufficient for the gain to
 approach unity. The OPA633 has a gain bandwidth of 260 MHz, however it
 requires $\pm 15$ mA current, which is about twice that of the OPA627.
 
@@ -255,7 +255,7 @@ The frequency response is illustrated in figure
 0.4169 \frac{V}{V}$ which is to scale the input from $\pm 6V$ to $\pm 2.5V$, $0.4169
 \approx 5 / 12 = 0.4167$, which is the input range of the ADS1282EVM
 (\cite{ads1282evm_ds} and \cite{ads1282_ds}) in bipolar mode. The
-slightly inaccurate scaling is due to available resistor values.
+slightly inaccurate scaling is due to the available (high precision) resistor values.
 
 \paragraph{}
 The impulse response of the system is plotted in figure
@@ -311,14 +311,18 @@ amplitude will wrap into the 125 Hz passband.
 \label{digitalfilter}
 \section{Digital filter}
 Further the ADS1282 is configured to digitally filter the decimation
-output so that the final output signal of 250 Hz contains no alias. The
+output so that the final output signal of 250 Hz contains no alias below
+the input Nyquist sample rate (equation \eqref{eqn:nyquist}). The
 built-in sinc and FIR filters are activated, see the ADS1282 datasheet
 \cite{ads1282_ds} for details. This provides more
 than $140$ dB of attenuation above the Nyquist frequency of the output
 sample rate \cite{ads1282_ds}.
 \paragraph{}The
 ADS1282 can be configured for an sample rate of as high as 4000 Hz
-\cite{ads1282_ds}. This would be possible without changes in the analog interface, although it would come at an cost of resolution.
+\cite{ads1282_ds}. This would be possible without changes in the analog
+interface, although it would come at an cost of resolution and would
+require adaption of the firmware of the buoy to handle the higher data
+rate.
 
 \paragraph{High Pass Filter (HPF)} The ADS1282 is configured to have an high
 pass corner frequency as close to 20 seconds as possible, the built in
@@ -354,8 +358,9 @@ transducer (including its built-in preamplifier).
 \end{multicols}
 
 \newpage
-\section*{Attachments}
-\subsection*{response.m}
+
+\section{Attachments}
+\subsection{response.m}
 \lstset{caption={response.m, MATLAB code for calculating instrument
 response},label=code:response_m}
 \lstinputlisting{response.m}
