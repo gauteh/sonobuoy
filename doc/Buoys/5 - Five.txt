@@ -14,6 +14,8 @@
   ...
 
   == History ==
+  2012-08-13: GPS unit used on buoy 3, faulty GPS unit installed (seems
+              to work now and then).
   2012-07-08: Updated to version 1.1.0.
   2012-07-07: Resistor connected to TLE2426 was not properly connected. But
               problem still persists. Possibly broken OPA627.

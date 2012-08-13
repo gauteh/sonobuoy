@@ -13,6 +13,8 @@
   == Hardware ==
 
   == History ==
+  2012-08-13: Replaced GPS unit with GPS unit from buoy 5, this seems to
+              be faulty.
   2012-08-07: Update to version 1.1.0.
   2012-06-25: Initial test: all components working.
   2012-06-25: Must fix: Appears to be some digital crosstalk on signal.
