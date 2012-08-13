@@ -121,8 +121,8 @@ namespace Buoy {
     /* Check state of timing and PPS, is called from within interrupt.
      * Should not output */
 
-    /* We have a tolerance of 100 millisecond to catch sync loss */
-# define LOST_SYNC 1100
+    /* Threshold in milliseconds before we consider SYNC lost */
+# define LOST_SYNC 2000
 
     /* Check if we have lost sync */
     if ((millis () - lastsync) > LOST_SYNC) {
@@ -192,13 +192,9 @@ namespace Buoy {
     /* Make sure lastsync is not changed while working */
     disable_sync ();
 
-    /* Update last second if we don't have a valid time from before
-     * or there has been an increment in seconds (wheter the new second is
-     * valid or not). */
-    if (!HAS_TIME || newsecond > lastsecond) {
-      lastsecond_time = millis ();
-      lastsecond      = newsecond;
-    }
+    /* Update last second */
+    lastsecond_time = millis ();
+    lastsecond      = newsecond;
 
     HAS_TIME = valid;
 
