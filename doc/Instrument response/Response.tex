@@ -40,7 +40,7 @@
 (gaute.hope@student.uib.no), 29.05.2012, Revision 2 (12.08.2012)}
 
 \vspace{2em}
-\section*{Introduction} 
+\section*{Introduction}
 Here is presented the theoretical derivation and analysis of the analog
 instrument response of the digitizer. The digital filtering during AD
 conversion is briefly discussed, but its properties are well defined in
@@ -62,7 +62,7 @@ circuit of the deployed input decoupling to the hydrophone.
 
 \begin{align*}
   C_1 &= 47 \mu F \\
-  C_2 &= 380 pF \\
+  C_2 &= 330 pF \\
   R_1 &= 58.33 k \Omega \\
   R_2 &= 41.67 k \Omega
 \end{align*}
@@ -105,8 +105,8 @@ terminals $T_+$ and $T_-$.
 Solving for $H(s)$ gives:
 
 \begin{equation}
-  H(s) = \frac{45115.36 s}
-  { (s + 1.083 \times 10^5)
+  H(s) = \frac{51951 s}
+  { (s + 1.2470 \times 10^5)
     (s + 0.2128) }
   \label{eqn:transferfunction}
 \end{equation}
@@ -236,12 +236,12 @@ The complete analog transfer function is then:
 \begin{center}
 \begin{equation}
   \begin{aligned}
-  H_{a} = &\frac{7.1817 \times 10^{15}}
+  H_{a} = &\frac{8.2698 \times 10^{15}}
                 { (s + 9.551 \times 10^5) \times
                    (s + 1.667 \times 10^5)
                  } \times \\
           & \frac{1}
-                 {(s + 1.083 \times 10^5) \times
+                 {(s + 1.247 \times 10^5) \times
                   (s + 0.2128) }
   \end{aligned}
   \label{eqn:transfer_analog}
@@ -288,8 +288,8 @@ frequency, $512$ kHz, equation \eqref{eqn:nyquist} using
 \eqref{eqn:transfer_analog}, is evaluated to be:
 \begin{equation}
   \begin{aligned}
-  | H_a(512 \times 10^3 \times 2 \pi) | &= 0.00020640 \\
-                                        &= -73.7059\ \text{dB}
+  | H_a(512 \times 10^3 \times 2 \pi) | &= 0.00023763 \\
+                                        &= -72.4821\ \text{dB}
   \end{aligned}
   \label{eqn:attenuation_nyquist}
 \end{equation}
