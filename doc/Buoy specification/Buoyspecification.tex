@@ -110,6 +110,16 @@ The Gautebuoy..
   Hz it takes approximately 4 seconds before it is full. This is
   implemented in: buoy/ads1282.cpp and buoy/gps.cpp.
 
+  \subsection{Drift}
+  The drift of the CPU clock is bounded by the crystal accuracy,
+  specified in ppm, as well as the number of CPU instructions around the
+  causing any lag. The CPU instructions are in the order of 5-6 lines of
+  C-code and given that the CPU runs at 72 MHz are ignored
+  \footnote{TODO: Better ref: \cite{stm32f103rbt6_ds}}.
+
+  \paragraph{The crystal} \textit{TODO:} Figure out which crystal Olimexino is
+  using and calculate drift over: a normal reference update cycle and a
+  long cycle without PPS.
 
   \section{Protocol}
 
