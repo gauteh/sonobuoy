@@ -97,9 +97,10 @@ The Gautebuoy..
     \item When time and date is fixed the next PPS is for the next
       second, otherwise the time would already also be one second
       later.
-    \item There will be a good enough fix for the PPS signal to present
-      often enough that micros() will not overflow and cause a backwards
-      jump in time.
+    \item There will be a good enough fix, under normal conditions, for
+      the PPS signal often enough that micros() will not overflow and
+      cause a backwards jump in time before a new reference has been set.
+    \item There cannot be PPS pulse without a valid time.
   \end{enumerate}
 
   \subsection{Determining a new reference}
