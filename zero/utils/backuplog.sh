@@ -22,7 +22,7 @@ echo "Backing up to: $dest.."
 
 mkdir -p $dest
 
-cp -ru "${src}"{One,Two,Three,Four,Five,*.log*} "${dest}"
+cp -ru "${src}"{One,Two,Three,Four,Five,Seismometer,*.log*} "${dest}"
 
 echo "Done."
 
