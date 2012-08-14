@@ -63,12 +63,23 @@ The Gautebuoy..
   signal is present the status flag HAS\_SYNC is set, if time and date
   is present the status flag HAS\_TIME is set.
 
+  \subsection{Time representation}
+  The time is represented as seconds since UNIX epoch, 1970, the GPS
+  time is used directly and \textbf{no} additional leap seconds are added.
+
+  \paragraph{}When needed the time is represented as microseconds since
+  UNIX epoch, i.e. for the batch reference. All operations thus require
+  64 bit wide unsigned integers.
+
   \subsection{Determining time}
   The current second is determined using the following steps
   (implemented in buoy/gps.cpp):
 
   \begin{enumerate}
-    \item Received time and date telegram, determine second since epoch
+    \item Received time and date telegram
+      \subitem Disable PPS handler
+      \subitem Determine seconds since UNIX epoch (1970)
+      \subitem Enable PPS handler
     \item Receive PPS signal
       \subitem Increment second
       \subitem Record output of micros(), the internal CPU time in
