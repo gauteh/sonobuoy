@@ -209,7 +209,6 @@ class Zero:
     self.logger.info ("[Zero] Starting current buoy thread..")
     MAX_BUOY_TIME = 40 # max time (seconds) before changing buoys
     MIN_BUOY_TIME =  0 # min time (seconds) before changing buoy
-                       # (otherwise index loop won't have time to do something)
     lastchange    = time.time ()
 
     while self.go:
@@ -258,15 +257,9 @@ class Zero:
                     break
                   ii = (ii + 1) % len(self.buoys)
 
-              # iterate: all good, pick next buoy
-              #if i == -1:
-                #i = (self.currenti + 1) % len(self.buoys)
-
               if (i != self.currenti and i != -1):
                 self.logger.info ("[Zero] Changing to buoy: " + self.buoys[i].name + " [" + str(self.buoys[i].id) + "]..")
-
                 self.set_current (self.buoys[i])
-
                 lastchange = time.time ()
 
       time.sleep (0.0001)
