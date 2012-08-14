@@ -251,20 +251,23 @@ buoy and on the central logging point.
     \hline
     \bfseries Start   &     \bfseries Field     &   \bfseries Type
     &   \bfseries Size  \\ \hline
-    0   & Padding   & 0   & $3 \cdot \text{sample length} = 12 $ \\ \hline
+    0   & Padding           & 0           & 12 \\ \hline
     12  & Reference id      & uint32\_t   & 4 \\ \hline
     16  & Time (reference)  & uint64\_t   & 8 \\ \hline
     24  & Status            & uint32\_t   & 4 \\ \hline
     28  & Latitude          & char[12]    & 12 \\ \hline
     40  & Longitude         & char[12]    & 12 \\ \hline
     52  & Checksum          & uint32\_t   & 4 \\ \hline
-    56  & Padding   & 0   & $3 \cdot \text{sample length} = 12 $ \\ \hline
+    56  & Padding           & 0           & 12  \\ \hline
     & \textbf{Total length} &  & \textbf{68} \\ \hline
   \end{tabular}
   \captionof{table}{Binary reference, fields, start and size is given in bytes.}
   \label{tab:reference_binary_fields}
 
-  The reference is padded in both ends so that it will be easier to
+  \vspace{1em}
+
+  The reference is padded with zeros ($3 \cdot \text{sample length} =
+  12$) in both ends so that it will be easier to
   recover parts of a corrupt data file as well as making it possible to
   detect a reference when none is expected.
 
