@@ -197,8 +197,11 @@ namespace Buoy {
 
     HAS_TIME = valid;
 
+    /*
     SerialUSB.println ((char*) ref_latitude);
     SerialUSB.println ((char*) ref_longitude);
+    SerialUSB.println (HAS_SYNC);
+    */
 
     enable_sync ();
     // }}}
