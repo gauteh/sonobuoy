@@ -32,3 +32,4 @@ hardware/simulations/*.net
 *.bbl
 *.blg
 *.run.xml
+zero/storereader/libmseed/
