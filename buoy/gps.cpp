@@ -117,7 +117,7 @@ namespace Buoy {
     }
   }
 
-  void GPS::assert_time () {
+  void GPS::assert_time () { // {{{
     /* Check state of timing and PPS, is called from within interrupt.
      * Should not output */
 
@@ -141,22 +141,21 @@ namespace Buoy {
 
       if (
           ( (lastsecond - reference) > REFERENCE_TIMEOUT ) &&
-          ( (millis () - lastsync) > (REFERENCE_TIMEOUT * 1000) )
+          ( (millis ()  - lastsync)  > (REFERENCE_TIMEOUT * 1000) )
          )
       {
         HAS_SYNC_REFERENCE = false;
 
         /* Un-reliable, using time telegram */
-        //reference   = lastsecond;
-        //microdelta  = micros () + ((millis () - lastsecond_time) * 1000);
-
-        //rf_send_debug_f ("[GPS] [Error] Setting reference manually: %llu", reference);
+        reference   = lastsecond;
+        microdelta  = micros () + ((millis () - lastsecond_time) * 1000);
+        lastsync    = millis ();
       }
     }
-  }
+  } // }}}
 
   void GPS::update_second () {
-    /* Calculate Unix time from UTC {{{ */
+    /* Calculate Unix time {{{ */
 
 # define SECONDS_PER_DAY 86400L
 # define LEAP_YEAR(x) !!(!((1970 + x) % 4) && ( ((1970 + x) % 100) || !((1970 + x) % 400) ))
@@ -167,10 +166,10 @@ namespace Buoy {
 
 # define LEAP_YEARS_BEFORE_1970 ((1970 / 4) - (1970 / 100) + (1970 / 400))
     /* Add a day of seconds for each leap year except this */
-    newsecond += (( (1970 + (_year-1)) /   4 )
-               - (  (1970 + (_year-1)) / 100 )
-               + (  (1970 + (_year-1)) / 400 )
-               - LEAP_YEARS_BEFORE_1970     ) * SECONDS_PER_DAY;
+    newsecond += (( (1970 + (_year-1)) /   4  )
+               -  (  (1970 + (_year-1)) / 100 )
+               +  (  (1970 + (_year-1)) / 400 )
+               -  LEAP_YEARS_BEFORE_1970       ) * SECONDS_PER_DAY;
 
     const int monthdays[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
     for (int i = 1; i < month; i++) {
@@ -205,7 +204,7 @@ namespace Buoy {
     // }}}
   }
 
-  void GPS::update_ref_position () {
+  void GPS::update_ref_position () { // {{{
     for (uint8_t i = 0; i < 12; i++) {
       ref_latitude[i] = 0;
       ref_longitude[i] = 0;
@@ -224,7 +223,7 @@ namespace Buoy {
       t++;
     if (east) *t = 'E';
     else      *t = 'W';
-  }
+  } // }}}
 
   void GPS::loop () {
     /* Handle incoming GPS telegrams on serial line (non-blocking) {{{
