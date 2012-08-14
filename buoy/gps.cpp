@@ -139,6 +139,8 @@ namespace Buoy {
        *
        */
 
+      /* Assuming we cannot have sync without time, there cannot be a lost
+       * sync_reference without lost sync */
       if (
           ( (lastsecond - reference) > REFERENCE_TIMEOUT ) &&
           ( (millis ()  - lastsync)  > (REFERENCE_TIMEOUT * 1000) )
