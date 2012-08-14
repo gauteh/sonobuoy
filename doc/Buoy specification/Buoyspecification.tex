@@ -41,7 +41,7 @@
 
 \vspace{2em}
 \section*{Introduction}
-The Gautebuoy.. 
+The Gautebuoy..
 
 \vspace{2em}
 
@@ -50,17 +50,63 @@ The Gautebuoy..
 
   \section{Concept}
 
-  \section{Hardware and analog}
+  \section{Hardware and analog system}
 
   \section{Digital control system}
+
+  \section{Timing}
+  The timing is based on the GPS unit time and date information as well
+  as a pulse per second (PPS) signal which has an accuracy of up to 1
+  $\mu$s \cite{em_406A_gps_ds}, this represents the limit on the timing. The PPS signal will
+  only be present if the GPS has a sufficiently good enough signal (fix),
+  which in the open air in the arctic should be no problem. If a PPS
+  signal is present the status flag HAS\_SYNC is set, if time and date
+  is present the status flag HAS\_TIME is set.
+
+  \subsection{Determining time}
+  The current second is determined using the following steps
+  (implemented in buoy/gps.cpp):
+
+  \begin{enumerate}
+    \item Received time and date telegram, determine second since epoch
+    \item Receive PPS signal
+      \subitem Increment second
+      \subitem Record output of micros(), the internal CPU time in
+      microseconds, this is called the 'microdelta'.
+  \end{enumerate}
+
+  To get a reference accurate to a microsecond, apart from the drift
+  of the internal CPU clock since the last PPS append the delta of a new
+  call to micros(), the CPU time in microseconds, and the recorded value
+  of micros() at the time of the PPS signal, to the second determined at
+  the time of the PPS signal.
+
+  \paragraph{Assumptions}
+  \begin{enumerate}
+    \item When time and date is fixed the next PPS is for the next
+      second, otherwise the time would already also be one second
+      later.
+    \item There will be a good enough fix for the PPS signal to present
+      often enough that micros() will not overflow and cause a backwards
+      jump in time.
+  \end{enumerate}
+
+  \subsection{Determining a new reference}
+  Every time there is a PPS signal a
+  new reference is made available with a fresh 'microdelta'. The
+  continuously refreshed reference is not used before a new batch is
+  started. With a batch length of 1024 samples and a sample rate of 250
+  Hz it takes approximately 4 seconds before it is full. This is
+  implemented in: buoy/ads1282.cpp and buoy/gps.cpp.
+
 
   \section{Protocol}
 
   \section{Zero: Central logging point}
-  
 
-%\vspace{5em}
-%\printbibliography
+
+\vspace{5em}
+\printbibliography
 \end{multicols}
 
 \end{document}
