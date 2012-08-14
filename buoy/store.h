@@ -82,7 +82,7 @@ namespace Buoy {
       typedef uint32_t sample;
 
 /* Data format */
-# define STORE_VERSION 6
+# define STORE_VERSION 7
 # define SAMPLE_LENGTH 4
 
 /* Data file format {{{
