@@ -37,7 +37,7 @@
 
 \begin{document}
 \makeheading{Gautebøye - File specification}{Gaute Hope
-(gaute.hope@student.uib.no), 13.08.2012}
+(gaute.hope@student.uib.no), 13.08.2012, Revision 1}
 
 \vspace{2em}
 \section*{Introduction}
@@ -363,12 +363,15 @@ buoy and on the central logging point.
     \item Longitude (string)
     \item Checksum (integer)
     \item Line (integer), specifying where this batch starts in data file.
-    \item Comma separated list of finished chunks (integers)
+    \item Comma separated list of finished chunks (integers, variable
+      length)
   \end{enumerate}
 
   If the chunk size equals the batch size, there is only one chunk per
   reference. Meaning if the reference (batch) has been retrieved there
-  should be one 0 in the last comma separated list.
+  should be one 0 in the last comma separated list. There cannot be a
+  chunk size greater than the batch size and the batch size must be a
+  multiple of the chunk size.
 
   \subsubsection{Structure: Data file}
   The data file is built up in a similar way as the binary data file,
