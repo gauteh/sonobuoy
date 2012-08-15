@@ -192,11 +192,11 @@ class Index:
       self.request_t = time.time ()
 
   # should probably be gotind..
-  def gotid (self, id, samples, n_refs):
-    self.logger.info (self.me + " Got full index: " + str(id) + ", samples: " + str(samples) + ", no of refs: " + str(n_refs))
+  def gotid (self, id, store_version, samples, n_refs):
+    self.logger.info (self.me + " Got full index: " + str(id) + ", samples: " + str(samples) + ", no of refs: " + str(n_refs) + " (store version: " + str(store_version) + ")")
     if self.working_data is not None:
       if self.working_data.id == id:
-        self.working_data.fullindex (samples, n_refs)
+        self.working_data.fullindex (samples, n_refs, store_version)
 
     if self.pendingid == 4:
       self.state = 0
@@ -257,16 +257,17 @@ class Index:
       self.protocol.send ("GIF")
       self.pendingid  = 6
 
-  def gotinfo (self, bid, version, protocolversion):
+  def gotinfo (self, bid, version, protocolversion, storeversion):
     if bid != self.buoy.id:
       self.logger.error (self.me + " Got info message for another buoy. Discarding.")
       return
 
     self.buoy.remote_version = version
     self.buoy.remote_protocolversion = protocolversion
+    self.buoy.remote_storeversion = storeversion
 
-    self.logger.info (self.me + " [Info] Remote version: " + version + ", protocol version: " + str(protocolversion))
-    self.buoy.log ("[Info] Remote version: " + version + ", protocol version: " + str(protocolversion))
+    self.logger.info (self.me + " [Info] Remote version: " + version + ", protocol version: " + str(protocolversion) + ", store version: " + str(storeversion))
+    self.buoy.log ("[Info] Remote version: " + version + ", protocol version: " + str(protocolversion) + ", store version: " + str(storeversion))
 
     self.has_info   = True
     self.state      = 0

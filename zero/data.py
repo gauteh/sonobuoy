@@ -73,6 +73,10 @@ class Data:
   samples     = None
   refs_no     = None
 
+  LASTVERSION = 2
+  localversion  = -1
+  remoteversion = -1
+
   def __init__ (self, l, _buoy, _index, _id, _enabled):
     self.logger   = l
     self.buoy     = _buoy
@@ -102,7 +106,9 @@ class Data:
 
   ''' Read index file and figure out meta data and existing refs {{{
 
-      Format (as returned by GETID):
+      Format:
+      Local version
+      Remote version
       Index id
       Samples
       No of refs
@@ -117,8 +123,21 @@ class Data:
         try:
           self.indexf = open (self.indexf_uri, 'r')
 
-          self.id             = int(self.indexf.readline ())
-          self.samples        = int(self.indexf.readline ())
+          self.localversion  = int(self.indexf.readline ())
+          self.remoteversion = int(self.indexf.readline ())
+
+          # Check if we are still on localversion = 1
+          if self.remoteversion == 40960 or self.remoteversion == 0:
+            self.id       = self.localversion
+            self.samples  = self.remoteversion
+
+            self.localversion   = 1
+            self.remoteversion  = 6
+
+          else:
+            self.id             = int(self.indexf.readline ())
+            self.samples        = int(self.indexf.readline ())
+
           self.refs_no        = int(self.indexf.readline ())
           r = self.indexf.readline ().strip ()
           self.hasfull        = (r == "True")
@@ -158,6 +177,9 @@ class Data:
       self.batches.sort (key=lambda r: r.no)
       self.indexf = open (self.indexf_uri, 'w') # truncate file
       self.indexf.truncate (0)
+      self.localversion = self.LASTVERSION
+      self.indexf.write (str(self.localversion) + '\n')
+      self.indexf.write (str(self.remoteversion) + '\n')
       self.indexf.write (str(self.id) + '\n')
       self.indexf.write (str(self.samples) + '\n')
       self.indexf.write (str(self.refs_no) + '\n')
@@ -329,9 +351,10 @@ class Data:
     else:
       self.logger.error (self.me + " Tried to append chunk on disabled data file.")
 
-  def fullindex (self, _samples, n_refs):
+  def fullindex (self, _samples, n_refs, store_version):
     self.samples = _samples
     self.refs_no = n_refs
+    self.remote_version = store_version
     self.hasfull = True
 
     # check if we have all refs and data

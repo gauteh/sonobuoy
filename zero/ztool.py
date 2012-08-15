@@ -182,7 +182,7 @@ class zCLI:
                   ["Position:", "{0:.4f}{1}, {2:.4f}{3}".format(s['latitude'], ("N" if s['north'] else "S"), s['longitude'], ("E" if s['east'] else "W")) + " ( Valid: " + str(s['valid']) + " )"],
                   ["Synchronization:", "( Sync: " + str(s['has_sync']) + " )" + '( Time: ' + str(s['has_time']) + " )" + '( Sync ref: ' + str(s['has_sync_reference']) + ' )'],
                   ["Time:", time.asctime(time.gmtime(float(s['unix_time']))) + ' (' + str(s['time']) + ', ' + str(s['date']) + ')'],
-                  ["Version:", s['version'] + ' (protocol: ' + str(s['protocolversion']) + ')'],
+                  ["Version:", s['version'] + ' (protocol: ' + str(s['protocolversion']) + ')' + ' (store: ' + str(s['storeversion']) + ')'],
                   ["Uptime: ", str(datetime.timedelta(0, s['uptime'] / 1000)) + ' (latest id: ' + str(s['lastid']) + ')'],
                   ], False)
 

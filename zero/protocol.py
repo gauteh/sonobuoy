@@ -546,12 +546,27 @@ class Protocol:
             self.tokens[1] = token
 
           elif (tokeni == 3):
+            if self.zero.current.remote_protocolversion <= 2:
+              # No store version provided, assume all ids have the default
+              # store version for this buoy
+              try:
+                self.zero.current.index.gotid (int(self.tokens[0]), self.zero.current.remote_storeversion, int(self.tokens[1]), int(token))
+                return
+              except ValueError:
+                self.zero.current.index.reset (keepradiorate = True)
+                self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
+                return
+            else:
+              self.tokens[2] = token
+
+          elif (tokeni == 4 and self.zero.current.remote_protocolversion >= 3):
             try:
-              self.zero.current.index.gotid (int(self.tokens[0]), int(self.tokens[1]), int(token))
+              self.zero.current.index.gotid (int(self.tokens[0]), int(self.tokens[1]), int(self.tokens[2]), int (token))
             except ValueError:
               self.zero.current.index.reset (keepradiorate = True)
               self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
               return
+
 
         elif (msgtype == 'I'):
           if (tokeni == 1):
@@ -561,7 +576,30 @@ class Protocol:
           elif (tokeni == 3):
             self.tokens[2] = token
             try:
-              self.zero.current.index.gotinfo (int(self.tokens[0]), self.tokens[1], int (self.tokens[2]))
+              p = int(self.tokens[2])
+            except ValueError:
+              self.zero.current.index.reset (keepradiorate = True)
+              self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
+              return
+
+            # version 2 and earlier did not have store version
+            if p <= 2:
+              try:
+                if self.tokens[1] == 'v1.1.0':
+                  sv = 6 # version 1.1.0 had store version 6
+                else:
+                  sv = 7 # version 1.2.0 had store version 7
+
+                self.zero.current.index.gotinfo (int(self.tokens[0]), self.tokens[1], int (self.tokens[2]), sv)
+              except ValueError:
+                self.zero.current.index.reset (keepradiorate = True)
+                self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
+                return
+
+          elif (tokeni == 4):
+            self.tokens[3] = token
+            try:
+              self.zero.current.index.gotinfo (int(self.tokens[0]), self.tokens[1], int (self.tokens[2]), int(self.tokens[3]))
             except ValueError:
               self.zero.current.index.reset (keepradiorate = True)
               self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
@@ -585,9 +623,9 @@ class Protocol:
                 self.logger.error ("[Buoy] Received error: [" + token + "] " + Buoy.error_strings[t])
                 self.zero.current.log ("[Buoy] Received error: [" + token + "] " + Buoy.error_strings[t])
 
-                # info command not supported, must be version 1
+                # info command not supported, must be version 1, default to version 6
                 if t == 2 and self.zero.current.index.pendingid == 6:
-                  self.zero.current.index.gotinfo (self.zero.current.id, 'v1.0.0', 1)
+                  self.zero.current.index.gotinfo (self.zero.current.id, 'v1.0.0', 1, 6)
                   return
 
                 # Only reset protocol in case of error with command

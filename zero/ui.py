@@ -82,6 +82,7 @@ class ZeroCliService:
             'batch_length'  : b.ad.ad_batch_length,
             'version'       : b.remote_version,
             'protocolversion' : b.remote_protocolversion,
+            'storeversion'  : b.remote_storeversion,
             'uptime'        : b.uptime,
             'lastid'        : b.index.lastid,
             }

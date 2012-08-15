@@ -52,6 +52,7 @@ class Buoy:
   uptime  = 0
   remote_version = 'unknown'
   remote_protocolversion = 1
+  remote_storeversion    = 6
 
   def __init__ (self, z, b):
     self.entry  = b
