@@ -73,7 +73,6 @@ namespace Zero {
       //cout << ref << endl;
 
       (char) dtt.get();
-      (char) dtt.get();
 
       int t = 0;
       int pos = 0;
@@ -104,16 +103,25 @@ namespace Zero {
       //cout << "Ref: " << b.no << ", " << b.ref << ", status: " << b.status << ", latitude: " << b.latitude << ", longitude: " << b.longitude << ", checksum: " << b.checksum << endl;
       //cout << "Read ref: " << b.no << endl;
 
-      for (int j = 0; j < BATCH_LENGTH; j++) {
+      for (int j = 0; j < 2; j++) {
         uint32_t s;
         dtt >> s;
         (char) dtt.get();
 
-        if (j < (BATCH_LENGTH -1)) (char) dtt.get(); // don't ask why..
+        //if (j < (BATCH_LENGTH -1)) (char) dtt.get(); // don't ask why..
 
-        b.samples[j] = s;
+        cout << s << endl;
+        cout << (s >> 31) << endl;
+        int32_t ss;
+        ss = s;
+        cout << (ss>>1) << endl;
+        ss = (s & 0x7FFFFFFF);
+        if (s >> 31) ss *= -1;
+
+        cout << (ss>>1) << endl;
         totalsamples++;
       }
+      break;
 
       batches.push_back (b);
     }
