@@ -9,7 +9,10 @@
 
 /* Version and settings */
 # define VERSION GIT_DESC
-# define PROTOCOL_VERSION 2
+# define PROTOCOL_VERSION 3
+
+/* IMPORTANT: Remember to update STORE_VERSION in case anything that might
+ * change data quality or similar has been done */
 
 /* ONLY_SPEC may be defined when including any of the headers to only include
  * any definitions and constants without code or code dependant parts. */

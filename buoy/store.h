@@ -82,7 +82,7 @@ namespace Buoy {
       typedef uint32_t sample;
 
 /* Data format */
-# define STORE_VERSION 7
+# define STORE_VERSION 8
 # define SAMPLE_LENGTH 4
 
 /* Data file format {{{
@@ -181,6 +181,7 @@ namespace Buoy {
 # define GET_IDS_N 10 // no of ids to send in one go
 # if HASRF
       uint32_t s_id;
+      uint16_t s_version;
       uint32_t s_samples;
       uint32_t s_nrefs;
       uint16_t s_lastbatch;

@@ -32,6 +32,7 @@ namespace Buoy {
 
 # if HASRF
     s_id = 0;
+    s_version = 0;
     s_samples = 0;
     s_nrefs = 0;
     s_lastbatch = 0;
@@ -459,6 +460,7 @@ namespace Buoy {
 # if HASRF
       s_id = 0;
       s_samples = 0;
+      s_version = 0;
       s_nrefs   = 0;
 
       if (send_i != NULL) {
@@ -562,6 +564,7 @@ namespace Buoy {
 
     s_id      = 0;
     s_samples = 0;
+    s_version = 0;
     s_nrefs   = 0;
     s_lastbatch = 0;
 
@@ -590,6 +593,7 @@ namespace Buoy {
 
         s_id      = id;
         s_samples = current_index.samples;
+        s_version = current_index.version;
         s_nrefs   = current_index.nrefs;
 
       } else {
@@ -611,8 +615,8 @@ namespace Buoy {
         }
 
         /* Reading first part of Index */
-        send_i->seekCur (  sizeof(Index::version)
-                         + sizeof(Index::id)
+        send_i->read (reinterpret_cast<char*>(&s_version), sizeof(s_version));
+        send_i->seekCur (  sizeof(Index::id)
                          + sizeof(Index::sample_l));
         send_i->read (reinterpret_cast<char*>(&s_samples), sizeof(s_samples));
         send_i->seekCur (sizeof(Index::samples_per_reference));
@@ -633,6 +637,8 @@ namespace Buoy {
     // format: $IND,id,samples,nrefs*CS
     RF_Serial.print ("$IND,");
     RF_Serial.print (id);
+    RF_Serial.print (",");
+    RF_Serial.print (s_version);
     RF_Serial.print (",");
     RF_Serial.print (s_samples);
     RF_Serial.print (",");
@@ -847,6 +853,7 @@ namespace Buoy {
 
       s_id      = 0;
       s_samples = 0;
+      s_version = 0;
       s_nrefs   = 0;
     }
   } // }}}
