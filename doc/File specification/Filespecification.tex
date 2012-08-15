@@ -152,27 +152,29 @@ buoy and on the central logging point.
     \begin{tabular}{|l|l|}
       \hline
       \bfseries Bit & \bfseries Flag \\ \hline
-       0b0  &   Nothing \\ \hline
-       0b1  &   Time    \\ \hline
-       0b10 &   Sync    \\ \hline
-       0b100 &  Sync Reference \\ \hline
-       0b1000 & Position \\ \hline
+       0b0    &   NOTHING \\ \hline
+       0b1    &   HAS\_TIME    \\ \hline
+       0b10   &   HAS\_SYNC    \\ \hline
+       0b100  &   HAS\_SYNC\_REFERENCE \\ \hline
+       0b1000 &   POSITION \\ \hline
     \end{tabular}
     \captionof{table}{Status flag bit mapping}
     \label{tab:status_flags}
 
-    \paragraph{Time} Means that a valid time is provided by the GPS
+    \paragraph{NOTHING} No flags set.
+
+    \paragraph{HAS\_TIME} A valid time is provided by the GPS
     unit.
-    \paragraph{Sync} Means that the PPS signal is being sent and the
+    \paragraph{HAS\_SYNC} There is a PPS signal being sent and the
     timing can be determined accurately.
 
-    \paragraph{Sync reference} Means that the reference in use was
+    \paragraph{HAS\_SYNC\_REFERENCE} The reference in use was
     determined at a time when there was a PPS signal available. This can
     remain true after both time and sync is lost and the accuracy will
     deteriorate with the drift of the CPU clock.
 
-    \paragraph{Position} Means that the GPS is delivering a valid
-    position fix.
+    \paragraph{POSITION} The GPS is delivering a valid
+    position fix. This will be true when HAS\_TIME is true.
 
     \subsection{Sample} The sample is 32 bits wide and is a twos
     complement integer. The last bit indicates whether the scale was exceeded
