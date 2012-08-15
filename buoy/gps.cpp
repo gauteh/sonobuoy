@@ -14,7 +14,6 @@
 
 # include "gps.h"
 # include "ads1282.h"
-# include "rf.h"
 
 using namespace std;
 
@@ -57,7 +56,6 @@ namespace Buoy {
   }
 
   void GPS::setup (BuoyMaster *b) {
-    //rf = b->rf;
     ad = b->ad;
 
     gps_buf[0] = 0;

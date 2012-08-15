@@ -40,7 +40,6 @@ namespace Buoy {
       void parse ();
 
     public:
-      /*RF      * rf;*/
       ADS1282 * ad;
 
       /* Telegram and data structures {{{ */
