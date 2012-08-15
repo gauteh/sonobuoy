@@ -142,6 +142,9 @@ class Data:
           self.indexf.close ()
 
           self.batches.sort (key=lambda r: r.no)
+
+          self.check_hasalldata ()
+
         except Exception as e:
           self.logger.error (self.me + " Error while opening data index..")
           self.logger.exception (e)
@@ -307,13 +310,7 @@ class Data:
         b.complete = (len(b.completechunks) == (BATCH_LENGTH / CHUNK_SIZE))
 
         # check if datafile is complete
-        if self.refs_no == len(self.batches):
-          self.hasalldata = True
-          for b in self.batches:
-            self.hasalldata = (self.hasalldata and b.complete)
-
-        else:
-          self.hasalldata = False
+        self.check_hasalldata ()
 
         if self.hasalldata:
           self.logger.info (self.me + " All batches complete for data file.")
@@ -338,10 +335,18 @@ class Data:
     self.hasfull = True
 
     # check if we have all refs and data
-    if self.refs_no < len(self.batches):
-      self.hasalldata = False
+    self.check_hasalldata ()
 
     self.write_index ()
+
+  def check_hasalldata (self):
+    if self.refs_no == len(self.batches):
+      self.hasalldata = True
+      for b in self.batches:
+        self.hasalldata = (self.hasalldata and b.complete)
+
+    else:
+      self.hasalldata = False
 
   def reset_data (self):
     self.dataf_l.acquire ()
