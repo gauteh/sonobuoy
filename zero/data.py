@@ -354,7 +354,7 @@ class Data:
   def fullindex (self, _samples, n_refs, store_version):
     self.samples = _samples
     self.refs_no = n_refs
-    self.remote_version = store_version
+    self.remoteversion = store_version
     self.hasfull = True
 
     # check if we have all refs and data
