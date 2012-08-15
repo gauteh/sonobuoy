@@ -63,6 +63,23 @@ if not GetOption("verbose_flag"):
 
 # Verbose }}}
 
-env.Append (CPPPATH = '../../buoy/', CPPDEFINES = { 'GIT_DESC' : ('\\"%s\\"' % GIT_DESC) }, CPPFLAGS = '-g' )
+env.Append (CPPPATH = ['../../buoy/'], CPPDEFINES = { 'GIT_DESC' : ('\\"%s\\"' % GIT_DESC) }, CPPFLAGS = '-g' )
+
 env.Program ('storereader', 'storereader.cpp')
+
+dttenv = Environment (CPPPATH = ['../../buoy/', 'libmseed/',], CPPDEFINES = { 'GIT_DESC' : ('\\"%s\\"' % GIT_DESC) }, CPPFLAGS = '-g', LIBS = ['libmseed',], LIBPATH = ['libmseed/',])
+
+if not GetOption("verbose_flag"): # {{{
+  dttenv["CXXCOMSTR"] = compile_source_message,
+  dttenv["CCCOMSTR"] = compile_source_message,
+  dttenv["SHCCCOMSTR"] = compile_shared_source_message,
+  dttenv["SHCXXCOMSTR"] = compile_shared_source_message,
+  dttenv["ARCOMSTR"] = link_library_message,
+  dttenv["RANLIBCOMSTR"] = ranlib_library_message,
+  dttenv["SHLINKCOMSTR"] = link_shared_library_message,
+  dttenv["LINKCOMSTR"] = link_program_message,
+  dttenv["JARCOMSTR"] = java_library_message,
+  dttenv["JAVACCOMSTR"] = java_compile_source_message, # }}}
+
+dttenv.Program ('dtttomseed', ['dtt.cpp', 'dtttomseed.cpp'])
 
