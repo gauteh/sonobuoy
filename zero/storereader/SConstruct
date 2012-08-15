@@ -64,5 +64,5 @@ if not GetOption("verbose_flag"):
 # Verbose }}}
 
 env.Append (CPPPATH = '../../buoy/', CPPDEFINES = { 'GIT_DESC' : ('\\"%s\\"' % GIT_DESC) }, CPPFLAGS = '-g' )
-env.Program ('storereader', 'main.cpp')
+env.Program ('storereader', 'storereader.cpp')
 
