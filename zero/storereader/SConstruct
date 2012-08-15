@@ -67,7 +67,7 @@ env.Append (CPPPATH = ['../../buoy/'], CPPDEFINES = { 'GIT_DESC' : ('\\"%s\\"' %
 
 env.Program ('storereader', 'storereader.cpp')
 
-dttenv = Environment (CPPPATH = ['../../buoy/', 'libmseed/',], CPPDEFINES = { 'GIT_DESC' : ('\\"%s\\"' % GIT_DESC) }, CPPFLAGS = '-g', LIBS = ['libmseed',], LIBPATH = ['libmseed/',])
+dttenv = Environment (CPPPATH = ['../../buoy/',], CPPDEFINES = { 'GIT_DESC' : ('\\"%s\\"' % GIT_DESC) }, CPPFLAGS = '-g', LIBS = ['libmseed',] )
 
 if not GetOption("verbose_flag"): # {{{
   dttenv["CXXCOMSTR"] = compile_source_message,
@@ -81,5 +81,5 @@ if not GetOption("verbose_flag"): # {{{
   dttenv["JARCOMSTR"] = java_library_message,
   dttenv["JAVACCOMSTR"] = java_compile_source_message, # }}}
 
-dttenv.Program ('dtttomseed', ['dtt.cpp', 'dtttomseed.cpp'])
+dttenv.Program ('dtttomseed', ['ms.cpp', 'dtt.cpp', 'dtttomseed.cpp'])
 
