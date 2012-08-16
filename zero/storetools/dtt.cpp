@@ -18,6 +18,7 @@ namespace Zero {
     id = _id;
     cout << "Opening id: " << id << endl;
 
+    /* Load index and samples */
     read_index ();
     read_batches ();
   }
@@ -62,6 +63,7 @@ namespace Zero {
     }
 
 
+    /* Read batches */
     for (int i = 0; i < batchcount; i++) {
       Batch b;
       b.samples = new int[BATCH_LENGTH];
@@ -69,11 +71,9 @@ namespace Zero {
       /* Read reference */
       string ref;
       dtt >> ref;
+      (char) dtt.get(); // skip newline
 
-      //cout << ref << endl;
-
-      (char) dtt.get();
-
+      /* Parse reference */
       int t = 0;
       int pos = 0;
       string token;
@@ -103,25 +103,29 @@ namespace Zero {
       //cout << "Ref: " << b.no << ", " << b.ref << ", status: " << b.status << ", latitude: " << b.latitude << ", longitude: " << b.longitude << ", checksum: " << b.checksum << endl;
       //cout << "Read ref: " << b.no << endl;
 
-      for (int j = 0; j < 2; j++) {
+      /* Read samples */
+      for (int j = 0; j < BATCH_LENGTH; j++) {
+        /* The sample is stored as a two's complement 32 bit uint,
+         * the last bit indicates whether the full scale of the AD
+         * has been exceeded. At upper value a set last bit means overflow,
+         * at lower value a unset last bit means underflow.
+         */
         uint32_t s;
         dtt >> s;
-        (char) dtt.get();
+        (char) dtt.get(); // skip newline
 
-        //if (j < (BATCH_LENGTH -1)) (char) dtt.get(); // don't ask why..
+        bool fsclipped = s & 0x1;
+        s &= 0xfffffffe;          // mask out to avoid confusion with twos_comp
 
-        cout << s << endl;
-        cout << (s >> 31) << endl;
-        int32_t ss;
-        ss = s;
-        cout << (ss>>1) << endl;
-        ss = (s & 0x7FFFFFFF);
-        if (s >> 31) ss *= -1;
 
-        cout << (ss>>1) << endl;
+        /* Assuming architecture stores int32_t as two's complement */
+        int32_t ss = s; // cast to int32_t
+        ss       >>= 1; // shift down to 31 bits (LSB is, now unset, FS clip bit)
+
+        b.samples[j] = ss;
+
         totalsamples++;
       }
-      break;
 
       batches.push_back (b);
     }
