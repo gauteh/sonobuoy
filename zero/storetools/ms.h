@@ -27,9 +27,6 @@ using namespace std;
 namespace Zero {
   class Ms {
     public:
-      int32_t sequence_number;
-      static const double samprate = 250;
-
       char network[11];
       char station[11];
       char location[11];
@@ -42,7 +39,7 @@ namespace Zero {
       ~Ms ();
 
       void add_bdata (Bdata *);
-      void pack_tracelist (const char *);
+      bool pack_tracelist (const char * fname = NULL);
       static void record_handler (char *, int, void *);
 
   };

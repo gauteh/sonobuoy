@@ -92,9 +92,9 @@ namespace Zero {
       }
 
       /* Pack traces */
-      const char * fname = "TMP.mseed";
-      ms.pack_tracelist (fname);
-
+      if ( !ms.pack_tracelist ()) {
+        cout << "Failed, see above errors." << endl;
+      }
 
       return 0;
     }

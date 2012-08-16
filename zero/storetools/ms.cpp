@@ -54,7 +54,7 @@ namespace Zero {
       msr->samprate   = SAMPLERATE;
       msr->byteorder  = 1; // big endian
       msr->starttime   = batch->ref;
-      msr->encoding    = DE_INT32;
+      msr->encoding    = DE_STEIM2;
 
       msr->datasamples = batch->samples;
       msr->numsamples = batch->length;
@@ -70,9 +70,21 @@ namespace Zero {
     cout << "done." << endl;
   }
 
-  void Ms::pack_tracelist (const char *fname) {
+  bool Ms::pack_tracelist (const char *fname) {
     cout << "MS: Packing tracelist.." << endl;
+
     mstl_printtracelist (mstl, 1, 1, 1);
+
+    bool autofname = (fname == NULL);
+    bool sequence_fname = false;
+    char *origname;
+
+    if (mstl->numtraces > 1 && fname != NULL) {
+      cout << "More than one output file, labeling sequentially." << endl;
+      sequence_fname = true;
+      origname = new char[strlen(fname) + 1];
+      strcpy (origname, fname);
+    }
 
     /* Packing traces */
     for (int i = 0; i < mstl->numtraces; i++) {
@@ -80,10 +92,31 @@ namespace Zero {
       /* Packing trace */
       MSTraceID id = mstl->traces[i];
 
-      string fname = id.srcname;
-      fname += ".mseed";
+      /* Generate file name */
+      char *thisfname;
 
-      ofstream out (fname.c_str());
+      if (autofname) {
+        char timestr[50];
+        string _fname = id.srcname;
+        _fname += '_';
+        _fname += ms_hptime2isotimestr (id.earliest, timestr, 1);
+        _fname += ".mseed";
+        thisfname = (char*)_fname.c_str ();
+      } else if (sequence_fname) {
+        string _fname = fname;
+        _fname += '_';
+        _fname += i;
+        thisfname = (char*)_fname.c_str ();
+      } else {
+        thisfname = (char*)fname;
+      }
+
+      ofstream out (thisfname);
+
+      if (!out.is_open () || out.bad ()) {
+        cout << "Ms: Error: Could not open file for writing: " << thisfname << endl;
+        return false;
+      }
 
       MSTrace * mst = mst_init (NULL);
 
@@ -118,22 +151,25 @@ namespace Zero {
         seg = seg->next;
       }
 
-      mst->samplecnt  = totalsamples;
-      mst->numsamples = totalsamples;
-      mst->datasamples = datasamples;
+      mst->samplecnt    = totalsamples;
+      mst->numsamples   = totalsamples;
+      mst->datasamples  = datasamples;
 
       /* Packing */
       int psamples, precords;
-      precords = mst_pack (mst, &(Ms::record_handler), (void*) &out, 4096, DE_INT32, 1, &psamples, 1, 8, NULL);
-      cout << "Packed " << psamples << " samples in " << precords << " records." << endl;
+      precords = mst_pack (mst, &(Ms::record_handler), (void*) &out, 4096, DE_INT32, 1, &psamples, 1, 1, NULL);
+      cout << "MS: => Packed " << psamples << " samples in " << precords << " records to file " << thisfname << "." << endl;
 
       out.close ();
     }
+
+    return true;
   }
 
   void Ms::record_handler (char *record, int reclen, void *out) {
-    cout << "Writing " << reclen << " records.." << endl;
+    //cout << "Writing " << reclen << " records..";
     ((ofstream*)out)->write (record, reclen);
+    //cout << "done." << endl;
   }
 
 
