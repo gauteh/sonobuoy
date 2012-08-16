@@ -18,6 +18,7 @@
 # include <fstream>
 # include <vector>
 
+# include "bdata.h"
 # include "dtt.h"
 # include "ms.h"
 
@@ -25,6 +26,7 @@
 
 /* Configuration */
 # define NETWORK  "GBU"
+# define STATION  "GAK11"
 # define LOCATION "GAK1"
 # define CHANNEL  "HYD"
 
@@ -70,18 +72,28 @@ namespace Zero {
       // }}}
 
       /* Set up miniSeed record (template) and trace list */
-      Ms ms;
+      Ms ms (NETWORK, STATION, LOCATION, CHANNEL);
 
       /* Work through ids */
       vector<int>::iterator id = ids.begin ();
-      while (id != ids.end ()) {
+      while (id < ids.end ()) {
 
         /* Load DTT */
         Dtt dtt (*id);
 
+        /* Add to MS */
+        if (dtt.ready) {
+          ms.add_bdata (&(dtt.bdata));
+        } else {
+          cout << "Error with: " << *id << ", skipping.." << endl;
+        }
+
         id++;
       }
 
+      /* Pack traces */
+      const char * fname = "TMP.mseed";
+      ms.pack_tracelist (fname);
 
 
       return 0;

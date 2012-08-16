@@ -8,7 +8,8 @@
 # pragma once
 
 # include <stdint.h>
-# include <vector>
+
+# include "bdata.h"
 
 # define BATCH_LENGTH 1024
 
@@ -17,37 +18,13 @@ using namespace std;
 namespace Zero {
   class Dtt {
     public:
-      /* Batch */
-      typedef struct Batch {
-        uint32_t  length;
-        uint32_t  no;
-        uint64_t  ref; // timestamp
-        uint16_t  status;
-        string    latitude;
-        string    longitude;
-        uint32_t  checksum;
-
-        // finished chunks..
-
-        int32_t *samples;
-      } Batch;
-
-      /* Index */
-      int localversion;
-      int remoteversion;
-      int id;
-      int samplescount;
-      int batchcount;
-      // HasFull..
-
-      int totalsamples;
-
-      vector<Batch> batches;
+      Bdata bdata;
+      bool  ready;
 
       Dtt (int);
 
-      void read_index ();    // Read ITT and load all
-      void read_batches ();  // Load batches with samples
+      bool read_index ();    // Read ITT and load all
+      bool read_batches ();  // Load batches with samples
 
       ~Dtt ();
   };

@@ -10,6 +10,10 @@
 # include <stdint.h>
 # include <string>
 
+# include <libmseed/libmseed.h>
+
+# include "bdata.h"
+
 using namespace std;
 
 /* Structure:
@@ -23,9 +27,6 @@ using namespace std;
 namespace Zero {
   class Ms {
     public:
-      Ms ();
-      ~Ms ();
-
       int32_t sequence_number;
       static const double samprate = 250;
 
@@ -34,6 +35,15 @@ namespace Zero {
       char location[11];
       char channel[11];
 
+      /* Main trace list */
+      MSTraceList * mstl;
+
+      Ms (const char*, const char*, const char*, const char*);
+      ~Ms ();
+
+      void add_bdata (Bdata *);
+      void pack_tracelist (const char *);
+      static void record_handler (char *, int, void *);
 
   };
 }

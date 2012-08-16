@@ -15,56 +15,68 @@ using namespace std;
 
 namespace Zero {
   Dtt::Dtt (int _id) {
-    id = _id;
-    cout << "Opening id: " << id << endl;
+    bdata.id = _id;
+    cout << "Opening id: " << bdata.id << "..";
 
     /* Load index and samples */
-    read_index ();
-    read_batches ();
+    if (!read_index ()) {
+      ready = false;
+      return;
+    }
+    if (!read_batches ()) {
+      ready = false;
+      return;
+    }
+
+    cout << "done, read: " << bdata.batches.size () << " batches with: " << bdata.totalsamples << " samples total." << endl;
+    ready = true;
   }
 
-  void Dtt::read_index () {
+  bool Dtt::read_index () {
     char fname[50];
-    sprintf (fname, "%d.ITT", id);
+    sprintf (fname, "%d.ITT", bdata.id);
 
-    cout << "Opening: " << fname << endl;
+    //cout << "Opening: " << fname << endl;
 
     ifstream itt (fname);
 
     if (itt.bad () || !itt.is_open ()) {
-      cerr << "[e] Could not open index." << endl;
-      return;
+      cerr << "Could not open index." << endl;
+      return false;
     }
-    itt >> localversion;
-    itt >> remoteversion;
-    itt >> id;
-    itt >> samplescount;
-    itt >> batchcount;
+    itt >> bdata.localversion;
+    itt >> bdata.remoteversion;
+    itt >> bdata.id;
+    itt >> bdata.samplescount;
+    itt >> bdata.batchcount;
 
+    /*
     cout << "Local version:  " << localversion << endl;
     cout << "Remote version: " << remoteversion << endl;
     cout << "ID:             " << id << endl;
     cout << "Samples:        " << samplescount << endl;
     cout << "Batches:        " << batchcount << endl;
+    */
 
     itt.close ();
+    return true;
   }
 
-  void Dtt::read_batches () {
+  bool Dtt::read_batches () {
     char fname[50];
-    sprintf (fname, "%d.DTT", id);
-    cout << "Reading batches from: " << fname << endl;
+    sprintf (fname, "%d.DTT", bdata.id);
+    //cout << "Reading batches from: " << fname << endl;
 
     ifstream dtt (fname);
 
     if (dtt.bad () || !dtt.is_open ()) {
-      cerr << "[e] Could not open data file." << endl;
-      return;
+      cerr << "Could not open data file." << endl;
+      return false;
     }
 
 
     /* Read batches */
-    for (int i = 0; i < batchcount; i++) {
+    for (int i = 0; i < bdata.batchcount; i++) {
       Batch b;
       b.samples = new int[BATCH_LENGTH];
 
@@ -124,17 +136,17 @@ namespace Zero {
 
         b.samples[j] = ss;
 
-        totalsamples++;
+        bdata.totalsamples++;
       }
 
-      batches.push_back (b);
+      bdata.batches.push_back (b);
     }
 
-    cout << "Read " << totalsamples << " samples total." << endl;
+    //cout << "Read " << totalsamples << " samples total." << endl;
+    return true;
   }
 
   Dtt::~Dtt () {
-    cout << "Closing id: " << id << endl;
   }
 }
 
