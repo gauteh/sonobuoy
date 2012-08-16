@@ -42,7 +42,8 @@
 \vspace{2em}
 \section*{Introduction}
 This document is a specification of how data is stored locally on the
-buoy and on the central logging point.
+buoy and on the central logging point, versions \textbf{8 for buoy
+storage (DAT)} and \textbf{2 for central storage (DTT)}.
 
 \vspace{2em}
 
@@ -195,6 +196,10 @@ buoy and on the central logging point.
   up and as each data file is full continues. This puts a limit at the
   maximum number of IDs since the file system has a limit on the maximum
   number of characters.
+
+  \paragraph{Version} The version number, stored in the index,
+  is updated whenever there is an upgrade of the buoy so that the
+  data quality or integrity changes. The buoy version is not stored.
 
   \paragraph{Implementation}
   The implementation and latest version of the DAT file format is to be
