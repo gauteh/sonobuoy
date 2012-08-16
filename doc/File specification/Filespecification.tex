@@ -178,11 +178,12 @@ storage (DAT)} and \textbf{2 for central storage (DTT)}.
     position fix. This will be true when HAS\_TIME is true.
 
     \subsection{Sample} The sample is 32 bits wide and is a twos
-    complement integer. The last bit indicates whether the scale was exceeded
-    in either direction, that means the first 31 bits are read as twos
-    complement, if the value is at its maximum a 0 in the last bit
-    indicates overflow while if the value is at its minium a 1 in the
-    last bit indicates underflow \cite{ads1282_ds}.
+    complement integer. The last bit indicates whether the full scale
+    was exceeded in either direction and the output has been clipped,
+    that means the first (MSB) 31 bits are read as twos complement, if the
+    value is at its maximum a 1 in the last bit indicates overflow while
+    if the value is at its minimum a 0 in the last bit indicates
+    underflow \cite{ads1282_ds}.
 
   \section{Formats}
   Since the files are stored in DAT format then read either directly
