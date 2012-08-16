@@ -77,7 +77,9 @@ while ~feof(fh)
   end
     
   if (complement_and_bitshift)
-    batch = bitshift (twos_comp (batch), -1);
+    % Taking twos complement (masking away FS clip bit) and shifting down
+    % to 31 bits.
+    batch = bitshift (twos_comp (bitset(batch, 1, 0)), -1);
   end
 
   d = cat(1, d, batch);
