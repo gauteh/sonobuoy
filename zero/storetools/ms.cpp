@@ -53,16 +53,19 @@ namespace Zero {
 
       msr->samprate   = SAMPLERATE;
       msr->byteorder  = 1; // big endian
-      msr->starttime   = batch->ref;
-      msr->encoding    = DE_STEIM2;
+      msr->starttime  = batch->ref;
+      msr->encoding   = DE_STEIM2;
 
       msr->datasamples = batch->samples;
-      msr->numsamples = batch->length;
-      msr->sampletype = 'i'; // int32
-      msr->samplecnt  = batch->length;
+      msr->numsamples  = batch->length;
+      msr->sampletype  = 'i'; // int32
+      msr->samplecnt   = batch->length;
 
-      /* Add MS record to trace list */
-      mstl_addmsr (mstl, msr, 0, 0, batch->ref, SAMPLERATE);
+      /* Record specific values */
+
+      /* Add MS record to trace list, group by quality, autoheal */
+      mstl_addmsr (mstl, msr, 1, 1, batch->ref, SAMPLERATE);
+
       batch++;
     }
 
@@ -98,7 +101,7 @@ namespace Zero {
       if (autofname) {
         char timestr[50];
         string _fname = id.srcname;
-        _fname += '_';
+        //_fname += '_';
         _fname += ms_hptime2isotimestr (id.earliest, timestr, 1);
         _fname += ".mseed";
         thisfname = (char*)_fname.c_str ();
@@ -157,7 +160,9 @@ namespace Zero {
 
       /* Packing */
       int psamples, precords;
-      precords = mst_pack (mst, &(Ms::record_handler), (void*) &out, 4096, DE_INT32, 1, &psamples, 1, 1, NULL);
+      precords = mst_pack (mst, &(Ms::record_handler), (void*) &out,
+                           4096, DE_STEIM2, 1, &psamples, 1, 2, NULL);
+
       cout << "MS: => Packed " << psamples << " samples in " << precords << " records to file " << thisfname << "." << endl;
 
       out.close ();
