@@ -122,6 +122,10 @@ storage (DAT)} and \textbf{2 for central storage (DTT)}.
     results in little drift\footnote{TODO: Put some numbers on timing drift..} between each reference and provides
     positioning every $1024 / 250 \text{Hz} \approx 4 \text{s}$.
 
+    \paragraph{} The time is represented as microseconds since the UNIX
+    epoch (1970-1-1 00:00:00), this is incidentally the same as the high
+    precision time format used by MiniSEED \cite{libmseed_man}.
+
     \paragraph{Checksum}
     As the data is sampled a 32-bit checksum is calculated for each
     batch, this is stored along with the reference and is used to check
