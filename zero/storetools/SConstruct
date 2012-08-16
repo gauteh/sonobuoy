@@ -65,7 +65,7 @@ if not GetOption("verbose_flag"):
 
 env.Append (CPPPATH = ['../../buoy/'], CPPDEFINES = { 'GIT_DESC' : ('\\"%s\\"' % GIT_DESC) }, CPPFLAGS = '-g' )
 
-env.Program ('storereader', 'storereader.cpp')
+env.Program ('datreader', 'datreader.cpp')
 
 dttenv = Environment (CPPPATH = ['../../buoy/',], CPPDEFINES = { 'GIT_DESC' : ('\\"%s\\"' % GIT_DESC) }, CPPFLAGS = '-g', LIBS = ['libmseed',] )
 

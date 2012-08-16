@@ -19,7 +19,7 @@ using namespace std;
 
 
 namespace Zero {
-  namespace StoreReader {
+  namespace DatReader {
 # define ONLY_SPEC
     typedef char byte;
 # include "store.h"
@@ -421,6 +421,6 @@ namespace Zero {
 }
 
 int main (int argc, char **argv) {
-  return Zero::StoreReader::main (argc, argv);
+  return Zero::DatReader::main (argc, argv);
 }
 

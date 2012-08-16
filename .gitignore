@@ -11,8 +11,8 @@ buoy/build
 *.dtt
 *.wav
 *.pyc
-zero/storereader/storereader
-zero/storereader/data/*
+zero/storetools/datreader
+zero/storetools/data/*
 zero/log
 *.DAT
 *.DTT
@@ -32,5 +32,5 @@ hardware/simulations/*.net
 *.bbl
 *.blg
 *.run.xml
-zero/storereader/libmseed/
-zero/storereader/dtttomseed
+zero/storetools/libmseed/
+zero/storetools/dtttomseed
