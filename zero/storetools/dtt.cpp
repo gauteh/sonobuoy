@@ -128,11 +128,6 @@ namespace Zero {
 
       /* Read samples */
       for (int j = 0; j < BATCH_LENGTH; j++) {
-        /* The sample is stored as a two's complement 32 bit uint,
-         * the last bit indicates whether the full scale of the AD
-         * has been exceeded. At upper value a set last bit means overflow,
-         * at lower value a unset last bit means underflow.
-         */
         uint32_t s;
         dtt >> s;
         (char) dtt.get(); // skip newline

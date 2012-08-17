@@ -1,8 +1,8 @@
-function [t, d, refs] = readdtt(f, complement_and_bitshift)
+function [t, d, refs] = readdtt(f, complement)
 % Reads DTT format file
 %
 % t is unix timestamp
-% d is data, complemented and bitshifted if complement_and_bitshift is
+% d is data, complemented if complement is
 %   true (default). The raw data comes in seconds complement form and with
 %   one extra bit (can be used for out-of-range checking).
 %
@@ -17,8 +17,8 @@ function [t, d, refs] = readdtt(f, complement_and_bitshift)
 % longitude: east (E) or west (W)
 % checksum (32 bits)
 
-if (~exist('complement_and_bitshift', 'var'))
-  complement_and_bitshift = true;
+if (~exist('complement', 'var'))
+  complement = true;
 end
 
 freq = 250;
@@ -76,10 +76,10 @@ while ~feof(fh)
     return;
   end
     
-  if (complement_and_bitshift)
+  if (complement)
     % Taking twos complement (masking away FS clip bit) and shifting down
     % to 31 bits.
-    batch = bitshift (twos_comp (bitset(batch, 1, 0)), -1);
+    batch = twos_comp (bitset(batch, 1, 0));
   end
 
   d = cat(1, d, batch);

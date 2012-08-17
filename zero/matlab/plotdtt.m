@@ -59,15 +59,15 @@ if magnitudes
   t0 = min(t);
   t1 = max(t);
   
-  plot (fig, [t0 t1],  [1 1] * (A3/5*(2^30-1)) + mean(d), 'c');
-  plot (fig, [t0 t1],  [1 1] * (A2/5*(2^30-1)) + mean(d), 'k');
-  plot (fig, [t0 t1],  [1 1] * (A1/5*(2^30-1)) + mean(d), 'r');
-  plot (fig, [t0 t1],  [1 1] * (A0/5*(2^30-1)) + mean(d), 'g');
+  plot (fig, [t0 t1],  [1 1] * (A3/5*(2^31-1)) + mean(d), 'c');
+  plot (fig, [t0 t1],  [1 1] * (A2/5*(2^31-1)) + mean(d), 'k');
+  plot (fig, [t0 t1],  [1 1] * (A1/5*(2^31-1)) + mean(d), 'r');
+  plot (fig, [t0 t1],  [1 1] * (A0/5*(2^31-1)) + mean(d), 'g');
 
-  plot (fig, [t0 t1], -[1 1] * (A3/5*(2^30-1)) + mean(d), 'c');
-  plot (fig, [t0 t1], -[1 1] * (A2/5*(2^30-1)) + mean(d), 'k');
-  plot (fig, [t0 t1], -[1 1] * (A1/5*(2^30-1)) + mean(d), 'r');
-  plot (fig, [t0 t1], -[1 1] * (A0/5*(2^30-1)) + mean(d), 'g');
+  plot (fig, [t0 t1], -[1 1] * (A3/5*(2^31-1)) + mean(d), 'c');
+  plot (fig, [t0 t1], -[1 1] * (A2/5*(2^31-1)) + mean(d), 'k');
+  plot (fig, [t0 t1], -[1 1] * (A1/5*(2^31-1)) + mean(d), 'r');
+  plot (fig, [t0 t1], -[1 1] * (A0/5*(2^31-1)) + mean(d), 'g');
 
   legend (fig, 'Data', 'mb = 2 @ 50km threshold', 'mb = 2 @ 10km threshold', 'mb = 1 @ 10km threshold', 'mb = 0 @ 10km threshold');
 end

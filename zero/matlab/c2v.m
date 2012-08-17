@@ -3,7 +3,7 @@ function v = c2v (c)
 % counts.
 
 maxv = 2.5;  % range +/- 2.5 V
-maxc = 2^30; % one bit is shifted out, one bit is used for twos complement
+maxc = 2^31; % complemented (last bit should be cleared by readdtt, out of FS bit)
 
 v = c ./ maxc .* maxv;
 

@@ -55,9 +55,9 @@ namespace Zero {
       vector<Batch> batches;
 
       /* Quality and fixing */
-      bool fixedtime;
-      bool notimefix;
-      bool checksum_passed;
+      bool fixedtime;       // time has been fixed on one or more batches
+      bool notimefix;       // no batch could be used to fix times, all are bad
+      bool checksum_passed; // all checksums passed
 
       void check_checksums ();
       void populate_int32_samples ();

@@ -43,13 +43,18 @@ namespace Zero {
       b->hasclipped = false;
 
       for (int i = 0; i < b->length; i++) {
+        /* The sample is stored as a two's complement 32 bit uint,
+         * the last bit indicates whether the full scale of the AD
+         * has been exceeded. At upper value a set last bit means overflow,
+         * at lower value a unset last bit means underflow.
+         */
+
         uint32_t s = b->samples_u[i];
         int32_t  ss;
 
         b->hasclipped |= s & 0x1;
         s   &= 0xfffffffe; // Mask out to avoid confusion with two's comp
         ss   = s;          // Assume arch. stores int32_t's as two's comp
-        ss >>= 1;          // shift down to 31 bits (clear FS clip bit)
         b->samples_i[i] = ss;
       }
     }

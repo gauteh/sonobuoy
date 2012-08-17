@@ -6,7 +6,7 @@
 
 noiserange = max(d) - min(d) +1;
 
-fsr = 2^31 - 1;
+fsr = 2^32 - 1;
 
 snr  = 20 * log10(fsr / noiserange);
 bits = log2(fsr / noiserange);
