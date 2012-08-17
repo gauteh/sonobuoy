@@ -25,9 +25,9 @@
 # define VERSION GIT_DESC
 
 /* Configuration */
-# define NETWORK  "GBU"
-# define STATION  "GAK11"
-# define LOCATION "GAK1"
+# define NETWORK  "GB"
+# define STATION  "BUO1"
+# define LOCATION "G1"
 # define CHANNEL  "HYD"
 
 using namespace std;
@@ -43,7 +43,7 @@ namespace Zero {
       cout << "DttToMseed ( rev " << VERSION << " )" << endl;
       cout << "Author: Gaute Hope <eg@gaute.vetsj.com>, 2012-08-15" << endl << endl;
 
-      cout << "Parsing id list.."; // {{{
+      //cout << "Parsing id list.."; // {{{
       if (argc < 2) {
         cerr << "[E] No ids specified." << endl;
         usage ();
@@ -68,7 +68,7 @@ namespace Zero {
           }
         }
       }
-      cout << "done." << endl;
+      //cout << "done." << endl;
       // }}}
 
       /* Set up miniSeed record (template) and trace list */

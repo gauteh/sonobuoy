@@ -41,6 +41,8 @@ namespace Zero {
     cout << "MS: Adding id: " << b->id << "..";
 
     /* Set up MS record for each batch */
+    int samples = 0;
+    int records = 0;
     vector<Bdata::Batch>::iterator batch = b->batches.begin ();
     while (batch < b->batches.end ()) {
       MSRecord *msr = msr_init (NULL);
@@ -54,7 +56,7 @@ namespace Zero {
       msr->samprate   = SAMPLERATE;
       msr->byteorder  = 1; // big endian
       msr->starttime  = batch->ref;
-      msr->encoding   = DE_STEIM2;
+      msr->encoding   = DE_INT32; // will be redone on packing tracelist
 
       msr->datasamples = batch->samples_i;
       msr->numsamples  = batch->length;
@@ -66,11 +68,14 @@ namespace Zero {
       /* Add MS record to trace list, group by quality, autoheal */
       mstl_addmsr (mstl, msr, 1, 1, batch->ref, SAMPLERATE);
 
+      samples += msr->numsamples;
+      records++;
+
       batch++;
     }
 
 
-    cout << "done." << endl;
+    cout << "done, packed " << samples << " samples in " << records << " records." << endl;
   }
 
   bool Ms::pack_tracelist (const char *fname) {
@@ -102,7 +107,7 @@ namespace Zero {
         char timestr[50];
         string _fname = id.srcname;
         //_fname += '_';
-        _fname += ms_hptime2isotimestr (id.earliest, timestr, 1);
+        _fname += ms_hptime2isotimestr (id.earliest, timestr, 0);
         _fname += ".mseed";
         thisfname = (char*)_fname.c_str ();
       } else if (sequence_fname) {
@@ -159,9 +164,15 @@ namespace Zero {
       mst->datasamples  = datasamples;
 
       /* Packing */
+# define DATABLOCK  4096
+# define ENCODING   DE_STEIM1
+# define BYTEORDER  1 // Big endian
+# define FLUSH      1
+# define VERBOSE    1
       int psamples, precords;
       precords = mst_pack (mst, &(Ms::record_handler), (void*) &out,
-                           4096, DE_INT32, 1, &psamples, 1, 2, NULL);
+                           DATABLOCK, ENCODING, BYTEORDER, &psamples,
+                           FLUSH, VERBOSE, NULL);
 
       cout << "MS: => Packed " << psamples << " samples in " << precords << " records to file " << thisfname << "." << endl;
 

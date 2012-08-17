@@ -3,6 +3,7 @@
  *
  * Reads index and data files stored on memory card
  *
+ * TODO: DAT files are little endian, this program only works on little endian systems.
  */
 
 # include <stdint.h>
