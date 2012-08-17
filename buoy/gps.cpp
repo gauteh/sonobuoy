@@ -96,23 +96,21 @@ namespace Buoy {
   }
 
   void GPS::sync_pulse () {
-    if (HAS_TIME) {
-      /* If a PPS pulse is sent it must be for the second after the last
-       * received as a telegram */
-      lastsecond++;
+    /* If a PPS pulse is sent it must be for the second after the last
+     * received as a telegram */
+    lastsecond++;
 
-      /* New available reference */
-      reference  = lastsecond;
+    /* New available reference */
+    reference  = lastsecond;
 
-      /* Update microdelta */
-      microdelta = micros ();
+    /* Update microdelta */
+    microdelta = micros ();
 
-      /* Reset last sync counter */
-      lastsync   = millis ();
+    /* Reset last sync counter */
+    lastsync   = millis ();
 
-      HAS_SYNC            = true;
-      HAS_SYNC_REFERENCE  = true;
-    }
+    HAS_SYNC            = true;
+    HAS_SYNC_REFERENCE  = true;
   }
 
   void GPS::assert_time () { // {{{
@@ -166,7 +164,7 @@ namespace Buoy {
 
 # define LEAP_YEARS_BEFORE_1970 ((1970 / 4) - (1970 / 100) + (1970 / 400))
     /* Add a day of seconds for each leap year except this */
-    newsecond += (( (1970 + (_year-1)) /   4  )
+    newsecond += ((  (1970 + (_year-1)) /   4 )
                -  (  (1970 + (_year-1)) / 100 )
                +  (  (1970 + (_year-1)) / 400 )
                -  LEAP_YEARS_BEFORE_1970       ) * SECONDS_PER_DAY;
@@ -292,7 +290,7 @@ namespace Buoy {
 
   void GPS::parse ()
   {
-    /* GPS parser (non-blocking) {{{
+    /* GPS parser {{{
      *
      *
      */
