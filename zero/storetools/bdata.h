@@ -11,7 +11,8 @@
 # include <vector>
 # include <string>
 
-# define SAMPLERATE 250.0
+# define SAMPLERATE   250.0
+# define BATCHLENGTH  1024
 
 using namespace std;
 
@@ -35,6 +36,7 @@ namespace Zero {
         char dataquality;   // Overall quality indicator
 
         bool fixedtime;     // Did we have to fix time
+        uint64_t origtime;
 
         uint32_t *samples_u;
         int32_t  *samples_i;
@@ -53,6 +55,10 @@ namespace Zero {
       vector<Batch> batches;
 
       /* Quality and fixing */
+      bool fixedtime;
+      bool notimefix;
+      bool checksum_passed;
+
       void check_checksums ();
       void populate_int32_samples ();
       void fix_time ();

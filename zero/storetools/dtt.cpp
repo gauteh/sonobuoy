@@ -121,6 +121,11 @@ namespace Zero {
       //cout << "Ref: " << b.no << ", " << b.ref << ", status: " << b.status << ", latitude: " << b.latitude << ", longitude: " << b.longitude << ", checksum: " << b.checksum << endl;
       //cout << "Read ref: " << b.no << endl;
 
+      if (b.no != i) {
+        cout << "Refrence number does not match position in sequence. Cancelling." << endl;
+        return false;
+      }
+
       /* Read samples */
       for (int j = 0; j < BATCH_LENGTH; j++) {
         /* The sample is stored as a two's complement 32 bit uint,

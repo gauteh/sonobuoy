@@ -7,6 +7,7 @@
  */
 
 # include <stdint.h>
+# include <time.h>
 # include <iostream>
 # include <vector>
 
@@ -16,6 +17,8 @@
 
 namespace Zero {
   void Bdata::check_checksums () {
+    checksum_passed = false;
+
     for (vector<Batch>::iterator b = batches.begin(); b < batches.end (); b++) {
       uint32_t cs = 0;
       b->checksum_pass = false;
@@ -29,6 +32,7 @@ namespace Zero {
       if (!b->checksum_pass) {
         cout << "BData, ID: " << id << ", batch: " << b->no << ": Checksum fail." << endl;
       }
+      checksum_passed &= b->checksum_pass;
     }
   }
 
@@ -67,7 +71,7 @@ namespace Zero {
      * be alright.
      *
      * Notes on store versions:
-     * - Because of SD_LAG, frequent checksum fails in periods below version 6.
+     * - Because of E_SDLAG, frequent checksum fails in periods below version 6.
      * - HAS_SYNC and HAS_SYNC_REFERENCE are unusable below store version 7.
      * - Time could not be updated backwards below version 7: will result in
      *   a date in the future to not be reset back.
@@ -75,12 +79,53 @@ namespace Zero {
 
     /* Any times out of this range will be ignored and time will be
      * extrapolated from previous sane reference */
-# define MAXTIME ms_time2hptime(2013, 1, 0, 0, 0, 0)
+    time_t t      = time (NULL);
+    struct tm *ts = gmtime (&t);
+
+# define MAXTIME ms_time2hptime(ts->tm_year + 1 + 1900, 1, 0, 0, 0, 0)
 # define MINTIME ms_time2hptime(2012, 100, 0, 0, 0, 0)
+
+    fixedtime = false;
+    notimefix = false;
+    int goodid = -1;
 
     for (vector<Batch>::iterator b = batches.begin(); b < batches.end (); b++) {
       b->fixedtime = false;
 
+      if (b->ref < MAXTIME && b->ref > MINTIME) {
+        /* ref is good */
+
+        /* First good: Go back and fix preceeding ids */
+        if (b->no > 0 && goodid == -1) {
+          cout << "Bdata: Fixing time on batches 0 to " << (b->no -1) << ".." << endl;
+          for (int i = 0; i < (b->no-1); i++) {
+            batches[i].fixedtime = true;
+            batches[i].origtime  = batches[i].ref;
+
+            batches[i].ref = b->ref - ( (b->no - i) * BATCHLENGTH / SAMPLERATE * 1e6);
+            fixedtime = true;
+          }
+        }
+
+        goodid = b->no;
+
+      } else {
+        /* ref is bad */
+        if (goodid > -1) {
+          /* There exists a good reference, use it */
+          b->fixedtime = true;
+          b->origtime  = b->ref;
+          b->ref = batches[goodid].ref + ( (b->no - goodid) * BATCHLENGTH / SAMPLERATE * 1e6);
+          fixedtime = true;
+          cout << "Bdata: Fixing time on batch " << b->no << ".." << endl;
+        }
+      }
+    }
+
+    /* No good refs for id */
+    if (goodid == -1) {
+      cout << "Bdata: No good refs for ID, time could not be fixed." << endl;
+      notimefix = true;
     }
   }
 
