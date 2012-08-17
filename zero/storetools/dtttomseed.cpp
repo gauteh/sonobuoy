@@ -5,12 +5,17 @@
  *
  * Requires: libmseed (developed for v2.5.1)
  *
- * All the ids supplied as an argument will be packed into one contiuous trace list,
- * you want more than one trace list make numerous invocations of this program with
- * each group that should be packed.
+ * All the ids supplied as an argument will be packed into one contiuous trace
+ * list, if you want more than one trace list make numerous invocations of
+ * this program with each group that should be packed into each trace list.
  *
- * Files are expected to be in current directory. Output will be written to files in current directory.
+ * Files are expected to be in current directory. Output will be written to
+ * files in current directory.
  *
+ * TODO:
+ *  - Output instrument response header?
+ *  - Data quality?
+ *  - Enhancement: Configuration file
  */
 
 # include <stdint.h>
@@ -41,7 +46,7 @@ namespace Zero {
 
     int main (int argc, char ** argv) {
       cout << "DttToMseed ( rev " << VERSION << " )" << endl;
-      cout << "Author: Gaute Hope <eg@gaute.vetsj.com>, 2012-08-15" << endl << endl;
+      cout << "Author: Gaute Hope <eg@gaute.vetsj.com> / 2012-08-15" << endl << endl;
 
       //cout << "Parsing id list.."; // {{{
       if (argc < 2) {
@@ -92,7 +97,7 @@ namespace Zero {
       }
 
       /* Pack traces */
-      if ( !ms.pack_tracelist ()) {
+      if ( !ms.pack_tracelist () ) {
         cout << "Failed, see above errors." << endl;
       }
 

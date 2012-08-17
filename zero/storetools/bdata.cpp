@@ -4,6 +4,9 @@
  * bdata.cpp: Data structure for id with batches as well as methods for
  *            fixing and sanitizing data.
  *
+ * Warning: This program assumes that in32_t are represented with two's
+ *          complement uint32_t.
+ *
  */
 
 # include <stdint.h>

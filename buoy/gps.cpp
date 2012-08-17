@@ -129,11 +129,11 @@ namespace Buoy {
       /* Check if we need to manually update reference:
        *
        * If micros () has overflowed since last microdelta and reference,
-       * a new reference and microdelta must be set before it reaches the second
-       * overflow.
+       * a new reference and microdelta must be set before it reaches the
+       * second overflow.
        *
-       * By ensuring that the reference is updated within the roll over time for
-       * micros () this should not happen.
+       * By ensuring that the reference is updated within the roll over time
+       * for micros () this should not happen.
        *
        */
 

@@ -165,7 +165,7 @@ namespace Zero {
 
       /* Packing */
 # define DATABLOCK  4096
-# define ENCODING   DE_STEIM1
+# define ENCODING   DE_INT32
 # define BYTEORDER  1 // Big endian
 # define FLUSH      1
 # define VERBOSE    1
@@ -183,9 +183,7 @@ namespace Zero {
   }
 
   void Ms::record_handler (char *record, int reclen, void *out) {
-    //cout << "Writing " << reclen << " records..";
     ((ofstream*)out)->write (record, reclen);
-    //cout << "done." << endl;
   }
 
 
