@@ -41,7 +41,7 @@ namespace Zero {
     cout << "MS: Adding id: " << b->id << "..";
 
     /* Set up MS record for each batch */
-    vector<Batch>::iterator batch = b->batches.begin ();
+    vector<Bdata::Batch>::iterator batch = b->batches.begin ();
     while (batch < b->batches.end ()) {
       MSRecord *msr = msr_init (NULL);
 
@@ -56,7 +56,7 @@ namespace Zero {
       msr->starttime  = batch->ref;
       msr->encoding   = DE_STEIM2;
 
-      msr->datasamples = batch->samples;
+      msr->datasamples = batch->samples_i;
       msr->numsamples  = batch->length;
       msr->sampletype  = 'i'; // int32
       msr->samplecnt   = batch->length;
@@ -161,7 +161,7 @@ namespace Zero {
       /* Packing */
       int psamples, precords;
       precords = mst_pack (mst, &(Ms::record_handler), (void*) &out,
-                           4096, DE_STEIM2, 1, &psamples, 1, 2, NULL);
+                           4096, DE_INT32, 1, &psamples, 1, 2, NULL);
 
       cout << "MS: => Packed " << psamples << " samples in " << precords << " records to file " << thisfname << "." << endl;
 

@@ -13,6 +13,7 @@
   == Hardware ==
 
   == History ==
+  2012-08-15: Updated to version 1.2.1.
   2012-08-14: Updated to version 1.2.0.
   2012-08-13: Replaced GPS unit with GPS unit from buoy 5, this seems to
               be faulty.

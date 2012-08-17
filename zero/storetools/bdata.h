@@ -9,39 +9,55 @@
 
 # include <stdint.h>
 # include <vector>
+# include <string>
 
 # define SAMPLERATE 250.0
 
 using namespace std;
 
 namespace Zero {
-  /* Batch */
-  typedef struct _Batch {
-    uint32_t  length;
-    uint32_t  no;
-    uint64_t  ref; // timestamp
-    uint16_t  status;
-    string    latitude;
-    string    longitude;
-    uint32_t  checksum;
+  class Bdata {
+    public:
+      /* Batch */
+      typedef struct _Batch {
+        uint32_t  length;
+        uint32_t  no;
+        uint64_t  ref; // timestamp
+        uint16_t  status;
+        string    latitude;
+        string    longitude;
+        uint32_t  checksum;
+        // finished chunks..
 
-    // finished chunks..
+        /* Quality and fixing */
+        bool hasclipped;    // has full scale range been exceeded
+        bool checksum_pass; // Did checksum validate
+        char dataquality;   // Overall quality indicator
 
-    int32_t *samples;
-  } Batch;
+        bool fixedtime;     // Did we have to fix time
 
-  /* Bdata */
-  typedef struct _Bdata {
-    int localversion;
-    int remoteversion;
-    int id;
-    int samplescount;
-    int batchcount;
-    // HasFull..
+        uint32_t *samples_u;
+        int32_t  *samples_i;
+      } Batch;
 
-    int totalsamples;
+      /* Bdata */
+      int localversion;
+      int remoteversion;
+      int id;
+      int samplescount;
+      int batchcount;
+      // HasFull..
 
-    vector<Batch> batches;
-  } Bdata;
+      int totalsamples;
+
+      vector<Batch> batches;
+
+      /* Quality and fixing */
+      void check_checksums ();
+      void populate_int32_samples ();
+      void fix_time ();
+      void assess_dataquality ();
+
+  };
 }
 

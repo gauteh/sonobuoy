@@ -81,5 +81,5 @@ if not GetOption("verbose_flag"): # {{{
   dttenv["JARCOMSTR"] = java_library_message,
   dttenv["JAVACCOMSTR"] = java_compile_source_message, # }}}
 
-dttenv.Program ('dtttomseed', ['ms.cpp', 'dtt.cpp', 'dtttomseed.cpp'])
+dttenv.Program ('dtttomseed', ['bdata.cpp', 'ms.cpp', 'dtt.cpp', 'dtttomseed.cpp'])
 

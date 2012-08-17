@@ -28,6 +28,12 @@ namespace Zero {
       return;
     }
 
+    /* Check and prepare samples */
+    bdata.check_checksums ();
+    bdata.populate_int32_samples ();
+    bdata.fix_time ();
+    bdata.assess_dataquality ();
+
     cout << "done, read: " << bdata.batches.size () << " batches with: " << bdata.totalsamples << " samples total." << endl;
     ready = true;
   }
@@ -77,8 +83,8 @@ namespace Zero {
 
     /* Read batches */
     for (int i = 0; i < bdata.batchcount; i++) {
-      Batch b;
-      b.samples = new int[BATCH_LENGTH];
+      Bdata::Batch b;
+      b.samples_u = new uint32_t[BATCH_LENGTH];
 
       /* Read reference */
       string ref;
@@ -126,16 +132,7 @@ namespace Zero {
         dtt >> s;
         (char) dtt.get(); // skip newline
 
-        bool fsclipped = s & 0x1;
-        s &= 0xfffffffe;          // mask out to avoid confusion with twos_comp
-
-
-        /* Assuming architecture stores int32_t as two's complement */
-        int32_t ss = s; // cast to int32_t
-        ss       >>= 1; // shift down to 31 bits (LSB is, now unset, FS clip bit)
-
-        b.samples[j] = ss;
-
+        b.samples_u[j] = s;
         bdata.totalsamples++;
       }
 
