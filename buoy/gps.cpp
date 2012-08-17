@@ -18,7 +18,7 @@
 using namespace std;
 
 namespace Buoy {
-  GPS::GPS () {
+  GPS::GPS () { // {{{
     HAS_TIME = false;
     HAS_SYNC = false;
     HAS_SYNC_REFERENCE = false;
@@ -53,9 +53,9 @@ namespace Buoy {
     ref_position_lock = 0;
     //*speedoverground = 0;
     //*courseoverground = 0;
-  }
+  } // }}}
 
-  void GPS::setup (BuoyMaster *b) {
+  void GPS::setup (BuoyMaster *b) { //{{{
     ad = b->ad;
 
     gps_buf[0] = 0;
@@ -89,7 +89,7 @@ namespace Buoy {
 
     pinMode (GPS_SYNC_PIN, INPUT_PULLDOWN);
     enable_sync ();
-  }
+  } //}}}
 
   void GPS::sync_pulse_int () {
     bu->gps->sync_pulse ();
@@ -637,7 +637,7 @@ namespace Buoy {
   }
 
 # if DEBUG_VERB
-  void GPS::print_status () {
+  void GPS::print_status () { // {{{
     SerialUSB.print ("[GPS] lat: ");
     SerialUSB.print (latitude);
     SerialUSB.print (", lon: ");
@@ -648,7 +648,7 @@ namespace Buoy {
     SerialUSB.print (day);
     SerialUSB.print (month);
     SerialUSB.println (year);
-  }
+  } // }}}
 # endif
 
   void GPS::enable_sync () {
