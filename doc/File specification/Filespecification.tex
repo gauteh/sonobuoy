@@ -429,12 +429,16 @@ storage (DAT)} and \textbf{2 for central storage (DTT)}.
   \subsection{Conversion and reading buoy local storage on a regular
   computer}
 
-  \subsubsection{dttreader}
-  The program: zero/storetool/dttreader reads and print IND and DAT file pairs
-  and can convert to DTT files as well as print the samples in a
-  specified format.
+  \subsubsection{datreader} The program: zero/storetool/datreader reads
+  and print IND and DAT file pairs and can convert to DTT files as well
+  as print the samples in a specified format.
 
-  \subsubsection{dtttomseed} \dots
+  \subsubsection{dtttomseed} Reads a range of ITT and DTT files
+  specified by their id and packs them into miniSEED files, one for each
+  trace segment.
+
+  \subsubsection{mschangesource} Changes the source parameters of
+  miniSEED files and repacks them.
 
 \vspace{5em}
 \printbibliography
