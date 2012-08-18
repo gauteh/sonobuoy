@@ -620,8 +620,6 @@ class Protocol:
         elif (msgtype == 'ERR'):
           if (tokeni == 1):
             self.tokens[0] = token
-
-          elif (tokeni == 2):
             if oncs:
               # must be protocol version 1
               try:
@@ -651,30 +649,30 @@ class Protocol:
                 self.zero.current.index.reset (keepradiorate = True)
                 return
 
-            else:
-              try:
-                i = int (self.tokens[0])
-                t = int(token)
-                self.logger.error ("[Buoy] [ID: " + str(i) + "] Received error: [" + token + "] " + Buoy.error_strings[t])
-                ii = self.zero.indexofid (i)
-                if ii is not None:
-                  self.zero.buoys[ii].log ("[Buoy] Received error: [" + token + "] " + Buoy.error_strings[t])
-                  # Only reset protocol in case of error with command
-                  if t == 1 or t == 2 or t == 4 or t == 5 or t == 6 or t == 7 or t == 8:
-                    self.zero.buoys[ii].index.reset (keepradiorate = True)
-                    return
-                else:
-                  if t == 1 or t == 2 or t == 4 or t == 5 or t == 6 or t == 7 or t == 8:
-                    self.zero.current.index.reset (keepradiorate = True)
-                    return
+          elif (tokeni == 2):
+            try:
+              i = int (self.tokens[0])
+              t = int(token)
+              self.logger.error ("[Buoy] [ID: " + str(i) + "] Received error: [" + token + "] " + Buoy.error_strings[t])
+              ii = self.zero.indexofid (i)
+              if ii is not None:
+                self.zero.buoys[ii].log ("[Buoy] Received error: [" + token + "] " + Buoy.error_strings[t])
+                # Only reset protocol in case of error with command
+                if t == 1 or t == 2 or t == 4 or t == 5 or t == 6 or t == 7 or t == 8:
+                  self.zero.buoys[ii].index.reset (keepradiorate = True)
+                  return
+              else:
+                if t == 1 or t == 2 or t == 4 or t == 5 or t == 6 or t == 7 or t == 8:
+                  self.zero.current.index.reset (keepradiorate = True)
+                  return
 
 
-              except ValueError:
-                self.logger.error ("[Buoy] [ID: " + i + "] Received error: [" + token + "]")
-                self.zero.current.log ("[Buoy] [ID: " + i + " (assumed)] Received error: [" + token + "]")
-                self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
-                self.zero.current.index.reset (keepradiorate = True)
-                return
+            except ValueError:
+              self.logger.error ("[Buoy] [ID: " + i + "] Received error: [" + token + "]")
+              self.zero.current.log ("[Buoy] [ID: " + i + " (assumed)] Received error: [" + token + "]")
+              self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
+              self.zero.current.index.reset (keepradiorate = True)
+              return
 
         else:
           self.zero.current.index.reset (keepradiorate = True)

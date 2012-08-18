@@ -26,6 +26,7 @@ class Buoy:
   name    = ''    # Unique friendly name
   address = ''    # Node address
   address_p = ''  # Synapse format address
+  getdata = False # Donload data (otherwise just status)
 
   radiorate = 0           # Radio rate currently set
   RADIORATE_TIMEOUT = 60  # seconds before buoy node reset to default (0) rate
@@ -62,6 +63,7 @@ class Buoy:
     self.name   = b['name']
     self.address = b['address']
     self.enabled = b['enabled']
+    self.getdata = b['getdata']
 
     self.address_p = str(int(self.address[:2],16)) + "." + str(int(self.address[3:5],16)) + "." + str(int (self.address[6:8], 16))
 
