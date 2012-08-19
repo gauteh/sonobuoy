@@ -124,6 +124,7 @@ namespace Buoy {
         uint32_t samples;     // Can maximum reach MAX_SAMPLES_PER_FILE
         uint32_t samples_per_reference; // Is defined by BATCH_LENGTH
         uint32_t nrefs;       // Current number of references
+        bool     e_sdlag;     // Has an E_SDLAG occured while on this index
       } Index;
 
 /* Using 8.3 file names limits the ID */
@@ -185,6 +186,7 @@ namespace Buoy {
       uint32_t s_samples;
       uint32_t s_nrefs;
       uint16_t s_lastbatch;
+      bool     s_e_sdlag;
       SdFile *send_i;
       SdFile *send_d;
 

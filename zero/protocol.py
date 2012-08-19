@@ -552,9 +552,10 @@ class Protocol:
           elif (tokeni == 3):
             if self.zero.current.remote_protocolversion <= 2:
               # No store version provided, assume all ids have the default
-              # store version for this buoy
+              # store version for this buoy.
+              # No E_SDLAG provided, assume False
               try:
-                self.zero.current.index.gotid (int(self.tokens[0]), self.zero.current.remote_storeversion, int(self.tokens[1]), int(token))
+                self.zero.current.index.gotid (int(self.tokens[0]), self.zero.current.remote_storeversion, int(self.tokens[1]), int(token), False)
                 return
               except ValueError:
                 self.zero.current.index.reset (keepradiorate = True)
@@ -564,12 +565,22 @@ class Protocol:
               self.tokens[2] = token
 
           elif (tokeni == 4 and self.zero.current.remote_protocolversion >= 3):
-            try:
-              self.zero.current.index.gotid (int(self.tokens[0]), int(self.tokens[1]), int(self.tokens[2]), int (token))
-            except ValueError:
-              self.zero.current.index.reset (keepradiorate = True)
-              self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
-              return
+            self.tokens[3] = token
+            if self.zero.current.remote_protocolversion < 4:
+              try:
+                # No SD_LAG provided, assume False
+                self.zero.current.index.gotid (int(self.tokens[0]), int(self.tokens[1]), int(self.tokens[2]), int (token), False)
+              except ValueError:
+                self.zero.current.index.reset (keepradiorate = True)
+                self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
+                return
+          elif (tokeni == 5 and self.zero.current.remote_protocolversion >= 4):
+              try:
+                self.zero.current.index.gotid (int(self.tokens[0]), int(self.tokens[1]), int(self.tokens[2]), int (self.tokens[3]), (token == 'Y'))
+              except ValueError:
+                self.zero.current.index.reset (keepradiorate = True)
+                self.logger.exception ("[Protocol] Could not convert token to int. Discarding rest of message.")
+                return
 
 
         elif (msgtype == 'I'):

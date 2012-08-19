@@ -73,9 +73,10 @@ class Data:
   samples     = None
   refs_no     = None
 
-  LASTVERSION = 2
+  LASTVERSION = 3
   localversion  = -1
   remoteversion = -1
+  e_sdlag       = False
 
   def __init__ (self, l, _buoy, _index, _id, _enabled):
     self.logger   = l
@@ -113,6 +114,7 @@ class Data:
       Samples
       No of refs
       hasfull
+      E_SDLAG
 
       After this, one line for each batch:
       refno,ref,refstatus,latitude,longitude,checksum,line,list of completechunks
@@ -141,6 +143,10 @@ class Data:
           self.refs_no        = int(self.indexf.readline ())
           r = self.indexf.readline ().strip ()
           self.hasfull        = (r == "True")
+
+          if self.localversion >= 3:
+            r = self.indexf.readline ().strip ()
+            self.e_sdlag = (r == "True")
 
           for l in self.indexf.readlines ():
             l = l.strip()
@@ -184,6 +190,7 @@ class Data:
       self.indexf.write (str(self.samples) + '\n')
       self.indexf.write (str(self.refs_no) + '\n')
       self.indexf.write (str(self.hasfull) + '\n')
+      self.indexf.write (str(self.e_sdlag) + '\n')
 
       for i in self.batches:
         self.indexf.write (str(i.no) + ',' + str(i.ref) + ',' + str(i.status)  + ',' + i.latitude + "," + i.longitude + "," + str(i.checksum) + ',' + str(i.line))
@@ -351,11 +358,12 @@ class Data:
     else:
       self.logger.error (self.me + " Tried to append chunk on disabled data file.")
 
-  def fullindex (self, _samples, n_refs, store_version):
+  def fullindex (self, _samples, n_refs, store_version, _e_sdlag):
     self.samples = _samples
     self.refs_no = n_refs
     self.remoteversion = store_version
     self.hasfull = True
+    self.e_sdlag = _e_sdlag
 
     # check if we have all refs and data
     self.check_hasalldata ()

@@ -226,11 +226,11 @@ class Index:
       self.request_t = time.time ()
 
   # should probably be gotind..
-  def gotid (self, id, store_version, samples, n_refs):
-    self.logger.info (self.me + " Got full index: " + str(id) + ", samples: " + str(samples) + ", no of refs: " + str(n_refs) + " (store version: " + str(store_version) + ")")
+  def gotid (self, id, store_version, samples, n_refs, e_sdlag):
+    self.logger.info (self.me + " Got full index: " + str(id) + ", samples: " + str(samples) + ", no of refs: " + str(n_refs) + " (store version: " + str(store_version) + ") (sdlag: " + str(e_sdlag) + ")")
     if self.working_data is not None:
       if self.working_data.id == id:
-        self.working_data.fullindex (samples, n_refs, store_version)
+        self.working_data.fullindex (samples, n_refs, store_version, e_sdlag)
 
     if self.pendingid == 4:
       self.state = 0

@@ -9,7 +9,7 @@
 
 /* Version and settings */
 # define VERSION GIT_DESC
-# define PROTOCOL_VERSION 3
+# define PROTOCOL_VERSION 4
 
 /* IMPORTANT: Remember to update STORE_VERSION in case anything that might
  * change data quality or similar has been done */

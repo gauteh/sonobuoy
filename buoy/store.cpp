@@ -35,6 +35,7 @@ namespace Buoy {
     s_version = 0;
     s_samples = 0;
     s_nrefs = 0;
+    s_e_sdlag = false;
     s_lastbatch = 0;
     send_i = NULL;
     send_d = NULL;
@@ -246,6 +247,7 @@ namespace Buoy {
     current_index.samples = 0;
     current_index.samples_per_reference = BATCH_LENGTH;
     current_index.nrefs = 0;
+    current_index.e_sdlag = false;
 
     SD_AVAILABLE &= (card->errorCode () == 0);
 
@@ -274,6 +276,7 @@ namespace Buoy {
       fi.write (reinterpret_cast<char*>(&current_index.samples), sizeof(current_index.samples));
       fi.write (reinterpret_cast<char*>(&current_index.samples_per_reference), sizeof(current_index.samples_per_reference));
       fi.write (reinterpret_cast<char*>(&current_index.nrefs), sizeof(current_index.nrefs));
+      fi.write (reinterpret_cast<char*>(&current_index.e_sdlag), sizeof(current_index.e_sdlag));
 
       fi.sync ();
       fi.close ();
@@ -368,6 +371,7 @@ namespace Buoy {
       lastbatch  =  (lastbatch + 1) % BATCHES;
 
     if (lastbatch != ad->batch) {
+      current_index.e_sdlag |= true;
 # if HASRF
       rf->send_error (RF::E_SDLAG);
 # endif
@@ -462,6 +466,7 @@ namespace Buoy {
       s_samples = 0;
       s_version = 0;
       s_nrefs   = 0;
+      s_e_sdlag = false;
 
       if (send_i != NULL) {
         delete send_i;
@@ -566,6 +571,7 @@ namespace Buoy {
     s_samples = 0;
     s_version = 0;
     s_nrefs   = 0;
+    s_e_sdlag = false;
     s_lastbatch = 0;
 
     if (send_d != NULL) {
@@ -595,6 +601,7 @@ namespace Buoy {
         s_samples = current_index.samples;
         s_version = current_index.version;
         s_nrefs   = current_index.nrefs;
+        s_e_sdlag = current_index.e_sdlag;
 
       } else {
         // Not working on current index, read index file
@@ -621,6 +628,7 @@ namespace Buoy {
         send_i->read (reinterpret_cast<char*>(&s_samples), sizeof(s_samples));
         send_i->seekCur (sizeof(Index::samples_per_reference));
         send_i->read (reinterpret_cast<char*>(&s_nrefs), sizeof(s_nrefs));
+        send_i->read (reinterpret_cast<char*>(&s_e_sdlag), sizeof(s_e_sdlag));
 
         send_i->close ();
         delete send_i;
@@ -634,7 +642,7 @@ namespace Buoy {
   void Store::send_index (uint32_t id) { // {{{
     if (!_check_index (id)) return;
 
-    // format: $IND,id,samples,nrefs*CS
+    // format: $IND,id,version,samples,nrefs,sdlag*CS
     RF_Serial.print ("$IND,");
     RF_Serial.print (id);
     RF_Serial.print (",");
@@ -643,6 +651,8 @@ namespace Buoy {
     RF_Serial.print (s_samples);
     RF_Serial.print (",");
     RF_Serial.print (s_nrefs);
+    RF_Serial.print (",");
+    RF_Serial.print (s_e_sdlag ? 'Y' : 'N');
     RF_Serial.println ("*NN");
 
     /*
@@ -855,6 +865,7 @@ namespace Buoy {
       s_samples = 0;
       s_version = 0;
       s_nrefs   = 0;
+      s_e_sdlag = false;
     }
   } // }}}
 
