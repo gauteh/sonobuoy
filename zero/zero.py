@@ -210,6 +210,8 @@ class Zero:
   def current_thread (self):
     self.logger.info ("[Zero] Starting current buoy thread..")
     MAX_BUOY_TIME = 70 # max time (seconds) before changing buoys
+    MAX_BUOY_TIME_NOGETDATA = 20 # max time (seconds) before changing if data
+                                 # should not be fetched from buoy.
     MIN_BUOY_TIME =  0 # min time (seconds) before changing buoy
     lastchange    = time.time ()
 
@@ -219,7 +221,10 @@ class Zero:
         if self.current.index.state == 1:
           to = self.current.index.timeout - (time.time () - self.current.index.request_t)
         else:
-          to = MAX_BUOY_TIME - (time.time () - lastchange)
+          if self.current.getdata:
+            to = MAX_BUOY_TIME - (time.time () - lastchange)
+          else:
+            to = MAX_BUOY_TIME_NOGETDATA - (time.time () - lastchange)
 
         if to < 0:
           to = 0

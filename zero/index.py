@@ -176,13 +176,13 @@ class Index:
     # out as we try to get the full index
     if self.lastid > 0:
       if not self.__id_check_done__:
-        for i in range (1, self.lastid):
+        for i in range (1, self.lastid + 1):
           if self.indexofdata(i) is None:
             self.logger.info (self.me + " Adding id: " + str(i))
             self.data.append (Data (self.logger, self.buoy, self, i, True))
       else:
         # just check from greatest id
-        for i in range(self.greatestid, self.lastid):
+        for i in range(self.greatestid, self.lastid + 1):
           if self.indexofdata(i) is None:
             self.logger.info (self.me + " Adding id: " + str(i))
             self.data.append (Data (self.logger, self.buoy, self, i, True))
