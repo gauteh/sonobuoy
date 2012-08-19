@@ -33,7 +33,7 @@ namespace Buoy {
   }
 
   void BuoyMaster::loop () {
-    static uint32_t lasts = 0;
+    //static uint32_t lasts = 0;
 
     critical_loop ();
 
@@ -43,14 +43,15 @@ namespace Buoy {
 
     ad->loop ();
 
+    /*
     if (millis () - lasts >= 1000) {
-      SerialUSB.print ("V");
-      SerialUSB.println (ad->values[ad->position-1]);
-      SerialUSB.println (ad->position);
+      //SerialUSB.println (ad->values[ad->position-1]);
+      //SerialUSB.println (ad->position);
       //ad->print_status ();
       //gps->print_status ();
       lasts = millis ();
     }
+    */
   }
 
   void BuoyMaster::critical_loop () {

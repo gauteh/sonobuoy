@@ -231,7 +231,7 @@ namespace Buoy {
         fi.close ();
       }
       i++;
-      SerialUSB.println (i);
+      //SerialUSB.println (i);
 
       // TODO: Check if trying to open non-existent file sets errorCode()
       SD_AVAILABLE &= (card->errorCode () == 0);
@@ -371,7 +371,7 @@ namespace Buoy {
 # if HASRF
       rf->send_error (RF::E_SDLAG);
 # endif
-      SerialUSB.println ("R");
+      //SerialUSB.println ("R");
 # if DEBUG_VERB
       SerialUSB.println ("[SD] [Error] Out of sync with AD, might not finish writing batch before it is swapped.");
 # endif
