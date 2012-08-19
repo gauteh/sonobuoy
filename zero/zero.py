@@ -226,10 +226,8 @@ class Zero:
           else:
             to = MAX_BUOY_TIME_NOGETDATA - (time.time () - lastchange)
 
-        if to < 0:
-          to = 0
-
-        self.current.index.action.wait (to)
+        if to > 0:
+          self.current.index.action.wait (to)
 
         self.current.loop ()
 
