@@ -70,6 +70,8 @@ class Zero:
     # reset reset status
     self.current.index.reseti = 0
 
+    self.current.index.event ()
+
 
   current  = property(get_current, set_current) # Current Buoy
 
@@ -207,12 +209,23 @@ class Zero:
 
   def current_thread (self):
     self.logger.info ("[Zero] Starting current buoy thread..")
-    MAX_BUOY_TIME = 40 # max time (seconds) before changing buoys
+    MAX_BUOY_TIME = 70 # max time (seconds) before changing buoys
     MIN_BUOY_TIME =  0 # min time (seconds) before changing buoy
     lastchange    = time.time ()
 
     while self.go:
       if self.current is not None:
+        to = 0
+        if self.current.index.state == 1:
+          to = self.current.index.timeout - (time.time () - self.current.index.request_t)
+        else:
+          to = MAX_BUOY_TIME - (time.time () - lastchange)
+
+        if to < 0:
+          to = 0
+
+        self.current.index.action.wait (to)
+
         self.current.loop ()
 
         if len(self.buoys) > 1 and (time.time () - lastchange > MIN_BUOY_TIME):
@@ -262,7 +275,6 @@ class Zero:
                 self.set_current (self.buoys[i])
                 lastchange = time.time ()
 
-      time.sleep (0.0001)
 
   # go through list of buoys and return index of id
   def indexofid (self, id):

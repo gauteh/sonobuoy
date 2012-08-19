@@ -633,6 +633,11 @@ class Protocol:
                   # info command not supported, must be version 1, default to version 6
                   if t == 2 and self.zero.current.index.pendingid == 6:
                     self.zero.current.index.gotinfo (self.zero.current.id, 'v1.0.0', 1, 6)
+                  # Only reset protocol in case of error with command
+                  if t == 1 or t == 2 or t == 4 or t == 5 or t == 6 or t == 7 or t == 8:
+                    self.zero.buoys[ii].index.reset (keepradiorate = True)
+
+                  self.zero.current.index.event ()
                   return
 
                 else:

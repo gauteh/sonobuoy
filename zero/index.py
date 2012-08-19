@@ -20,13 +20,13 @@ class Index:
 
   idle        = False # all data received, all up to date
   cleanup     = False # indicate to buoy that it should send no more requests
+  action      = None  # Event indicating that something has happened and the
+                      # loop should iterate
 
   data        = None
   greatestid  = 0
   lastid      = 0
-  __incremental_id_check_done__ = False
-  __unchecked_ids__             = None
-
+  __id_check_done__             = False
   __full_data_check_done__      = False
 
   # id for log
@@ -43,14 +43,18 @@ class Index:
     self.protocol = self.buoy.protocol
     self.me = "[" + self.buoy.name + "] [Index]"
     self.indexf_uri = os.path.join (self.buoy.logdir, 'indexes')
+    self.action = threading.Event ()
 
     self.logger.info (self.me + " Initializing and opening index..: " + self.indexf_uri)
     self.open_index ()
 
+  def event (self):
+    self.action.set ()
+
   def complete (self):
     return ( self.__full_data_check_done__ and
-             self.__incremental_id_check_done__ and
-            (self.__unchecked_ids__ is None) )
+             self.__id_check_done__ or
+             not self.buoy.getdata)
 
   # return percent complete
   def completeness (self):
@@ -99,15 +103,20 @@ class Index:
       self.logger.info (self.me + " Setting buoy radio rate to goal: " + str(self.goal_radiorate))
       self.protocol.znbuoyradiorate (self.goal_radiorate)
 
+    self.event ()
+
   def checkradiorate (self):
     if self.buoy.radiorate != 0:
       if (time.time () - self.buoy.set_radiorate_t) > self.buoy.RADIORATE_TIMEOUT:
         self.logger.info (self.me + " Buoy radio rate timed out, resetting rate.")
         self.buoy.radiorate = 0
 
-  ''' Update local list of ids from buoy, working backwards '''
+    self.event ()
+
+  # GETIDS: Depreceated {{{
   gotids_n = 0
   def getids (self, start):
+    ''' Update local list of ids from buoy, working backwards '''
     if self.state == 0:
       self.fastradiorate ()
       self.protocol.send ("GIDS," + str(start))
@@ -151,6 +160,7 @@ class Index:
     if self.gotids_n >= 10:
       if self.pendingid == 3:
         self.state = 0
+  # }}}
 
   def indexofdata (self, id):
     n = 0
@@ -161,6 +171,26 @@ class Index:
 
     return None
 
+  def check_and_add_ids (self):
+    # We're just adding the ids, if they turn out empty we will have figured it
+    # out as we try to get the full index
+    if self.lastid > 0:
+      if not self.__id_check_done__:
+        for i in range (1, self.lastid):
+          if self.indexofdata(i) is None:
+            self.logger.info (self.me + " Adding id: " + str(i))
+            self.data.append (Data (self.logger, self.buoy, self, i, True))
+      else:
+        # just check from greatest id
+        for i in range(self.greatestid, self.lastid):
+          if self.indexofdata(i) is None:
+            self.logger.info (self.me + " Adding id: " + str(i))
+            self.data.append (Data (self.logger, self.buoy, self, i, True))
+
+    self.greatestid = self.lastid
+    self.__id_check_done__ = True
+    self.event ()
+
   def getlastid (self):
     if self.state == 0:
       self.request_t = time.time ()
@@ -170,7 +200,7 @@ class Index:
 
   def gotlastid (self, id):
     if id != self.lastid:
-      self.__incremental_id_check_done__  = False
+      self.__id_check_done__              = False
       self.__full_data_check__done__      = False
 
     self.lastid = id
@@ -179,6 +209,10 @@ class Index:
     self.sync_lastid_t = time.time ()
     if self.pendingid == 2:
       self.state = 0
+
+    # Check if there are any missing ids initialized
+    self.check_and_add_ids ()
+    self.event ()
 
   def getid (self, id):
     if self.state == 0:
@@ -200,6 +234,8 @@ class Index:
 
     if self.pendingid == 4:
       self.state = 0
+
+    self.event ()
 
   requested_chunks = 0
   def getbatch (self, id, ref, start, length):
@@ -225,6 +261,8 @@ class Index:
       if self.requested_chunks <= 0:
         self.state = 0
 
+    self.event ()
+
   status = 0
   def getstatus (self):
     if self.state == 0:
@@ -248,6 +286,8 @@ class Index:
         self.buoy.log ("[Buoy] Uptime: " + str(self.buoy.uptime / 1000) + "s")
       else:
         self.logger.debug (self.me + " Status updated.")
+
+    self.event ()
 
   def getinfo (self):
     if self.state == 0:
@@ -273,6 +313,8 @@ class Index:
     self.state      = 0
     self.pendingid  = 0
 
+    self.event ()
+
   # State for keeping this buoys data uptodate
   state     = 0
   timeout   = 0  # seconds, should be set relevant to appropriate request
@@ -292,11 +334,11 @@ class Index:
 
   getid_timeout     = 10
   getids_timeout    = 15
-  getbatch_timeout  = 15
+  getbatch_timeout  = 30
 
-  default_chunks    = 10 # number of chunks/batches to request in one go
+  default_chunks    =  8 # number of chunks/batches to request in one go
 
-  working_data  = None  # working data object, getting full index, refs and data
+  working_data  = None   # working data object, getting full index, refs and data
 
   # For developers reference when implementing new telegrams
   # Latest used pending id: 6
@@ -324,37 +366,9 @@ class Index:
         # }}}
 
         if self.buoy.getdata:
-          # check if we have all ids {{{
-          if self.lastid > 0:
-            # get ids from greatestid to lastid
-            if self.greatestid < self.lastid:
-              self.pendingid = 3
-              self.getids (self.greatestid + 1)
-              return
-
-            # Get possibly missing ids
-            elif not self.__incremental_id_check_done__:
-              if self.__unchecked_ids__ is None:
-                self.__unchecked_ids__ = []
-                ii = 1
-                while ii < self.greatestid:
-                  if self.indexofdata (ii) is None:
-                    self.__unchecked_ids__.append (ii)
-                  ii = ii + 1
-
-                self.logger.debug (self.me + " Getting missing ids: " + str(self.__unchecked_ids__))
-                return
-
-              else:
-                if len(self.__unchecked_ids__) > 0:
-                  self.pendingid = 3
-                  self.getids (self.__unchecked_ids__[0]) # take first, but leave it in list, is removed when received
-                  return
-                else:
-                  self.__unchecked_ids__              = None
-                  self.__incremental_id_check_done__  = True
-                  self.logger.debug (self.me + " All missing ids got.")
-          # }}}
+          # check if we have all ids
+          if not self.__id_check_done__:
+            self.check_and_add_ids ()
 
           # download data, strategy:
           #
@@ -458,7 +472,7 @@ class Index:
           # Everything is happy dandy.. I'm idle.
           else:
             if not self.idle_msg:
-              self.logger.info (self.me + " Idle (data acquisition disabled).")
+              self.logger.info (self.me + " Idle.")
               self.idle_msg = True
 
             self.idle = True
@@ -467,7 +481,7 @@ class Index:
 
         else:
           if not self.idle_msg:
-            self.logger.info (self.me + " Idle.")
+            self.logger.info (self.me + " Idle (data acquisition disabled).")
             self.idle_msg = True
           self.idle = True
 
@@ -476,12 +490,18 @@ class Index:
         self.logger.info (self.me + " Cleaned up. Idle.")
         self.idle = True
 
+      if self.idle:
+        self.event ()
+
       # waiting for response
       elif self.state == 1:
         # time.time out
         if time.time () - self.request_t > self.timeout:
           self.logger.debug (self.me + " Request timed out, reset..")
           self.reset (timeout = True)
+
+        else:
+          self.action.clear ()
 
   reseti = 0 # times tried to reset
   def reset (self, keepradiorate = False, timeout = False):
@@ -523,5 +543,7 @@ class Index:
     self.protocol.a_receive_state = 0
     self.protocol.a_buf = ''
     self.waitforreceipt = False
+
+    self.event ()
 
 
