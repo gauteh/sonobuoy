@@ -312,6 +312,7 @@ class Zero:
     self.go = False
 
     # Stop all Buoys..
+    self.current.index.event ()
     self.cthread.join ()
 
     if self.current:
