@@ -336,7 +336,7 @@ class Index:
   getids_timeout    = 15
   getbatch_timeout  = 30
 
-  default_chunks    =  8 # number of chunks/batches to request in one go
+  default_chunks    = 10 # number of chunks/batches to request in one go
 
   working_data  = None   # working data object, getting full index, refs and data
 
