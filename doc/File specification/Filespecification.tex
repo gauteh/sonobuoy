@@ -42,8 +42,8 @@
 \vspace{2em}
 \section*{Introduction}
 This document is a specification of how data is stored locally on the
-buoy and on the central logging point, versions \textbf{8 for buoy
-storage (DAT)} and \textbf{2 for central storage (DTT)}.
+buoy and on the central logging point, versions \textbf{9 for buoy
+storage (DAT)} and \textbf{3 for central storage (DTT)}.
 
 \vspace{2em}
 
@@ -108,6 +108,8 @@ storage (DAT)} and \textbf{2 for central storage (DTT)}.
       \item Number of samples (batch size $\cdot$ max references)
       \item Number of samples per reference (batch size, 1024)
       \item Number of references (40)
+      \item Flag indicating whether there was an error with writing
+        samples fast enough to card
     \end{enumerate}
 
     \subsubsection{Reference: Timing, position and status}
@@ -255,7 +257,8 @@ storage (DAT)} and \textbf{2 for central storage (DTT)}.
     8   & No of samples   & uint32\_t   & 4 \\ \hline
     12  & Batch size & uint32\_t  & 4 \\ \hline
     16  & No of references & uint32\_t & 4 \\ \hline
-    & \textbf{Total length} &  & \textbf{20} \\ \hline
+    20  & SD lag flag      & uint8\_t   & 1 \\ \hline
+    & \textbf{Total length} &  & \textbf{21} \\ \hline
   \end{tabular}
   \captionof{table}{Binary index file, fields, start and size is given in bytes.}
   \label{tab:index_binary_fields}
@@ -373,6 +376,8 @@ storage (DAT)} and \textbf{2 for central storage (DTT)}.
     \item Number of references (integer)
     \item HasFull, 'True' or 'False', whether a complete index has been
       received.
+    \item SD lag flag, 'True' or 'False', whether data could be written
+      fast enough to card.
   \end{enumerate}
 
   After that there is one line for each received reference, with a comma
