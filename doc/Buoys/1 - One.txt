@@ -14,6 +14,7 @@
   Seems to be a bad contact somewhere, may be solderpoints on Olimexino.
 
   == History ==
+  2012-08-20: Updated to v1.2.2.
   2012-08-08: Noticed bad GPS connection.
   2012-08-07: Updated to version 1.1.0.
   2012-06-25: Initial test: all components working.
