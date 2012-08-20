@@ -507,7 +507,7 @@ class Index:
   def reset (self, keepradiorate = False, timeout = False):
     self.reseti += 1
 
-    self.logger.debug (self.me + " Resetting communication state (try: " + str(self.reseti) + ".")
+    self.logger.debug (self.me + " Resetting communication state (try: " + str(self.reseti) + ").")
 
     # reset in case checksum mismatch or timeout
     if self.pendingid == 5 and self.requested_chunks > 1 and not timeout:
