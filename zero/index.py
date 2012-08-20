@@ -189,6 +189,7 @@ class Index:
 
     self.greatestid = self.lastid
     self.__id_check_done__ = True
+    self.__full_data_check_done__ = False
     self.event ()
 
   def getlastid (self):
@@ -200,8 +201,7 @@ class Index:
 
   def gotlastid (self, id):
     if id != self.lastid:
-      self.__id_check_done__              = False
-      self.__full_data_check__done__      = False
+      self.__id_check_done__             = False
 
     self.lastid = id
     self.logger.info (self.me + " Latest id: " + str(self.lastid))
