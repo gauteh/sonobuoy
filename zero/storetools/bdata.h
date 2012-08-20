@@ -61,9 +61,22 @@ namespace Zero {
 
       void check_checksums ();
       void populate_int32_samples ();
-      void fix_time ();
+      void fix_batch_time ();
       void assess_dataquality ();
 
+  };
+
+  class Collection {
+    public:
+      Collection ();
+
+      vector<Bdata> datas;
+
+      bool fixedtime;
+      bool notimefix;
+
+      /* Fix times */
+      void fix_data_time ();
   };
 }
 

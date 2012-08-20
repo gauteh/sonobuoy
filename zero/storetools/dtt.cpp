@@ -31,7 +31,7 @@ namespace Zero {
     /* Check and prepare samples */
     bdata.check_checksums ();
     bdata.populate_int32_samples ();
-    bdata.fix_time ();
+    bdata.fix_batch_time ();
     bdata.assess_dataquality ();
 
     cout << "done, read: " << bdata.batches.size () << " batches with: " << bdata.totalsamples << " samples total." << endl;

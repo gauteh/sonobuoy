@@ -63,7 +63,7 @@ namespace Zero {
     }
   }
 
-  void Bdata::fix_time () {
+  void Bdata::fix_batch_time () {
     /* Search for bad jumps in time and realign to previous sane reference
      *
      * Let GPS sync and time drift stay:
@@ -97,7 +97,8 @@ namespace Zero {
     notimefix = false;
     int goodid = -1;
 
-    for (vector<Batch>::iterator b = batches.begin(); b < batches.end (); b++) {
+    for (vector<Batch>::iterator b = batches.begin(); b < batches.end (); b++)
+    {
       b->fixedtime = false;
 
       if (b->ref < MAXTIME && b->ref > MINTIME) {
@@ -138,6 +139,17 @@ namespace Zero {
   }
 
   void Bdata::assess_dataquality () {
+
+  }
+
+  Collection::Collection () {
+    fixedtime = false;
+    notimefix = false;
+  }
+
+  void Collection::fix_data_time () {
+    /* Try to fix time on data files and batches, based on time on previous
+     * or following data files */
 
   }
 }

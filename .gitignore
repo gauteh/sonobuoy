@@ -34,5 +34,6 @@ hardware/simulations/*.net
 *.run.xml
 zero/storetools/libmseed/
 zero/storetools/dtttomseed
+zero/storetools/dttfix
 zero/storetools/mschangesource
 *.mseed
