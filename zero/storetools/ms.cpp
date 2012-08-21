@@ -102,6 +102,7 @@ namespace Zero {
 
       /* Generate file name */
       char *thisfname;
+      char finalname[256];
 
       if (autofname) {
         char timestr[50];
@@ -119,10 +120,12 @@ namespace Zero {
         thisfname = (char*)fname;
       }
 
-      ofstream out (thisfname);
+      strcpy (finalname, thisfname);
+
+      ofstream out (finalname);
 
       if (!out.is_open () || out.bad ()) {
-        cout << "Ms: Error: Could not open file for writing: " << thisfname << endl;
+        cout << "Ms: Error: Could not open file for writing: " << finalname << endl;
         return false;
       }
 
@@ -174,7 +177,7 @@ namespace Zero {
                            DATABLOCK, ENCODING, BYTEORDER, &psamples,
                            FLUSH, VERBOSE, NULL);
 
-      cout << "MS: => Packed " << psamples << " samples in " << precords << " records to file " << thisfname << "." << endl;
+      cout << "MS: => Packed " << psamples << " samples in " << precords << " records to file " << finalname << "." << endl;
 
       out.close ();
     }

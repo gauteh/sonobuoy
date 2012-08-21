@@ -26,8 +26,8 @@ ittf = open (str(id) + '.ITT', 'w')
 ittf.write (str(3) + '\n') # local version
 ittf.write (str(9) + '\n') # remote version
 ittf.write (str(id) + '\n')
-ittf.write (str(samples) + '\n')
-ittf.write (str(batches) + '\n')
+ittf.write (str(int(samples)) + '\n')
+ittf.write (str(int(batches)) + '\n')
 ittf.write ("True\n")
 ittf.write ("True\n")
 

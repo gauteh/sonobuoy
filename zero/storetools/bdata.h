@@ -77,6 +77,7 @@ namespace Zero {
 
       /* Fix times */
       void fix_data_time ();
+      void write_back ();
   };
 }
 

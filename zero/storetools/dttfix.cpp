@@ -59,22 +59,43 @@ namespace Zero {
       //cout << "done." << endl;
       // }}}
 
+      /* Data collection */
+      Collection c;
+
       /* Work through ids */
       vector<int>::iterator id = ids.begin ();
       while (id < ids.end ()) {
 
         /* Load DTT */
-        Dtt dtt (*id);
+        Dtt dtt (*id); // fixes internal batch time if possible
 
         if (dtt.ready) {
-          /* Handle */
-
+          c.datas.push_back (*(dtt.bdata));
         } else {
           cout << "Error with: " << *id << ", skipping.." << endl;
         }
 
         id++;
       }
+
+      /* Fixing time */
+      cout << "Fixing time.." << endl;
+      c.fix_data_time ();
+
+      /* Write back */
+      cout << "Write back files.." << endl;
+      for (vector<Bdata>::iterator bd = c.datas.begin (); bd < c.datas.end(); bd++) {
+        Dtt dtt (&(*bd));
+
+        char fname_i[50];
+        char fname_d[50];
+        sprintf (fname_i, "%d.ITT.NEW", bd->id);
+        sprintf (fname_d, "%d.DTT.NEW", bd->id);
+
+        dtt.write (fname_i, fname_d);
+      }
+
+      cout << "Finished." << endl;
 
       return 0;
     }
@@ -84,7 +105,8 @@ namespace Zero {
       cout << "Specify ids as space separated sequence of single ids or range" << endl
            << "with a range of the format STARTID-ENDID (no spaces, start and" << endl
            << "end separated with a -)." << endl;
-
+      cout << endl;
+      cout << "Output will be written to ID.DTT.NEW and ID.ITT.NEW." << endl;
     }
   }
 }

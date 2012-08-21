@@ -15,8 +15,9 @@ using namespace std;
 
 namespace Zero {
   Dtt::Dtt (int _id) {
-    bdata.id = _id;
-    cout << "Opening id: " << bdata.id << "..";
+    bdata = new Bdata;
+    bdata->id = _id;
+    cout << "Opening id: " << bdata->id << "..";
 
     /* Load index and samples */
     if (!read_index ()) {
@@ -29,18 +30,25 @@ namespace Zero {
     }
 
     /* Check and prepare samples */
-    bdata.check_checksums ();
-    bdata.populate_int32_samples ();
-    bdata.fix_batch_time ();
-    bdata.assess_dataquality ();
+    bdata->check_checksums ();
+    bdata->populate_int32_samples ();
+    bdata->fix_batch_time ();
+    bdata->assess_dataquality ();
 
-    cout << "done, read: " << bdata.batches.size () << " batches with: " << bdata.totalsamples << " samples total." << endl;
+    cout << "done, read: " << bdata->batches.size () << " batches with: " << bdata->totalsamples << " samples total." << endl;
     ready = true;
+  }
+
+  Dtt::Dtt (Bdata *b) {
+    bdata = b;
+    ready = true;
+    cout << "Initialized id: " << bdata->id << "..";
+    cout << "done, loaded: " << bdata->batches.size () << " batches with: " << bdata->totalsamples << " samples total." << endl;
   }
 
   bool Dtt::read_index () {
     char fname[50];
-    sprintf (fname, "%d.ITT", bdata.id);
+    sprintf (fname, "%d.ITT", bdata->id);
 
     //cout << "Opening: " << fname << endl;
 
@@ -50,11 +58,11 @@ namespace Zero {
       cerr << "Could not open index." << endl;
       return false;
     }
-    itt >> bdata.localversion;
-    itt >> bdata.remoteversion;
-    itt >> bdata.id;
-    itt >> bdata.samplescount;
-    itt >> bdata.batchcount;
+    itt >> bdata->localversion;
+    itt >> bdata->remoteversion;
+    itt >> bdata->id;
+    itt >> bdata->samplescount;
+    itt >> bdata->batchcount;
 
     /*
     cout << "Local version:  " << localversion << endl;
@@ -70,7 +78,7 @@ namespace Zero {
 
   bool Dtt::read_batches () {
     char fname[50];
-    sprintf (fname, "%d.DTT", bdata.id);
+    sprintf (fname, "%d.DTT", bdata->id);
     //cout << "Reading batches from: " << fname << endl;
 
     ifstream dtt (fname);
@@ -82,7 +90,7 @@ namespace Zero {
 
 
     /* Read batches */
-    for (int i = 0; i < bdata.batchcount; i++) {
+    for (int i = 0; i < bdata->batchcount; i++) {
       Bdata::Batch b;
       b.samples_u = new uint32_t[BATCH_LENGTH];
 
@@ -133,14 +141,23 @@ namespace Zero {
         (char) dtt.get(); // skip newline
 
         b.samples_u[j] = s;
-        bdata.totalsamples++;
+        bdata->totalsamples++;
       }
 
-      bdata.batches.push_back (b);
+      bdata->batches.push_back (b);
     }
 
     //cout << "Read " << totalsamples << " samples total." << endl;
     return true;
+  }
+
+  void Dtt::write (const char *fname_i, const char *fname_d) {
+    cout << "Writing " << fname_d << " (and " << fname_i << ").." << endl;
+  }
+  void Dtt::write_index (const char * fname) {
+  }
+
+  void Dtt::write_batches (const char * fname) {
   }
 
   Dtt::~Dtt () {

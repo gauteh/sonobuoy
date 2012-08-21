@@ -33,7 +33,7 @@
 # define NETWORK  "GB"
 # define STATION  "BUO1"
 # define LOCATION "G1"
-# define CHANNEL  "HYD"
+# define CHANNEL  "SH_Z"
 
 using namespace std;
 
@@ -88,7 +88,7 @@ namespace Zero {
 
         /* Add to MS */
         if (dtt.ready) {
-          ms.add_bdata (&(dtt.bdata));
+          ms.add_bdata (dtt.bdata);
         } else {
           cout << "Error with: " << *id << ", skipping.." << endl;
         }

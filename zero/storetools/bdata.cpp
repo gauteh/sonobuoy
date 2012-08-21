@@ -150,7 +150,12 @@ namespace Zero {
   void Collection::fix_data_time () {
     /* Try to fix time on data files and batches, based on time on previous
      * or following data files */
+    for (vector<Bdata>::iterator bd = datas.begin (); bd < datas.end(); bd++) {
 
+    }
+  }
+
+  void Collection::write_back () {
   }
 }
 
