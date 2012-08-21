@@ -17,6 +17,8 @@ zero/log
 *.DAT
 *.DTT
 *.ITT
+*.ITT*
+*.DTT*
 *.LOG
 *.LON
 *.IND

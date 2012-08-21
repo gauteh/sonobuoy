@@ -85,6 +85,8 @@ namespace Zero {
 
         /* Load DTT */
         Dtt dtt (*id);
+        dtt.bdata->fix_batch_time ();
+        dtt.bdata->assess_dataquality ();
 
         /* Add to MS */
         if (dtt.ready) {

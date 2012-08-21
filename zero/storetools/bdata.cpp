@@ -63,6 +63,16 @@ namespace Zero {
     }
   }
 
+  hptime_t MAXTIME () {
+    time_t t = time(NULL);
+    struct tm *ts = gmtime(&t);
+    return ms_time2hptime(ts->tm_year + 1 + 1900, 1, 0, 0, 0, 0);
+  }
+
+  hptime_t MINTIME () {
+    return ms_time2hptime(2012, 100, 0, 0, 0, 0);
+  }
+
   void Bdata::fix_batch_time () {
     /* Search for bad jumps in time and realign to previous sane reference
      *
@@ -87,12 +97,6 @@ namespace Zero {
 
     /* Any times out of this range will be ignored and time will be
      * extrapolated from previous sane reference */
-    time_t t      = time (NULL);
-    struct tm *ts = gmtime (&t);
-
-# define MAXTIME ms_time2hptime(ts->tm_year + 1 + 1900, 1, 0, 0, 0, 0)
-# define MINTIME ms_time2hptime(2012, 100, 0, 0, 0, 0)
-
     fixedtime = false;
     notimefix = false;
     int goodid = -1;
@@ -101,7 +105,7 @@ namespace Zero {
     {
       b->fixedtime = false;
 
-      if (b->ref < MAXTIME && b->ref > MINTIME) {
+      if (b->ref < MAXTIME() && b->ref > MINTIME()) {
         /* ref is good */
 
         /* First good: Go back and fix preceeding ids */
@@ -150,12 +154,85 @@ namespace Zero {
   void Collection::fix_data_time () {
     /* Try to fix time on data files and batches, based on time on previous
      * or following data files */
+
+    /* Concept:
+     *
+     * 1. Search for good time, prefer good one with good status
+     * 2. Use the closest good time to fix ids with no time
+     *
+     * Algorithm:
+     * 1. Iterate through ids, when good time is found
+     * 2. Work backwards to first if missing
+     * 3. Work backwards to middle between last good time and this fixing all
+     *    ids with missing (even though they have allready been fixed)
+     * 4. Use for following bad ids/batches when continuing to iterate
+     * 5. When next good time is found update working good time to this
+     *
+     */
+
+    /* Found good time on */
+    uint64_t goodtime = 0;
+    uint32_t goodid   = 0;
+    uint32_t goodref  = 0;
+    bool     hassync  = false;
+
     for (vector<Bdata>::iterator bd = datas.begin (); bd < datas.end(); bd++) {
 
-    }
-  }
+      for (vector<Bdata::Batch>::iterator b = bd->batches.begin(); b < bd->batches.end (); b++)
+      {
 
-  void Collection::write_back () {
+        /* Check if time is good */
+        if (b->ref > MINTIME() && b->ref < MAXTIME() && b->status == GOODSTATUS)
+        {
+          /* Update previous fixes back to half the way to previous good id
+           * unless this is the first, then go all the way */
+          int halfid = (goodid == 0 ? 0 : (bd->id - goodid) / 2);
+
+          /* Update goodtime to this one */
+          goodtime = b->ref;
+          goodid   = bd->id;
+          goodref  = b->no;
+          hassync  = true;
+
+          /* Do the actual updating of previous ones */
+          for (int i = halfid; i <= bd->id; i++) {
+            for (int r = 0; (i != bd->id && r < BATCHES) ||
+                (i == bd->id && r < b->ref); r++)
+            {
+              if (datas[i].batches[r].fixedtime || !datas[i].batches[r].notimefix)
+              {
+                /* Fix time */
+                b->origtime = b->ref;
+                b->ref = goodtime + ( (bd->id - goodid) * 40  + (b->no - goodref) )
+                                  * BATCHLENGTH / SAMPLERATE * 1e6;
+                b->fixedtime  = true;
+                b->notimefix  = false;
+                bd->fixedtime = true;
+                bd->notimefix = false;
+
+              }
+            }
+          }
+
+        } else {
+          /* Nope, try to fix it if we have a good one already */
+          if (goodtime > 0) {
+            b->origtime = b->ref;
+            b->ref = goodtime + ( (bd->id - goodid) * 40  + (b->no - goodref) )
+                              * BATCHLENGTH / SAMPLERATE * 1e6;
+            b->fixedtime  = true;
+            b->notimefix  = false;
+            bd->fixedtime = true;
+            bd->notimefix = false;
+          } else {
+            b->notimefix  = true;
+            bd->notimefix = true;
+          }
+        }
+      }
+
+
+    }
   }
 }
 

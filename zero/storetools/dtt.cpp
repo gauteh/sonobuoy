@@ -10,6 +10,7 @@
 # include <string>
 
 # include "dtt.h"
+# include "bdata.h"
 
 using namespace std;
 
@@ -32,8 +33,6 @@ namespace Zero {
     /* Check and prepare samples */
     bdata->check_checksums ();
     bdata->populate_int32_samples ();
-    bdata->fix_batch_time ();
-    bdata->assess_dataquality ();
 
     cout << "done, read: " << bdata->batches.size () << " batches with: " << bdata->totalsamples << " samples total." << endl;
     ready = true;
@@ -92,6 +91,13 @@ namespace Zero {
     /* Read batches */
     for (int i = 0; i < bdata->batchcount; i++) {
       Bdata::Batch b;
+
+      b.hasclipped    = false;
+      b.checksum_pass = false;
+      b.fixedtime     = false;
+      b.notimefix     = false;
+      b.origtime      = 0;
+
       b.samples_u = new uint32_t[BATCH_LENGTH];
 
       /* Read reference */
@@ -153,11 +159,51 @@ namespace Zero {
 
   void Dtt::write (const char *fname_i, const char *fname_d) {
     cout << "Writing " << fname_d << " (and " << fname_i << ").." << endl;
+    write_index (fname_i);
+    write_batches (fname_d);
   }
   void Dtt::write_index (const char * fname) {
+    ofstream out (fname);
+    if (!out.is_open () || out.bad ()) {
+      cout << "Dtt: Error: Could not open file for writing: " << fname << endl;
+      return;
+    }
+
+    out << bdata->localversion << endl;
+    out << bdata->remoteversion << endl;
+    out << bdata->id << endl;
+    out << bdata->samplescount << endl;
+    out << bdata->batchcount << endl;
+    out << "True" << endl;  // has full
+    out << "False" << endl; // sd lag?
+
+    for (vector<Bdata::Batch>::iterator b = bdata->batches.begin (); b < bdata->batches.end(); b++) {
+      out << b->no << "," << b->ref << "," << b->status << ","
+          << b->latitude << "," << b->longitude << "," << b->checksum << ","
+          << (b->length * b->no + b->no) << ",0" << endl;
+    }
+
+    out.close ();
   }
 
   void Dtt::write_batches (const char * fname) {
+    ofstream out (fname);
+    if (!out.is_open () || out.bad ()) {
+      cout << "Dtt: Error: Could not open file for writing: " << fname << endl;
+      return;
+    }
+
+    for (vector<Bdata::Batch>::iterator b = bdata->batches.begin (); b < bdata->batches.end(); b++) {
+      out << "R," << b->length << "," << b->no << "," << b->ref << ","
+          << b->status << "," << b->latitude << "," << b->longitude << ","
+          << b->checksum << endl;
+      for (int i = 0; i < b->length; i++) {
+        out << b->samples_u[i] << endl;
+      }
+    }
+
+
+    out.close ();
   }
 
   Dtt::~Dtt () {

@@ -10,13 +10,21 @@
 # include <stdint.h>
 # include <vector>
 # include <string>
+# include <libmseed/libmseed.h>
 
 # define SAMPLERATE   250.0
 # define BATCHLENGTH  1024
+# define BATCHES      40
+
+# define GOODSTATUS   15u
 
 using namespace std;
 
 namespace Zero {
+  /* Sane limits for checking time */
+  static hptime_t MAXTIME ();
+  static hptime_t MINTIME ();
+
   class Bdata {
     public:
       /* Batch */
@@ -36,6 +44,7 @@ namespace Zero {
         char dataquality;   // Overall quality indicator
 
         bool fixedtime;     // Did we have to fix time
+        bool notimefix;     // Could not fix time
         uint64_t origtime;
 
         uint32_t *samples_u;
@@ -77,7 +86,6 @@ namespace Zero {
 
       /* Fix times */
       void fix_data_time ();
-      void write_back ();
   };
 }
 

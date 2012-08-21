@@ -107,7 +107,6 @@ namespace Zero {
       if (autofname) {
         char timestr[50];
         string _fname = id.srcname;
-        //_fname += '_';
         _fname += ms_hptime2isotimestr (id.earliest, timestr, 0);
         _fname += ".mseed";
         thisfname = (char*)_fname.c_str ();
