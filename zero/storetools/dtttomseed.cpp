@@ -33,7 +33,7 @@
 # define NETWORK  "GB"
 # define STATION  "BUO1"
 # define LOCATION "G1"
-# define CHANNEL  "SH_Z"
+# define CHANNEL  "SHZ"
 
 using namespace std;
 
