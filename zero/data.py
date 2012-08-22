@@ -73,7 +73,7 @@ class Data:
   samples     = None
   refs_no     = None
 
-  LASTVERSION = 3
+  LASTVERSION   = 3
   localversion  = -1
   remoteversion = -1
   e_sdlag       = False
@@ -379,6 +379,8 @@ class Data:
     else:
       self.hasalldata = False
 
+    self.hasalldata = (self.hasalldata and self.hasfull)
+
   def reset_data (self):
     self.dataf_l.acquire ()
 
@@ -401,5 +403,6 @@ class Data:
     return (self.id == other)
 
   def close (self):
-    self.write_index ()
+    pass
+    # self.write_index ()
 

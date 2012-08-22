@@ -228,6 +228,11 @@ class Zero:
 
         if to > 0:
           self.current.index.action.wait (to)
+        elif len(self.buoys) < 2:
+          if self.current.index.idle:
+            self.current.index.action.clear ()
+
+          self.current.index.action.wait (0.5)
 
         self.current.loop ()
 
