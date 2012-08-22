@@ -194,6 +194,7 @@ namespace Zero {
           goodref  = b->no;
           hassync  = true;
 
+          cout << "Found goodtime, I: " << goodid << ", R: " << goodref << endl;
           /* Do the actual updating of previous ones */
           for (int i = halfid; i <= bd->id; i++) {
             for (int r = 0; (i != bd->id && r < BATCHES) ||
@@ -201,14 +202,18 @@ namespace Zero {
             {
               if (datas[i].batches[r].fixedtime || !datas[i].batches[r].notimefix)
               {
+                cout << "I: " << i << ", R: " << r << endl;
+                Bdata::Batch *bf = &(datas[i].batches[r]);
+                Bdata *bdf       = &(datas[i]);
+
                 /* Fix time */
-                b->origtime = b->ref;
-                b->ref = goodtime + ( (bd->id - goodid) * 40  + (b->no - goodref) )
-                                  * BATCHLENGTH / SAMPLERATE * 1e6;
-                b->fixedtime  = true;
-                b->notimefix  = false;
-                bd->fixedtime = true;
-                bd->notimefix = false;
+                bf->origtime = bf->ref;
+                bf->ref = goodtime + ( (bdf->id - goodid) * 40  + (bf->no - goodref) )
+                                     * BATCHLENGTH / SAMPLERATE * 1e6;
+                bf->fixedtime  = true;
+                bf->notimefix  = false;
+                bdf->fixedtime = true;
+                bdf->notimefix = false;
 
               }
             }
