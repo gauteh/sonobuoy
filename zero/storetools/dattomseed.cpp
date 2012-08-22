@@ -46,7 +46,7 @@ namespace Zero {
 
     int main (int argc, char ** argv) {
       cout << "DatToMseed ( rev " << VERSION << " )" << endl;
-      cout << "Author: Gaute Hope <eg@gaute.vetsj.com> / 2012-08-15" << endl << endl;
+      cout << "Author: Gaute Hope <eg@gaute.vetsj.com> / 2012-08-22" << endl << endl;
 
       //cout << "Parsing id list.."; // {{{
       if (argc < 2) {

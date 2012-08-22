@@ -29,7 +29,7 @@ namespace Zero {
 
     int main (int argc, char ** argv) {
       cout << "DttFix ( rev " << VERSION << " )" << endl;
-      cout << "Author: Gaute Hope <eg@gaute.vetsj.com> / 2012-08-15" << endl << endl;
+      cout << "Author: Gaute Hope <eg@gaute.vetsj.com> / 2012-08-20" << endl << endl;
 
       //cout << "Parsing id list.."; // {{{
       if (argc < 2) {
