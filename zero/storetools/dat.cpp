@@ -84,6 +84,14 @@ namespace Zero {
     bdata->hasfull        = true;
     bdata->e_sdlag        = i.e_sdlag;
 
+    /*
+    cout << "Local version:  " << bdata->localversion << endl;
+    cout << "Remote version: " << bdata->remoteversion << endl;
+    cout << "ID:             " << bdata->id << endl;
+    cout << "Samples:        " << bdata->totalsamples << endl;
+    cout << "Batches:        " << bdata->batchcount << endl;
+    */
+
     ind.close ();
     return true;
   }
@@ -111,11 +119,30 @@ namespace Zero {
       b.notimefix     = false;
       b.origtime      = 0;
 
+      b.length = BATCH_LENGTH;
       b.samples_u = new uint32_t[BATCH_LENGTH];
 
       /* Read reference */
+      char tmp[15];
 
-      /* Parse reference */
+      /* Skip padding */
+      for (int k = 0; k < (3 * SAMPLE_LENGTH); k++) {
+        dat.get ();
+      }
+
+      dat.read (reinterpret_cast<char*>(&b.no), sizeof(uint32_t));
+      dat.read (reinterpret_cast<char*>(&b.ref), sizeof(uint64_t));
+      dat.read (reinterpret_cast<char*>(&b.status), sizeof(uint32_t));
+      dat.read (tmp, sizeof(char) * 12);
+      b.latitude = tmp;
+      dat.read (tmp, sizeof(char) * 12);
+      b.longitude = tmp;
+      dat.read (reinterpret_cast<char*>(&b.checksum), sizeof(uint32_t));
+
+      /* Skip padding */
+      for (int k = 0; k < (3 * SAMPLE_LENGTH); k++) {
+        dat.get ();
+      }
 
       //cout << "Ref: " << b.no << ", " << b.ref << ", status: " << b.status << ", latitude: " << b.latitude << ", longitude: " << b.longitude << ", checksum: " << b.checksum << endl;
       //cout << "Read ref: " << b.no << endl;
@@ -127,12 +154,16 @@ namespace Zero {
 
       /* Read samples */
       for (int j = 0; j < BATCH_LENGTH; j++) {
+        uint32_t s;
+        dat.read (reinterpret_cast<char*>(&s), sizeof(uint32_t));
+
+        b.samples_u[j] = s;
       }
 
       bdata->batches.push_back (b);
     }
 
-    //cout << "Read " << totalsamples << " samples total." << endl;
+    //cout << "Read " << bdata->totalsamples << " samples total." << endl;
     return true;
   }
 

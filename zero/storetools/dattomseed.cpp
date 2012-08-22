@@ -1,5 +1,5 @@
 /* Author:  Gaute Hope <eg@gaute.vetsj.com>
- * Date:    2012-08-15
+ * Date:    2012-08-22
  *
  * dattomseed.cpp: Converts a range of DAT's to a miniSEED store
  *
