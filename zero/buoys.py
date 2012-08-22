@@ -9,7 +9,7 @@
 buoys = [ { 'id' :        1,
             'name' :      'One',
             'address' :   '04:3C:60',
-            'enabled' :   True,
+            'enabled' :   False,
             'version' :   3,
             'getdata' :   True,
           },
