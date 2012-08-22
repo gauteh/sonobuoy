@@ -70,7 +70,7 @@ class Zero:
     # reset reset status
     self.current.index.reseti = 0
 
-    self.current.index.event ()
+    self.current.index.event ("zero: set_current")
 
 
   current  = property(get_current, set_current) # Current Buoy
@@ -320,7 +320,7 @@ class Zero:
     self.go = False
 
     # Stop all Buoys..
-    self.current.index.event ()
+    self.current.index.event ("zero: stop")
     self.cthread.join ()
 
     if self.current:

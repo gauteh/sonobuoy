@@ -48,7 +48,8 @@ class Index:
     self.logger.info (self.me + " Initializing and opening index..: " + self.indexf_uri)
     self.open_index ()
 
-  def event (self):
+  def event (self, caller):
+    #self.logger.debug (self.me +  " Set action: " + caller)
     self.action.set ()
 
   def complete (self):
@@ -103,7 +104,7 @@ class Index:
       self.logger.info (self.me + " Setting buoy radio rate to goal: " + str(self.goal_radiorate))
       self.protocol.znbuoyradiorate (self.goal_radiorate)
 
-    self.event ()
+    #self.event ("fastradiorate")
 
   def checkradiorate (self):
     if self.buoy.radiorate != 0:
@@ -111,7 +112,6 @@ class Index:
         self.logger.info (self.me + " Buoy radio rate timed out, resetting rate.")
         self.buoy.radiorate = 0
 
-    self.event ()
 
   # GETIDS: Depreceated {{{
   gotids_n = 0
@@ -190,7 +190,7 @@ class Index:
     self.greatestid = self.lastid
     self.__id_check_done__ = True
     self.__full_data_check_done__ = False
-    self.event ()
+    self.event ("check_and_add_id")
 
   def getlastid (self):
     if self.state == 0:
@@ -212,7 +212,7 @@ class Index:
       self.state = 0
 
     # Check if there are any missing ids initialized
-    self.event ()
+    self.event ("gotlastid")
 
   def getid (self, id):
     if self.state == 0:
@@ -235,7 +235,7 @@ class Index:
     if self.pendingid == 4:
       self.state = 0
 
-    self.event ()
+    self.event ("gotid")
 
   requested_chunks = 0
   def getbatch (self, id, ref, start, length):
@@ -260,8 +260,7 @@ class Index:
       self.requested_chunks -= 1
       if self.requested_chunks <= 0:
         self.state = 0
-
-    self.event ()
+        self.event ("gotbatch all")
 
   status = 0
   def getstatus (self):
@@ -286,8 +285,8 @@ class Index:
         self.buoy.log ("[Buoy] Uptime: " + str(self.buoy.uptime / 1000) + "s")
       else:
         self.logger.debug (self.me + " Status updated.")
+      self.event ("gotstatus")
 
-    self.event ()
 
   def getinfo (self):
     if self.state == 0:
@@ -313,7 +312,7 @@ class Index:
     self.state      = 0
     self.pendingid  = 0
 
-    self.event ()
+    self.event ("gotinfo")
 
   # State for keeping this buoys data uptodate
   state     = 0
@@ -490,8 +489,8 @@ class Index:
         self.logger.info (self.me + " Cleaned up. Idle.")
         self.idle = True
 
-      if self.idle:
-        self.event ()
+      if self.state == 0 and self.idle:
+        self.event ("idle")
 
       # waiting for response
       elif self.state == 1:
@@ -501,6 +500,7 @@ class Index:
           self.reset (timeout = True)
 
         else:
+          #self.logger.debug (self.me + " Clear action.")
           self.action.clear ()
 
   reseti = 0 # times tried to reset
@@ -544,6 +544,6 @@ class Index:
     self.protocol.a_buf = ''
     self.waitforreceipt = False
 
-    self.event ()
+    self.event ("reset")
 
 
