@@ -4,7 +4,7 @@
  * dttfix.cpp: Reads a range of IDs, try to fix them and outputs new.
  *
  * Files are expected to be in current directory. Output will be written to
- * files in current directory.
+ * files in current directory with .NEW appended to file name.
  *
  */
 

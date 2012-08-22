@@ -186,7 +186,7 @@ namespace Zero {
         {
           /* Update previous fixes back to half the way to previous good id
            * unless this is the first, then go all the way */
-          int halfid = (goodid == 0 ? 0 : (bd->id - goodid) / 2);
+          int halfid = (goodid == 0 ? datas[0].id : (bd->id - goodid) / 2 + goodid);
 
           /* Update goodtime to this one */
           goodtime = b->ref;
@@ -196,24 +196,27 @@ namespace Zero {
 
           cout << "Found goodtime, I: " << goodid << ", R: " << goodref << endl;
           /* Do the actual updating of previous ones */
-          for (int i = halfid; i <= bd->id; i++) {
-            for (int r = 0; (i != bd->id && r < DEFBATCHES) ||
-                (i == bd->id && r < b->ref); r++)
+          for (vector<Bdata>::iterator p = bd; p->id >= halfid; p--) {
+
+            for (int r = 0; (p->id != bd->id && r < DEFBATCHES) ||
+                (p->id == bd->id && r < b->no); r++)
             {
-              if (datas[i].batches[r].fixedtime || !datas[i].batches[r].notimefix)
+              if (p->batches[r].fixedtime || p->batches[r].notimefix)
               {
-                cout << "I: " << i << ", R: " << r << endl;
-                Bdata::Batch *bf = &(datas[i].batches[r]);
-                Bdata *bdf       = &(datas[i]);
+                cout << "Fixed time of I: " << p->id << ", R: " << r
+                     << " using I: " << goodid << ", R: " << goodref << endl;
+
+                Bdata::Batch *bf = &(p->batches[r]);
 
                 /* Fix time */
                 bf->origtime = bf->ref;
-                bf->ref = goodtime + ( (bdf->id - goodid) * 40  + (bf->no - goodref) )
-                                     * BATCHLENGTH / SAMPLERATE * 1e6;
-                bf->fixedtime  = true;
-                bf->notimefix  = false;
-                bdf->fixedtime = true;
-                bdf->notimefix = false;
+                bf->ref = goodtime + ( (p->id - goodid) * 40
+                                   + (bf->no - goodref) )
+                                   * BATCHLENGTH / SAMPLERATE * 1e6;
+                bf->fixedtime   = true;
+                bf->notimefix   = false;
+                p->fixedtime    = true;
+                p->notimefix    = false;
 
               }
             }
