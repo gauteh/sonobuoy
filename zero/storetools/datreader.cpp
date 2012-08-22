@@ -366,6 +366,12 @@ namespace Zero {
       fi.read (reinterpret_cast<char*>(&i.samples_per_reference), sizeof(i.samples_per_reference));
       fi.read (reinterpret_cast<char*>(&i.nrefs), sizeof(i.nrefs));
 
+      if (i.version > 8) {
+        fi.read (reinterpret_cast<char*>(&i.e_sdlag), sizeof(i.e_sdlag));
+      } else {
+        i.e_sdlag = false;
+      }
+
       if (verbose)
         cerr << "done." << endl;
 
@@ -379,6 +385,7 @@ namespace Zero {
       cerr << "=> Samples:           " << i.samples << endl;
       cerr << "=> Samples per ref:   " << i.samples_per_reference << endl;
       cerr << "=> References:        " << i.nrefs << endl;
+      cerr << "=> SD lag:            " << (i.e_sdlag ? "Yes" : "No") << endl;
     }
 
     void usage (string argv) {

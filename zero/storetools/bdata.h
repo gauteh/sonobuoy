@@ -57,8 +57,8 @@ namespace Zero {
       int id;
       int samplescount;
       int batchcount;
-      // HasFull..
-      // SD lag..
+      bool hasfull;
+      bool e_sdlag;
 
       int totalsamples;
 

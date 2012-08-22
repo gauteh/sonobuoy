@@ -63,6 +63,19 @@ namespace Zero {
     itt >> bdata->samplescount;
     itt >> bdata->batchcount;
 
+    bdata->hasfull = false;
+    bdata->e_sdlag = false;
+
+    string s;
+    itt >> s;
+    if (s == "True") bdata->hasfull = true;
+    itt.get (); // skip newline
+
+    if (bdata->localversion >= 3) {
+      itt >> s;
+      if (s == "True") bdata->e_sdlag = true;
+    }
+
     /*
     cout << "Local version:  " << localversion << endl;
     cout << "Remote version: " << remoteversion << endl;
@@ -174,8 +187,8 @@ namespace Zero {
     out << bdata->id << endl;
     out << bdata->samplescount << endl;
     out << bdata->batchcount << endl;
-    out << "True" << endl;  // has full
-    out << "False" << endl; // sd lag?
+    out << (bdata->hasfull ? "True" : "False") << endl;  // has full
+    out << (bdata->e_sdlag ? "True" : "False") << endl; // sd lag?
 
     for (vector<Bdata::Batch>::iterator b = bdata->batches.begin (); b < bdata->batches.end(); b++) {
       out << b->no << "," << b->ref << "," << b->status << ","
