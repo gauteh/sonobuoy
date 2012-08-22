@@ -14,7 +14,7 @@
 
 # define SAMPLERATE   250.0
 # define BATCHLENGTH  1024
-# define BATCHES      40
+# define DEFBATCHES     40
 
 # define GOODSTATUS   15u
 
@@ -52,10 +52,10 @@ namespace Zero {
       } Batch;
 
       /* Bdata */
+      int source; // 0 = DTT, 1 = DAT
       int localversion;
       int remoteversion;
       int id;
-      int samplescount;
       int batchcount;
       bool hasfull;
       bool e_sdlag;

@@ -197,7 +197,7 @@ namespace Zero {
           cout << "Found goodtime, I: " << goodid << ", R: " << goodref << endl;
           /* Do the actual updating of previous ones */
           for (int i = halfid; i <= bd->id; i++) {
-            for (int r = 0; (i != bd->id && r < BATCHES) ||
+            for (int r = 0; (i != bd->id && r < DEFBATCHES) ||
                 (i == bd->id && r < b->ref); r++)
             {
               if (datas[i].batches[r].fixedtime || !datas[i].batches[r].notimefix)

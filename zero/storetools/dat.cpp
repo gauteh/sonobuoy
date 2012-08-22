@@ -1,7 +1,7 @@
 /* Author:  Gaute Hope <eg@gaute.vetsj.com>
- * Date:    2012-08-15
+ * Date:    2012-08-22
  *
- * dtt.cpp: Interface to DTT file
+ * dat.cpp: Interface to DAT file
  *
  */
 
@@ -9,13 +9,15 @@
 # include <fstream>
 # include <string>
 
-# include "dtt.h"
+# include "dat.h"
 # include "bdata.h"
 
 using namespace std;
 
 namespace Zero {
-  Dtt::Dtt (int _id) {
+
+
+  Dat::Dat (int _id) {
     bdata = new Bdata;
     bdata->id = _id;
     cout << "Opening id: " << bdata->id << "..";
@@ -38,66 +40,62 @@ namespace Zero {
     ready = true;
   }
 
-  Dtt::Dtt (Bdata *b) {
+  Dat::Dat (Bdata *b) {
     bdata = b;
     ready = true;
     cout << "Initialized id: " << bdata->id << "..";
     cout << "done, loaded: " << bdata->batches.size () << " batches with: " << bdata->totalsamples << " samples total." << endl;
   }
 
-  bool Dtt::read_index () {
+  bool Dat::read_index () {
     char fname[50];
-    sprintf (fname, "%d.ITT", bdata->id);
+    sprintf (fname, "%d.IND", bdata->id);
 
     //cout << "Opening: " << fname << endl;
 
-    ifstream itt (fname);
-
-    if (itt.bad () || !itt.is_open ()) {
-      cerr << "Could not open index." << endl;
+    ifstream ind (fname, ios::binary);
+    if (ind.bad () || !ind.is_open ()) {
+      cerr << "Could not open index file." << endl;
       return false;
     }
 
-    bdata->source = 0;
-    itt >> bdata->localversion;
-    itt >> bdata->remoteversion;
-    itt >> bdata->id;
-    itt >> bdata->totalsamples;
-    itt >> bdata->batchcount;
 
-    bdata->hasfull = false;
-    bdata->e_sdlag = false;
+    Index i;
 
-    string s;
-    itt >> s;
-    if (s == "True") bdata->hasfull = true;
-    itt.get (); // skip newline
+    /* Reading index, member by member to avoid struct padding issues */
+    ind.read (reinterpret_cast<char*>(&i.version), sizeof(i.version));
+    ind.read (reinterpret_cast<char*>(&i.id), sizeof(i.id));
+    ind.read (reinterpret_cast<char*>(&i.sample_l), sizeof(i.sample_l));
+    ind.read (reinterpret_cast<char*>(&i.samples), sizeof(i.samples));
+    ind.read (reinterpret_cast<char*>(&i.samples_per_reference), sizeof(i.samples_per_reference));
+    ind.read (reinterpret_cast<char*>(&i.nrefs), sizeof(i.nrefs));
 
-    if (bdata->localversion >= 3) {
-      itt >> s;
-      if (s == "True") bdata->e_sdlag = true;
+    if (i.version > 8) {
+      ind.read (reinterpret_cast<char*>(&i.e_sdlag), sizeof(i.e_sdlag));
+    } else {
+      i.e_sdlag = false;
     }
 
-    /*
-    cout << "Local version:  " << localversion << endl;
-    cout << "Remote version: " << remoteversion << endl;
-    cout << "ID:             " << id << endl;
-    cout << "Samples:        " << samplescount << endl;
-    cout << "Batches:        " << batchcount << endl;
-    */
+    bdata->source         = 1;
+    bdata->localversion   = 0;
+    bdata->remoteversion  = i.version;
+    bdata->totalsamples   = i.samples;
+    bdata->batchcount     = i.nrefs;
+    bdata->hasfull        = true;
+    bdata->e_sdlag        = i.e_sdlag;
 
-    itt.close ();
+    ind.close ();
     return true;
   }
 
-  bool Dtt::read_batches () {
+  bool Dat::read_batches () {
     char fname[50];
-    sprintf (fname, "%d.DTT", bdata->id);
+    sprintf (fname, "%d.DAT", bdata->id);
     //cout << "Reading batches from: " << fname << endl;
 
-    ifstream dtt (fname);
+    ifstream dat (fname, ios::binary);
 
-    if (dtt.bad () || !dtt.is_open ()) {
+    if (dat.bad () || !dat.is_open ()) {
       cerr << "Could not open data file." << endl;
       return false;
     }
@@ -116,36 +114,8 @@ namespace Zero {
       b.samples_u = new uint32_t[BATCH_LENGTH];
 
       /* Read reference */
-      string ref;
-      dtt >> ref;
-      (char) dtt.get(); // skip newline
 
       /* Parse reference */
-      int t = 0;
-      int pos = 0;
-      string token;
-      while (t <= 7 && pos < ref.length()) {
-        token = "";
-        while (pos < ref.length()) {
-          char c = ref[pos];
-          if (c == ',') {pos++; break;}
-          else token += (char)c;
-          pos++;
-        }
-
-        switch (t) {
-          case 0: break; // R
-          case 1: sscanf (token.c_str(), "%u", &(b.length)); break;
-          case 2: sscanf (token.c_str(), "%u", &(b.no)); break;
-          case 3: sscanf (token.c_str(), "%lu", &(b.ref)); break;
-          case 4: sscanf (token.c_str(), "%u", &(b.status)); break;
-          case 5: b.latitude  = token;
-          case 6: b.longitude = token;
-          case 7: sscanf (token.c_str(), "%u", &(b.checksum)); break;
-        }
-
-        t++;
-      }
 
       //cout << "Ref: " << b.no << ", " << b.ref << ", status: " << b.status << ", latitude: " << b.latitude << ", longitude: " << b.longitude << ", checksum: " << b.checksum << endl;
       //cout << "Read ref: " << b.no << endl;
@@ -157,11 +127,6 @@ namespace Zero {
 
       /* Read samples */
       for (int j = 0; j < BATCH_LENGTH; j++) {
-        uint32_t s;
-        dtt >> s;
-        (char) dtt.get(); // skip newline
-
-        b.samples_u[j] = s;
       }
 
       bdata->batches.push_back (b);
@@ -171,6 +136,7 @@ namespace Zero {
     return true;
   }
 
+  /*
   void Dtt::write (const char *fname_i, const char *fname_d) {
     cout << "Writing " << fname_d << " (and " << fname_i << ").." << endl;
     write_index (fname_i);
@@ -186,7 +152,7 @@ namespace Zero {
     out << bdata->localversion << endl;
     out << bdata->remoteversion << endl;
     out << bdata->id << endl;
-    out << bdata->totalsamples << endl;
+    out << bdata->samplescount << endl;
     out << bdata->batchcount << endl;
     out << (bdata->hasfull ? "True" : "False") << endl;  // has full
     out << (bdata->e_sdlag ? "True" : "False") << endl; // sd lag?
@@ -219,8 +185,9 @@ namespace Zero {
 
     out.close ();
   }
+  */
 
-  Dtt::~Dtt () {
+  Dat::~Dat () {
   }
 }
 
