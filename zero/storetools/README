@@ -1,0 +1,6 @@
+Store tools
+
+Set the environment variable: LD_LIBRARY_PATH to the libmseed directory after
+building it to avoid having to install libmseed.
+
+

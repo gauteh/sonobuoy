@@ -31,7 +31,7 @@
 
 /* Configuration */
 # define NETWORK  "GB"
-# define STATION  "BUO1"
+# define STATION  "BUO2"
 # define LOCATION "G1"
 # define CHANNEL  "SHZ"
 
