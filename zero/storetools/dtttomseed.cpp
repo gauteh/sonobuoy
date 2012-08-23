@@ -31,7 +31,6 @@
 
 /* Configuration */
 # define NETWORK  "GB"
-# define STATION  "BUO3"
 # define LOCATION "G1"
 # define CHANNEL  "SHZ"
 
@@ -54,8 +53,9 @@ namespace Zero {
         usage ();
         return 1;
       }
+      string station = argv[1];
 
-      for (int i = 1; i < argc; i++) {
+      for (int i = 2; i < argc; i++) {
         int start, end;
         int n = sscanf (argv[i], "%d-%d", &start, &end);
         if (n == 2) {
@@ -77,7 +77,7 @@ namespace Zero {
       // }}}
 
       /* Set up miniSeed record (template) and trace list */
-      Ms ms (NETWORK, STATION, LOCATION, CHANNEL);
+      Ms ms (NETWORK, station.c_str (), LOCATION, CHANNEL);
 
       /* Work through ids */
       vector<int>::iterator id = ids.begin ();
@@ -107,7 +107,7 @@ namespace Zero {
     }
 
     void usage () {
-      cout << endl << "Usage: dtttomseed sequence.." << endl;
+      cout << endl << "Usage: dtttomseed STATION sequence.." << endl;
       cout << "Specify ids as space separated sequence of single ids or range" << endl
            << "with a range of the format STARTID-ENDID (no spaces, start and" << endl
            << "end separated with a -)." << endl;
