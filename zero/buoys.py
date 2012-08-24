@@ -19,7 +19,7 @@ buoys = [ { 'id' :        1,
             'address' :   '00:00:FF',
             'enabled' :   False,
             'version' :   3,
-            'getdata' :   True,
+            'getdata' :   False,
           },
 
           { 'id' :        3,
