@@ -239,7 +239,11 @@ class Zero:
         if len(self.buoys) > 1 and (time.time () - lastchange > MIN_BUOY_TIME):
           if self.ser is not None and self.acquire:
             # when current is done, go to next
-            if (time.time () - lastchange > MAX_BUOY_TIME) and not self.current.index.cleanup and not self.current.index.idle:
+            max_to = MAX_BUOY_TIME
+            if not self.current.getdata:
+              max_to = MAX_BUOY_TIME_NOGETDATA
+
+            if (time.time () - lastchange > max_to) and not self.current.index.cleanup and not self.current.index.idle:
               # give current buoy time to cleanup (timeout or receive)
               self.logger.info ("[Zero] Requesting current buoy to cleanup..")
               self.current.index.cleanup = True
