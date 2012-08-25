@@ -165,7 +165,7 @@ namespace Buoy {
        * Included tolerance for millis () drift.
        *
        */
-# define REFERENCE_TIMEOUT (20 * 60) // [s]
+# define REFERENCE_TIMEOUT (10 * 60) // [s]
 
 # if BBOARD == 0
       /* Maple Native Beta Crystal: 535-9721-1-ND from DigiKey */

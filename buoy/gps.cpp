@@ -143,7 +143,7 @@ namespace Buoy {
 
         /* Un-reliable, using time telegram */
         reference   = lastsecond;
-        microdelta  = micros () + ((millis () - lastsecond_time) * 1000L);
+        microdelta  = lastmicros;
         lastsync    = millis ();
       }
     }
@@ -188,6 +188,7 @@ namespace Buoy {
 
     /* Update last second */
     lastsecond_time = millis ();
+    lastmicros      = micros ();
     lastsecond      = newsecond;
 
     HAS_TIME = valid;
