@@ -137,16 +137,13 @@ namespace Buoy {
 
       /* Assuming we cannot have sync without time, there cannot be a lost
        * sync_reference without lost sync */
-      if (
-          ( (lastsecond - reference) > REFERENCE_TIMEOUT ) &&
-          ( (millis ()  - lastsync)  > (REFERENCE_TIMEOUT * 1000) )
-         )
+      if ((millis ()  - lastsync)  > (REFERENCE_TIMEOUT * 1000L))
       {
         HAS_SYNC_REFERENCE = false;
 
         /* Un-reliable, using time telegram */
         reference   = lastsecond;
-        microdelta  = micros () + ((millis () - lastsecond_time) * 1000);
+        microdelta  = micros () + ((millis () - lastsecond_time) * 1000L);
         lastsync    = millis ();
       }
     }
@@ -186,7 +183,7 @@ namespace Buoy {
     time += minute  * 1e2;
     time += second;
 
-    /* Make sure lastsync is not changed while working */
+    /* Make sure the PPS interrupt is not changed while working */
     disable_sync ();
 
     /* Update last second */
