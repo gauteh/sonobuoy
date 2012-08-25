@@ -193,8 +193,8 @@ class Protocol:
         self.a_buf = ''
         self.betweentelegram = self.betweentelegram.strip ()
         if len(self.betweentelegram) > 0:
-          self.logger.error (self.me + ' Discarded between telegram message received, see log file for details.')
-          self.logger.debug (self.me + ' Discarded between telegram message received: ' + self.betweentelegram)
+          self.logger.error (self.me + ' Message received between telegrams, discarded.')
+          self.logger.debug (self.me + ' Discarded: ' + self.betweentelegram)
 
           self.betweentelegram = ''
 
@@ -218,8 +218,8 @@ class Protocol:
 
       # Check if we're receiving sane amounts of data..
       if len(self.a_buf) > self.MAX_TELEGRAM_LENGTH:
-        self.logger.error (self.me + ' Telegram size suspiciously high, discarding, see log file for details.')
-        self.logger.debug (self.me + ' Telegram size suspiciously high, discarding: ' + self.a_buf)
+        self.logger.error (self.me + ' Discarded too long message.')
+        self.logger.debug (self.me + ' Discarded: ' + self.a_buf)
 
         self.a_buf = ''
         self.a_receive_state = 0
@@ -231,7 +231,7 @@ class Protocol:
       #self.logger.debug ("[Protocol] Checksum not provided on received message")
       pass
     elif (not test_checksum (buf)):
-      self.logger.info ("[Protocol] Message discarded, checksum failed, see log for details.")
+      self.logger.info ("[Protocol] Checksum failed, message discarded.")
       self.logger.debug ("[Protocol] Discarded: " + buf)
       self.zero.current.index.reset (keepradiorate = True)
       return
@@ -273,7 +273,7 @@ class Protocol:
         if self.waitforreceipt:
           if msgtype != 'AD' or (tokeni > 1 and subtype != 'DE'):
             self.zero.current.index.reset (keepradiorate = True)
-            self.logger.error ("[Protocol] Did not receive receipt immediately after data batch. Discarding data batch.")
+            self.logger.error ("[Protocol] Expected end of data batch. Discarding batch.")
             self.waitforreceipt = False
             self.zero.current.ad.ad_k_samples = 0
             self.zero.current.ad.ad_reference = 0
