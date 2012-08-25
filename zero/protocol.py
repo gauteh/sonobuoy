@@ -1,9 +1,7 @@
-"""
-Gaute Hope <eg@gaute.vetsj.com> (c) 2011-09-09
-
-protocol.py: Interface and protocol to buoys
-
-"""
+# -*- coding: utf-8 -*-
+# Gaute Hope <eg@gaute.vetsj.com> (c) 2011-09-09
+#
+# protocol.py: Interface and protocol to buoys
 
 from time import time
 

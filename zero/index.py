@@ -333,7 +333,7 @@ class Index:
 
   getid_timeout     = 10
   getids_timeout    = 15
-  getbatch_timeout  = 30
+  getbatch_timeout  = 10
 
   default_chunks    = 10 # number of chunks/batches to request in one go
 
@@ -542,7 +542,7 @@ class Index:
     # reset protocol
     self.protocol.a_receive_state = 0
     self.protocol.a_buf = ''
-    self.waitforreceipt = False
+    self.protocol.waitforreceipt = False
 
     self.event ("reset")
 

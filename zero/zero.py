@@ -2,10 +2,8 @@
 #
 # Author: Gaute Hope <eg@gaute.vetsj.com> / 2011-09-26
 #
-# Central logging and managing point
+# Zero: Central logging and managing point
 #
-# Requires:
-#  - pyserial
 
 import serial
 import signal
