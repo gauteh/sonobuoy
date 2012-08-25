@@ -58,7 +58,8 @@ class Zero:
 
     self.current.index.checkradiorate ()
 
-    self.protocol.ensure_zn_address ()
+    if self.ser is not None:
+      self.protocol.ensure_zn_address ()
 
     self.current.active = True
     self.current.index.cleanup  = False
