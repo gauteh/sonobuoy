@@ -190,7 +190,7 @@ class Index:
     self.greatestid = self.lastid
     self.__id_check_done__ = True
     self.__full_data_check_done__ = False
-    self.event ("check_and_add_id")
+    self.event ("check_and_add_ids")
 
   def getlastid (self):
     if self.state == 0:
@@ -358,7 +358,7 @@ class Index:
           self.getstatus ()
           return
 
-        if time.time() - self.sync_lastid > self.sync_lastid_t:
+        if time.time() - self.sync_lastid_t > self.sync_lastid:
           self.pendingid = 2
           self.getlastid ()
           return
