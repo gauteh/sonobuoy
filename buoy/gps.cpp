@@ -183,7 +183,7 @@ namespace Buoy {
     time += minute  * 1e2;
     time += second;
 
-    /* Make sure the PPS interrupt is not changed while working */
+    /* Make sure the PPS interrupt is not run while working */
     disable_sync ();
 
     /* Update last second */
