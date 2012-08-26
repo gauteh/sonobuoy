@@ -211,7 +211,8 @@ class Zero:
     MAX_BUOY_TIME = 70 # max time (seconds) before changing buoys
     MAX_BUOY_TIME_NOGETDATA = 20 # max time (seconds) before changing if data
                                  # should not be fetched from buoy.
-    MIN_BUOY_TIME =  0 # min time (seconds) before changing buoy
+    MIN_BUOY_TIME = 0 # min time (seconds) before changing buoy
+    allidle       = False
     IDLE_LOOP     = 0.5
     lastchange    = time.time ()
 
@@ -220,15 +221,18 @@ class Zero:
         to = 0
         if self.current.index.state == 1:
           to = self.current.index.timeout - (time.time () - self.current.index.request_t)
-        else:
-          if len (self.buoys) > 1:
-            if self.current.getdata:
-              to = MAX_BUOY_TIME - (time.time () - lastchange)
-            else:
-              to = MAX_BUOY_TIME_NOGETDATA - (time.time () - lastchange)
+
+          if self.current.getdata:
+            max_to = MAX_BUOY_TIME - (time.time () - lastchange)
           else:
-            self.current.index.action.clear ()
-            to = IDLE_LOOP
+            max_to = MAX_BUOY_TIME_NOGETDATA - (time.time () - lastchange)
+
+          to = min(to, max_to)
+
+        elif allidle:
+          to = IDLE_LOOP
+
+          self.current.index.action.clear ()
 
         if to > 0:
           self.current.index.action.wait (to)
@@ -285,6 +289,9 @@ class Zero:
                 self.logger.info ("[Zero] Changing to buoy: " + self.buoys[i].name + " [" + str(self.buoys[i].id) + "]..")
                 self.set_current (self.buoys[i])
                 lastchange = time.time ()
+                allidle = False
+              else:
+                allidle = True
 
 
   # go through list of buoys and return index of id
