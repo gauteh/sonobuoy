@@ -230,7 +230,7 @@ class Zero:
 
             to = min(to, max_to)
 
-        elif allidle:
+        elif allidle or len(self.buoys) < 2:
           to = IDLE_LOOP
 
           self.current.index.action.clear ()
