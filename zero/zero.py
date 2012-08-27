@@ -222,12 +222,13 @@ class Zero:
         if self.current.index.state == 1:
           to = self.current.index.timeout - (time.time () - self.current.index.request_t)
 
-          if self.current.getdata:
-            max_to = MAX_BUOY_TIME - (time.time () - lastchange)
-          else:
-            max_to = MAX_BUOY_TIME_NOGETDATA - (time.time () - lastchange)
+          if len(self.buoys) > 1:
+            if self.current.getdata:
+              max_to = MAX_BUOY_TIME - (time.time () - lastchange)
+            else:
+              max_to = MAX_BUOY_TIME_NOGETDATA - (time.time () - lastchange)
 
-          to = min(to, max_to)
+            to = min(to, max_to)
 
         elif allidle:
           to = IDLE_LOOP
