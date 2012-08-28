@@ -39,4 +39,5 @@ zero/storetools/dtttomseed
 zero/storetools/dattomseed
 zero/storetools/dttfix
 zero/storetools/mschangesource
+zero/storetools/readlongs
 *.mseed

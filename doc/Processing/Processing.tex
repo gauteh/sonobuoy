@@ -69,6 +69,22 @@ notes for how to use the data with SEISAN or MATLAB.
     Use the program \textit{fakedtt.py} to create a DTT file with a sine
     wave and try to convert and plot it to see if everything works.
 
+    \subsection{Importing to SEISAN}
+      \begin{enumerate}
+        \item Create a work directory, copy the data and index files for
+          the events to it.
+        \item Use dtttomseed or dattomseed with the first argument being
+          station name, BUO1 to BUO5 and after that a list of sequences
+          of the ids of the files.
+        \item A mseed file is created in the current directory.
+        \item Use mscut to split the file up in hourly intervals.
+        \item Create a list of the final files with dirf.
+        \item Use autoreg to add the events to the database. Copy the
+          WAV files and select create new IDs if they conflict with
+          existing events.
+        \item Use associ to merge the events with the existing events in
+          the database. Delete merged events.
+      \end{enumerate}
   \section{MATLAB}
 
 %\vspace{1em}
