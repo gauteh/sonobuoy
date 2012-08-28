@@ -230,6 +230,10 @@ class Zero:
 
             to = min(to, max_to)
 
+            # wait for buoy to cleanup
+            if self.current.index.cleanup:
+              to = max(to, IDLE_LOOP)
+
         elif allidle or len(self.buoys) < 2:
           to = IDLE_LOOP
 
