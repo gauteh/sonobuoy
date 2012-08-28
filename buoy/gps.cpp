@@ -117,9 +117,6 @@ namespace Buoy {
     /* Check state of timing and PPS, is called from within interrupt.
      * Should not output */
 
-    /* Threshold in milliseconds before we consider SYNC lost */
-# define LOST_SYNC 2000
-
     /* Check if we have lost sync */
     if ((millis () - lastsync) > LOST_SYNC) {
       HAS_SYNC = false;
@@ -137,7 +134,7 @@ namespace Buoy {
 
       /* Assuming we cannot have sync without time, there cannot be a lost
        * sync_reference without lost sync */
-      if ((millis ()  - lastsync)  > (REFERENCE_TIMEOUT * 1000L))
+      if ((millis ()  - lastsync)  > (REFERENCE_TIMEOUT * E3))
       {
         HAS_SYNC_REFERENCE = false;
 
@@ -152,7 +149,7 @@ namespace Buoy {
   void GPS::update_second () {
     /* Calculate Unix time {{{ */
 
-# define SECONDS_PER_DAY 86400L
+# define SECONDS_PER_DAY 86400uL
 # define LEAP_YEAR(x) !!(!((1970 + x) % 4) && ( ((1970 + x) % 100) || !((1970 + x) % 400) ))
 
     uint32_t _year = (2000 + year) - 1970; // Offset 1970 (unix epoch)
@@ -179,8 +176,8 @@ namespace Buoy {
     newsecond += (uint32_t)minute * 60;
     newsecond += (uint32_t)second;
 
-    time  = hour    * 1e4;
-    time += minute  * 1e2;
+    time  = hour    * E4;
+    time += minute  * E2;
     time += second;
 
     /* Make sure the PPS interrupt is not run while working */

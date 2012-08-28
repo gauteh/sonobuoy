@@ -147,6 +147,10 @@ namespace Buoy {
        * TODO: Handle if receiver is including them in telegrams.
        */
 
+# define E2 100uL
+# define E3 1000uL
+# define E4 10000uL
+# define E6 1000000uL
 
       /* The last unix time calculated from GPS telegram, with timestamp
        * in millis (). Is also incremented by a PPS signal. */
@@ -165,7 +169,10 @@ namespace Buoy {
        * Included tolerance for millis () drift.
        *
        */
-# define REFERENCE_TIMEOUT (10 * 60) // [s]
+# define REFERENCE_TIMEOUT (10uL * 60uL) // [s]
+
+    /* Threshold in milliseconds before we consider SYNC lost */
+# define LOST_SYNC 2000uL
 
 # if BBOARD == 0
       /* Maple Native Beta Crystal: 535-9721-1-ND from DigiKey */
