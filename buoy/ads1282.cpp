@@ -91,7 +91,7 @@ namespace Buoy {
      * for some initial reference.
      */
 # if HASGPS
-    references[batch] = (gps->reference * 1e6) + (micros () - gps->microdelta);
+    references[batch] = (gps->reference * 1e6L) + (micros () - gps->microdelta);
     reference_status[batch] = (gps->HAS_TIME & GPS::TIME) |
                               (gps->HAS_SYNC & GPS::SYNC) |
                               (gps->HAS_SYNC_REFERENCE & GPS::SYNC_REFERENCE);
@@ -589,7 +589,7 @@ namespace Buoy {
 
       /* Pick new reference for batch */
 # if HASGPS
-      references[batch] = (gps->reference * 1e6) + (micros () - gps->microdelta);
+      references[batch] = (gps->reference * 1e6L) + (micros () - gps->microdelta);
       reference_status[batch] = 0;
       if (gps->HAS_TIME) reference_status[batch] |= GPS::TIME;
       if (gps->HAS_SYNC) reference_status[batch] |= GPS::SYNC;
@@ -601,7 +601,6 @@ namespace Buoy {
 
       strcpy((char*) (reference_latitudes[batch]), (const char*) (gps->ref_latitude));
       strcpy((char*) (reference_longitudes[batch]), (const char*) (gps->ref_longitude));
-
 # endif
 
       checksums[batch] = 0;
