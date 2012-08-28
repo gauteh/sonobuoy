@@ -19,11 +19,11 @@ geoshow (ax, land);
 hold on;
 
 % IBCAO
-ibcaotfw = '~/ymse/maps/IBCAO-3rd-Edition/IBCAO_V3_500m_RR.tfw';
-ibcaotif = '~/ymse/maps/IBCAO-3rd-Edition/IBCAO_V3_500m_RR.tif';
-R = worldfileread (ibcaotfw);
-[ortho, cmap] = imread(ibcaotif);
-geoshow (ortho(:, :, 1:3), R);
+% ibcaotfw = '~/ymse/maps/IBCAO-3rd-Edition/IBCAO_V3_500m_RR.tfw';
+% ibcaotif = '~/ymse/maps/IBCAO-3rd-Edition/IBCAO_V3_500m_RR.tif';
+% R = worldfileread (ibcaotfw);
+% [ortho, cmap] = imread(ibcaotif);
+% geoshow (ortho(:, :, 1:3), R);
 
 
 % Todo: This probably considers minutes to be decimals of degree
