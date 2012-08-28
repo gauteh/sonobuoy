@@ -147,10 +147,13 @@ namespace Buoy {
        * TODO: Handle if receiver is including them in telegrams.
        */
 
+# define E1 10uL
 # define E2 100uL
 # define E3 1000uL
 # define E4 10000uL
+# define E5 100000uL
 # define E6 1000000uL
+# define E9 1000000000uL
 
       /* The last unix time calculated from GPS telegram, with timestamp
        * in millis (). Is also incremented by a PPS signal. */
