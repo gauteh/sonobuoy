@@ -56,13 +56,14 @@ notes for how to use the data with SEISAN or MATLAB.
 
   \section{SEISAN}
     \subsection{Configuration}
-    You have to increase the plot resolution of mulplt to something like
-    40000 horizontal and around 3000 vertical, as well as update the
-    frequency band of the spectral analysis to at least 125 Hz.
+    You have to increase the plot resolution of mulplt (MULPLT.DEF) to something like
+    60000 (screen resolution and hardcopy resolution), as well as update the
+    frequency band of the spectral analysis to at least 125 Hz. More
+    might be required. There is 40960 points in each DAT or DTT file.
 
     \subsection{Conversion}
-    Use \textit{dtttomseed} to convert to miniSEED, update the source
-    file to change location and station. I have used SHZ as channel code
+    Use \textit{dtttomseed} or \textit{dattomseed} to convert to miniSEED, update the source
+    file to change location, station is given as first argument. I have used SHZ as channel code
     for the hydrophone.
 
     \subsection{Test}
@@ -84,6 +85,20 @@ notes for how to use the data with SEISAN or MATLAB.
           existing events.
         \item Use associ to merge the events with the existing events in
           the database. Delete merged events.
+      \end{enumerate}
+
+      \subsection{Continuous database setup}
+      \begin{enumerate}
+        \item Set up a database for the experiment, e.g. GAK1
+        \item Import events hourly as described above, one event for
+          each hour.
+        \item Set up SEISAN.DEF to know GAK1 as a continuous database.
+        \item Set a new database for registered and extracted events, e.g. GAK1E.
+        \item Work on GAK1 and register ('p' in mulplt) to create an
+          event in GAK1E when something interesting is found.
+        \item GAK1 can be used for noise measurements etc.
+        \item Possibly create an intermittent stop with sanitized events
+          (fixed time, etc..)
       \end{enumerate}
   \section{MATLAB}
 
