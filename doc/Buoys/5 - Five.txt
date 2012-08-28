@@ -14,6 +14,7 @@
   ...
 
   == History ==
+  2012-08-29: Swapped back Olimexino from b 4.
   2012-08-29: Swapped GPS with buoy 4.
   2012-08-24: Swapped Olimexino with possbily faulty from buoy 4.
   2012-08-19: Updated to version 1.2.2.
