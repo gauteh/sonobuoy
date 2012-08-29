@@ -17,6 +17,8 @@ ax = worldmap (latlim, lonlim);
 land = shaperead ('landareas', 'UseGeoCoords', true);
 geoshow (ax, land);
 hold on;
+grid on;
+axis on;
 
 % IBCAO
 % ibcaotfw = '~/ymse/maps/IBCAO-3rd-Edition/IBCAO_V3_500m_RR.tfw';
