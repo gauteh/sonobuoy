@@ -21,42 +21,38 @@
 
 /* SDIO, connected to SD socket. */
 # if BBOARD == 0
-/* SPI mode, pins:
- * CS     = CD (card detect) / SDIO_D3 (Data 3)
- * DI     = SDIO_CMD
- * SCLK   = SDIO_CK
- * DO     = SDIO_D0 (Data 0)
- */
-# define SDIO_D0   98
-# define SDIO_D1   99
-# define SDIO_D2  111
-# define SDIO_D3  112
+  /* SPI mode, pins:
+   * CS     = CD (card detect) / SDIO_D3 (Data 3)
+   * DI     = SDIO_CMD
+   * SCLK   = SDIO_CK
+   * DO     = SDIO_D0 (Data 0)
+   */
+  # define SDIO_D0   98
+  # define SDIO_D1   99
+  # define SDIO_D2  111
+  # define SDIO_D3  112
 
-# define SDIO_CK  113
-# define SDIO_CMD 116
-
-/* SPI 2
- *
- * NSS  = 2
- * SCK  = 3
- * MISO = 4
- * MOSI = 5
- */
-# define SD_SPI 2
-# define SD_CS  2
-
+  # define SDIO_CK  113
+  # define SDIO_CMD 116
+  /* SPI 2
+   *
+   * NSS  = 2
+   * SCK  = 3
+   * MISO = 4
+   * MOSI = 5
+   */
+  # define SD_SPI 2
+  # define SD_CS  2
 # elif BBOARD == 1
-
-/* SPI 2
- *
- * NSS  = 25
- * SCK  = 32
- * MISO = 33
- * MOSI = 34
- */
-# define SD_SPI 2
-# define SD_CS  25 // chip select pin
-
+  /* SPI 2
+   *
+   * NSS  = 25
+   * SCK  = 32
+   * MISO = 33
+   * MOSI = 34
+   */
+  # define SD_SPI 2
+  # define SD_CS  25 // chip select pin
 # endif
 
 namespace Buoy {
@@ -81,36 +77,36 @@ namespace Buoy {
 
       typedef uint32_t sample;
 
-/* Data format */
-# define STORE_VERSION 10
-# define SAMPLE_LENGTH 4
+      /* Data format */
+      # define STORE_VERSION 10
+      # define SAMPLE_LENGTH 4
 
-/* Data file format {{{
- *
- * Reference:
- *  - 3 * (SAMPLE_LENGTH) with 0
- *  - Reference id: uint32_t
- *  - Reference:    uint64_t referencesecond [unix time + microdelta]
- *  - Status bit:   uint32_t status
- *  - Latitude:     char * 12
- *  - Longitude:    char * 12
- *  - Checksum:     uint32_t (of samples in batch)
- *  - 3 * (SAMPLE_LENGTH) with 0
- *  Total length: 68 bytes.
- *
- * Entry:
- *  - SAMPLE    (4 bytes)
- *
- * }}} */
+      /* Data file format {{{
+       *
+       * Reference:
+       *  - 3 * (SAMPLE_LENGTH) with 0
+       *  - Reference id: uint32_t
+       *  - Reference:    uint64_t referencesecond [unix time + microdelta]
+       *  - Status bit:   uint32_t status
+       *  - Latitude:     char * 12
+       *  - Longitude:    char * 12
+       *  - Checksum:     uint32_t (of samples in batch)
+       *  - 3 * (SAMPLE_LENGTH) with 0
+       *  Total length: 68 bytes.
+       *
+       * Entry:
+       *  - SAMPLE    (4 bytes)
+       *
+       * }}} */
 
-# define SD_REFERENCE_PADN 3
-# define SD_REFERENCE_LENGTH (2 * 3 * (SAMPLE_LENGTH) + 4 * 4 + 2 * 12 + 4)
+      # define SD_REFERENCE_PADN 3
+      # define SD_REFERENCE_LENGTH (2 * 3 * (SAMPLE_LENGTH) + 4 * 4 + 2 * 12 + 4)
 
-# define MAX_SAMPLES_PER_FILE (BATCH_LENGTH * 40)
-# define MAX_REFERENCES (MAX_SAMPLES_PER_FILE / BATCH_LENGTH)
+      # define MAX_SAMPLES_PER_FILE (BATCH_LENGTH * 40)
+      # define MAX_REFERENCES (MAX_SAMPLES_PER_FILE / BATCH_LENGTH)
 
-/* Maximum number of bytes in each data file */
-# define SD_DATA_FILE_SIZE (MAX_SAMPLES_PER_FILE * SAMPLE_LENGTH + MAX_REFERENCES * SD_REFERENCE_LENGTH)
+      /* Maximum number of bytes in each data file */
+      # define SD_DATA_FILE_SIZE (MAX_SAMPLES_PER_FILE * SAMPLE_LENGTH + MAX_REFERENCES * SD_REFERENCE_LENGTH)
 
       /* Last ID is one unsigned long */
       typedef uint32_t LASTID;
@@ -127,8 +123,8 @@ namespace Buoy {
         bool     e_sdlag;     // Has an E_SDLAG occured while on this index
       } Index;
 
-/* Using 8.3 file names limits the ID */
-# define MAXID (100000000L -1L)
+      /* Using 8.3 file names limits the ID */
+      # define MAXID (100000000L -1L)
 
       /* Files:
        * LASTID.LON     - file with current index id (not to be trusted..)
@@ -144,8 +140,8 @@ namespace Buoy {
        * new index or if file is corrupt.
        */
 
-/* Log files */
-# define MAX_LOG_SIZE (1024 * 1024 * 1)
+      /* Log files */
+      # define MAX_LOG_SIZE (1024 * 1024 * 1)
 
 # ifndef ONLY_SPEC
 
@@ -179,7 +175,7 @@ namespace Buoy {
       void stop_continuous_write ();
 
       /* ID and files currently being sent */
-# define GET_IDS_N 10 // no of ids to send in one go
+      # define GET_IDS_N 10 // no of ids to send in one go
 # if HASRF
       uint32_t s_id;
       uint16_t s_version;

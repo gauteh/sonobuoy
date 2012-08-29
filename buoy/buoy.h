@@ -9,7 +9,6 @@
 
 /* Version and settings */
 # define VERSION GIT_DESC
-# define PROTOCOL_VERSION 4
 
 /* IMPORTANT: Remember to update STORE_VERSION in case anything that might
  * change data quality or similar has been done */
@@ -64,6 +63,15 @@
  * incomint telegrams */
 # define MAX_TELEGRAM_CHARS 256
 
+/* Shorthand engineering notation for powers of 10 (unsigned longs) */
+# define E1 10uL
+# define E2 100uL
+# define E3 1000uL
+# define E4 10000uL
+# define E5 100000uL
+# define E6 1000000uL
+# define E9 1000000000uL
+
 namespace Buoy {
   class BuoyMaster {
     public:
@@ -82,7 +90,7 @@ namespace Buoy {
       void setup ();
   };
 
-  int itoa (uint32_t, uint8_t, char *);
+  int  itoa (uint32_t, uint8_t, char *);
   byte gen_checksum (const char *);
   bool test_checksum (char *);
   //void append_checksum (char *);

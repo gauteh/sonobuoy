@@ -149,15 +149,14 @@ namespace Buoy {
 
   void GPS::update_second () {
     /* Calculate Unix time {{{ */
-
-# define SECONDS_PER_DAY 86400uL
-# define LEAP_YEAR(x) !!(!((1970 + x) % 4) && ( ((1970 + x) % 100) || !((1970 + x) % 400) ))
+    # define SECONDS_PER_DAY 86400uL
+    # define LEAP_YEAR(x) !!(!((1970 + x) % 4) && ( ((1970 + x) % 100) || !((1970 + x) % 400) ))
 
     uint32_t _year = (2000 + year) - 1970; // Offset 1970 (unix epoch)
 
     uint64_t newsecond = _year * 365 * SECONDS_PER_DAY;
 
-# define LEAP_YEARS_BEFORE_1970 ((1970 / 4) - (1970 / 100) + (1970 / 400))
+    # define LEAP_YEARS_BEFORE_1970 ((1970 / 4) - (1970 / 100) + (1970 / 400))
     /* Add a day of seconds for each leap year except this */
     newsecond += ((  (1970 + (_year-1)) /   4 )
                -  (  (1970 + (_year-1)) / 100 )

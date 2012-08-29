@@ -12,15 +12,17 @@
 
 # include <stdint.h>
 
+# define PROTOCOL_VERSION 4
+
 namespace Buoy {
 # define RF_BAUDRATE 115200
 # if BBOARD == 0
 
-# define RF_Serial Serial3
+  # define RF_Serial Serial3
 
 # elif BBOARD == 1
 
-# define RF_Serial Serial1
+  # define RF_Serial Serial1
 
 # endif
 
@@ -49,15 +51,13 @@ namespace Buoy {
 /* Protocol
  *
  * Telegram consists of:
- * $Type,values,values,values*Checksum
+ * $type,values,values,values*checksum
  *
- * Type is one of:
- *  - AD    AD data and status messages
- *  - GPS   GPS position and time data
- *  - DBG   Debug message
+ * Telegrams are described in doc/Protocol.ods
  *
  * After * checksum is computed as XOR of all values
  * between, and not including, $ and *. Two hexadecimal digits.
+ * Zero will also accept NN as checksum if none can be computed.
  *
  */
 
@@ -81,7 +81,7 @@ namespace Buoy {
       # define MAX_SANE_SAMPLE  MAX_SAMPLES_PER_FILE
       # define MAX_SANE_LENGTH  (50 * BATCH_LENGTH)
 
-# define RF_SERIAL_BUFLEN MAX_TELEGRAM_CHARS
+      # define RF_SERIAL_BUFLEN MAX_TELEGRAM_CHARS
       char rf_buf[RF_SERIAL_BUFLEN];
       uint8_t rf_buf_pos;
 

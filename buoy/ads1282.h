@@ -16,35 +16,33 @@ using namespace std;
 namespace Buoy {
 
 # if BBOARD == 0
-/* Maple Native */
+  /* Maple Native */
 
-// SPI
-# define AD_SPI   1
-# define AD_SCLK 53
-# define AD_DOUT 55
-# define AD_DIN  54
-# define AD_SS   BOARD_SPI1_NSS_PIN   // 52, unused
+  // SPI
+  # define AD_SPI   1
+  # define AD_SCLK 53
+  # define AD_DOUT 55
+  # define AD_DIN  54
+  # define AD_SS   BOARD_SPI1_NSS_PIN   // 52, unused
 
-# define AD_nDRDY 40
+  # define AD_nDRDY 40
 
-# define AD_I2C  1
-# define AD_SCL 38
-# define AD_SDA 39
-
+  # define AD_I2C  1
+  # define AD_SCL 38
+  # define AD_SDA 39
 # elif BBOARD == 1
-/* Olimexino STM32 H103 */
+  /* Olimexino STM32 H103 */
 
-// SPI
-# define AD_SCLK 12
-# define AD_DOUT 11 // (D13 = led 1)
-# define AD_DIN  10
+  // SPI
+  # define AD_SCLK 12
+  # define AD_DOUT 11 // (D13 = led 1)
+  # define AD_DIN  10
 
-# define AD_nDRDY 4 // (D3 = led 2)
+  # define AD_nDRDY 4 // (D3 = led 2)
 
-# define AD_I2C 1
-# define AD_SCL 5
-# define AD_SDA 9
-
+  # define AD_I2C 1
+  # define AD_SCL 5
+  # define AD_SDA 9
 # endif
 
 /* I2C bus
@@ -92,7 +90,6 @@ namespace Buoy {
 # define AD_I2C_POLARITY1 0
 
   class ADS1282 {
-    private:
     public:
 # if HASGPS
       GPS  * gps;
@@ -252,8 +249,8 @@ namespace Buoy {
        */
 
       volatile uint64_t references[BATCHES];
-      volatile char reference_latitudes[BATCHES][12];
-      volatile char reference_longitudes[BATCHES][12];
+      volatile char     reference_latitudes[BATCHES][12];
+      volatile char     reference_longitudes[BATCHES][12];
       volatile uint16_t reference_status[BATCHES];
       volatile uint32_t checksums[BATCHES];
 

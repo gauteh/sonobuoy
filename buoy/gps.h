@@ -15,24 +15,20 @@
 # include <stdint.h>
 # include "types.h"
 
-namespace Buoy {
-  class GPS {
 # define TELEGRAM_LEN MAX_TELEGRAM_CHARS
 
 # define GPS_BAUDRATE 4800
 
 # if BBOARD == 0
-
-# define GPS_Serial Serial1
-# define GPS_SYNC_PIN 27 // Should be 5V tolerant
-
+  # define GPS_Serial Serial1
+  # define GPS_SYNC_PIN 27 // Should be 5V tolerant
 # elif BBOARD == 1
-
-# define GPS_Serial Serial2
-# define GPS_SYNC_PIN 2 // Should be 5V tolerant
-
+  # define GPS_Serial Serial2
+  # define GPS_SYNC_PIN 2 // Should be 5V tolerant
 # endif
 
+namespace Buoy {
+  class GPS {
     private:
       char gps_buf [TELEGRAM_LEN + 2];
       int  gps_buf_pos;
@@ -145,14 +141,6 @@ namespace Buoy {
        *
        * TODO: Handle if receiver is including them in telegrams.
        */
-
-# define E1 10uL
-# define E2 100uL
-# define E3 1000uL
-# define E4 10000uL
-# define E5 100000uL
-# define E6 1000000uL
-# define E9 1000000000uL
 
       /* The last unix time calculated from GPS telegram, with timestamp
        * in millis (). Is also incremented by a PPS signal. */
