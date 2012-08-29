@@ -167,14 +167,16 @@ namespace Buoy {
 
       /* Timeout for considering valid PPS signal and for before
        * updating a the reference manually (when sync / PPS is lost) */
-# define REFERENCE_TIMEOUT (10uL * 60uL)  // [s]
-# define LOST_SYNC          2000uL        // [ms]
+      # define REFERENCE_TIMEOUT (10uL * 60uL)  // [s]
+      # define LOST_SYNC          2000uL        // [ms]
 
 # if BBOARD == 0
       /* Maple Native Beta Crystal: 535-9721-1-ND from DigiKey */
-# define TIMING_PPM  10
+      # define CPUFREQ    (72 * E9) // [Hz] (see: CYCLES_PER_MICROSECOND)
+      # define TIMING_PPM  10       // [ppm]
 # elif BBOARD == 1
       /* TODO: Still unknown for Olimexino */
+      # define CPUFREQ    (72 * E9) // [Hz] (see: CYCLES_PER_MICROSECOND)
 # endif
 
 /* Overflow handling, the math.. {{{

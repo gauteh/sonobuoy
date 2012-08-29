@@ -172,7 +172,7 @@ namespace Buoy {
         newsecond += SECONDS_PER_DAY * monthdays[i - 1];
     }
 
-    newsecond += SECONDS_PER_DAY * (day - 1);
+    newsecond += SECONDS_PER_DAY  * (day - 1);
     newsecond += (uint32_t)hour   * 60 * 60;
     newsecond += (uint32_t)minute * 60;
     newsecond += (uint32_t)second;
