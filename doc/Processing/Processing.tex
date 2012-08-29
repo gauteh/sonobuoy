@@ -49,7 +49,15 @@ notes for how to use the data with SEISAN or MATLAB.
 \begin{multicols}{2}
   \section{Tools}
   \subsection{dtttomseed}
-  \subsection{dattodtt}
+  \subsection{datreader}
+    Reads IND and DAT files and can, among other things, convert to DTT.
+    Typical invocation for converting a large number of DAT files to
+    DTT (\textit{bash}). \\
+
+    \begin{listing}
+      for i in *.IND; do datreader -s -d $>$  \$\{i/IND/DTT\}; done
+    \end{listing}
+
   \subsection{dttfix}
   \subsection{fakedtt}
   \subsection{mschangesource}
