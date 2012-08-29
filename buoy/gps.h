@@ -130,7 +130,6 @@ namespace Buoy {
        *
        */
       volatile bool HAS_TIME;            // Has valid time from GPS
-
       volatile bool HAS_SYNC;            // Has PPS synced
       volatile bool HAS_SYNC_REFERENCE;  // Reference is set using PPS
 
@@ -166,16 +165,10 @@ namespace Buoy {
       volatile uint64_t lastsync;
       volatile uint64_t lastmicros;
 
-
-      /* Time to wait before manually updating reference (in case of no sync)
-       *
-       * Included tolerance for millis () drift.
-       *
-       */
-# define REFERENCE_TIMEOUT (10uL * 60uL) // [s]
-
-    /* Threshold in milliseconds before we consider SYNC lost */
-# define LOST_SYNC 2000uL
+      /* Timeout for considering valid PPS signal and for before
+       * updating a the reference manually (when sync / PPS is lost) */
+# define REFERENCE_TIMEOUT (10uL * 60uL)  // [s]
+# define LOST_SYNC 2000uL                 // [ms]
 
 # if BBOARD == 0
       /* Maple Native Beta Crystal: 535-9721-1-ND from DigiKey */
