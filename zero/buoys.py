@@ -27,7 +27,7 @@ buoys = [ { 'id' :        1,
             'address' :   '04:3C:64',
             'enabled' :   True,
             'version' :   3,
-            'getdata' :   False,
+            'getdata' :   True,
           },
 
           { 'id' :        4,
