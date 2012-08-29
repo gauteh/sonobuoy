@@ -44,13 +44,14 @@ namespace Buoy {
     year      = 0;
     valid     = false;
     *latitude = 0;
-    north     = false;
-    *longitude = 0;
-    east      = false;
+    north       = false;
+    *longitude  = 0;
+    east        = false;
 
-    ref_latitude[0] = 0;
-    ref_longitude[0] = 0;
+    ref_latitude[0]   = 0;
+    ref_longitude[0]  = 0;
     ref_position_lock = 0;
+
     //*speedoverground = 0;
     //*courseoverground = 0;
   } // }}}

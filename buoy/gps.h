@@ -168,7 +168,7 @@ namespace Buoy {
       /* Timeout for considering valid PPS signal and for before
        * updating a the reference manually (when sync / PPS is lost) */
 # define REFERENCE_TIMEOUT (10uL * 60uL)  // [s]
-# define LOST_SYNC 2000uL                 // [ms]
+# define LOST_SYNC          2000uL        // [ms]
 
 # if BBOARD == 0
       /* Maple Native Beta Crystal: 535-9721-1-ND from DigiKey */
