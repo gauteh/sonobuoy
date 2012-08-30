@@ -38,7 +38,33 @@ namespace Zero {
         return 1;
       }
 
+      /* options */
+      bool requiregoodstatus = false;
+
+      bool onsequence = false;
       for (int i = 1; i < argc; i++) {
+        /* Check for options before id sequences start */
+        if (!onsequence) {
+          if (argv[i][0] == '-') {
+            switch (argv[i][1]) {
+              case 's': requiregoodstatus = true;
+                        break;
+              default:
+                {
+                  cerr << "Unknown option: " << argv[i] << endl;
+
+                  usage ();
+                  return 1;
+                }
+            }
+
+            continue;
+
+          } else {
+            onsequence = true;
+          }
+        }
+
         int start, end;
         int n = sscanf (argv[i], "%d-%d", &start, &end);
         if (n == 2) {
@@ -80,7 +106,7 @@ namespace Zero {
 
       /* Fixing time */
       cout << "Fixing time.." << endl;
-      c.fix_data_time ();
+      c.fix_data_time (requiregoodstatus);
 
       /* Write back */
       cout << "Write back files.." << endl;
@@ -101,12 +127,16 @@ namespace Zero {
     }
 
     void usage () {
-      cout << endl << "Usage: dttfix sequence.." << endl;
+      cout << endl << "Usage: dttfix [-s] sequence.." << endl;
       cout << "Specify ids as space separated sequence of single ids or range" << endl
            << "with a range of the format STARTID-ENDID (no spaces, start and" << endl
            << "end separated with a -)." << endl;
       cout << endl;
       cout << "Output will be written to ID.DTT.NEW and ID.ITT.NEW." << endl;
+      cout << endl;
+      cout << "Options: " << endl
+           << "  -s     Require good status (no time will be considered good" << endl
+           << "         unless it has optimal status)" << endl;
     }
   }
 }

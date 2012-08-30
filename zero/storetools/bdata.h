@@ -86,7 +86,7 @@ namespace Zero {
       bool notimefix;
 
       /* Fix times */
-      void fix_data_time ();
+      void fix_data_time (bool requiregoodstatus);
   };
 }
 

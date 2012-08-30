@@ -151,7 +151,7 @@ namespace Zero {
     notimefix = false;
   }
 
-  void Collection::fix_data_time () {
+  void Collection::fix_data_time (bool requiregoodstatus) {
     /* Try to fix time on data files and batches, based on time on previous
      * or following data files */
 
@@ -182,7 +182,7 @@ namespace Zero {
       {
 
         /* Check if time is good */
-        if (b->ref > MINTIME() && b->ref < MAXTIME() && b->status == GOODSTATUS)
+        if (b->ref > MINTIME() && b->ref < MAXTIME() && (!requiregoodstatus || b->status == GOODSTATUS))
         {
           /* Update previous fixes back to half the way to previous good id
            * unless this is the first, then go all the way */
@@ -195,8 +195,13 @@ namespace Zero {
           hassync  = true;
 
           cout << "Found goodtime, I: " << goodid << ", R: " << goodref << endl;
-          /* Do the actual updating of previous ones */
-          for (vector<Bdata>::iterator p = bd; p->id >= halfid; p--) {
+
+          cout << "halfid: " << halfid << endl;
+
+          /* Updating previous ones */
+          for (vector<Bdata>::iterator p = bd; p->id >= halfid && p >= datas.begin (); p--) {
+            cout << "On " << p->id << endl;
+
 
             for (int r = 0; (p->id != bd->id && r < DEFBATCHES) ||
                 (p->id == bd->id && r < b->no); r++)
@@ -221,9 +226,11 @@ namespace Zero {
               }
             }
           }
+          cout << "done updating previous ones.." << endl;
 
         } else {
           /* Nope, try to fix it if we have a good one already */
+          cout << "Bad time, id: " << bd->id << ", ref: " << b->no << ", time: " << b->ref << endl;
           if (goodtime > 0) {
             b->origtime = b->ref;
             b->ref = goodtime + ( (bd->id - goodid) * 40  + (b->no - goodref) )
@@ -238,9 +245,9 @@ namespace Zero {
           }
         }
       }
-
-
     }
+
+    cout << "Goodtime: " << (goodtime != 0 ? "yes" : "no") << endl;
   }
 }
 

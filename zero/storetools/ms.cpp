@@ -38,7 +38,7 @@ namespace Zero {
   }
 
   void Ms::add_bdata (Bdata * b) {
-    cout << "MS: Adding id: " << b->id << "..";
+    //cout << "MS: Adding id: " << b->id << "..";
 
     /* Set up MS record for each batch */
     int samples = 0;
@@ -75,7 +75,7 @@ namespace Zero {
     }
 
 
-    cout << "done, packed " << samples << " samples in " << records << " records." << endl;
+    //cout << "done, packed " << samples << " samples in " << records << " records." << endl;
   }
 
   bool Ms::pack_tracelist (const char *fname) {

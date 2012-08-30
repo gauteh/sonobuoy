@@ -31,8 +31,8 @@
 
 /* Configuration */
 # define NETWORK  "GB"
-# define LOCATION "G1"
-# define CHANNEL  "SHZ"
+# define LOCATION "G2"
+# define CHANNEL  "BNR"
 
 using namespace std;
 
@@ -84,6 +84,7 @@ namespace Zero {
       while (id < ids.end ()) {
 
         /* Load DTT */
+        cout << "Reading id: " << *id << "..";
         Dtt dtt (*id);
         dtt.bdata->fix_batch_time ();
         dtt.bdata->assess_dataquality ();
@@ -91,6 +92,9 @@ namespace Zero {
         /* Add to MS */
         if (dtt.ready) {
           ms.add_bdata (dtt.bdata);
+
+          cout << "done, read and packed " << dtt.bdata->totalsamples << " samples." << endl;
+
         } else {
           cout << "Error with: " << *id << ", skipping.." << endl;
         }

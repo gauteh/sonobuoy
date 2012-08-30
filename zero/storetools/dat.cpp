@@ -20,7 +20,7 @@ namespace Zero {
   Dat::Dat (int _id) {
     bdata = new Bdata;
     bdata->id = _id;
-    cout << "Opening id: " << bdata->id << "..";
+    //cout << "Opening id: " << bdata->id << "..";
 
     /* Load index and samples */
     if (!read_index ()) {
@@ -36,15 +36,15 @@ namespace Zero {
     bdata->check_checksums ();
     bdata->populate_int32_samples ();
 
-    cout << "done, read: " << bdata->batches.size () << " batches with: " << bdata->totalsamples << " samples total." << endl;
+    //cout << "done, read: " << bdata->batches.size () << " batches with: " << bdata->totalsamples << " samples total." << endl;
     ready = true;
   }
 
   Dat::Dat (Bdata *b) {
     bdata = b;
     ready = true;
-    cout << "Initialized id: " << bdata->id << "..";
-    cout << "done, loaded: " << bdata->batches.size () << " batches with: " << bdata->totalsamples << " samples total." << endl;
+    //cout << "Initialized id: " << bdata->id << "..";
+    //cout << "done, loaded: " << bdata->batches.size () << " batches with: " << bdata->totalsamples << " samples total." << endl;
   }
 
   bool Dat::read_index () {

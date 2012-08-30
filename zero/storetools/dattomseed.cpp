@@ -31,8 +31,8 @@
 
 /* Configuration */
 # define NETWORK  "GB"
-# define LOCATION "G1"
-# define CHANNEL  "SHZ"
+# define LOCATION "G2"
+# define CHANNEL  "BNR"
 
 using namespace std;
 
@@ -85,6 +85,7 @@ namespace Zero {
       while (id < ids.end ()) {
 
         /* Load DAT */
+        cout << "Reading id: " << *id << "..";
         Dat dat (*id);
         dat.bdata->fix_batch_time ();
         dat.bdata->assess_dataquality ();
@@ -92,6 +93,9 @@ namespace Zero {
         /* Add to MS */
         if (dat.ready) {
           ms.add_bdata (dat.bdata);
+
+          cout << "done, read and packed " << dat.bdata->totalsamples << " samples." << endl;
+
         } else {
           cout << "Error with: " << *id << ", skipping.." << endl;
         }
