@@ -22,9 +22,9 @@ using namespace std;
 
 /* Configuration */
 # define NETWORK  "GB"
-# define STATION  "SEI1"
-# define LOCATION "G1"
-# define CHANNEL  NULL
+# define STATION  "BUO2"
+# define LOCATION "G2"
+# define CHANNEL  "BNR"
 
 # define VERSION GIT_DESC
 
