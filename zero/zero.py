@@ -248,11 +248,6 @@ class Zero:
 
           self.current.index.action.clear ()
 
-        else:
-          #self.logger.info ('[Zero] Undefined state, idling.')
-          self.current.index.action.clear ()
-          to = IDLE_LOOP
-
         if to > 0:
           self.current.index.action.wait (to)
 
