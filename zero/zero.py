@@ -311,6 +311,9 @@ class Zero:
                 allidle = False
               else:
                 allidle = True
+      else:
+        # no buoy selected
+        time.sleep (IDLE_LOOP)
 
   # go through list of buoys and return index of id
   def indexofid (self, id):
