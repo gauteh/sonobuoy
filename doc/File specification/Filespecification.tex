@@ -42,7 +42,7 @@
 \vspace{2em}
 \section*{Introduction}
 This document is a specification of how data is stored locally on the
-buoy and on the central logging point, versions \textbf{9 for buoy
+buoy and on the central logging point, versions \textbf{10 for buoy
 storage (DAT)} and \textbf{3 for central storage (DTT)}.
 
 \vspace{2em}
@@ -427,23 +427,11 @@ storage (DAT)} and \textbf{3 for central storage (DTT)}.
   The implementation is done in: buoy/store.cpp and buoy/store.h.
 
   \subsection{Zero: Central logging point}
-  The implementation is done in: zero/data.py and zero/index.py. Reading
-  is done with: zero/matlab/readdtt.m, where there exists various other
-  scripts for working with the information.
-
+  The implementation is done in: zero/data.py and zero/index.py.
   \subsection{Conversion and reading buoy local storage on a regular
   computer}
-
-  \subsubsection{datreader} The program: zero/storetool/datreader reads
-  and print IND and DAT file pairs and can convert to DTT files as well
-  as print the samples in a specified format.
-
-  \subsubsection{dtttomseed} Reads a range of ITT and DTT files
-  specified by their id and packs them into miniSEED files, one for each
-  trace segment.
-
-  \subsubsection{mschangesource} Changes the source parameters of
-  miniSEED files and repacks them.
+  Refer to \textit{doc/Processing} for a description of the programs and tools
+    that work with the DAT and DTT files \cite{processing}.
 
 \vspace{5em}
 \printbibliography
