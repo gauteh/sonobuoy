@@ -36,7 +36,7 @@
 
 
 \begin{document}
-\makeheading{Gautebøye - File specification}{Gaute Hope
+\makeheading{Gautebøye - File specification (or of DTT and DATs)}{Gaute Hope
 (gaute.hope@student.uib.no), 13.08.2012, Revision 1}
 
 \vspace{2em}
@@ -94,17 +94,18 @@ storage (DAT)} and \textbf{3 for central storage (DTT)}.
 
     There is one set of data and index file for each ID, the index file
     contains information about the number of batches (references) and
-    samples. The data file contains the references and the samples.
-    The index file is not strictly needed for anything else than
-    the data format version, but is used to check against data and as an
-    possibility to read a data file faster.
+    samples. The data file contains the references and the samples. The
+    index acts as an header to the data file with general information
+    and status. Status and information that changes with each batch or
+    reference is stored along with the samples in the data file.
 
     \subsubsection{Index}
     The index contains:
     \begin{enumerate}
-      \item Version of file format
+      \item Version of file format (incremented with buoy updates even
+        when the format stays the same)
       \item ID
-      \item Sample length (always 32 bit)
+      \item Sample length (always 4 bytes, 32 bits)
       \item Number of samples (batch size $\cdot$ max references)
       \item Number of samples per reference (batch size, 1024)
       \item Number of references (40)
@@ -119,18 +120,19 @@ storage (DAT)} and \textbf{3 for central storage (DTT)}.
     sample - but for a predefined number of samples. The
     time of each samples are calculated from the reference and the
     sample rate. The batch size is chosen based on the desired resolution of
-    timestamps and position fixes and limited by the memory of the CPU
+    timestamps and position fixes and limitations of memory of the CPU
     unit, it is put to 1024 samples per batch, which
     results in little drift\footnote{TODO: Put some numbers on timing drift..} between each reference and provides
-    positioning every $1024 / 250 \text{Hz} \approx 4 \text{s}$.
+    frequent positioning at every $1024 / 250 \text{Hz} \approx 4 \text{s}$.
 
     \paragraph{} The time is represented as microseconds since the UNIX
     epoch (1970-1-1 00:00:00), this is incidentally the same as the high
-    precision time format used by MiniSEED \cite{libmseed_man}.
+    precision time format (hptime\_t) defined by MiniSEED \cite{libmseed_man}.
 
     \paragraph{Checksum}
-    As the data is sampled a 32-bit checksum is calculated for each
-    batch, this is stored along with the reference and is used to check
+    As the data is sampled a 32-bit checksum is calculated the moment a
+    sample is read from the AD unit for each
+    batch. This is stored along with the reference and is used to check
     whether the stored data has not been corrupted and is the same that
     was recorded. The checksum is the XOR between all samples in the
     batch.
@@ -148,11 +150,11 @@ storage (DAT)} and \textbf{3 for central storage (DTT)}.
     \paragraph{}
     Both formats use this structure, on the buoys local storage it is
     stored in the root folder of the SD card and on the central it is
-    stored in a folder dedicated to its buoy.
+    stored in a folder dedicated to each buoy.
 
-    \subsubsection{Status} The status is a 16 bits wide with bits set for
-    different conditions, the bit is set if the specified function is
-    working, these are defined in buoy/gps.h: \\
+    \subsubsection{Status} The status is a 16-bit wide unsigned integer
+    with bits set for different conditions, the bit is set if the
+    specified function is working with a optimal status of 15 (0b1111), these are defined in buoy/gps.h: \\
 
     \vspace{1em}
 
@@ -194,20 +196,20 @@ storage (DAT)} and \textbf{3 for central storage (DTT)}.
 
     \paragraph{} Throughout processing and storing the values are
     represented with 32 bits, even though the least significant bit may
-    cleared after having converted the values to signed integers.
+    be cleared after having converted the values to signed integers.
 
-  \section{Formats}
-  Since the files are stored in DAT format then read either directly
-  from the SD card or sent over the network the DTT version of an ID is
-  governed by the properties of its DAT file. The settings for size or
-  batch length in the DAT will be seen in the DTT file.
+  \section{Formats} Since the files are stored in DAT format then read
+  either directly from the SD card or sent over the network the DTT
+  version of an ID is determined entirely by the properties of its
+  master DAT file. The settings for size or batch length in the DAT will
+  be seen in the DTT file.
 
   \subsection{Binary format: DAT}
-  The binary format uses the extension DAT for its data files and IND
-  for its index files, the buoy chooses the next free ID number on start
-  up and as each data file is full continues. This puts a limit at the
-  maximum number of IDs since the file system has a limit on the maximum
-  number of characters.
+  The binary format uses the extension
+  DAT for its data files and IND for its index files, the buoy chooses
+  the next free ID number on start up picking the next free ID as a data
+  file is filled up. This puts a limit at the maximum number of IDs
+  since the FAT32 file system has a limit on the maximum number of characters.
 
   \paragraph{Endianness} The buoy runs on an ARM7 CPU and values are
   stored in little endian.
@@ -215,19 +217,21 @@ storage (DAT)} and \textbf{3 for central storage (DTT)}.
   \paragraph{Version} The version number, stored in the index,
   is updated whenever there is an upgrade of the buoy so that the
   data quality or integrity changes. The buoy version is not stored.
+  \footnote{TODO: Mentioned in Entity: Version}
 
   \paragraph{Implementation}
   The implementation and latest version of the DAT file format is to be
   found in the source: buoy/store.h and buoy/store.cpp.
 
   \paragraph{Limit of IDs}
-  The SD card is formatted using the FAT32 file system and the file
-  names follow the 8.3 limit, that leaves 8 digits for the ID number and
-  a maximum ID of $10^8 - 1 = 99999999$. With a maximum number of 40 references
-  (batches) per data file and a batch size of 1024 values there will be
-  ~164 seconds of recording in each file. This means that for 14 days of
-  continuous recording 7383 IDs are needed, in other words well below
-  the limit \cite{local_data_capacity_budget}.
+  The SD card is formatted using the FAT32 file
+  system and the file names are limited by the 8.3 format, that leaves 8
+  digits for the ID number and a maximum ID of $10^8 - 1 = 99999999$.
+  With a maximum number of 40 references (batches) per data file and a
+  batch size of 1024 values there will be ~164 seconds of recording in
+  each file. This means that for 14 days of continuous recording 7383
+  IDs are needed, in other words well below the limit
+  \cite{local_data_capacity_budget}.
 
   \paragraph{Data file size}
   The number of references (batches) and the data file size has been
@@ -243,8 +247,8 @@ storage (DAT)} and \textbf{3 for central storage (DTT)}.
 
 
   \subsubsection{Structure: Index}
-  The index file for ID is named \textit{ID.IND} and is when a data file
-  is finished written as a binary file as:
+  The index file for ID is named \textit{ID.IND} and is written when a
+  data file is full, the file structure is:
   \vspace{1em}
 
   \begin{tabular}{|r|c|c|l|}
@@ -292,7 +296,9 @@ storage (DAT)} and \textbf{3 for central storage (DTT)}.
   The reference is padded with zeros ($3 \cdot \text{sample length} =
   12$) in both ends so that it will be easier to
   recover parts of a corrupt data file as well as making it possible to
-  detect a reference when none is expected.
+  detect a reference when none is expected. The reference id starts at 0
+  for each data file reaching up to 40 which is the number of batches
+  before a data file is considered full.
 
   \paragraph{Sample}Each sample is an \textbf{uint32\_t} with size 4.
 
@@ -376,8 +382,8 @@ storage (DAT)} and \textbf{3 for central storage (DTT)}.
     \item Number of references (integer)
     \item HasFull, 'True' or 'False', whether a complete index has been
       received.
-    \item SD lag flag, 'True' or 'False', whether data could be written
-      fast enough to card.
+    \item SD lag flag, 'True' or 'False', whether data could
+      \textit{not} be written fast enough to card.
   \end{enumerate}
 
   After that there is one line for each received reference, with a comma
@@ -396,7 +402,7 @@ storage (DAT)} and \textbf{3 for central storage (DTT)}.
 
   If the chunk size equals the batch size, there is only one chunk per
   reference. Meaning if the reference (batch) has been retrieved there
-  should be one 0 in the last comma separated list. There cannot be a
+  should be one '0' in the last comma separated list. There cannot be a
   chunk size greater than the batch size and the batch size must be a
   multiple of the chunk size.
 
@@ -419,17 +425,10 @@ storage (DAT)} and \textbf{3 for central storage (DTT)}.
   \end{enumerate}
 
   After this follows 1024 samples (integers) one on each line. The
-  references are sorted descending, but there may be missing references
+  references are sorted ascending, but there may be missing references
   (batches).
 
-  \section{Implementation}
-  \subsection{Buoy: Local storage}
-  The implementation is done in: buoy/store.cpp and buoy/store.h.
-
-  \subsection{Zero: Central logging point}
-  The implementation is done in: zero/data.py and zero/index.py.
-  \subsection{Conversion and reading buoy local storage on a regular
-  computer}
+  \section{Working with DTTs and DATs}
   Refer to \textit{doc/Processing} for a description of the programs and tools
     that work with the DAT and DTT files \cite{processing}.
 
