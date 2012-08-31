@@ -133,6 +133,9 @@ class Zero:
         try:
           self.ser = serial.Serial (port = self.port, baudrate = self.baud) #, timeout = 0)
           self.logger.info ("[Zero] Serial port open.")
+          if self.current is not None:
+            self.current.index.event ("openserial")
+
         except serial.SerialException as e:
           if not msg:
             self.logger.error ("[Zero] Failed to open serial port.. retrying every 5 seconds.")
@@ -219,7 +222,13 @@ class Zero:
     while self.go:
       if self.current is not None:
         to = 0
-        if self.current.index.state == 1:
+
+        if self.ser is None or not self.acquire:
+          # No serial or not acquiring
+          self.current.index.action.clear ()
+          to = IDLE_LOOP
+
+        elif self.current.index.state == 1:
           to = self.current.index.timeout - (time.time () - self.current.index.request_t)
 
           if len(self.buoys) > 1:
@@ -238,6 +247,11 @@ class Zero:
           to = IDLE_LOOP
 
           self.current.index.action.clear ()
+
+        else:
+          self.logger.error (self.me + ' Undefined state, idling.')
+          self.current.index.action.clear ()
+          to = IDLE_LOOP
 
         if to > 0:
           self.current.index.action.wait (to)
@@ -297,7 +311,6 @@ class Zero:
                 allidle = False
               else:
                 allidle = True
-
 
   # go through list of buoys and return index of id
   def indexofid (self, id):
