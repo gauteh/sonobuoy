@@ -1,10 +1,34 @@
+Contents:
 
- * Upload snap/zeronode.py to RF200 node connected to computer.
+  zero.py:
+  Central logging point (Zero), manages buoys, synchronizes and
+  retrieves status.
 
- * Run zero.py to manage and collect data relayed from ZeroNode.
-   Requirements: Python2, PySerial
 
- * Run zcli.py to connect and interact with the mangement server
-   zero.py.
-   Requirements: Python2, Texttable
+  ztool.py:
+  Command line interface for sending commands, retrieving status and
+  monitoring buoys from Zero.
+
+  log/:
+  Local storage of buoy data, Zero writes data here.
+
+  snap/:
+  Firmware for RF200 connected for RF200 device connected to Zero
+  through USB.
+
+
+  storetools/:
+  Tools for processing data files.
+
+
+  matlab/:
+  Scripts for working with data files in MATLAB.
+
+
+  utils/:
+  Scripts and programs for preparing SD card, backing up and testing.
+
+
+  zui/:
+  Unfinished graphical user interfaces.
 
