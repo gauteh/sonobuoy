@@ -1,9 +1,29 @@
 v 20110115 2
 C 40000 40000 0 0 0 title-B.sym
-C 39200 40400 1 0 0 TEN 5-1222-1.sym
+C 40700 50100 1 0 0 terminal-1.sym
 {
-T 42200 50800 5 10 0 1 0 0 1
-device=TEN 5-2222-1
-T 42800 50000 5 10 1 1 0 0 1
-refdes=U?
+T 41010 50850 5 10 0 0 0 0 1
+device=terminal
+T 41010 50700 5 10 0 0 0 0 1
+footprint=CONNECTOR 1 1
+T 40950 50150 5 10 1 1 0 6 1
+refdes=Battery (+)
 }
+C 40700 49600 1 0 0 terminal-1.sym
+{
+T 41010 50350 5 10 0 0 0 0 1
+device=terminal
+T 41010 50200 5 10 0 0 0 0 1
+footprint=CONNECTOR 1 1
+T 40950 49650 5 10 1 1 0 6 1
+refdes=Battery (-)
+}
+N 41600 50200 41800 50200 4
+C 39100 40900 1 0 0 TEN 5-1222-1.sym
+{
+T 42100 51300 5 10 0 1 0 0 1
+device=TEN 5-2222-1
+T 42300 50500 5 10 1 1 0 0 1
+refdes=TEN 5-1222
+}
+N 41600 49700 41800 49700 4
