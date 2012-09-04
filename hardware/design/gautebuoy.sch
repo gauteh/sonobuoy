@@ -608,9 +608,9 @@ N 57000 35400 57000 36100 4
 N 57000 36100 55200 36100 4
 T 63300 37800 9 10 1 0 0 0 1
 Hydrophone terminals
-C 55500 32100 1 0 0 generic-power.sym
+C 55500 32200 1 0 0 generic-power.sym
 {
-T 55700 32350 5 10 1 1 0 3 1
+T 55700 32450 5 10 1 1 0 3 1
 net=+6VA
 }
 C 55500 30700 1 0 0 generic-power.sym
