@@ -49,7 +49,7 @@ T 42810 49250 5 10 0 0 0 0 1
 device=terminal
 T 42810 49100 5 10 0 0 0 0 1
 footprint=CONNECTOR 1 1
-T 42750 48550 5 10 1 1 0 6 1
+T 42450 48550 5 10 1 1 0 6 1
 refdes=Power
 }
 C 42500 47000 1 0 0 terminal-1.sym
@@ -67,7 +67,7 @@ T 42810 46150 5 10 0 0 0 0 1
 device=terminal
 T 42810 46000 5 10 0 0 0 0 1
 footprint=CONNECTOR 1 1
-T 42750 45450 5 10 1 1 0 6 1
+T 42650 45450 5 10 1 1 0 6 1
 refdes=Common
 }
 N 43400 48600 49700 48600 4
