@@ -85,7 +85,7 @@ namespace Buoy {
           parse (); // Complete telegram received
           rf_buf_pos  = 0;
           state       = 0;
-          return;
+          return;   // Do not parse any more telegrams this loop
           break;
 
         /* Should not be reached. */
