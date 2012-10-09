@@ -41,3 +41,5 @@ zero/storetools/dttfix
 zero/storetools/mschangesource
 zero/storetools/readlongs
 *.mseed
+filenr.lis
+mulplt.out

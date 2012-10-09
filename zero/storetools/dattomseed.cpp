@@ -1,16 +1,16 @@
 /* Author:  Gaute Hope <eg@gaute.vetsj.com>
  * Date:    2012-08-22
  *
- * dattomseed.cpp: Converts a range of DAT's to a miniSEED store
+ * dattomseed.cpp: Converts a range of DAT's to a hourly miniSEED stores
  *
- * Requires: libmseed (developed for v2.5.1)
+ * Requires: libmseed (developed for v2.7)
  *
  * All the ids supplied as an argument will be packed into one contiuous trace
  * list, if you want more than one trace list make numerous invocations of
  * this program with each group that should be packed into each trace list.
  *
  * Files are expected to be in current directory. Output will be written to
- * files in current directory.
+ * files in current directory in hourly intervals.
  *
  * TODO:
  *  - Output instrument response header?
@@ -80,32 +80,42 @@ namespace Zero {
       /* Set up miniSeed record (template) and trace list */
       Ms ms (NETWORK, station.c_str(), LOCATION, CHANNEL);
 
+      bool err = false;
+
       /* Work through ids */
       vector<int>::iterator id = ids.begin ();
       while (id < ids.end ()) {
 
         /* Load DAT */
         cout << "Reading id: " << *id << "..";
+
         Dat dat (*id);
+
         dat.bdata->fix_batch_time ();
         dat.bdata->assess_dataquality ();
 
-        /* Add to MS */
+        /* Add to MS and write */
         if (dat.ready) {
           ms.add_bdata (dat.bdata);
 
           cout << "done, read and packed " << dat.bdata->totalsamples << " samples." << endl;
 
         } else {
-          cout << "Error with: " << *id << ", skipping.." << endl;
+          cerr << ": Error with: " << *id << ", skipping.." << endl;
+          err = true;
         }
 
         id++;
       }
 
       /* Pack traces */
-      if ( !ms.pack_tracelist () ) {
+      if ( !ms.pack_group () ) {
         cout << "Failed, see above errors." << endl;
+      }
+
+      if (err) {
+        cerr << "There were errors, please see above for details." << endl;
+        return 1;
       }
 
       return 0;

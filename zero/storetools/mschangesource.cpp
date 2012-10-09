@@ -115,7 +115,7 @@ namespace Zero {
 
         cout << "Packing.." << endl;
 
-        int precords, psamples;
+        int64_t precords, psamples;
 
 # define DATABLOCK  4096
 # define ENCODING   DE_STEIM1

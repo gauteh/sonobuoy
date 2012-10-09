@@ -17,7 +17,7 @@ using namespace std;
 
 namespace Zero {
   Ms::Ms (const char * _network, const char *_station, const char *_location, const char *_channel) {
-    cout << "MS initializing.." << endl;
+    cout << "MS: Initializing.." << endl;
 
     strcpy (network, _network);
     strcpy (station, _station);
@@ -34,7 +34,7 @@ namespace Zero {
     MS_PACKDATABYTEORDER(1);
 
     /* Set up trace list */
-    mstl = mstl_init (NULL);
+    mstg = mst_initgroup (NULL);
   }
 
   void Ms::add_bdata (Bdata * b) {
@@ -65,121 +65,53 @@ namespace Zero {
 
       /* Record specific values */
 
-      /* Add MS record to trace list, group by quality, autoheal */
-      mstl_addmsr (mstl, msr, 1, 1, batch->ref, SAMPLERATE);
+      /* Add MS record to trace group, group by quality, autoheal */
+      mst_addmsrtogroup (mstg, msr, 1, TIMETOLERANCE, SAMPLERATETOLERANCE);
 
       samples += msr->numsamples;
       records++;
 
       batch++;
     }
-
-
-    //cout << "done, packed " << samples << " samples in " << records << " records." << endl;
   }
 
-  bool Ms::pack_tracelist (const char *fname) {
-    cout << "MS: Packing tracelist.." << endl;
+  bool Ms::pack_group () {
+    cout << "MS: Packing tracegroup.." << endl;
 
-    mstl_printtracelist (mstl, 1, 1, 1);
+    /* Generate file name */
+    char srcname[256];
+    mst_srcname (mstg->traces, srcname, 0);
 
-    bool autofname = (fname == NULL);
-    bool sequence_fname = false;
-    char *origname;
+    char timestr[50];
+    ms_hptime2isotimestr (mstg->traces->starttime, timestr, 0);
 
-    if (mstl->numtraces > 1 && fname != NULL) {
-      cout << "More than one output file, labeling sequentially." << endl;
-      sequence_fname = true;
-      origname = new char[strlen(fname) + 1];
-      strcpy (origname, fname);
+    string fname;
+    fname += timestr;
+    fname += "_";
+    fname += srcname;
+    fname += ".mseed";
+
+    ofstream out (fname.c_str());
+
+    if (!out.is_open () || out.bad ()) {
+      cout << "Ms: Error: Could not open file for writing: " << fname << endl;
+      return false;
     }
 
-    /* Packing traces */
-    for (int i = 0; i < mstl->numtraces; i++) {
-
-      /* Packing trace */
-      MSTraceID id = mstl->traces[i];
-
-      /* Generate file name */
-      char *thisfname;
-      char finalname[256];
-
-      if (autofname) {
-        char timestr[50];
-        string _fname = id.srcname;
-        _fname += ms_hptime2isotimestr (id.earliest, timestr, 0);
-        _fname += ".mseed";
-        thisfname = (char*)_fname.c_str ();
-      } else if (sequence_fname) {
-        string _fname = fname;
-        _fname += '_';
-        _fname += i;
-        thisfname = (char*)_fname.c_str ();
-      } else {
-        thisfname = (char*)fname;
-      }
-
-      strcpy (finalname, thisfname);
-
-      ofstream out (finalname);
-
-      if (!out.is_open () || out.bad ()) {
-        cout << "Ms: Error: Could not open file for writing: " << finalname << endl;
-        return false;
-      }
-
-      MSTrace * mst = mst_init (NULL);
-
-      strcpy (mst->network, id.network);
-      strcpy (mst->station, id.station);
-      strcpy (mst->location, id.location);
-      strcpy (mst->channel, id.channel);
-
-      mst->starttime    = id.earliest;
-      mst->endtime      = id.latest;
-      mst->dataquality  = id.dataquality;
-
-      MSTraceSeg * seg = id.first;
-
-      mst->samprate   = seg->samprate;
-      mst->sampletype = seg->sampletype;
-
-      /* Create complete datasamples buffer */
-      int totalsamples = 0;
-      for (int segno = 0; segno < id.numsegments; segno++) {
-        totalsamples += seg->numsamples;
-        seg = seg->next;
-      }
-
-      int32_t * datasamples = new int32_t[totalsamples];
-      uint32_t pos = 0;
-      seg = id.first;
-      for (int segno = 0; segno < id.numsegments; segno++) {
-        memcpy (&(datasamples[pos]), seg->datasamples, sizeof(int32_t) * seg->numsamples);
-        pos += seg->numsamples;
-
-        seg = seg->next;
-      }
-
-      mst->samplecnt    = totalsamples;
-      mst->numsamples   = totalsamples;
-      mst->datasamples  = datasamples;
-
-      /* Packing */
+    /* Packing */
 # define DATABLOCK  4096
 # define ENCODING   DE_INT32
 # define BYTEORDER  1 // Big endian
 # define FLUSH      1
 # define VERBOSE    1
-      int psamples, precords;
-      precords = mst_pack (mst, &(Ms::record_handler), (void*) &out,
-                           DATABLOCK, ENCODING, BYTEORDER, &psamples,
-                           FLUSH, VERBOSE, NULL);
+    int64_t psamples, precords;
+    precords = mst_packgroup (mstg, &(Ms::record_handler), (void*) &out,
+                              DATABLOCK, ENCODING, BYTEORDER, &psamples,
+                              FLUSH, VERBOSE, NULL);
 
-      cout << "MS: => Packed " << psamples << " samples in " << precords << " records to file " << finalname << "." << endl;
+    cout << "MS: => Packed " << psamples << " samples in " << precords << " records to file " << fname << "." << endl;
 
-      out.close ();
-    }
+    out.close ();
 
     return true;
   }
@@ -190,7 +122,7 @@ namespace Zero {
 
 
   Ms::~Ms () {
-    mstl_free (&mstl, 1);
+    mst_freegroup (&mstg);
   }
 }
 

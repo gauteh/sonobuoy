@@ -103,7 +103,7 @@ namespace Zero {
       }
 
       /* Pack traces */
-      if ( !ms.pack_tracelist () ) {
+      if ( !ms.pack_group () ) {
         cout << "Failed, see above errors." << endl;
       }
 

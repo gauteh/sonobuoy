@@ -24,6 +24,10 @@ using namespace std;
  *
  */
 
+/* Time tolerance between MS records to join in trace */
+# define TIMETOLERANCE 0.9
+# define SAMPLERATETOLERANCE 1.0
+
 namespace Zero {
   class Ms {
     public:
@@ -32,14 +36,14 @@ namespace Zero {
       char location[11];
       char channel[11];
 
-      /* Main trace list */
-      MSTraceList * mstl;
+      /* Main trace group */
+      MSTraceGroup *mstg;
 
       Ms (const char*, const char*, const char*, const char*);
       ~Ms ();
 
       void add_bdata (Bdata *);
-      bool pack_tracelist (const char * fname = NULL);
+      bool pack_group ();
       static void record_handler (char *, int, void *);
 
   };
