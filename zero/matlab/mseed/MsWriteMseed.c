@@ -11,6 +11,11 @@
 # include <mex.h>
 # include <libmseed/libmseed.h>
 
+# include <time.h>
+
+/* Prototypes */
+void record_handler (char *record, int reclen, void *f);
+
 /* This function is designed to work with one source at the time, it takes
  * a series of batches as input, per batch parameters are:
  *
@@ -74,10 +79,10 @@ void mexFunction (int nlhs, mxArray *phls[], int nrhs, const mxArray *prhs[]) {
    */
 
   /* Batches matrix */
-  const mxArray * batches = prhs[0];
-
-  int batches_n = mxGetN (batches);
-  int batches_m = mxGetM (batches);
+  const mxArray * mbatches = prhs[0];
+  double * batches = mxGetPr (mbatches);
+  int batches_n = mxGetN (mbatches);
+  int batches_m = mxGetM (mbatches);
 
   if (batches_n != 4) {
     mexErrMsgTxt ("Wrong number of columns in batches.");
@@ -156,8 +161,89 @@ void mexFunction (int nlhs, mxArray *phls[], int nrhs, const mxArray *prhs[]) {
   mexPrintf ("=> Sample rate:     %6.1f Hz\n", samplerate);
   mexPrintf ("=> Time tol.:       %6.1f s\n", timetol);
   mexPrintf ("=> Samplerate tol:  %6.1f Hz\n", sampletol);
-
   mexPrintf ("\n");
 
+  /* Set up miniSEED volume */
+  ms_loginit ((void *)&mexPrintf, NULL, (void *)&mexWarnMsgTxt, NULL);
+
+  /* Ensure big-endianess */
+  MS_PACKHEADERBYTEORDER(1);
+  MS_PACKDATABYTEORDER(1);
+
+  /* Set up trace group */
+  MSTraceGroup * mstg = mst_initgroup (NULL);
+
+  /* Generate file name
+   *
+   * Format:
+   * YYYY-MM-DD-HHMM-SS.NET_STA_LOC_CHA.mseed (date is start)
+   */
+  char * fname   = mxCalloc (1024, sizeof(char));
+  char * timestr = mxCalloc (80, sizeof (char));
+  hptime_t start = batches[0];
+  time_t   _start = (start / 10e6);
+  struct tm * ptm = gmtime (&_start);
+
+  strftime (timestr, 80, "%Y-%m-%d-%H%M-%S", ptm);
+  sprintf (fname, "%s.%s_%s_%s_%s.mseed", timestr, network, station, location,
+      channel);
+
+  mexPrintf ("Writing to file: %s..\n", fname);
+
+
+  /* Add batches as traces to tracegroup */
+  double *curdata   = values;
+  int    cursample  = 0;
+
+  for (int i = 0; i < batches_m; i++) {
+    MSTrace *mst = mst_init (NULL);
+
+    strcpy (mst->network, network);
+    strcpy (mst->station, station);
+    strcpy (mst->location, location);
+    strcpy (mst->channel, channel);
+
+    mst->samprate   = samplerate;
+    mst->starttime  = batches[i * batches_n + 0];
+    mst->endtime    = batches[i * batches_n + 1];
+    mst->sampletype = 'i';
+    mst->numsamples = batches[i * batches_n + 2];
+    mst->dataquality = batches[i * batches_n + 3];
+
+    if ((cursample + mst->numsamples) > numberofsamples) {
+      mexErrMsgTxt ("Number of samples specified in batches does not match with avilable samples in dataseries.");
+    }
+
+    mst->datasamples = mxCalloc (mst->numsamples, sizeof(int32_t));
+    memcpy (mst->datasamples, curdata, mst->numsamples * sizeof(int32_t));
+
+    mst_addtracetogroup (mstg, mst);
+  }
+
+  mst_printtracelist (mstg, 0, 1, 0);
+
+  /* Open file */
+  FILE * f = fopen (fname, "w");
+
+  /* Packing */
+# define DATABLOCK  4096
+# define ENCODING   DE_INT32
+# define BYTEORDER  1 // Big endian
+# define FLUSH      0
+# define VERBOSE    1
+  int64_t psamples, precords;
+  precords = mst_packgroup (mstg, &(record_handler), (void*) f,
+                            DATABLOCK, ENCODING, BYTEORDER, &psamples,
+                            FLUSH, VERBOSE, NULL);
+
+  mexPrintf ("=> Packed %d samples in %d records to file %s.\n", psamples, precords, fname);
+
+  fclose (f);
+
+  return;
+}
+
+void record_handler (char *record, int reclen, void *f) {
+  fwrite (record, sizeof (char), reclen, (FILE *) f);
 }
 
