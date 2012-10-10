@@ -25,8 +25,8 @@ using namespace std;
  */
 
 /* Time tolerance between MS records to join in trace */
-# define TIMETOLERANCE 0.9
-# define SAMPLERATETOLERANCE 1.0
+# define TIMETOLERANCE 2.0
+# define SAMPLERATETOLERANCE 250
 
 namespace Zero {
   class Ms {

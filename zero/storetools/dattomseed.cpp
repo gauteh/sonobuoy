@@ -91,7 +91,7 @@ namespace Zero {
 
         Dat dat (*id);
 
-        dat.bdata->fix_batch_time ();
+        //dat.bdata->fix_batch_time ();
         dat.bdata->assess_dataquality ();
 
         /* Add to MS and write */

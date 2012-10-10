@@ -78,6 +78,8 @@ namespace Zero {
   bool Ms::pack_group () {
     cout << "MS: Packing tracegroup.." << endl;
 
+    mst_groupheal (mstg, TIMETOLERANCE, SAMPLERATETOLERANCE);
+
     /* Generate file name */
     char srcname[256];
     mst_srcname (mstg->traces, srcname, 0);
@@ -102,7 +104,7 @@ namespace Zero {
 # define DATABLOCK  4096
 # define ENCODING   DE_INT32
 # define BYTEORDER  1 // Big endian
-# define FLUSH      1
+# define FLUSH      0
 # define VERBOSE    1
     int64_t psamples, precords;
     precords = mst_packgroup (mstg, &(Ms::record_handler), (void*) &out,
