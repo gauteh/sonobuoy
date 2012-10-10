@@ -43,3 +43,4 @@ zero/storetools/readlongs
 *.mseed
 filenr.lis
 mulplt.out
+*.mexa64
