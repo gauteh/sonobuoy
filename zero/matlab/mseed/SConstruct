@@ -64,7 +64,7 @@ if not GetOption("verbose_flag"):
 # Verbose }}}
 
 env.Replace (CC = '/home/gaute/.MATLAB/R2010b/bin/mex')
-env.Append (CPPPATH = ['../../buoy/'], CPPDEFINES = { 'GIT_DESC' : ('\\"%s\\"' % GIT_DESC) }, CPPFLAGS = '-g', LIBS = ['libmseed',] )
+env.Append (CPPPATH = ['../../buoy/'], CPPDEFINES = { 'GIT_DESC' : ('\\"%s\\"' % GIT_DESC) }, CFLAGS = '-g', LIBS = ['libmseed',], LINKFLAGS = '-c -largeArrayDims' )
 
 env.Program (source = ['MsWriteMseed.c', ])
 
