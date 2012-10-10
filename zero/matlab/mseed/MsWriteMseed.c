@@ -180,20 +180,18 @@ void mexFunction (int nlhs, mxArray *phls[], int nrhs, const mxArray *prhs[]) {
    */
   char * fname   = mxCalloc (1024, sizeof(char));
   char * timestr = mxCalloc (80, sizeof (char));
-  hptime_t start = batches[0];
-  time_t   _start = (start / 10e6);
+  hptime_t start = (hptime_t) batches[0];
+  time_t   _start = (time_t) ((int64_t) start / 10e5);
   struct tm * ptm = gmtime (&_start);
 
   strftime (timestr, 80, "%Y-%m-%d-%H%M-%S", ptm);
   sprintf (fname, "%s.%s_%s_%s_%s.mseed", timestr, network, station, location,
       channel);
 
-  mexPrintf ("Writing to file: %s..\n", fname);
-
-
   /* Add batches as traces to tracegroup */
-  double *curdata   = values;
-  int    cursample  = 0;
+  mexPrintf ("Loading batches..\n");
+  double  *curdata   = values;
+  int64_t cursample  = 0;
 
   for (int i = 0; i < batches_m; i++) {
     MSTrace *mst = mst_init (NULL);
@@ -204,18 +202,27 @@ void mexFunction (int nlhs, mxArray *phls[], int nrhs, const mxArray *prhs[]) {
     strcpy (mst->channel, channel);
 
     mst->samprate   = samplerate;
-    mst->starttime  = batches[i * batches_n + 0];
-    mst->endtime    = batches[i * batches_n + 1];
+    mst->starttime  = (hptime_t) batches[i];
+    mst->endtime    = (hptime_t) batches[i + 1 * batches_m];
     mst->sampletype = 'i';
-    mst->numsamples = batches[i * batches_n + 2];
-    mst->dataquality = batches[i * batches_n + 3];
+    mst->numsamples = (int64_t) batches[i + 2 * batches_m];
+    mst->samplecnt  = mst->numsamples;
+    mst->dataquality = 0;
+
+    mexPrintf ("Batch %d, start: %lu, end: %lu, numsamples: %d, quality: %d\n",
+        i, mst->starttime, mst->endtime, mst->numsamples, mst->dataquality);
 
     if ((cursample + mst->numsamples) > numberofsamples) {
       mexErrMsgTxt ("Number of samples specified in batches does not match with avilable samples in dataseries.");
     }
 
-    mst->datasamples = mxCalloc (mst->numsamples, sizeof(int32_t));
-    memcpy (mst->datasamples, curdata, mst->numsamples * sizeof(int32_t));
+    mst->datasamples = (int32_t*) malloc (mst->numsamples * sizeof(int32_t));
+
+    for (int j = 0; j < mst->numsamples; j++) {
+      ((int32_t*)mst->datasamples)[j] = (int32_t) values[cursample + j];
+    }
+
+    cursample += mst->numsamples;
 
     mst_addtracetogroup (mstg, mst);
   }
@@ -226,11 +233,13 @@ void mexFunction (int nlhs, mxArray *phls[], int nrhs, const mxArray *prhs[]) {
   FILE * f = fopen (fname, "w");
 
   /* Packing */
-# define DATABLOCK  4096
-# define ENCODING   DE_INT32
-# define BYTEORDER  1 // Big endian
-# define FLUSH      0
-# define VERBOSE    1
+  mexPrintf ("Packing traces..\n");
+  mexPrintf ("Writing to file: %s..\n", fname);
+  # define DATABLOCK  (2*4096)
+  # define ENCODING   DE_INT32
+  # define BYTEORDER  1 // Big endian
+  # define FLUSH      1
+  # define VERBOSE    1
   int64_t psamples, precords;
   precords = mst_packgroup (mstg, &(record_handler), (void*) f,
                             DATABLOCK, ENCODING, BYTEORDER, &psamples,
@@ -239,8 +248,6 @@ void mexFunction (int nlhs, mxArray *phls[], int nrhs, const mxArray *prhs[]) {
   mexPrintf ("=> Packed %d samples in %d records to file %s.\n", psamples, precords, fname);
 
   fclose (f);
-
-  return;
 }
 
 void record_handler (char *record, int reclen, void *f) {
