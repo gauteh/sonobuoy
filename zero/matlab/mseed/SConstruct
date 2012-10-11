@@ -67,5 +67,6 @@ env.Replace (CC = '/home/gaute/.MATLAB/R2010b/bin/mex')
 env.Append (CPPPATH = ['../../buoy/'], CPPDEFINES = { 'GIT_DESC' : ('\\"%s\\"' % GIT_DESC) }, CFLAGS = '-g', LIBS = ['libmseed',], LINKFLAGS = '-largeArrayDims' )
 
 env.Program (source = ['MsWriteMseed.c', ])
+env.Program (source = ['mexMsReadTracesNative.c', ])
 
 

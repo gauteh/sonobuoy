@@ -229,13 +229,17 @@ void mexFunction (int nlhs, mxArray *phls[], int nrhs, const mxArray *prhs[]) {
 
   mst_printtracelist (mstg, 0, 1, 0);
 
+  /* Heal group */
+  mexPrintf ("Healing group (joining adjacent trace segments)..\n");
+  mst_groupheal (mstg, timetol, sampletol);
+
   /* Open file */
   FILE * f = fopen (fname, "w");
 
   /* Packing */
   mexPrintf ("Packing traces..\n");
   mexPrintf ("Writing to file: %s..\n", fname);
-  # define DATABLOCK  (2*4096)
+  # define DATABLOCK  2*4096
   # define ENCODING   DE_INT32
   # define BYTEORDER  1 // Big endian
   # define FLUSH      1
