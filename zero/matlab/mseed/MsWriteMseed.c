@@ -163,12 +163,12 @@ void mexFunction (int nlhs, mxArray *phls[], int nrhs, const mxArray *prhs[]) {
   mexPrintf ("=> Samplerate tol:  %6.1f Hz\n", sampletol);
   mexPrintf ("\n");
 
-  /* Set up miniSEED volume */
-  ms_loginit ((void *)&mexPrintf, NULL, (void *)&mexWarnMsgTxt, NULL);
-
   /* Ensure big-endianess */
   MS_PACKHEADERBYTEORDER(1);
   MS_PACKDATABYTEORDER(1);
+
+  /* Set up miniSEED volume */
+  ms_loginit ((void *)&mexPrintf, NULL, (void *)&mexWarnMsgTxt, NULL);
 
   /* Set up trace group */
   MSTraceGroup * mstg = mst_initgroup (NULL);

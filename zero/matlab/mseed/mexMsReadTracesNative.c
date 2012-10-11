@@ -2,26 +2,26 @@
  * mexMsReadTracesNative.c
  *
  * This file is part of the library libmseed.
- * 
+ *
  *     libmseed is free software; you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
  *     the Free Software Foundation; either version 2 of the License, or
  *     (at your option) any later version.
- * 
+ *
  *     libmseed is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
- * 
+ *
  *     You should have received a copy of the GNU General Public License
  *     along with Foobar; if not, write to the Free Software
  *     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  *
  * Mex wrapper function for the msReadTraces function in the libmseed library.
- * 
+ *
  * mexMsReadTracesNative takes the same input arguments as the
  * ms_readtraces() funciton does except for the first argument.
- * 
+ *
  * The return value is a Matlab structure similiar to the libmseed structure
  *  MSTrace_s containing the trace header and data.
  *
@@ -38,6 +38,9 @@
 #include "mex.h"
 #include <libmseed/libmseed.h>
 
+/* 1 = big endian, 0 = little endian */
+# define ENDIANNESS 0
+
 void
 mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
@@ -52,8 +55,8 @@ mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   int i, j, nfields;
   mxArray *tmp_val;
   double *tmp_val_ptr;
-  int *data;
-  
+  int32_t *data;
+
   /* Sanity check input and output */
   if ( nrhs != 8 )
     {
@@ -73,16 +76,16 @@ mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     {
       mexErrMsgTxt ("Too many output arguments.");
     }
-  
+
   /* Redirect libmseed logging messages to Matlab functions */
   ms_loginit ((void *)&mexPrintf, NULL, (void *)&mexWarnMsgTxt, NULL);
-  
+
   /* Get the length of the input string */
   buflen = (mxGetM (prhs[0]) * mxGetN (prhs[0])) + 1;
-  
+
   /* Allocate memory for input string */
   filename = mxCalloc (buflen, sizeof (char));
-  
+
   /* Assign the input arguments to variables */
   if ( mxGetString (prhs[0], filename, buflen) )
     mexErrMsgTxt ("Not enough space. Filename string is truncated.");
@@ -93,15 +96,15 @@ mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   skipnodata = (flag) mxGetScalar(prhs[5]);
   dataflag = (flag) mxGetScalar(prhs[6]);
   verbose = (flag) mxGetScalar(prhs[7]);
-  
+
   /* Read the file */
   if ( ms_readtraces (&mstg, filename, reclen, timetol, sampratetol, dataquality,
 		      skipnodata, dataflag, verbose) != MS_NOERROR )
     mexErrMsgTxt ("Error reading files");
-  
+
   /* Print some information to the Matlab command prompt */
   mst_printtracelist (mstg, 0, verbose, 1);
-  
+
   /* Create the Matlab output structure */
   mst = mstg->traces;
   for (i=0; i < mstg->numtraces; i++)
@@ -126,16 +129,21 @@ mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	  plhs[0] = mxCreateStructMatrix(mstg->numtraces, 1, nfields, my_fnames);
 	  mxFree(my_fnames);
    	}
-      
+
       /* Copy the data of the mst structure to the matlab output structure. */
-      data = (int*)mst->datasamples;
+      data = (int32_t*) mst->datasamples;
       tmp_val = mxCreateDoubleMatrix(mst->numsamples, 1, mxREAL);
       tmp_val_ptr = mxGetPr(tmp_val);
       for (j = 0; j < mst->numsamples; j++)
-	{
-	  tmp_val_ptr[j] = data[j];
-	}
-      
+      {
+# if ENDIANNESS
+        tmp_val_ptr[j] = (double) data[j];
+# else
+        tmp_val_ptr[j] = (double) (int32_t)(__builtin_bswap32 (data[j]));
+# endif
+        //tmp_val_ptr[j] = 100.0;
+      }
+
       mxSetFieldByNumber(plhs[0], i, 0, mxCreateString(mst->network));
       mxSetFieldByNumber(plhs[0], i, 1, mxCreateString(mst->station));
       mxSetFieldByNumber(plhs[0], i, 2, mxCreateString(mst->location));
@@ -149,9 +157,9 @@ mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       mxSetFieldByNumber(plhs[0], i, 10, mxCreateDoubleScalar(mst->numsamples));
       mxSetFieldByNumber(plhs[0], i, 11, mxCreateDoubleScalar((int)mst->sampletype));
       mxSetFieldByNumber(plhs[0], i, 12, tmp_val);
-      
+
       mst = mst->next;
     }
-  
+
   mst_freegroup (&mstg);
 }
