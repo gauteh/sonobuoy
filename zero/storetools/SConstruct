@@ -82,9 +82,14 @@ if not GetOption("verbose_flag"): # {{{
   dttenv["JARCOMSTR"] = java_library_message,
   dttenv["JAVACCOMSTR"] = java_compile_source_message, # }}}
 
-dttenv.Program ('dtttomseed', ['bdata.cpp', 'ms.cpp', 'dtt.cpp', 'dtttomseed.cpp'])
-dttenv.Program ('dattomseed', ['bdata.cpp', 'ms.cpp', 'dat.cpp', 'dattomseed.cpp'])
-dttenv.Program ('dttfix', ['bdata.cpp', 'dtt.cpp', 'dttfix.cpp'])
+dttenv.Program ('dtttomseed', ['ms.cpp', 'dtttomseed.cpp', dttenv.Object ('dtt.cpp'), dttenv.Object ('bdata-reg.o', 'bdata.cpp')])
+dttenv.Program ('dattomseed', ['ms.cpp', 'dattomseed.cpp', dttenv.Object ('dat-reg.o', 'dat.cpp'), dttenv.Object ('bdata-reg.o', 'bdata.cpp')])
+dttenv.Program ('dttfix', ['dttfix.cpp', dttenv.Object('bdata-reg.o', 'bdata.cpp'), dttenv.Object ('dtt.cpp')])
 dttenv.Program ('mschangesource', ['mschangesource.cpp',])
 
 
+mexenv = Environment ()
+mexenv.Replace (CC = '/home/gaute/.MATLAB/R2010b/bin/mex', CXX = '/home/gaute/.MATLAB/R2010b/bin/mex')
+mexenv.Append (CPPPATH = ['../../buoy/'], CPPDEFINES = { 'GIT_DESC' : ('\\"%s\\"' % GIT_DESC) }, CFLAGS = '-g', LIBS = ['libmseed',], LINKFLAGS = '-largeArrayDims' )
+
+mexenv.Program (source = ['readdat.cpp', mexenv.Object ('dat.cpp'), mexenv.Object ('bdata.cpp') ])
