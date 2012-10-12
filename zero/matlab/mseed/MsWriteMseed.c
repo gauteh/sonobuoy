@@ -53,7 +53,6 @@ void mexFunction (int nlhs, mxArray *phls[], int nrhs, const mxArray *prhs[]) {
 
     mexPrintf ("  batches is a matrix with a row for each batch with a column for:\n");
     mexPrintf ("    - Start time (hptime_t)\n");
-    mexPrintf ("    - End time   (hptime_t)\n");
     mexPrintf ("    - Number of samples\n");
     mexPrintf ("    - Data quality\n");
     mexPrintf ("  dataseries is a vector with data values in same order as batches\n");
@@ -84,7 +83,7 @@ void mexFunction (int nlhs, mxArray *phls[], int nrhs, const mxArray *prhs[]) {
   int batches_n = mxGetN (mbatches);
   int batches_m = mxGetM (mbatches);
 
-  if (batches_n != 4) {
+  if (batches_n != 3) {
     mexErrMsgTxt ("Wrong number of columns in batches.");
   }
 
@@ -194,37 +193,38 @@ void mexFunction (int nlhs, mxArray *phls[], int nrhs, const mxArray *prhs[]) {
   int64_t cursample  = 0;
 
   for (int i = 0; i < batches_m; i++) {
-    MSTrace *mst = mst_init (NULL);
+    MSRecord *msr = msr_init (NULL);
 
-    strcpy (mst->network, network);
-    strcpy (mst->station, station);
-    strcpy (mst->location, location);
-    strcpy (mst->channel, channel);
+    strcpy (msr->network, network);
+    strcpy (msr->station, station);
+    strcpy (msr->location, location);
+    strcpy (msr->channel, channel);
 
-    mst->samprate   = samplerate;
-    mst->starttime  = (hptime_t) batches[i];
-    mst->endtime    = (hptime_t) batches[i + 1 * batches_m];
-    mst->sampletype = 'i';
-    mst->numsamples = (int64_t) batches[i + 2 * batches_m];
-    mst->samplecnt  = mst->numsamples;
-    mst->dataquality = 0;
+    msr->samprate   = samplerate;
+    msr->starttime  = (hptime_t) batches[i];
+    msr->sampletype = 'i';
+    msr->encoding   = DE_INT32;
+    msr->byteorder  = 1;
+    msr->numsamples = (int64_t) batches[i + 1 * batches_m];
+    msr->samplecnt  = msr->numsamples;
+    msr->dataquality = 0;
 
-    mexPrintf ("Batch %d, start: %lu, end: %lu, numsamples: %d, quality: %d\n",
-        i, mst->starttime, mst->endtime, mst->numsamples, mst->dataquality);
+    mexPrintf ("Batch %d, start: %lu, numsamples: %d, quality: %d\n",
+        i, msr->starttime, msr->numsamples, msr->dataquality);
 
-    if ((cursample + mst->numsamples) > numberofsamples) {
+    if ((cursample + msr->numsamples) > numberofsamples) {
       mexErrMsgTxt ("Number of samples specified in batches does not match with avilable samples in dataseries.");
     }
 
-    mst->datasamples = (int32_t*) malloc (mst->numsamples * sizeof(int32_t));
+    msr->datasamples = (int32_t*) malloc (msr->numsamples * sizeof(int32_t));
 
-    for (int j = 0; j < mst->numsamples; j++) {
-      ((int32_t*)mst->datasamples)[j] = (int32_t) values[cursample + j];
+    for (int j = 0; j < msr->numsamples; j++) {
+      ((int32_t*)msr->datasamples)[j] = (int32_t) values[cursample + j];
     }
 
-    cursample += mst->numsamples;
+    cursample += msr->numsamples;
 
-    mst_addtracetogroup (mstg, mst);
+    mst_addmsrtogroup (mstg, msr, 1, timetol, sampletol);
   }
 
   mst_printtracelist (mstg, 0, 1, 0);
