@@ -19,7 +19,7 @@ void mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     mexPrintf ("readdat - Gaute Hope <eg@gaute.vetsj.com> / 2012-10-10\n\n");
     mexPrintf ("   Read dat files.\n\n");
     mexPrintf ("Usage: \n");
-    mexPrintf ("  [t, d, refs] = readdat ( filename )\n\n");
+    mexPrintf ("  [t, d, refs] = readdat ( id )\n\n");
   }
 
   int id = mxGetScalar (prhs[0]);
