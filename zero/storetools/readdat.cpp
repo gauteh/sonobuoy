@@ -19,7 +19,7 @@ void mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     mexPrintf ("readdat - Gaute Hope <eg@gaute.vetsj.com> / 2012-10-10\n\n");
     mexPrintf ("   Read dat files.\n\n");
     mexPrintf ("Usage: \n");
-    mexPrintf ("  [t, d, refs] = readdat ( id )\n\n");
+    mexPrintf ("  [t, d, refs, sdlag] = readdat ( id )\n\n");
   }
 
   int id = mxGetScalar (prhs[0]);
@@ -34,7 +34,7 @@ void mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     mexPrintf ("read: %d samples.\n", dat.bdata->totalsamples);
 
     /* Generate refs */
-    const int ndim = 10;
+    const int ndim = 11;
     mxArray * refs = mxCreateDoubleMatrix (dat.bdata->batchcount, ndim, mxREAL);
     double  * refs_p = mxGetPr (refs);
 
@@ -72,6 +72,7 @@ void mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
       }
 
       refs_p[i + mdim * 9] = (double) dat.bdata->batches[i].checksum;
+      refs_p[i + mdim * 10] = (dat.bdata->batches[i].checksum_pass ? 1.0 : 0.0);
     }
 
     /* Generate times */
@@ -103,10 +104,17 @@ void mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
       curstart += dat.bdata->batches[i].length;
     }
 
+    /* SD lag */
+    mxArray * sdlag = mxCreateDoubleMatrix (1, 1, mxREAL);
+    double  * sdlag_p = mxGetPr (sdlag);
+    sdlag_p[0] = (dat.bdata->e_sdlag ? 1.0 : 0.0);
+
     plhs[0] = time;
     plhs[1] = data;
     plhs[2] = refs;
-    nlhs = 3;
+    plhs[3] = sdlag;
+
+    nlhs = 4;
   }
 }
 

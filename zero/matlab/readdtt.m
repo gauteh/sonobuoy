@@ -16,6 +16,7 @@ function [t, d, refs] = readdtt(f, complement)
 % longitude: value
 % longitude: east (E) or west (W)
 % checksum (32 bits)
+% Checksum passed (not implemented for DTT)
 
 if (~exist('complement', 'var'))
   complement = true;
@@ -50,6 +51,8 @@ while ~feof(fh)
 
   % Got referenceline in l
   R = sscanf (l, '%c,%u,%u,%lu,%u,%f%c,%f%c,%u');
+  R(11) = 0;
+  
   refs = [refs; R'];
   crc = R(10);
   L = R(2); % Length of samples
