@@ -152,15 +152,17 @@ void mexFunction (int nlhs, mxArray *phls[], int nrhs, const mxArray *prhs[]) {
     sampletol = mxGetScalar (m);
   }
 
-  mexPrintf ("Writing MiniSEED file for: %s_%s_%s_%s..\n\n", network, station,
+  mexPrintf ("Writing MiniSEED file for: %s_%s_%s_%s..\n", network, station,
       location, channel);
 
+  /*
   mexPrintf ("=> Batches:         %4d\n", batches_m);
   mexPrintf ("=> Total samples:   %4d\n", numberofsamples);
   mexPrintf ("=> Sample rate:     %6.1f Hz\n", samplerate);
   mexPrintf ("=> Time tol.:       %6.1f s\n", timetol);
   mexPrintf ("=> Samplerate tol:  %6.1f Hz\n", sampletol);
   mexPrintf ("\n");
+  */
 
   /* Ensure big-endianess */
   MS_PACKHEADERBYTEORDER(1);
@@ -188,7 +190,7 @@ void mexFunction (int nlhs, mxArray *phls[], int nrhs, const mxArray *prhs[]) {
       channel);
 
   /* Add batches as traces to tracegroup */
-  mexPrintf ("Loading batches..\n");
+  //mexPrintf ("Loading batches..\n");
   double  *curdata   = values;
   int64_t cursample  = 0;
 
@@ -209,8 +211,10 @@ void mexFunction (int nlhs, mxArray *phls[], int nrhs, const mxArray *prhs[]) {
     msr->samplecnt  = msr->numsamples;
     msr->dataquality = 0;
 
+    /*
     mexPrintf ("Batch %d, start: %lu, numsamples: %d, quality: %d\n",
         i, msr->starttime, msr->numsamples, msr->dataquality);
+    */
 
     if ((cursample + msr->numsamples) > numberofsamples) {
       mexErrMsgTxt ("Number of samples specified in batches does not match with avilable samples in dataseries.");
@@ -230,20 +234,20 @@ void mexFunction (int nlhs, mxArray *phls[], int nrhs, const mxArray *prhs[]) {
   mst_printtracelist (mstg, 0, 1, 0);
 
   /* Heal group */
-  mexPrintf ("Healing group (joining adjacent trace segments)..\n");
+  //mexPrintf ("Healing group (joining adjacent trace segments)..\n");
   mst_groupheal (mstg, timetol, sampletol);
 
   /* Open file */
   FILE * f = fopen (fname, "w");
 
   /* Packing */
-  mexPrintf ("Packing traces..\n");
-  mexPrintf ("Writing to file: %s..\n", fname);
+  //mexPrintf ("Packing traces..\n");
+  //mexPrintf ("Writing to file: %s..\n", fname);
   # define DATABLOCK  2*4096
   # define ENCODING   DE_INT32
   # define BYTEORDER  1 // Big endian
   # define FLUSH      1
-  # define VERBOSE    1
+  # define VERBOSE    0
   int64_t psamples, precords;
   precords = mst_packgroup (mstg, &(record_handler), (void*) f,
                             DATABLOCK, ENCODING, BYTEORDER, &psamples,

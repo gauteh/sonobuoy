@@ -1,5 +1,5 @@
 function [batches] = getbatches (t, d)
-% [batches = timetobatches (t, d)
+% [batches] = getbatches (t, d)
 %
 % Prepares a time and data series for conversion to miniSEED by generating
 % a batches parameter matrix.

@@ -1,5 +1,5 @@
 function checkbatches (refs, t, d, fix)
-% Check for errors in batch and optionally try to fix
+% Check for errors in batches and optionally try to fix
 %
 % Attempt to detect errors of type:
 % - Clock skews
