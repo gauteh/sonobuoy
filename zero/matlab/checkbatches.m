@@ -1,4 +1,4 @@
-function fixed = checkbatches (refs, t, d, fix, nprevr, nprevt)
+function [fixed, t, d] = checkbatches (refs, t, d, fix, nprevr, nprevt)
 % Check for errors in batches and optionally try to fix
 %
 % Attempt to detect errors of type:
@@ -9,6 +9,8 @@ function fixed = checkbatches (refs, t, d, fix, nprevr, nprevt)
 
 fprintf ('==> Checking %d samples..\n', length(t));
 
+fixed = false;
+
 % Constants
 samples_per_batch = 1024;
 
@@ -16,7 +18,8 @@ samples_per_batch = 1024;
 MIN_TIME = datenum2btime (datenum('2012-08-31'));
 MAX_TIME = datenum2btime (datenum('2012-09-10'));
 
-maxtdiff = 0.9e6; % us
+maxptdiff = 0.9e6; % us
+maxntdiff = 0.3e6; % us
 
 % Partial reference:
 partial_ref = nprevt - (nprevr -1) * samples_per_batch;
@@ -35,11 +38,11 @@ plot(t); hold on;
 title ('Time');
 
 % Plot refs as stars
-
 if nprevr == 0,
   x = (0:nr-1) * samples_per_batch;
 else
-  x = [0 ((0:(nr -2)) * samples_per_batch + partial_ref)]; % previous refs
+  x = [0 ((0:(nprevr-3)) * samples_per_batch + partial_ref)]; % previous refs
+  x = [x (((nprevr-1):(nr-1)) * samples_per_batch + partial_ref)];
 end
 
 plot(x, refs(:,4), 'r*')
@@ -57,7 +60,7 @@ if (~isempty(nz))
 end
 
 %% Find negative time deltas
-nn = find (tdiff < 0);
+nn = find (tdiff < -maxntdiff);
 if (~isempty(nn)) 
   for i=nn'
     fprintf ('==> Found negative time delta at: %d (delta: %f)\n', i, tdiff(i));
@@ -67,7 +70,7 @@ if (~isempty(nn))
 end
 
 %% Find large positive time deltas
-np = find (tdiff > maxtdiff);
+np = find (tdiff > maxptdiff);
 if (~isempty(np))
   for i=np'
     fprintf ('==> Found postive time delta at: %d (delta: %f)\n', i, tdiff(i));
@@ -124,12 +127,66 @@ if (fix)
     ny = interp1(x, y, dx, 'linear');
     
     t(dx) = ny;
+    
+    fixed = true;
   end
+  
+  %% Find un-realistic times
+  unrea = (t > MAX_TIME) | (t < MIN_TIME);
+  if (any(unrea))
+    fprintf ('==> [fixing] Found unrealistic times, discarding and recalculating, values: %d\n', length(unrea(unrea==1)));
+
+    dx = unrea;
+    x  = ~unrea;
+    
+    xx = 1:length(t);
+    dx = xx(dx);
+    x  = xx(x);
+    
+    t(dx) = interp1(x, t(x), dx, 'linear');
+    
+    fixed = true;
+  end
+ 
   
   %% Replot
   figure(3); clf('reset');
   plot(t); hold on;
-  title ('Fixed time');
+  title ('Fixed time'); 
+  
+  %% Fit linear line and detect outliers
+  tolerance = 20*1e6; % us
+  
+  x = 1:length(t);
+  p = polyfit (x, t', 1);
+  
+  y = polyval (p, x);
+  ymax = y + tolerance;
+  ymin = y - tolerance;
+  
+  plot(x, ymax, 'g-');
+  plot(x, ymin, 'g-');
+  
+  outliers = ((t>ymax') | (t<ymin'));
+  if (any(outliers))
+    fprintf ('==> [fixing] Found outliers, discarding and recalculating, values: %d\n', length(outliers(outliers==1)));
+
+    dx = outliers;
+    x  = ~outliers;
+    
+    xx = 1:length(t);
+    dx = xx(dx);
+    x  = xx(x);
+    
+    t(dx) = interp1(x, t(x), dx, 'linear');
+    
+    fixed = true;
+    
+    % replot
+    plot (t, 'r-');
+  end
+  
+
 
   % Plot refs as stars
   if nprevr == 0,
@@ -149,7 +206,7 @@ if (fix)
   
   %% Rescan for large or uncaught jumps (outliers)
   % Find large negative time deltas
-  nn = find (tdiff < 0);
+  nn = find (tdiff < -maxntdiff);
   if (~isempty(nn)) 
     for i=nn'
       fprintf ('==> Found unhandled negative time delta at: %d (delta: %f)\n', i, tdiff(i));
@@ -159,7 +216,7 @@ if (fix)
   end
 
   % Find large positive time deltas
-  np = find (tdiff > maxtdiff);
+  np = find (tdiff > maxptdiff);
   if (~isempty(np))
     for i=np'
       fprintf ('==> Found unhandled postive time delta at: %d (delta: %f)\n', i, tdiff(i));
@@ -168,10 +225,13 @@ if (fix)
     plot (np, t(np), 'kx');
   end
   
-  
+
 end
 
-
+%% Plot final time
+figure(4); clf('reset');
+plot(t);
+title ('Final time');
 
 pause
 

@@ -96,7 +96,7 @@ while (k < length(range) || ~isempty(prevt))
   end
   
   %% Check
-  checkbatches (r, t, d, true, nprevr, nprevt);
+  [fixed, t, d] = checkbatches (r, t, d, true, nprevr, nprevt);
   
   %% Find rollover to next hour
   [~, ~, ~, hours, ~, ~] = datevec(btime2datenum (t));
