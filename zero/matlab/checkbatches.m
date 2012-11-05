@@ -233,7 +233,6 @@ figure(4); clf('reset');
 plot(t);
 title ('Final time');
 
-pause
 
 
 end
