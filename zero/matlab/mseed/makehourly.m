@@ -40,7 +40,7 @@ while (k < length(range) || ~isempty(prevt))
     fprintf ('==> End of range reached, writing out samples of non-full hour..\n');
     nf = 0;
   else
-    fprintf ('==> Loading one hour (+ buffer) of samples, files: %d to %d..\n', k, kend);
+    fprintf ('==> Loading one hour (+ buffer) of samples, index: %d to %d..\n', k, kend);
     nf   = kend - k;
     thisrange = range(k:kend);   
   end
@@ -55,7 +55,7 @@ while (k < length(range) || ~isempty(prevt))
   
   % load from previous file
   if (~isempty(prevt))
-    fprintf ('==> Loaded %d of superfluos samples from previous collection.\n', length(prevt));
+    fprintf ('==> Loaded %d of remaining samples from previous collection.\n', length(prevt));
     t(1:length(prevt)) = prevt;
     d(1:length(prevd)) = prevd;
     
@@ -66,6 +66,13 @@ while (k < length(range) || ~isempty(prevt))
   sk = max([length(prevt) 1]);      % index of samples arrays
   sr = max([b 1]);                  % index of reference arrays
   ss = max([length(prevsdlag) 1]);  % index of file arrays
+  
+  % save sizes for checkbatches
+  nprevr = b;
+  nprevt = length(prevt);
+  
+  [nr, ~] = size(r);
+  assert (b<=nr, 'Less total number of references than from remaining previous references.');
   
   % clear prev
   prevt = [];
@@ -88,6 +95,9 @@ while (k < length(range) || ~isempty(prevt))
     end
   end
   
+  %% Check
+  checkbatches (r, t, d, true, nprevr, nprevt);
+  
   %% Find rollover to next hour
   [~, ~, ~, hours, ~, ~] = datevec(btime2datenum (t));
   starth = hours(1);
@@ -95,7 +105,7 @@ while (k < length(range) || ~isempty(prevt))
   
   if (isempty(endi))
     endi = length(t);
-    fprintf ('==> No hour rollover in range, collecting rest of samples in this file\n');
+    fprintf ('==> No hour rollover in range, collecting remaining samples in this file\n');
   else
     fprintf ('==> Found hour rollover at sample %d: %d -> %d.\n', endi, starth, hours(endi));
   end
@@ -105,10 +115,10 @@ while (k < length(range) || ~isempty(prevt))
     prevt = t(endi+1:end);
     prevd = d(endi+1:end);
     
-    b = ceil(length(prevt) / samples_per_batch);
-    f = ceil(length(prevt) / samples_per_file); % should never be more than 1
+    b = floor(length(prevt) / samples_per_batch);
+    f = floor(length(prevt) / samples_per_file); % should never be more than 1
     
-    prevr = r(end-b:end, :);
+    prevr = r(end-b-2:end, :);
     prevsdlag = sdlag(end-f:end);
     
     % remove superfluos samples from this collection
@@ -119,9 +129,6 @@ while (k < length(range) || ~isempty(prevt))
     
     fprintf ('==> %d samples scheduled for next file..\n', length(prevt));
   end
-  
-  %% Check
-  checkbatches (r, t, d, true);
   
   %% Write mseed file
   batches = getbatches (t, d);

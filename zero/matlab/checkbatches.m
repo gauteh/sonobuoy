@@ -1,4 +1,4 @@
-function fixed = checkbatches (refs, t, d, fix)
+function fixed = checkbatches (refs, t, d, fix, nprevr, nprevt)
 % Check for errors in batches and optionally try to fix
 %
 % Attempt to detect errors of type:
@@ -9,8 +9,6 @@ function fixed = checkbatches (refs, t, d, fix)
 
 fprintf ('==> Checking %d samples..\n', length(t));
 
-if ~exist ('fix', 'var'), fix = false; end
-
 % Constants
 samples_per_batch = 1024;
 
@@ -19,6 +17,9 @@ MIN_TIME = datenum2btime (datenum('2012-08-31'));
 MAX_TIME = datenum2btime (datenum('2012-09-10'));
 
 maxtdiff = 0.9e6; % us
+
+% Partial reference:
+partial_ref = nprevt - (nprevr -1) * samples_per_batch;
 
 %% Sanity checks
 [nr, ~] = size (refs);
@@ -34,8 +35,18 @@ plot(t); hold on;
 title ('Time');
 
 % Plot refs as stars
-x = (0:(nr - 1)) * samples_per_batch;
+
+if nprevr == 0,
+  x = (0:nr-1) * samples_per_batch;
+else
+  x = [0 ((0:(nr -2)) * samples_per_batch + partial_ref)]; % previous refs
+end
+
 plot(x, refs(:,4), 'r*')
+
+if (nprevr~= 0)
+  plot((nprevr-1) * samples_per_batch, refs(nprevr, 4), 'ko');
+end
 
 %% Find zero time deltas (indicating duplicates)
 nz = find (tdiff == 0);
@@ -121,9 +132,19 @@ if (fix)
   title ('Fixed time');
 
   % Plot refs as stars
-  x = (0:(nr - 1)) * samples_per_batch;
+  if nprevr == 0,
+    x = (0:nr-1) * samples_per_batch;
+  else
+    x = [0 ((0:(nprevr-3)) * samples_per_batch + partial_ref)]; % previous refs
+    x = [x (((nprevr-1):(nr-1)) * samples_per_batch + partial_ref)];
+  end
+
   plot(x, refs(:,4), 'r*')
-  
+
+  if (nprevr~= 0)
+    plot((nprevr-1) * samples_per_batch, refs(nprevr, 4), 'ko');
+  end
+
   tdiff = diff(t);
   
   %% Rescan for large or uncaught jumps (outliers)
