@@ -83,6 +83,7 @@ if (fix)
   D = abs(NN - NP);
   [DI,  i] = sort(D);
   
+  % Find matches and sort by best matches
   [mx, nx] = size(D);
   for ii=1:nx
     [~, mi] = min(DI(:,ii));
@@ -125,8 +126,8 @@ if (fix)
   
   tdiff = diff(t);
   
-  %% Rescan for large or uncaught jumps
-  % Find negative time deltas
+  %% Rescan for large or uncaught jumps (outliers)
+  % Find large negative time deltas
   nn = find (tdiff < 0);
   if (~isempty(nn)) 
     for i=nn'
@@ -145,6 +146,8 @@ if (fix)
 
     plot (np, t(np), 'kx');
   end
+  
+  
 end
 
 
