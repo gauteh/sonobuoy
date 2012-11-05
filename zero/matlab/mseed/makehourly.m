@@ -19,6 +19,7 @@ samples_per_hour  = 250 * 60 * 60;
 samples_per_file  = 40 * 1024;
 samples_per_batch = 1024;
 batches_per_file  = 40;
+files_buffer      = 10; % extra files to load to make sure we get to the next hour
 
 %% Work through range
 % superfluos samples from previous file
@@ -28,25 +29,31 @@ prevr = [];
 prevsdlag = [];
 
 k = 1;
-while k < length(range)
+while (k < length(range) || ~isempty(prevt))
   %% Load one hour of samples
   % Calculate files needed to get new full hour
-  needsamples = samples_per_hour - length(prevt);
+  needsamples = samples_per_hour - length(prevt) + files_buffer * samples_per_file;
   needfiles   = ceil (needsamples / samples_per_file);
   
   kend = min([k+needfiles-1 length(range)]);
-  fprintf ('==> Loading one hour of samples: %d to %d..\n', k, kend);
-  nf   = kend - k;
-  thisrange = range(k:kend);
+  if (k > length(range))
+    fprintf ('==> End of range reached, writing out samples of non-full hour..\n');
+    nf = 0;
+  else
+    fprintf ('==> Loading one hour (+ buffer) of samples, files: %d to %d..\n', k, kend);
+    nf   = kend - k;
+    thisrange = range(k:kend);   
+  end
+
+  [b, ~] = size(prevr);
   
   % pre allocate vars
-  t = nan(samples_per_file * nf, 1);
-  d = nan(samples_per_file * nf, 1);
-  r = nan(batches_per_file * nf, 11);
-  sdlag = nan(nf, 1);
+  t = nan(samples_per_file * nf + length(prevt), 1);
+  d = nan(samples_per_file * nf + length(prevd), 1);
+  r = nan(batches_per_file * nf + b, 11);
+  sdlag = nan(nf + length(prevsdlag), 1);
   
   % load from previous file
-  [b, ~] = size(prevr);
   if (~isempty(prevt))
     fprintf ('==> Loaded %d of superfluos samples from previous collection.\n', length(prevt));
     t(1:length(prevt)) = prevt;
@@ -56,9 +63,9 @@ while k < length(range)
     sdlag(1:length(prevsdlag)) = prevsdlag;
   end
   
-  sk = max([length(prevt) 1]); % index of samples arrays
-  sr = max([b 1]); % index of reference arrays
-  ss = max([length(prevsdlag) 1]); % index of file arrays
+  sk = max([length(prevt) 1]);      % index of samples arrays
+  sr = max([b 1]);                  % index of reference arrays
+  ss = max([length(prevsdlag) 1]);  % index of file arrays
   
   % clear prev
   prevt = [];
@@ -67,35 +74,48 @@ while k < length(range)
   prevsdlag = [];
   
   % load files
-  for i=thisrange
-    [tt, dd, rr, ssdlag] = readdat (i);
-    t(sk:sk+samples_per_file-1) = tt;
-    d(sk:sk+samples_per_file-1) = dd;
-    r(sr:sr+batches_per_file-1,:) = rr;
-    sdlag(ss:ss+1) = ssdlag;
-    
-    sk = sk + samples_per_file;
-    sr = sr + batches_per_file;
-    ss = ss + 1;
+  if (k < length(range))
+    for i=thisrange
+      [tt, dd, rr, ssdlag] = readdat (i);
+      t(sk:sk+samples_per_file-1) = tt;
+      d(sk:sk+samples_per_file-1) = dd;
+      r(sr:sr+batches_per_file-1,:) = rr;
+      sdlag(ss:ss+1) = ssdlag;
+
+      sk = sk + samples_per_file;
+      sr = sr + batches_per_file;
+      ss = ss + 1;
+    end
+  end
+  
+  %% Find rollover to next hour
+  [~, ~, ~, hours, ~, ~] = datevec(btime2datenum (t));
+  starth = hours(1);
+  endi = find(hours > starth, 1 );
+  
+  if (isempty(endi))
+    endi = length(t);
+    fprintf ('==> No hour rollover in range, collecting rest of samples in this file\n');
+  else
+    fprintf ('==> Found hour rollover at sample %d: %d -> %d.\n', endi, starth, hours(endi));
   end
   
   %% Put superfluos samples in next 'prev'
-  if (length(t) > needsamples)
-    prevt = t(needsamples+1:end);
-    prevd = d(needsamples+1:end);
+  if (length(t) > endi)
+    prevt = t(endi+1:end);
+    prevd = d(endi+1:end);
     
     b = ceil(length(prevt) / samples_per_batch);
     f = ceil(length(prevt) / samples_per_file); % should never be more than 1
-    assert (f <= 1, 'Loaded more than one extra file.');
     
     prevr = r(end-b:end, :);
-    prevsdlag = sdlag(end);
+    prevsdlag = sdlag(end-f:end);
     
     % remove superfluos samples from this collection
-    t = t(1:needsamples);
-    d = d(1:needsamples);
-    r = r(1:b);
-    sdlag = sdlag(1:end - 1);
+    t = t(1:endi);
+    d = d(1:endi);
+    r = r(1:end-b,:);
+    sdlag = sdlag(1:end-f);
     
     fprintf ('==> %d samples scheduled for next file..\n', length(prevt));
   end
