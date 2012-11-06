@@ -124,7 +124,7 @@ while (k < length(range) || ~isempty(prevt))
     prevsdlag = sdlag(end-f:end);
     
     testref = prevr(1,4) + partial_ref / 250 * 1e6;
-    assert (testref == prevt(1), 'Previous: Reference and time series does not match.');
+    %assert (testref == prevt(1), 'Previous: Reference and time series does not match.');
     [mr, ~] = size(prevr);
     assert (b == mr, 'Previous: Bad number of references.');
     

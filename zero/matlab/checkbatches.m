@@ -9,6 +9,8 @@ function [fixed, t, d] = checkbatches (refs, t, d, fix, nprevr, nprevt)
 
 fprintf ('==> Checking %d samples..\n', length(t));
 
+doplot = false;
+
 fixed = false;
 
 % Constants
@@ -27,13 +29,16 @@ partial_ref = (nprevr * samples_per_batch) - nprevt;
 [nr, ~] = size (refs);
 
 tdiff = diff(t);
-figure(1); clf('reset');
-hist(tdiff, 100);
-title ('Time differences');
 
-figure(2); clf('reset');
-plot(t); hold on;
-title ('Time');
+if (doplot)
+  figure(1); clf('reset');
+  hist(tdiff, 100);
+  title ('Time differences');
+
+  figure(2); clf('reset');
+  plot(t); hold on;
+  title ('Time');
+end
 
 % Plot refs as stars
 if nprevr == 0,
@@ -45,10 +50,14 @@ else
   refsx = [refsx (((nprevr-1):(nr-1)) * samples_per_batch + (1024 - partial_ref))];
 end
 
-plot(refsx, refs(:,4), 'r*')
+if (doplot)
+  plot(refsx, refs(:,4), 'r*')
+end
 
 if (nprevr~= 0)
-  plot((nprevr-1) * samples_per_batch, refs(nprevr, 4), 'ko');
+  if (doplot)
+    plot((nprevr-1) * samples_per_batch, refs(nprevr, 4), 'ko');
+  end
 end
 
 % Check if refs match time (previous refs will not match in case they have
@@ -62,7 +71,9 @@ nz = find (tdiff == 0);
 if (~isempty(nz)) 
   fprintf ('==> Found zero time delta at: %d\n', nz);
   
-  plot (nz, t(nz), 'gx');
+  if (doplot)
+    plot (nz, t(nz), 'gx');
+  end
 end
 
 %% Find negative time deltas
@@ -72,7 +83,9 @@ if (~isempty(nn))
     fprintf ('==> Found negative time delta at: %d (delta: %f)\n', i, tdiff(i));
   end
   
-  plot (nn, t(nn), 'gx');
+  if (doplot)
+    plot (nn, t(nn), 'gx');
+  end
 end
 
 %% Find large positive time deltas
@@ -82,7 +95,9 @@ if (~isempty(np))
     fprintf ('==> Found postive time delta at: %d (delta: %f)\n', i, tdiff(i));
   end
   
-  plot (np, t(np), 'kx');
+  if (doplot)
+    plot (np, t(np), 'kx');
+  end
 end
 
 %% Fix
@@ -155,9 +170,11 @@ if (fix)
   end
  
   %% Replot
-  figure(3); clf('reset');
-  plot(t); hold on;
-  title ('Fixed time'); 
+  if (doplot)
+    figure(3); clf('reset');
+    plot(t); hold on;
+    title ('Fixed time'); 
+  end
   
   %% Fit linear line and detect outliers
   tolerance = 20*1e6; % us
@@ -169,8 +186,10 @@ if (fix)
   ymax = y + tolerance;
   ymin = y - tolerance;
   
-  plot(x, ymax, 'g-');
-  plot(x, ymin, 'g-');
+  if (doplot)
+    plot(x, ymax, 'g-');
+    plot(x, ymin, 'g-');
+  end
   
   outliers = ((t>ymax') | (t<ymin'));
   if (any(outliers))
@@ -188,14 +207,20 @@ if (fix)
     fixed = true;
     
     % replot
-    plot (t, 'r-');
+    if (doplot)
+      plot (t, 'r-');
+    end
   end
   
   % Plot refs as stars
-  plot(refsx, refs(:,4), 'r*')
+  if (doplot)
+    plot(refsx, refs(:,4), 'r*')
+  end
 
   if (nprevr~= 0)
-    plot((nprevr-1) * samples_per_batch, refs(nprevr, 4), 'ko');
+    if (doplot)
+      plot((nprevr-1) * samples_per_batch, refs(nprevr, 4), 'ko');
+    end
   end
 
   tdiff = diff(t);
@@ -207,8 +232,10 @@ if (fix)
     for i=nn'
       fprintf ('==> Found unhandled negative time delta at: %d (delta: %f)\n', i, tdiff(i));
     end
-
-    plot (nn, t(nn), 'gx');
+    
+    if (doplot)
+      plot (nn, t(nn), 'gx');
+    end
   end
 
   % Find large positive time deltas
@@ -217,15 +244,19 @@ if (fix)
     for i=np'
       fprintf ('==> Found unhandled postive time delta at: %d (delta: %f)\n', i, tdiff(i));
     end
-
-    plot (np, t(np), 'kx');
+    
+    if (doplot)
+      plot (np, t(np), 'kx');
+    end
   end
   
 end
 
 %% Plot final time
-figure(4); clf('reset');
-plot(t);
-title ('Final time');
+if (doplot)
+  figure(4); clf('reset');
+  plot(t);
+  title ('Final time');
+end
 
 end
