@@ -9,7 +9,7 @@ function [fixed, t, d] = checkbatches (refs, t, d, fix, nprevr, nprevt)
 
 fprintf ('==> Checking %d samples..\n', length(t));
 
-doplot = false;
+doplot = true;
 
 fixed = false;
 
@@ -177,7 +177,7 @@ if (fix)
   end
   
   %% Fit linear line and detect outliers
-  tolerance = 20*1e6; % us
+  tolerance = 2000*1e6; % us
   
   x = 1:length(t);
   p = polyfit (x, t', 1);
