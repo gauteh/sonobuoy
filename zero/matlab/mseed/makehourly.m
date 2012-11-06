@@ -115,11 +115,18 @@ while (k < length(range) || ~isempty(prevt))
     prevt = t(endi+1:end);
     prevd = d(endi+1:end);
     
-    b = floor(length(prevt) / samples_per_batch);
-    f = floor(length(prevt) / samples_per_file); % should never be more than 1
+    b = ceil(length(prevt) / samples_per_batch);
+    f = ceil(length(prevt) / samples_per_file); % should never be more than 1
     
-    prevr = r(end-b-2:end, :);
+    partial_ref = (b * samples_per_batch) - length(prevt);
+    
+    prevr = r(end-(b-1):end, :);
     prevsdlag = sdlag(end-f:end);
+    
+    testref = prevr(1,4) + partial_ref / 250 * 1e6;
+    assert (testref == prevt(1), 'Previous: Reference and time series does not match.');
+    [mr, ~] = size(prevr);
+    assert (b == mr, 'Previous: Bad number of references.');
     
     % remove superfluos samples from this collection
     t = t(1:endi);

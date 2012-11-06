@@ -22,12 +22,10 @@ maxptdiff = 0.9e6; % us
 maxntdiff = 0.3e6; % us
 
 % Partial reference:
-partial_ref = nprevt - (nprevr -1) * samples_per_batch;
+partial_ref = (nprevr * samples_per_batch) - nprevt;
 
-%% Sanity checks
 [nr, ~] = size (refs);
 
-%% Simple time checks
 tdiff = diff(t);
 figure(1); clf('reset');
 hist(tdiff, 100);
@@ -39,17 +37,25 @@ title ('Time');
 
 % Plot refs as stars
 if nprevr == 0,
-  x = (0:nr-1) * samples_per_batch;
+  refsx = (0:nr-1) * samples_per_batch;
 else
-  x = [0 ((0:(nprevr-3)) * samples_per_batch + partial_ref)]; % previous refs
-  x = [x (((nprevr-1):(nr-1)) * samples_per_batch + partial_ref)];
+  % realign first ref
+  refs(1,4) = refs(1,4) + partial_ref / 250 * 1e6;
+  refsx = [0 ((0:(nprevr-3)) * samples_per_batch + (1024 - partial_ref))]; % previous refs
+  refsx = [refsx (((nprevr-1):(nr-1)) * samples_per_batch + (1024 - partial_ref))];
 end
 
-plot(x, refs(:,4), 'r*')
+plot(refsx, refs(:,4), 'r*')
 
 if (nprevr~= 0)
   plot((nprevr-1) * samples_per_batch, refs(nprevr, 4), 'ko');
 end
+
+% Check if refs match time (previous refs will not match in case they have
+% already been fixed)
+% eps_refs = 1; % us
+% res = t(refsx+1) - refs(:,4);
+%assert (all(abs(res) < eps_refs), 'Reference does not match time series.');
 
 %% Find zero time deltas (indicating duplicates)
 nz = find (tdiff == 0);
@@ -148,7 +154,6 @@ if (fix)
     fixed = true;
   end
  
-  
   %% Replot
   figure(3); clf('reset');
   plot(t); hold on;
@@ -186,17 +191,8 @@ if (fix)
     plot (t, 'r-');
   end
   
-
-
   % Plot refs as stars
-  if nprevr == 0,
-    x = (0:nr-1) * samples_per_batch;
-  else
-    x = [0 ((0:(nprevr-3)) * samples_per_batch + partial_ref)]; % previous refs
-    x = [x (((nprevr-1):(nr-1)) * samples_per_batch + partial_ref)];
-  end
-
-  plot(x, refs(:,4), 'r*')
+  plot(refsx, refs(:,4), 'r*')
 
   if (nprevr~= 0)
     plot((nprevr-1) * samples_per_batch, refs(nprevr, 4), 'ko');
@@ -225,14 +221,11 @@ if (fix)
     plot (np, t(np), 'kx');
   end
   
-
 end
 
 %% Plot final time
 figure(4); clf('reset');
 plot(t);
 title ('Final time');
-
-
 
 end
