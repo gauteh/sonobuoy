@@ -9,7 +9,7 @@ function makehourly (location, station, range)
 % - Save track and status along with each hourly miniSEED file
 %
 
-% Common defaults
+% Common
 network = 'GB';
 channel = 'BNR';
 
