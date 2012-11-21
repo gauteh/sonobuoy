@@ -9,12 +9,12 @@ import time
 
 # input
 year  = 12
-month =  8
-day   = 13
+month =  7
+day   = 23 
 
-hour    = 21
-minute  = 19
-second  = 59
+hour    = 19
+minute  = 31 
+second  = 00 
 
 seconds_per_day = 86400
 
