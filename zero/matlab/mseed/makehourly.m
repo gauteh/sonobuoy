@@ -8,6 +8,10 @@ function makehourly (location, station, range)
 % - Detect timing errors and stop
 % - Save track and status along with each hourly miniSEED file
 %
+% For each hour write out:
+% - MiniSEED file for this hour
+% - Info file with: ID numbers of input files
+% - Track file for hour
 
 % Common
 network = 'GB';
@@ -140,7 +144,10 @@ while (k < length(range) || ~isempty(prevt))
   %% Write mseed file
   batches = getbatches (t, d);
   
-  MsWriteMseed (batches, d', network, station, location, channel, 250.0, 1.0, 250.0);
+  cd out
+  fname = MsWriteMseed (batches, d', network, station, location, channel, 250.0, 1.0, 250.0);
+  disp (fname);
+  cd ..
   
   k = kend +1;
 end

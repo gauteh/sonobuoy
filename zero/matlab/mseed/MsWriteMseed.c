@@ -42,14 +42,14 @@ void record_handler (char *record, int reclen, void *f);
  *  - Sample rate tolerance
  */
 
-void mexFunction (int nlhs, mxArray *phls[], int nrhs, const mxArray *prhs[]) {
+void mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 
   /* Help and argument checking */
   if (nrhs < 5 || nrhs > 9) {
     mexPrintf ("MsWriteMseed - Gaute Hope <eg@gaute.vetsj.com> / 2012-10-10\n\n");
     mexPrintf ("   Create miniSEED files.\n\n");
     mexPrintf ("Usage: \n");
-    mexPrintf ("  MsWriteMseed ( batches, dataseries, network, station, location, [channel], [sample rate], [timetol], [sampletol] )\n\n");
+    mexPrintf ("  [fname] = MsWriteMseed ( batches, dataseries, network, station, location, [channel], [sample rate], [timetol], [sampletol] )\n\n");
 
     mexPrintf ("  batches is a matrix with a row for each batch with a column for:\n");
     mexPrintf ("    - Start time (hptime_t)\n");
@@ -60,12 +60,9 @@ void mexFunction (int nlhs, mxArray *phls[], int nrhs, const mxArray *prhs[]) {
     mexPrintf ("  sample rate, default: 250 Hz\n");
     mexPrintf ("  timetol, tolerance between batches before splitting them in several traces, default: 1.0\n");
     mexPrintf ("  sampletol, tolerance for sample rate before splitting them in several traces, default: 250\n\n");
+    mexPrintf ("  Return value: Output file name.\n\n");
 
     mexErrMsgTxt ("Incorrect number of arguments.");
-  }
-
-  if (nlhs > 0) {
-    mexErrMsgTxt ("MsWriteMseed does not support any output arguments.");
   }
 
   /* Steps:
@@ -254,6 +251,11 @@ void mexFunction (int nlhs, mxArray *phls[], int nrhs, const mxArray *prhs[]) {
                             FLUSH, VERBOSE, NULL);
 
   mexPrintf ("=> Packed %d samples in %d records to file %s.\n", psamples, precords, fname);
+
+  /* Return file name */
+  nlhs = 1;
+  mxArray * fname_r = mxCreateString (fname);
+  plhs[0] = fname_r;
 
   fclose (f);
 }
