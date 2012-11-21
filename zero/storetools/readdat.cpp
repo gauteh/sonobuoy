@@ -34,7 +34,7 @@ void mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     mexPrintf ("read: %d samples.\n", dat.bdata->totalsamples);
 
     /* Generate refs */
-    const int ndim = 11;
+    const int ndim = 12;
     mxArray * refs = mxCreateDoubleMatrix (dat.bdata->batchcount, ndim, mxREAL);
     double  * refs_p = mxGetPr (refs);
 
@@ -73,6 +73,7 @@ void mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 
       refs_p[i + mdim * 9] = (double) dat.bdata->batches[i].checksum;
       refs_p[i + mdim * 10] = (dat.bdata->batches[i].checksum_pass ? 1.0 : 0.0);
+      refs_p[i + mdim * 11] = (double) id;
     }
 
     /* Generate times */

@@ -31,6 +31,7 @@ prevt = [];
 prevd = [];
 prevr = [];
 prevsdlag = [];
+realrange = []; % ids used for this hourly file
 
 k = 1;
 while (k < length(range) || ~isempty(prevt))
@@ -54,7 +55,7 @@ while (k < length(range) || ~isempty(prevt))
   % pre allocate vars
   t = nan(samples_per_file * nf + length(prevt), 1);
   d = nan(samples_per_file * nf + length(prevd), 1);
-  r = nan(batches_per_file * nf + b, 11);
+  r = nan(batches_per_file * nf + b, 12);
   sdlag = nan(nf + length(prevsdlag), 1);
   
   % load from previous file
@@ -65,6 +66,8 @@ while (k < length(range) || ~isempty(prevt))
     
     r(1:b, :) = prevr(:,:);
     sdlag(1:length(prevsdlag)) = prevsdlag;
+    
+    realrange = prevrange;
   end
   
   sk = max([length(prevt) 1]);      % index of samples arrays
@@ -120,7 +123,11 @@ while (k < length(range) || ~isempty(prevt))
     prevd = d(endi+1:end);
     
     b = ceil(length(prevt) / samples_per_batch);
-    f = ceil(length(prevt) / samples_per_file); % should never be more than 1
+    f = ceil(length(prevt) / samples_per_file);
+    
+    % figure out how many of thisrange has been put into prev
+    prevrange = thisrange(end-f:end);
+    realrange = [realrange; thisrange(1:end-f)];
     
     partial_ref = (b * samples_per_batch) - length(prevt);
     
@@ -146,7 +153,38 @@ while (k < length(range) || ~isempty(prevt))
   
   cd out
   fname = MsWriteMseed (batches, d', network, station, location, channel, 250.0, 1.0, 250.0);
-  disp (fname);
+  
+  
+  % Write IDs used to info file (remove .mseed part)
+  fname_base = fname(1:end-6);
+  fname_info = sprintf ('%s.ids', fname_base);
+  f_info = fopen (fname_info, 'w');
+  for id=realrange
+    fwrite (f_info, sprintf('%d\n', id));
+  end
+  fclose (f_info);
+  
+  % Write out references
+  fname_track = sprintf ('%s.refs', fname_base);
+  f_track = fopen (fname_track, 'w');
+  for rr=r'
+    % format:
+    % - file id
+    % - no
+    % - ref
+    % - status
+    % - lat
+    % - N/S
+    % - lon
+    % - E/W
+    % - checksum
+    % - checksum pass
+    
+    fwrite (f_track, sprintf ('%d,%d,%lu,%d,%f,%c,%f,%c,%lu,%d\n', rr(12), rr(3), rr(4), rr(5), ...
+      rr(6), rr(7), rr(8), rr(9), rr(10), rr(11)));
+  end
+  fclose (f_track);
+  
   cd ..
   
   k = kend +1;

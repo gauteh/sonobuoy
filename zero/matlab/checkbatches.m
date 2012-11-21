@@ -9,7 +9,7 @@ function [fixed, t, d] = checkbatches (refs, t, d, fix, nprevr, nprevt)
 
 fprintf ('==> Checking %d samples..\n', length(t));
 
-doplot = true;
+doplot = false;
 
 fixed = false;
 
