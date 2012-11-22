@@ -6,6 +6,8 @@
  * should be fairly dump so that errors or time problems are as obvious as
  * possible - as little as possible processing should be done here.
  *
+ * Memory: Is not handled very well, this function might be a source of a
+ *         memory leak.
  */
 
 # include <mex.h>

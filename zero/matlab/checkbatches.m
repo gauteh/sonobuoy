@@ -47,7 +47,7 @@ else
   % realign first ref
   refs(1,4) = refs(1,4) + partial_ref / 250 * 1e6;
   refsx = [0 ((0:(nprevr-3)) * samples_per_batch + (1024 - partial_ref))]; % previous refs
-  refsx = [refsx (((nprevr-1):(nr-1)) * samples_per_batch + (1024 - partial_ref))];
+  refsx = [refsx (((nprevr-2):(nr-2)) * samples_per_batch + (1024 - partial_ref))];
 end
 
 if (doplot)
@@ -56,7 +56,7 @@ end
 
 if (nprevr~= 0)
   if (doplot)
-    plot((nprevr-1) * samples_per_batch, refs(nprevr, 4), 'ko');
+    plot((nprevr-2) * samples_per_batch, refs(nprevr, 4), 'ko');
   end
 end
 
@@ -219,7 +219,7 @@ if (fix)
 
   if (nprevr~= 0)
     if (doplot)
-      plot((nprevr-1) * samples_per_batch, refs(nprevr, 4), 'ko');
+      plot((nprevr-2) * samples_per_batch, refs(nprevr, 4), 'ko');
     end
   end
 

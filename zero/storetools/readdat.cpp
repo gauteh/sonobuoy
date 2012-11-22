@@ -3,6 +3,9 @@
  *
  * MATLAB interface to reading DAT files
  *
+ * Memory: Is not handled very well, this function might be a source of a
+ *         memory leak.
+ *
  */
 
 # include <mex.h>
