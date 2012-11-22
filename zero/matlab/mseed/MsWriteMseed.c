@@ -6,6 +6,8 @@
  * should be fairly dump so that errors or time problems are as obvious as
  * possible - as little as possible processing should be done here.
  *
+ * Written for libmseed 2.7
+ *
  * Memory: Is not handled very well, this function might be a source of a
  *         memory leak.
  */
@@ -33,7 +35,7 @@ void record_handler (char *record, int reclen, void *f);
  * The batches are formatted in one long data series, batches are fixed size,
  * the per batch parameters are passed along in a matrix with a row per batch.
  *
- * Common paramters for all batches:
+ * Common parameters for all batches:
  *
  *  - Source information (network, station, location, channel)
  *  - Sample rate
@@ -62,6 +64,7 @@ void mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     mexPrintf ("  sample rate, default: 250 Hz\n");
     mexPrintf ("  timetol, tolerance between batches before splitting them in several traces, default: 1.0\n");
     mexPrintf ("  sampletol, tolerance for sample rate before splitting them in several traces, default: 250\n\n");
+
     mexPrintf ("  Return value: Output file name.\n\n");
 
     mexErrMsgTxt ("Incorrect number of arguments.");

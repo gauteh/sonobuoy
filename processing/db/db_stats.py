@@ -3,7 +3,7 @@
 # Author: Gaute Hope <eg@gaute.vetsj.com>
 # Date:   2012-11-22
 #
-# Print stats about events in DB (assuming all are in same month..)
+# Print stats about events in DB
 #
 
 import sys
@@ -12,6 +12,7 @@ import os
 cwd = os.getcwd ()
 
 files = os.listdir (cwd)
+files.sort()
 
 days = [] # list with days and event number pairs
 
@@ -21,7 +22,7 @@ for f in files:
     ym = f[-6:]
 
     dd = ym + '-' + d
-    
+
     # find and append to existing key if possible
     i = 0
     found = False
@@ -44,6 +45,7 @@ for k,v in days:
   total += v
 
 # print total
+print "-----------------"
 print "total ......: %3d" % total
 
 
