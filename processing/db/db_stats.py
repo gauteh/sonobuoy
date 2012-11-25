@@ -41,7 +41,6 @@ print "Event database stats:"
 total = 0
 for k,v in days:
   print "%s ..: %3d" % (k , v)
-  #print k + " .: " + str(v)
   total += v
 
 # print total

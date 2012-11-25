@@ -9,7 +9,7 @@
 # * b2, b3, b4 contains a folder dat each with raw DAT files
 
 # Create dirs
-mkdir 01_cont 02_events_raw
+mkdir 01_cont 02_events_raw 03_events_ready 04_events_localize
 
 # Create mseed files
 cd b2/dat
