@@ -1,4 +1,4 @@
-function [t, d, refs] = readrangedat (r, path)
+function [t, d, refs, sdlag] = readrangedat (r, path)
 % Read all dats in range r, optionally specify path (otherwise current
 % directory is assumed)
 
@@ -10,11 +10,13 @@ cd (path);
 t = [];
 d = [];
 refs = [];
+sdlag = [];
 for i = r
-  [nt, nd, nr] = readdat(i);
+  [nt, nd, nr, nsd] = readdat(i);
   t = [t; nt];
   d = [d; nd];
   refs = [refs; nr];
+  sdlag = [sdlag; nsd];
 end
 
 cd (wd);
