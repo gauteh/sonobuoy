@@ -1,5 +1,5 @@
 #! /usr/bin/python2
-# Author: Gaute Hope <eg@gaute.vetsj.com> / 2012-11-25
+# Author: Gaute Hope <eg@gaute.vetsj.com> / 2012-11-26
 #
 # Extract revised mseeds and create new S file ready for phasepicking
 #
@@ -26,7 +26,7 @@ localizeevents = '04_events_localize'
 
 root = '../../'
 if not os.path.exists (os.path.join (root, contdir)):
-  print "Could not figure out root db dir, run from event dir in 03_events_ready/... ."
+  print "Could not figure out root db dir, run from event dir in 03_events_ready/_some_event_ ."
   sys.exit (1)
 
 contdir = os.path.join (root, contdir)
@@ -47,10 +47,12 @@ mseedfiles = []
 for s in stations:
   files = os.listdir (s)
   for f in files:
-    if f[-6:] == '.mseed':
+    if '.ids' in f or '.refs' in f or '.mseed' in f:
       print "Copying: %s.." % f
       shutil.copy (os.path.join (s, f), neweventd)
-      mseedfiles.append (f)
+
+      if f[-6:] == '.mseed':
+        mseedfiles.append (f)
 
 # generate S file
 neweventf = os.path.join (neweventd, event)
