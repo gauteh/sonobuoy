@@ -25,7 +25,7 @@ LR GROUP-VELOCITY (DEF 3.95 [km/s]):  3.95
 STARTING SOURCE TIME (EPOCHAL TIME): 0.
 STARTING TIME ERROR       [s]      : 120. 
 
-STARTING SOURCE DEPTH     [km]     : 7.88
+STARTING SOURCE DEPTH     [km]     : 4.0 
 DEPTH FLAG (f,b,d,F,B,D)           : f
 
 STARTING SOURCE LATITUDE  [deg]    : 85.5 
