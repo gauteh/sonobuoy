@@ -1,0 +1,3 @@
+ftp://ftp.norsar.no/pub/outgoing/johannes/hyposat/ contents of data dir
+in hyposat 4.4b.
+
