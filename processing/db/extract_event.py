@@ -34,8 +34,8 @@ if singleevent:
   event = sys.argv[1]
 
 # stations
-stations = ['GAK2', 'GAK3', 'GAK4']
-sdirs = { 'GAK2' : 'b2', 'GAK3' : 'b3', 'GAK4': 'b4' }
+stations = ['GAK2', 'GAK3', 'GAK4', 'GAKS']
+sdirs = { 'GAK2' : 'b2', 'GAK3' : 'b3', 'GAK4': 'b4', 'GAKS' : 's5' }
 
 # dirs
 contdir = '01_cont'
@@ -72,7 +72,8 @@ def extract_event (sfile):
   mseedfiles = []
 
   sfl = open (sfile, 'r')
-  for l in sfl.readlines ():
+  lines = sfl.readlines ()
+  for l in lines:
     if 'mseed' in l:
       n = l.find ('.mseed')
       m = l[:n]
@@ -89,9 +90,22 @@ def extract_event (sfile):
 
       newsfl.write (newl)
 
+    elif ('GAKS' in l) and ('wav' in l):
+      n = l.find ('       ')
+      m = l[:n]
+      mseedfiles.append (m)
+      newl = ' ' + os.path.basename (m)
+      k = len(newl)
+      while k < 79:
+        newl = newl + ' '
+        k += 1
+
+      newl += '6\n'
+
+      newsfl.write (newl)
+
     else:
       newsfl.write (l)
-
 
   sfl.close ()
   newsfl.close ()
@@ -102,7 +116,9 @@ def extract_event (sfile):
     shutil.copy (os.path.join (root, f[3:]), eventdir)
 
   # read ids and refs file for each mseed file
-  for f in mseedfiles:
+  for f in mseedfiles :
+    if 'GAKS' in f: continue # skip seismometer
+
     f = f.strip ()
     ff = os.path.join (root, f[3:])
 
