@@ -18,6 +18,13 @@ day=${eventdir%%-*}
 
 time=${yearmonth}${day}$1
 
+echo $#
+
+if [[ $# -ne "2" ]]; then
+  echo "cutseismo.sh takes exactly two arguments."
+  exit 1
+fi
+
 echo "Extracting from: $yearmonth$day$1.."
 echo "Interval: $2"
 
