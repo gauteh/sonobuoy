@@ -89,7 +89,7 @@ for s in stations:
       ts += float(p[3][-3:])
       hts = ts * 1e6
 
-      print "=> %s, first arrival (%s): %s, timestamp: %f" % (s, p[1], times, ts)
+      #print "=> %s, first arrival (%s): %s, timestamp: %f" % (s, p[1], times, ts)
 
       # Searching for closest position in ref file
       prev = ''
@@ -191,7 +191,7 @@ for p in correctedphases:
         month         = int(date[5:6]),
         day           = int(date[7:]),
         hour          = int(p[2][:2]),
-        minute        = int(p[2][3:]),
+        minute        = int(p[2][2:]),
         second        = float(p[3]),
         std_deviation_onset       = (0.050 if (p[1] == 'P') else (0.200 if (p[1] == 'S') else 0.0)),
         backazimuth               = -999.0,
