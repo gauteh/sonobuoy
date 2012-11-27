@@ -31,7 +31,13 @@ jobd = 'job_01'
 if not os.path.exists (jobd):
   os.makedirs (jobd)
 
+datadir = os.path.join (os.path.dirname (sys.argv[0]))
+
 print "Creating HYPOSAT job for: %s in %s.." % (event, jobd)
+
+print "Copying parameter file and velocity model.."
+shutil.copy (os.path.join (datadir, 'hyposat-parameter'), jobd)
+shutil.copy (os.path.join (datadir, 'vmod.dat'), jobd)
 
 
 
