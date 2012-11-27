@@ -21,6 +21,7 @@ from utils import *
 import math
 
 stations = ['GAK2', 'GAK3', 'GAK4']
+seismo   = 'GAKS'
 
 if len(sys.argv) == 2:
   event = sys.argv[1]
@@ -139,6 +140,10 @@ for s in stations:
   if not found:
     print "=> No IP phase for station: %s, exiting." % s
     sys.exit (1)
+
+# Seismometer is placed at station 2
+positions[seismo] = positions['GAK2']
+stations.append (seismo)
 
 print "=> Writing station file: stations.dat.."
 stationsf = open (os.path.join (jobd, 'stations.dat'), 'w')

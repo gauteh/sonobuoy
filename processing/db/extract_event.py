@@ -104,6 +104,11 @@ def extract_event (sfile):
 
       newsfl.write (newl)
 
+      # create subdir for seismometer
+      sd = os.path.join (eventdir, 'GAKS')
+      if not os.path.exists (sd):
+        os.makedirs (sd)
+
     else:
       newsfl.write (l)
 

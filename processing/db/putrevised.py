@@ -16,6 +16,7 @@ import datetime
 
 # stations
 stations = ['GAK2', 'GAK3', 'GAK4']
+seismos  = 'GAKS'
 sdirs = { 'GAK2' : 'b2', 'GAK3' : 'b3', 'GAK4': 'b4' }
 
 # dirs
@@ -53,6 +54,15 @@ for s in stations:
 
       if f[-6:] == '.mseed':
         mseedfiles.append (f)
+
+# copy seismometer mseeds
+s = 'GAKS'
+files = os.listdir (s)
+for f in files:
+  if 'GAKS' in f:
+    print "Copying: %s.." % f
+    shutil.copy (os.path.join (s, f), neweventd)
+    mseedfiles.append (f)
 
 # generate S file
 neweventf = os.path.join (neweventd, event)
