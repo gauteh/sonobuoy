@@ -156,9 +156,7 @@ for s in stations:
       height = 0.0
     ))
 
-  #stationsf.write ('%s %f %f\n' % (s, positions[s][0], positions[s][1]))
 stationsf.close ()
-
 
 print "Copying parameter file and velocity model.."
 copy (os.path.join (datadir, 'hyposat-parameter'), os.path.join (jobd, 'hyposat-parameter'))
@@ -207,15 +205,15 @@ for p in correctedphases:
 inf.close ()
 
 # Generate job script
-jfuri = os.path.join (jobd, 'hyposatjob.sh')
-print "Writing HYPOSAT job file: hyposatjob.sh.."
-jf = open (jfuri, 'w')
-jf.write ('#! /bin/bash\n')
-jf.write ('# Automatically generated file (makehypojob.py): %s\n' % datetime.datetime.strftime (datetime.datetime.now(), '%Y-%m-%d %H:%M'))
-jf.write ('export HYPOSAT_DATA=%s\n' % os.path.join (datadir, 'data'))
-jf.write ('hyposat hyposat.in\n')
-jf.close ()
-os.chmod (jfuri, 0755)
+#jfuri = os.path.join (jobd, 'hyposatjob.sh')
+#print "Writing HYPOSAT job file: hyposatjob.sh.."
+#jf = open (jfuri, 'w')
+#jf.write ('#! /bin/bash\n')
+#jf.write ('# Automatically generated file (makehypojob.py): %s\n' % datetime.datetime.strftime (datetime.datetime.now(), '%Y-%m-%d %H:%M'))
+#jf.write ('export HYPOSAT_DATA=%s\n' % os.path.join (datadir, 'data'))
+#jf.write ('hyposat hyposat.in\n')
+#jf.close ()
+#os.chmod (jfuri, 0755)
 
 
 
