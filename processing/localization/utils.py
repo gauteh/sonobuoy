@@ -30,3 +30,19 @@ def decimaldegree_ddmmss (s):
 
   return r
 
+def ddmmss_decimaldegree (s):
+  n = s.find ('.')
+  sec = s[n -2:-1]
+  d   = s[-1]
+  min = s[n - 4: n - 2]
+  deg = s[: n - 4]
+
+  r  = float (deg)
+  r += float (min) / 60.0
+  r += float (sec) / 60.0 / 60.0
+
+  if d == 'S' or d == 'W':
+    r *= -1.0
+
+  return r
+
