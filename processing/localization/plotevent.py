@@ -84,12 +84,16 @@ for j in jobs:
   # plot stations if not plotted already
   if not stationsplotted:
     print "Plotting stations.."
-    sf = open (os.path.join (jd, 'stations.dat'), 'r')    
+    sf = open (os.path.join (jd, 'stations.dat'), 'r')
     for l in sf.readlines ():
       ss = l.split (' ')
       name = ss[0]
       lat  = ss[2]
       lon  = ss[4]
+
+      # is plotted along with GAK2
+      if 'GAKS' in name:
+        continue
 
       lat = ddmmss_decimaldegree (lat)
       lon = ddmmss_decimaldegree (lon)
@@ -100,15 +104,54 @@ for j in jobs:
 
       x, y = m(lon, lat)
       m.plot (x, y, 'wo', label = name, linewidth = 10, markersize = 10, alpha = 0.7)
-      if 'GAKS' in name:
-        y -= 1000
-      plt.text (x+100, y, name, rotation = -15, color = 'white')
 
+      if 'GAK2' in name:
+        name = 'GAK2 (GAKS)'
 
+      plt.text (x+250, y, name, rotation = -15, color = 'white')
 
     stationsplotted = True
 
+  # Extract info from job
+  print "Plotting job: %s.." % j
+  hypoout = os.path.join (jd, 'hyposat-out')
+  if not os.path.exists (hypoout):
+    print "--> No hyposat-out, skipping."
+    continue
+
+  hf = open (hypoout, 'r')
+  lines = hf.readlines ()
+  hf.close ()
+
+  next = False
+  for l in lines:
+    if next:
+      res = l
+
+    elif l[:2] == 'T0':
+      next = True
+
+  if not next:
+    print "--> No solution line found."
+    continue
+  
+  # Parse result line
+  t0    = res[0:23]
+  lat   = float(res[26:32])
+  lon   = float(res[36:41])
+  z     = float(res[43:49])
+  vpvs  = float(res[51:56])
+  rms   = float(res[107:112])
+
+  print "--> t0: %(t0)s, lat: %(lat)g, lon: %(lon)g, depth: %(depth)g, vpvs: %(vpvs)g, rms: %(rms)g" % { 't0' : t0, 'lat' : lat, 'lon' : lon, 'depth' : z, 'vpvs' : vpvs, 'rms' : rms}
+
+  # plot origin
+  x, y = m(lon, lat)
+  m.plot (x, y, '*y', label = event, markersize = 20)
+
+
 m.bluemarble ()
+plt.legend ()
 plt.show ()
 
 
