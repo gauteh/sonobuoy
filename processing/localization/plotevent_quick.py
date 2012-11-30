@@ -27,6 +27,8 @@ event    = os.path.basename (os.getcwd())
 
 if len(sys.argv) > 1:
   eventdir  = os.path.join (eventdir, sys.argv[1])
+  if not os.path.isdir (eventdir):
+    eventdir = './'
   event     = sys.argv[1]
 
 eventuri = os.path.join (eventdir, event)
@@ -49,6 +51,10 @@ for e in entries:
   if os.path.isdir (os.path.join (eventdir, e)):
     if 'job_' in e:
       jobs.append (e)
+
+if len(jobs) < 1:
+  print "--> no jobs, exiting."
+  sys.exit (1)
 
 # Setting up map
 print "Setting up map.."
@@ -75,6 +81,9 @@ m.drawmeridians (np.arange (-180.0, 180., 10), latmax = 90, labels = [True, Fals
 plt.title ('Hypocenter solutions for event: %s' % event)
 
 plt.hold (True)
+
+# stationcolors
+stationcolors = { 'GAK2' : 'w', 'GAK3' : 'g', 'GAK4' : 'r' }
 
 # Plotting jobs
 stationsplotted = False
@@ -103,7 +112,7 @@ for j in jobs:
       #m.tissot (lon, lat, 0.01, 100, facecolor = 'green', zorder = 10, alpha = 1)
 
       x, y = m(lon, lat)
-      m.plot (x, y, 'wo', label = name, linewidth = 10, markersize = 10, alpha = 0.7)
+      m.plot (x, y, 'o' + stationcolors[name], label = name, markersize = 10, alpha = 0.7)
 
       if 'GAK2' in name:
         name = 'GAK2 (GAKS)'
@@ -111,12 +120,13 @@ for j in jobs:
       plt.text (x+250, y, name, rotation = -15, color = 'white')
 
     stationsplotted = True
+    print "Plotting jobs.."
 
   # Extract info from job
-  print "Plotting job: %s.." % j
+  print "--> %s:" % j,
   hypoout = os.path.join (jd, 'hyposat-out')
   if not os.path.exists (hypoout):
-    print "--> No hyposat-out, skipping."
+    print "No hyposat-out, skipping."
     continue
 
   hf = open (hypoout, 'r')
@@ -132,9 +142,9 @@ for j in jobs:
       next = True
 
   if not next:
-    print "--> No solution line found."
+    print "No solution line found."
     continue
-  
+
   # Parse result line
   t0    = res[0:23]
   lat   = float(res[26:32])
@@ -143,11 +153,11 @@ for j in jobs:
   vpvs  = float(res[51:56])
   rms   = float(res[107:112])
 
-  print "--> t0: %(t0)s, lat: %(lat)g, lon: %(lon)g, depth: %(depth)g, vpvs: %(vpvs)g, rms: %(rms)g" % { 't0' : t0, 'lat' : lat, 'lon' : lon, 'depth' : z, 'vpvs' : vpvs, 'rms' : rms}
+  print "t0: %(t0)s, lat: %(lat)g, lon: %(lon)g, depth: %(depth)g, vpvs: %(vpvs)g, rms: %(rms)g" % { 't0' : t0, 'lat' : lat, 'lon' : lon, 'depth' : z, 'vpvs' : vpvs, 'rms' : rms}
 
   # plot origin
   x, y = m(lon, lat)
-  m.plot (x, y, '*y', label = event, markersize = 20)
+  m.plot (x, y, '*y', label = event + '_' + j, markersize = 15)
 
 
 m.bluemarble ()
