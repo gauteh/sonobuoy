@@ -74,7 +74,7 @@ $f_{LP_1}$. The original design already decouples, and high-passes, the
 signal at frequency $f_{HP}$.
 
   \begin{center}
-    \includegraphics[width=200px]{AQ-18-decoupling-and-wiring.jpg}
+    \includegraphics[width=200px]{aq-18/AQ-18-decoupling-and-wiring.jpg}
   \end{center}
   \captionof{figure}{AQ-18 suggested decoupling and wiring
     \cite{aq-18_decoupling}.}
@@ -310,6 +310,7 @@ amplitude will wrap into the 125 Hz passband.
 
 \label{digitalfilter}
 \section{Digital filter}
+\label{sec:digital_filter}
 Further the ADS1282 is configured to digitally filter the decimation
 output so that the final output signal of 250 Hz contains no alias below
 the input Nyquist sample rate (equation \eqref{eqn:nyquist}). The
@@ -317,6 +318,25 @@ built-in sinc and FIR filters are activated, see the ADS1282 datasheet
 \cite{ads1282_ds} for details. This provides more
 than $140$ dB of attenuation above the Nyquist frequency of the output
 sample rate \cite{ads1282_ds}.
+
+\begin{center}
+  \includegraphics[width=200px]{ads1282/sinc_filter.png}
+\end{center}
+\captionof{figure}{Sinc filter response \cite{ads1282_ds}.}
+\label{fig:ads1282_sinc_filter}
+
+\begin{center}
+  \includegraphics[width=200px]{ads1282/fir_filter.png}
+\end{center}
+\captionof{figure}{FIR filter response \cite{ads1282_ds}.}
+\label{fig:ads1282_fir_filter}
+
+\paragraph{}
+Figure \ref{fig:ads1282_sinc_filter} shows the response of the sinc
+filter, figure \ref{fig:ads1282_fir_filter} shows the response of the
+FIR filter (figures from \citetitle{ads1282_ds} pp. 20 - 21
+\cite{ads1282_ds}.
+
 \paragraph{}The
 ADS1282 can be configured for an sample rate of as high as 4000 Hz
 \cite{ads1282_ds}. This would be possible without changes in the analog
@@ -351,10 +371,24 @@ radians. And an $HPF[1:0] = 82.3550098$ truncated to $HPF[1:0] = 82_{10} =
 
 \section{Hydrophone characteristics}
 The hydrophone used, Benthos AQ-18, is specified to have an flat frequency response within
-$\pm 1.5 \text{dB}$ at the band 1 - 10 kHz
+$\pm 1.5 \text{dB}$ at the band 7 Hz - 10 kHz
 \cite{benthos_hydrophone_brochure}. With a sensitivity of -171 dBv re 1
-uPa at $20^\circ$ C. \textbf{TODO:} Need lower corner frequency and
-details.. Transfer function for hydrophone:
+uPa at $20^\circ$ C.
+
+\paragraph{}
+The frequency response for the AQ-18 is plotted in figure
+\ref{fig:aq-18_frequency_plot}:
+
+\begin{center}
+  \includegraphics[width=200px]{aq-18/AQ-18-FFVS.png}
+\end{center}
+\captionof{figure}{Frequency response plot of hydrophone, AQ-18
+  \cite{communication_benthos_aq18_freq}.}
+\label{fig:aq-18_frequency_plot}
+
+\paragraph{}
+A simplified transfer function for the hydrophone in the flat band (7
+Hz - 10 kHz):
 
 \begin{equation}
   H_{Hyd} = - 171\ \text{dBv re}\ 1\ \text{uPa} = 10^{8.55}
@@ -363,10 +397,10 @@ details.. Transfer function for hydrophone:
 \end{equation}
 
 \section{Response of Digitizer}
-In addition to the digital filters, however very sharp should ideally be
-included, the output is 32 bit integers, with a range of $\left[ -2^{31},
-  2^{31} - 1 \right]$, disregarding for simplicity (\textbf{FIXME}),
-the transfer function for the digitization part is: 
+The AD converter, ADS1282, includes very sharp digital filters
+(section \ref{sec:digital_filter}). The output is 32 bit integers, with
+a range of $\left[ -2^{31}, 2^{31} - 1 \right]$. The result is a near
+approximately flat frequency response from 0.05 Hz up to 125 Hz.
 
 \begin{equation}
   H_{D} = \frac{2^{32}}{5} \frac{\text{counts}}{\text{V}}
