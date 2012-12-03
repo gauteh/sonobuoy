@@ -74,6 +74,7 @@ print "Number: %d" % len(both)
 print
 
 print "Events only in raw:"
+withexp = 0
 for e in onlyraw:
   # check for explanation
   explanation = None
@@ -87,13 +88,15 @@ for e in onlyraw:
 
   if explanation is not None:
     print "%s: %s" % (e, explanation)
+    withexp += 1
   else:
     print e
   
-print "Number: %d" % len(onlyraw)
+print "Number: %d (%d without explanation)" % ( len(onlyraw), len(onlyraw) - withexp)
 print
 
 print "Events only in ready:"
+withexp = 0
 for e in onlyready:
   # check for explanation
   explanation = None
@@ -104,12 +107,13 @@ for e in onlyready:
     explanation = inf.read ()
     inf.close ()
     explanation = explanation.strip ()
+    withexp += 1
 
   if explanation is not None:
     print "%s: %s" % (e, explanation)
   else:
     print e
-print "Number: %d" % len(onlyready)
+print "Number: %d (%d without explanation)" % (len(onlyready), len(onlyready) - withexp)
 print
 print "Total: %d" % (len(both) + len(onlyraw) + len(onlyready))
 

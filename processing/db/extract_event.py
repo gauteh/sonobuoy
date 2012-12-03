@@ -64,6 +64,9 @@ def extract_event (sfile):
   eventdir = os.path.join (readyevents, os.path.basename (sfile))
   if not os.path.exists (eventdir):
     os.makedirs (eventdir)
+  else:
+    print "Event dir already exists, aborting."
+    sys.exit (1)
 
   # write out event with updated mseed file names (same dir)
   newsfile = os.path.join (eventdir, os.path.basename (sfile))
