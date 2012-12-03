@@ -1,0 +1,119 @@
+#! /usr/bin/python2
+#
+# Author: Gaute Hope <eg@gaute.vetsj.com> /  2012-12-03
+#
+# List extracted events and list unexctracted events with comments.
+
+
+import os
+import os.path
+import sys
+import shutil
+
+
+# stations
+stations = ['GAK2', 'GAK3', 'GAK4', 'GAKS']
+sdirs = { 'GAK2' : 'b2', 'GAK3' : 'b3', 'GAK4': 'b4', 'GAKS' : 's5' }
+
+# dirs
+contdir = '01_cont'
+rawevents = '02_events_raw'
+readyevents = '03_events_ready'
+localizeevents = '04_events_localize'
+
+# figure out which dir im run in: either db root or one of sub-dbs
+root = './'
+if not os.path.exists (os.path.join (root, contdir)):
+  root = '../'
+  if not os.path.exists (os.path.join (root, contdir)):
+    print "Could not figure out root db dir, run from either root db or one of sub dirs."
+    sys.exit (1)
+
+contdir = os.path.join (root, contdir)
+rawevents = os.path.join (root, rawevents)
+readyevents = os.path.join (root, readyevents)
+localizeevents = os.path.join (root, localizeevents)
+
+
+# Search for events in 03
+raw = []
+
+files = os.listdir (readyevents)
+files.sort ()
+for f in files:
+  if '.S' in f:
+    raw.append (f)
+
+
+# Search for events in 04
+ready = []
+files = os.listdir (localizeevents)
+files.sort ()
+for f in files:
+  if '.S' in f:
+    ready.append (f)
+
+# Compare
+both = []
+onlyraw = []
+onlyready = []
+
+for r in raw:
+  if r in ready:
+    both.append (r)
+    ready.remove(r)
+  else:
+    onlyraw.append (r)
+
+onlyready = ready
+
+print "Events in both:"
+for e in both:
+  print "%s" % e
+
+print "Number: %d" % len(both)
+print
+
+print "Events only in ready:"
+for e in onlyraw:
+  # check for explanation
+  explanation = None
+
+  inf = os.path.join (readyevents, e, e + '.txt')
+  if os.path.exists (inf):
+    inf = open (inf, 'r')
+    explanation = inf.read ()
+    inf.close ()
+    explanation = explanation.strip ()
+
+  if explanation is not None:
+    print "%s: %s" % (e, explanation)
+  else:
+    print e
+
+print "Number: %d" % len(onlyraw)
+print
+
+print "Events only in localize:"
+for e in onlyready:
+  # check for explanation
+  explanation = None
+
+  inf = os.path.join (localizeevents, e, e + '.txt')
+  if os.path.exists (inf):
+    inf = open (inf, 'r')
+    explanation = inf.read ()
+    inf.close ()
+    explanation = explanation.strip ()
+
+  if explanation is not None:
+    print "%s: %s" % (e, explanation)
+  else:
+    print e
+
+print "Number: %d" % len(onlyready)
+print
+
+print "Total: %d" % (len(both) + len(onlyraw) + len(onlyready))
+
+
