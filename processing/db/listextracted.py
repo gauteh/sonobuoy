@@ -25,8 +25,10 @@ root = './'
 if not os.path.exists (os.path.join (root, contdir)):
   root = '../'
   if not os.path.exists (os.path.join (root, contdir)):
-    print "Could not figure out root db dir, run from either root db or one of sub dirs."
-    sys.exit (1)
+    root = '../../'
+    if not os.path.exists (os.path.join (root, contdir)):
+      print "Could not figure out root db dir, run from either root db or one of sub dirs."
+      sys.exit (1)
 
 contdir = os.path.join (root, contdir)
 rawevents = os.path.join (root, rawevents)
@@ -91,7 +93,7 @@ for e in onlyraw:
     withexp += 1
   else:
     print e
-  
+
 print "Number: %d (%d without explanation)" % ( len(onlyraw), len(onlyraw) - withexp)
 print
 
