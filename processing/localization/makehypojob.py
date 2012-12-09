@@ -59,8 +59,8 @@ phases = []
 for l in phaselines:
   station = l[1:5].strip ()
   phasen  = l[9:15].strip ()
-  hrmm    = l[18:22].strip ()
-  secs    = l[23:28].strip ()
+  hrmm    = l[18:22].replace (' ', '0').strip ()
+  secs    = l[23:28].replace (' ', '0').strip ()
   print "=> Station: %s, phase: %s, time: %s:%s" % (station, phasen, hrmm, secs)
   phases.append ([station, phasen, hrmm, secs])
 
