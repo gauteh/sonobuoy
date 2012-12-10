@@ -94,3 +94,4 @@ for s in stations:
   if not found:
     print "=> No IP phase for station: %s, exiting." % s
     sys.exit (1)
+
