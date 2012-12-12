@@ -112,21 +112,23 @@ if (fix)
   nn = nn(abs(tdiff(nn))<maxjump);
   np = np(abs(tdiff(np))<maxjump);
   
-  NN = repmat (nn, 1, length(np));
-  NP = repmat (np, 1, length(nn))';
-  
-  D = abs(NN - NP);
-  [DI,  i] = sort(D);
-  
-  % Find matches and sort by best matches
-  [mx, nx] = size(D);
-  for ii=1:nx
-    [~, mi] = min(DI(:,ii));
-    
-    pp = [nn(i(mi,ii)) np(ii)];
-    
-    if abs(pp(2) - pp(1)) < jump_range_threshold
-      pairs = [pairs; pp];
+  if (length(nn) > 0 && length(np) > 0)
+    NN = repmat (nn, 1, length(np));
+    NP = repmat (np, 1, length(nn))';
+
+    D = abs(NN - NP);
+    [DI,  i] = sort(D);
+
+    % Find matches and sort by best matches
+    [mx, nx] = size(D);
+    for ii=1:nx
+      [~, mi] = min(DI(:,ii));
+
+      pp = [nn(i(mi,ii)) np(ii)];
+
+      if abs(pp(2) - pp(1)) < jump_range_threshold
+        pairs = [pairs; pp];
+      end
     end
   end
   
