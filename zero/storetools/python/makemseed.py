@@ -29,8 +29,6 @@ class Makemseed:
     pass
 
   def go (self):
-    print "makemseed"
-
     # parse args
     if len (sys.argv) < 2:
       print "Incorrect arguments."

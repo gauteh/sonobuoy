@@ -13,11 +13,19 @@ class Dat:
   def __init__ (self):
     pass
 
-  def read (self, s):
-    # s is file name
-    print "dat: loading %s.." % s
+  def read (self, datf):
+    # datf is file name
+    indf = datf[:-3] + '.IND'
 
-    f = open (s, 'r')
+    print "dat: loading %s.." % datf,
+
+    f = open (datf, 'rb')
+
+
+    f.close ()
+
+    print "loaded %d batches." % len(self.batches)
+
 
 
 
