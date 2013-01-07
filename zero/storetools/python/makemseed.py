@@ -34,7 +34,6 @@ class Makemseed:
       print "Incorrect arguments."
       sys.exit (1)
 
-
     if '.mat' in sys.argv[1]:
       self.domat ()
 
@@ -47,7 +46,7 @@ class Makemseed:
   def dorange (self):
     # parse range
     if len(sys.argv) == 2:
-      root = './'
+      root   = './'
       rrange = sys.argv[1]
 
     elif len(sys.argv) == 3:
@@ -58,21 +57,19 @@ class Makemseed:
 
     for i in rrange.split (','):
       if '-' in i:
-        aa = i.split ('-')
+        aa  =  i.split ('-')
         ids += range (int(aa[0]), int(aa[1]) + 1)
       else:
         ids.append (int (i))
 
     # load batches
-    batches = []
+    bdatas = []
 
     for i in ids:
       d = Dat ()
       d.read (os.path.join (root, str(i) + '.DAT'))
 
-      batches += d.batches
-
-
+      bdatas.append (d.bdata)
 
 
 if __name__ == '__main__':

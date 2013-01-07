@@ -6,27 +6,73 @@
 #
 
 import os
+from struct import *
+from array import array
+
+from bdata import *
 
 class Dat:
-  batches = []
+  bdata = None
 
   def __init__ (self):
-    pass
+    self.bdata = Bdata ()
 
-  def read (self, datf):
+  def read (self, datfu):
     # datf is file name
-    indf = datf[:-3] + '.IND'
+    indfu = datfu[:-3] + 'IND'
 
-    print "dat: loading %s.." % datf,
+    print "dat: loading %s.." % datfu,
 
-    f = open (datf, 'rb')
+    # read index
+    indf = open (indfu, 'rb')
 
+    self.bdata.source = 1
+    self.bdata.localversion = 0
 
-    f.close ()
+    self.bdata.remoteversion, = unpack ('H', indf.read (2))
+    self.bdata.id,            = unpack ('I', indf.read (4))
 
-    print "loaded %d batches." % len(self.batches)
+    indf.read (2) # skip sample length
+    self.bdata.totalsamples,  = unpack ('I', indf.read (4))
+    self.bdata.batchlength,   = unpack ('I', indf.read (4))
+    self.bdata.nobatches,     = unpack ('I', indf.read (4))
+    self.bdata.e_sdlag,       = unpack ('?', indf.read (1))
 
+    indf.close ()
 
+    datf = open (datfu, 'rb')
+    nref = 0
+    while nref < self.bdata.nobatches:
+      b = Bdata.Batch ()
 
+      # read reference  (repeat)
+      datf.read (3 * sample_length) # skip padding
 
+      b.no,     = unpack ('I', datf.read (4))
+      b.ref,    = unpack ('Q', datf.read (8))
+      b.status, = unpack ('I', datf.read (4))
+      b.latitude = datf.read (12)
+      b.longitude = datf.read (12)
+      b.checksum = unpack ('I', datf.read (4))
+
+      datf.read (3 * sample_length) # skip padding
+
+      if b.no != nref:
+        print "Error: Reference number does not match reference number in file."
+        print b.no
+        print nref
+        break
+
+      # read samples    (repeat)
+      b.samples_u = array ('I')
+      b.samples_u.read (datf, b.length)
+
+      nref += 1
+
+    datf.close ()
+
+    self.bdata.populate_int32_samples ()
+    self.bdata.checksums ()
+
+    print "loaded %d batches (%d samples, version: %d, sdlag: %s)." % (self.bdata.nobatches, self.bdata.totalsamples, self.bdata.remoteversion, ("yes" if self.bdata.e_sdlag else "no"))
 
