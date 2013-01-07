@@ -51,9 +51,10 @@ class Dat:
       b.no,     = unpack ('I', datf.read (4))
       b.ref,    = unpack ('Q', datf.read (8))
       b.status, = unpack ('I', datf.read (4))
-      b.latitude = datf.read (12)
+      b.latitude = datf.read (11)
+      datf.read (1) # skip extra lat byte
       b.longitude = datf.read (12)
-      b.checksum = unpack ('I', datf.read (4))
+      b.checksum, = unpack ('I', datf.read (4))
 
       datf.read (3 * sample_length) # skip padding
 
@@ -67,6 +68,7 @@ class Dat:
       b.samples_u = array ('I')
       b.samples_u.read (datf, b.length)
 
+      self.bdata.batches.append (b)
       nref += 1
 
     datf.close ()

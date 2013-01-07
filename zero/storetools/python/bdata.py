@@ -27,11 +27,15 @@ class Bdata:
     notimefix = False
     origtime  = None
 
-    samples_u = []
-    samples_i = []
+    samples_u = None
+    samples_i = None
+
+    def __init__ (self):
+      self.samples_u = []
+      self.samples_i = []
 
   # batches in bdata
-  batches = []
+  batches = None
 
   source  = 0 # 0 = DTT, 1 = DAT
   fixedtime = False
@@ -49,11 +53,14 @@ class Bdata:
 
   totalsamples  = 0
 
+  def __init__ (self):
+    self.batches = []
+
   def checksums (self):
-    c = 0
     self.checksum_pass = True
 
     for b in self.batches:
+      c = 0
       for u in b.samples_u:
         c ^= u
 
@@ -63,13 +70,7 @@ class Bdata:
       else:
         print "Error: Failed checksum on batch: %d" % b.no
 
-
-  def populate_int32_samples (self):
-    for b in self.batches:
-      for u in b.samples_u:
-        b.samples_i.append (int32 (u))
-
-  def int32 (x):
+  def int32 (self, x):
     if x>0xFFFFFFFF:
       raise OverflowError
     if x>0x7FFFFFFF:
@@ -80,3 +81,7 @@ class Bdata:
         return -2147483648
     return x
 
+  def populate_int32_samples (self):
+    for b in self.batches:
+      for u in b.samples_u:
+        b.samples_i.append (self.int32 (u))
