@@ -5,6 +5,10 @@
 # bdata.py: Buoy data file
 #
 
+# constants
+sample_length = 4
+
+# structures extended with classes
 class Bdata:
   class Batch:
     length  = 1024
@@ -25,7 +29,6 @@ class Bdata:
 
     samples_u = []
     samples_i = []
-
 
   # batches in bdata
   batches = []
@@ -76,7 +79,4 @@ class Bdata:
       else:
         return -2147483648
     return x
-
-
-sample_length = 4
 

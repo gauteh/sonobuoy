@@ -41,6 +41,7 @@ class Makemseed:
       self.dorange ()
 
   def domat (self):
+    print "Error: Not implemented."
     pass
 
   def dorange (self):
@@ -71,6 +72,7 @@ class Makemseed:
 
       bdatas.append (d.bdata)
 
+    # set up datastream
 
 if __name__ == '__main__':
   m = Makemseed ()
