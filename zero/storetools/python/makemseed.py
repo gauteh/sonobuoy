@@ -28,7 +28,7 @@
 import os
 import sys
 
-from obspy import read, Stream, Trace, UTCDateTime
+from obspy            import read, Stream, Trace, UTCDateTime
 from obspy.core.trace import Stats
 
 import numpy
@@ -79,7 +79,7 @@ class Makemseed:
   def plot (self):
     if self.st is not None:
       print "mkms: plotting.."
-      self.st.plot (number_of_ticks = 20)
+      self.st.plot (number_of_ticks = 300)
 
   def domat (self):
     print "Error: Not implemented."
@@ -105,6 +105,7 @@ class Makemseed:
         ids.append (int (i))
 
     # load batches
+    print "mkms: loading batches.."
     self.bdatas = []
 
     for i in ids:

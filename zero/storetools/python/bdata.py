@@ -6,12 +6,14 @@
 #
 
 # constants
-sample_length = 4
+sample_length     = 4
+batch_length      = 1024
+batches_per_file  = 40
 
 # structures extended with classes
 class Bdata:
   class Batch:
-    length  = 1024
+    length  = batch_length
     no      = 0
     ref     = 0 # timestamp
     status  = 0

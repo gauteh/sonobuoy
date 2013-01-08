@@ -7,7 +7,7 @@
 
 import os
 from struct import *
-from array import array
+from array  import array
 
 from bdata import *
 
@@ -18,8 +18,7 @@ class Dat:
     self.bdata = Bdata ()
 
   def read (self, datfu):
-    # datf is file name
-    indfu = datfu[:-3] + 'IND'
+    indfu = datfu[:-3] + 'IND' # datfu is file name
 
     print "dat: loading %s.." % datfu,
 
@@ -60,11 +59,10 @@ class Dat:
 
       if b.no != nref:
         print "Error: Reference number does not match reference number in file."
-        print b.no
-        print nref
+        print nref, "!=", b.no
         break
 
-      # read samples    (repeat)
+      # read samples (repeat)
       b.samples_u = array ('I')
       b.samples_u.read (datf, b.length)
 
