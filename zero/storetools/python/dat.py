@@ -45,7 +45,7 @@ class Dat:
     while nref < self.bdata.nobatches:
       b = Bdata.Batch ()
 
-      # read reference  (repeat)
+      # read reference (repeat)
       datf.read (3 * sample_length) # skip padding
 
       b.no,     = unpack ('I', datf.read (4))

@@ -6,15 +6,19 @@
 #
 # Usage:
 #
-#   makemseed.py station root range
+#   makemseed.py [-p][-n] station [root] range
 #
+#     -p              plot trace
+#     -n              do not write stream
 #     station         station trace is for
-#     root  is root directory of DAT files
-#     range is a range of ids of DAT files expected
+#     root            is root directory of DAT files
+#     range           is a range of ids of DAT files expected
 #
 #
-#   makemseed.py station file time-variable dataseries-variable
+#   makemseed.py [-p][-n] station file time-variable dataseries-variable
 #
+#     -p              plot trace
+#     -n              do not write stream
 #     station         station trace is for
 #     file            is matlab .mat file
 #     time-variable   variable with time series
@@ -38,11 +42,28 @@ class Makemseed:
   sampling_rate = 250.0
   channel   = 'BNR'
 
+  optplot     = False
+  optnowrite  = False
+
+  name    = None
+  start   = None
+  bdatas  = None
+  st      = None
+
   def __init__ (self):
     pass
 
   def go (self):
     # parse args
+    if '-p' in sys.argv:
+      self.optplot = True
+      sys.argv.remove ('-p')
+
+    if '-n' in sys.argv:
+      self.optnowrite = True
+      sys.argv.remove ('-n')
+      print "mkms: (not writing stream)"
+
     if len (sys.argv) < 3:
       print "Incorrect arguments."
       sys.exit (1)
@@ -54,6 +75,11 @@ class Makemseed:
 
     else:
       self.dorange ()
+
+  def plot (self):
+    if self.st is not None:
+      print "mkms: plotting.."
+      self.st.plot (number_of_ticks = 20)
 
   def domat (self):
     print "Error: Not implemented."
@@ -79,18 +105,18 @@ class Makemseed:
         ids.append (int (i))
 
     # load batches
-    bdatas = []
+    self.bdatas = []
 
     for i in ids:
       d = Dat ()
       d.read (os.path.join (root, str(i) + '.DAT'))
 
-      bdatas.append (d.bdata)
+      self.bdatas.append (d.bdata)
 
     # set up datastream
     print "mkms: setting up stream for %s.." % self.station,
-    st = Stream ()
-    for bd in bdatas:
+    self.st = Stream ()
+    for bd in self.bdatas:
       for b in bd.batches:
         s = Stats ()
         s.sampling_rate = self.sampling_rate
@@ -102,33 +128,37 @@ class Makemseed:
         s.starttime = UTCDateTime ((b.ref / 1000000.0))
 
         t = Trace (data = numpy.array (b.samples_i, dtype = numpy.int32), header = s)
-        st.append (t)
+        self.st.append (t)
 
     print "done."
 
     # generate file name
-    name = st[0].id.replace ('.', '_')
+    self.name = self.st[0].id.replace ('.', '_')
 
-    start = st[0].stats.starttime
-    name = start.strftime ("%Y-%m-%d-%H%M-%S") + '.' + name
+    self.start = self.st[0].stats.starttime
+    self.name = self.start.strftime ("%Y-%m-%d-%H%M-%S") + '.' + self.name
 
-    print "Writing %s.mseed.." % name,
+    if self.optplot:
+      self.plot ()
 
-    st.write (name + '.mseed', format = 'MSEED', encoding = 'INT32', byteorder = 1, flush = 1, verbose = 0)
+    if not self.optnowrite:
+      print "mkms: writing %s.mseed.." % self.name,
 
-    print "done."
+      self.st.write (self.name + '.mseed', format = 'MSEED', encoding = 'INT32', byteorder = 1, flush = 1, verbose = 0)
 
-    # write ids and refs
-    idsf = open (name + '.ids', 'w')
-    refsf = open (name + '.refs', 'w')
-    for bd in bdatas:
-      idsf.write ("%d,%d\n" % (bd.id, 1 if bd.e_sdlag else 0))
+      print "done."
 
-      for b in bd.batches:
-        refsf.write ("%d,%d,%d,%d,%s,%s,%s,%s,%s,%d\n" % (bd.id, b.no, b.ref, b.status, b.latitude[:-2], b.latitude[-2:], b.longitude[:-2], b.longitude[-2:], b.checksum, 1 if b.checksum_pass else 0))
+      # write ids and refs
+      idsf = open (self.name + '.ids', 'w')
+      refsf = open (self.name + '.refs', 'w')
+      for bd in self.bdatas:
+        idsf.write ("%d,%d\n" % (bd.id, 1 if bd.e_sdlag else 0))
 
-    idsf.close ()
-    refsf.close ()
+        for b in bd.batches:
+          refsf.write ("%d,%d,%d,%d,%s,%s,%s,%s,%s,%d\n" % (bd.id, b.no, b.ref, b.status, b.latitude[:-2], b.latitude[-2:], b.longitude[:-2], b.longitude[-2:], b.checksum, 1 if b.checksum_pass else 0))
+
+      idsf.close ()
+      refsf.close ()
 
 if __name__ == '__main__':
   m = Makemseed ()
