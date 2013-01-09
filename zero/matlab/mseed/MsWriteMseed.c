@@ -10,6 +10,9 @@
  *
  * Memory: Is not handled very well, this function might be a source of a
  *         memory leak.
+ *
+ * Warning: Fix byte order issues.
+ *
  */
 
 # include <mex.h>
@@ -208,7 +211,12 @@ void mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     msr->starttime  = (hptime_t) batches[i];
     msr->sampletype = 'i';
     msr->encoding   = DE_INT32;
+
+    // TODO:  Byteorder should be little endian (0), seisan 9.0 interpreted
+    //        this reversly. New seisan 9.1 needs correctly
+    //        encoded <-> specified byte order.
     msr->byteorder  = 1;
+
     msr->numsamples = (int64_t) batches[i + 1 * batches_m];
     msr->samplecnt  = msr->numsamples;
     msr->dataquality = 0;
