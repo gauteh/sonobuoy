@@ -26,11 +26,22 @@ def decimaldegree_ddmmss (s):
   min   = math.floor (mint)
   sec   = (mint - min) * 60.0
 
-  r = '%02d%02d%02.1f' % (deg, min, sec)
+  r = '%02d%02d%04.1f' % (deg, min, sec)
 
   return r
 
 def ddmmss_decimaldegree (s):
+  # space -> 0
+  ss = s
+  s = ''
+  k = 0
+  while k < len(ss):
+    if ss[k] == ' ':
+      s += '0'
+    else:
+      s += ss[k]
+    k += 1
+
   n = s.find ('.')
   sec = s[n -2:-1]
   d   = s[-1]
