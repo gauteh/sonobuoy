@@ -10,6 +10,11 @@
 # Time follows wavetool manual.
 # Important: a . must be present to get ABS time.
 
+function die() {
+  echo "Error: $1"
+  exit 1
+}
+ 
 # figure out date
 eventdir=$(basename $(pwd))
 
@@ -36,7 +41,7 @@ year=$(echo $yearmonth | cut -c1-4)
 month=$(echo $yearmonth | cut -c5-6)
 hour=$(echo $1 | cut -c1-4)
 newevent=$year-$month-$day-$hour-00.GB_GAKS_G3____.mseed
-mv wavetool.out $newevent
+mv wavetool.out $newevent || die "Could not move new file, might not exists." 
 
 cd ..
 

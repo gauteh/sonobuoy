@@ -3,9 +3,13 @@
 #
 # Extract revised mseeds and create new S file ready for phasepicking
 #
-# mseed: any mseeds in station subdirs
-#
 # Run from event dir in 03_events_ready
+#
+# usage:
+#   putrevised.py [subfolder]
+#
+#   subfolder       sub-folder below station folder with extracted data
+#
 
 
 import sys
@@ -131,6 +135,10 @@ if __name__ == '__main__':
   event = os.path.basename (c)
   eventroot = '.'
 
+  subfolder = None
+  if len(sys.argv) == 2:
+    subfolder = sys.argv[1]
+
   p = Putrevised ()
-  p.doevent (eventroot, event)
+  p.doevent (eventroot, event, stationsub = subfolder)
 
