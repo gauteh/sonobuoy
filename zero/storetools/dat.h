@@ -3,6 +3,8 @@
  *
  * dat.h: Interface to DAT file
  *
+ * Warning: Probably only works on little-endian machines.
+ *
  */
 
 # pragma once

@@ -3,6 +3,7 @@
  *
  * dat.cpp: Interface to DAT file
  *
+ * Warning: Probably only works on little-endian machines.
  */
 
 # include <iostream>

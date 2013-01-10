@@ -215,7 +215,7 @@ void mexFunction (int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     // TODO:  Byteorder should be little endian (0), seisan 9.0 interpreted
     //        this reversly. New seisan 9.1 needs correctly
     //        encoded <-> specified byte order.
-    msr->byteorder  = 1;
+    msr->byteorder  = 1; // should be 0 on my machine with this reading
 
     msr->numsamples = (int64_t) batches[i + 1 * batches_m];
     msr->samplecnt  = msr->numsamples;

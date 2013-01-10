@@ -6,6 +6,8 @@
  * Memory: Is not handled very well, this function might be a source of a
  *         memory leak.
  *
+ * Warning: Probably only works on little-endian machines.
+ *
  */
 
 # include <mex.h>
