@@ -96,16 +96,13 @@ for j in jobs:
     sf = open (os.path.join (jd, 'stations.dat'), 'r')
     for l in sf.readlines ():
       name = l[:5].strip ()
-      lat  = l[7:15]
-      lon  = l[17:25]
+      lat  = l[6:15]
+      lon  = l[16:25]
 
       # is plotted along with GAK2
       if 'GAKS' in name:
         continue
 
-      print name
-      print lat
-      print lon
       lat = ddmmss_decimaldegree (lat)
       lon = ddmmss_decimaldegree (lon)
 
