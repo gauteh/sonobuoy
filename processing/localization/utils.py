@@ -31,16 +31,7 @@ def decimaldegree_ddmmss (s):
   return r
 
 def ddmmss_decimaldegree (s):
-  # space -> 0
-  ss = s
-  s = ''
-  k = 0
-  while k < len(ss):
-    if ss[k] == ' ':
-      s += '0'
-    else:
-      s += ss[k]
-    k += 1
+  s = s.replace (' ', '0') # space -> 0
 
   n = s.find ('.')
   sec = s[n -2:-1]
