@@ -6,7 +6,7 @@
 
 import math
 
-def decimal_degree (s, d):
+def ddmm_mm_decimaldegree (s, d):
   # s is decimalminute.fractionalminutes string
   # d is north/south or east/west indicator
 

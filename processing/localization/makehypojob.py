@@ -117,12 +117,12 @@ for s in stations:
 
       # do a linear interpolation between points
       latitude = []
-      latitude.append (decimal_degree (prevf[4], prevf[5]))
-      latitude.append (decimal_degree (nextf[4], nextf[5]))
+      latitude.append (ddmm_mm_decimaldegree (prevf[4], prevf[5]))
+      latitude.append (ddmm_mm_decimaldegree (nextf[4], nextf[5]))
 
       longitude = []
-      longitude.append (decimal_degree (prevf[6], prevf[7]))
-      longitude.append (decimal_degree (nextf[6], nextf[7]))
+      longitude.append (ddmm_mm_decimaldegree (prevf[6], prevf[7]))
+      longitude.append (ddmm_mm_decimaldegree (nextf[6], nextf[7]))
 
       t = []
       t.append (float(prevf[2]))
