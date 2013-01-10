@@ -44,7 +44,10 @@ class Makemseed:
 
   optplot     = False
   optnowrite  = False
+  root        = ""
+  destdir     = "."
 
+  ids     = None
   name    = None
   start   = None
   bdatas  = None
@@ -74,6 +77,7 @@ class Makemseed:
       self.domat ()
 
     else:
+      self.parserange ()
       self.dorange ()
 
   def plot (self):
@@ -85,32 +89,33 @@ class Makemseed:
     print "Error: Not implemented."
     pass
 
-  def dorange (self):
+  def parserange (self):
     # parse range
     if len(sys.argv) == 3:
-      root   = './'
+      self.root   = './'
       rrange = sys.argv[2]
 
     elif len(sys.argv) == 4:
-      root   = sys.argv[2]
+      self.root   = sys.argv[2]
       rrange = sys.argv[3]
 
-    ids = []
+    self.ids = []
 
     for i in rrange.split (','):
       if '-' in i:
         aa  =  i.split ('-')
-        ids += range (int(aa[0]), int(aa[1]) + 1)
+        self.ids += range (int(aa[0]), int(aa[1]) + 1)
       else:
-        ids.append (int (i))
+        self.ids.append (int (i))
 
+  def dorange (self):
     # load batches
     print "mkms: loading batches.."
     self.bdatas = []
 
-    for i in ids:
+    for i in self.ids:
       d = Dat ()
-      d.read (os.path.join (root, str(i) + '.DAT'))
+      d.read (os.path.join (self.root, str(i) + '.DAT'))
 
       self.bdatas.append (d.bdata)
 
@@ -145,13 +150,13 @@ class Makemseed:
     if not self.optnowrite:
       print "mkms: writing %s.mseed.." % self.name,
 
-      self.st.write (self.name + '.mseed', format = 'MSEED', encoding = 'INT32', byteorder = 1, flush = 1, verbose = 0)
+      self.st.write (os.path.join (self.destdir, self.name + '.mseed'), format = 'MSEED', encoding = 'INT32', byteorder = 1, flush = 1, verbose = 0)
 
       print "done."
 
       # write ids and refs
-      idsf = open (self.name + '.ids', 'w')
-      refsf = open (self.name + '.refs', 'w')
+      idsf = open (os.path.join (self.destdir, self.name + '.ids'), 'w')
+      refsf = open (os.path.join (self.destdir, self.name + '.refs'), 'w')
       for bd in self.bdatas:
         idsf.write ("%d,%d\n" % (bd.id, 1 if bd.e_sdlag else 0))
 
@@ -160,6 +165,8 @@ class Makemseed:
 
       idsf.close ()
       refsf.close ()
+
+      return (self.name + '.mseed', idsf, refsf)
 
 if __name__ == '__main__':
   m = Makemseed ()

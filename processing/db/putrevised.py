@@ -27,81 +27,110 @@ localizeevents = '04_events_localize'
 
 root = '../../'
 if not os.path.exists (os.path.join (root, contdir)):
-  print "Could not figure out root db dir, run from event dir in 03_events_ready/_some_event_ ."
-  sys.exit (1)
+  root = '../'
+  if not os.path.exists (os.path.join (root, contdir)):
+    print "Could not figure out root db dir, run from event dir in 03_events_ready/_some_event_ ."
+    sys.exit (1)
 
 contdir = os.path.join (root, contdir)
 rawevents = os.path.join (root, rawevents)
 readyevents = os.path.join (root, readyevents)
 localizeevents = os.path.join (root, localizeevents)
 
-# i'm run from event dir
-c = os.getcwd ()
-event = os.path.basename (c)
+class Putrevised:
+  mseedfiles = None
+  eventroot  = ''
+  neweventd  = ''
 
-neweventd = os.path.join (localizeevents, event)
-if not os.path.exists (neweventd):
-  os.makedirs (neweventd)
+  def __init__ (self):
+    self.mseedfiles = []
 
-mseedfiles = []
+  def reset (self):
+    self.mseedfiles = []
 
-for s in stations:
-  files = os.listdir (s)
-  for f in files:
-    if '.ids' in f or '.refs' in f or '.mseed' in f:
-      print "Copying: %s.." % f
-      shutil.copy (os.path.join (s, f), neweventd)
+  def find_copy_wavs (self, stationsub):
+    if stationsub is None:
+      stationsub = '.'
 
-      if f[-6:] == '.mseed':
-        mseedfiles.append (f)
+    for s in stations:
+      sd = os.path.join (self.eventroot, s, stationsub)
+      files = os.listdir (sd)
+      for f in files:
+        if '.ids' in f or '.refs' in f or '.mseed' in f:
+          print "Copying: %s.." % os.path.join (sd, f)
+          shutil.copy (os.path.join (sd, f), self.neweventd)
 
-# copy seismometer mseeds
-s = 'GAKS'
-files = os.listdir (s)
-for f in files:
-  if 'GAKS' in f:
-    print "Copying: %s.." % f
-    shutil.copy (os.path.join (s, f), neweventd)
-    mseedfiles.append (f)
+          if f[-6:] == '.mseed':
+            self.mseedfiles.append (f)
 
-# generate S file
-neweventf = os.path.join (neweventd, event)
-nfl = open (neweventf, 'w')
+    # copy seismometer mseeds
+    sd = os.path.join (self.eventroot, 'GAKS', stationsub)
+    files = os.listdir (sd)
+    for f in files:
+      if 'GAKS' in f:
+        print "Copying: %s.." % os.path.join (sd, f)
+        shutil.copy (os.path.join (sd, f), self.neweventd)
+        self.mseedfiles.append (f)
 
-es = event
-y  = es[-6:-2]
-m  = es[-2:]
-d  = es[:2]
-t  = es[3:7]
-s  = es[8:9]
-dist = es[10]
+  def doevent (self, eventroot, event, stationsub = None):
+    # stationsub is subfolder inside station folder where extracted wave
+    # file is located
+    self.eventroot = eventroot
 
-print "Writing new event file: %s.." % event
+    self.neweventd = os.path.join (localizeevents, event)
+    if not os.path.exists (self.neweventd):
+      os.makedirs (self.neweventd)
 
-# write date and location
-nfl.write (" %(year)d %(month)2d%(day)2d %(time)4d %(sec)4.1f %(dist)s %(id)57d\n" % { 'year' : int(y), 'month' : int(m), 'day' : int(d), 'time' : int(t), 'sec' : int(s), 'dist' : dist, 'id': 1})
 
-# write id field
-idf = ' ACTION:ARG ' + datetime.datetime.strftime(datetime.datetime.now (), '%y-%m-%d %H:%M')
-idf += ' OP:au   STATUS:               '
-idf += 'ID:%(year)d%(month)02d%(day)02d%(time)4d%(sec)02d     I' % { 'year' : int(y), 'month' : int(m), 'day' : int(d), 'time' : int(t), 'sec' : int(s) }
-nfl.write (idf + '\n')
+    self.find_copy_wavs (stationsub)
 
-# write mseed lines
-for f in mseedfiles:
-  nfl.write (' ' + f)
-  k = len(f)+1
-  while k < 79:
-    nfl.write (' ')
-    k += 1
+    # generate S file
+    neweventf = os.path.join (self.neweventd, event)
+    nfl = open (neweventf, 'w')
 
-  nfl.write ('6\n')
+    es = event
+    y  = es[-6:-2]
+    m  = es[-2:]
+    d  = es[:2]
+    t  = es[3:7]
+    s  = es[8:9]
+    dist = es[10]
 
-# write start of phases line
-nfl.write (' STAT SP IPHASW D HRMM SECON CODA AMPLIT PERI AZIMU VELO AIN AR TRES W  DIS CAZ7\n')
+    print "Writing new event file: %s.." % event
 
-# write blank line
-nfl.write ('%80s' % ' ')
+    # write date and location
+    nfl.write (" %(year)d %(month)2d%(day)2d %(time)4d %(sec)4.1f %(dist)s %(id)57d\n" % { 'year' : int(y), 'month' : int(m), 'day' : int(d), 'time' : int(t), 'sec' : int(s), 'dist' : dist, 'id': 1})
 
-nfl.close ()
+    # write id field
+    idf = ' ACTION:ARG ' + datetime.datetime.strftime(datetime.datetime.now (), '%y-%m-%d %H:%M')
+    idf += ' OP:au   STATUS:               '
+    idf += 'ID:%(year)d%(month)02d%(day)02d%(time)4d%(sec)02d     I' % { 'year' : int(y), 'month' : int(m), 'day' : int(d), 'time' : int(t), 'sec' : int(s) }
+    nfl.write (idf + '\n')
+
+    # write mseed lines
+    for f in self.mseedfiles:
+      nfl.write (' ' + f)
+      k = len(f)+1
+      while k < 79:
+        nfl.write (' ')
+        k += 1
+
+      nfl.write ('6\n')
+
+    # write start of phases line
+    nfl.write (' STAT SP IPHASW D HRMM SECON CODA AMPLIT PERI AZIMU VELO AIN AR TRES W  DIS CAZ7\n')
+
+    # write blank line
+    nfl.write ('%80s' % ' ')
+
+    nfl.close ()
+
+if __name__ == '__main__':
+  # i'm run from event dir
+  c = os.getcwd ()
+  event = os.path.basename (c)
+  eventroot = '.'
+
+  p = Putrevised ()
+  p.doevent (eventroot, event)
 
