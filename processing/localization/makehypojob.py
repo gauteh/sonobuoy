@@ -3,7 +3,15 @@
 #
 # Prepare HYPOSAT job, run from (readily picked) event dir or with S file
 # as first argument.
-
+#
+# Usage:
+#
+#   makehypojob.py [event] [-j jobid]
+#
+#   event       event to create hyposat job for, if not specified
+#               use current directory.
+#   -j jobid    create job with id jobid in subdirectory jobid
+#
 # Input needed for HYPOSAT:
 # - Job file: .IN (phase picks, etc) : traveltime corrected for waterdepth
 # - Parameter file
@@ -23,16 +31,29 @@ import math
 stations = ['GAK2', 'GAK3', 'GAK4']
 seismo   = 'GAKS'
 
+jobid = '01' # default
+
+if '-j' in sys.argv:
+  if len(sys.argv) >= 3:
+    n = sys.argv.index ('-j')
+    jobid = sys.argv[n+1]
+
+    sys.argv.remove ('-j')
+    sys.argv.remove (jobid)
+
+  else:
+    print "Incorrect arguments."
+    sys.exit (1)
+
 if len(sys.argv) == 2:
   event = sys.argv[1]
 else:
-  event = os.path.basename(os.getcwd())
+  event = os.path.basename(os.getcwd()) # default
 
 if not os.path.exists (event):
   print "Could not open event file: %s.." % event
   sys.exit (1)
 
-jobid = '01'
 jobd = 'job_%s' % jobid
 if not os.path.exists (jobd):
   os.makedirs (jobd)
