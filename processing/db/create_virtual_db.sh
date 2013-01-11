@@ -10,9 +10,12 @@ for i in ../*/*.mseed; do
   ln -s ${i}
 done
 
-echo "Create file list.."
-dirf ../*/*.S*
 
-mv filenr.lis vdb.lis
+# echo link S files
+for i in ../*/*.S*; do
+  d=$(basename ${i})
+  echo "Linking (soft): ${i} to ${d}.."
+  ln -s ${i}
+done
 
-echo "Ready file: vdb.lis"
+
