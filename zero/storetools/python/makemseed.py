@@ -6,16 +6,19 @@
 #
 # Usage:
 #
-#   makemseed.py [-p][-n] station [root] range
+#   makemseed.py [-p][-n] [-r root] station range [destination]
 #
 #     -p              plot trace
 #     -n              do not write stream
 #     station         station trace is for
-#     root            is root directory of DAT files
+#     -r root         is root directory of DAT files
 #     range           is a range of ids of DAT files expected
+#     destination     sub directory to put output (will be created)
 #
 #
+#   NOT IMPLEMENTED:
 #   makemseed.py [-p][-n] station file time-variable dataseries-variable
+#                [destination]
 #
 #     -p              plot trace
 #     -n              do not write stream
@@ -44,8 +47,8 @@ class Makemseed:
 
   optplot     = False
   optnowrite  = False
-  root        = ""
-  destdir     = "."
+  root        = "./"
+  destdir     = "./"
 
   ids     = None
   name    = None
@@ -66,6 +69,11 @@ class Makemseed:
       self.optnowrite = True
       sys.argv.remove ('-n')
       print "mkms: (not writing stream)"
+
+    if '-r' in sys.argv:
+      self.root = sys.argv[sys.argv.index('-r') + 1]
+      sys.argv.remove ('-r')
+      sys.argv.remove (self.root)
 
     if len (sys.argv) < 3:
       print "Incorrect arguments."
@@ -92,12 +100,11 @@ class Makemseed:
   def parserange (self):
     # parse range
     if len(sys.argv) == 3:
-      self.root   = './'
       rrange = sys.argv[2]
 
     elif len(sys.argv) == 4:
-      self.root   = sys.argv[2]
-      rrange = sys.argv[3]
+      self.destdir   = sys.argv[3]
+      rrange = sys.argv[2]
 
     self.ids = []
 
@@ -150,6 +157,9 @@ class Makemseed:
     if not self.optnowrite:
       print "mkms: writing %s.mseed.." % self.name,
 
+      if not os.path.exists (self.destdir):
+        os.makedirs (self.destdir)
+
       self.st.write (os.path.join (self.destdir, self.name + '.mseed'), format = 'MSEED', encoding = 'INT32', byteorder = 1, flush = 1, verbose = 0)
 
       print "done."
@@ -167,6 +177,9 @@ class Makemseed:
       refsf.close ()
 
       return (self.name + '.mseed', idsf, refsf)
+    else:
+      print "mkms: would write %s.mseed (disabled)." % os.path.join (self.destdir, self.name)
+      return None
 
 if __name__ == '__main__':
   m = Makemseed ()
