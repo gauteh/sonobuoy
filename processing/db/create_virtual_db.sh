@@ -4,7 +4,7 @@
 #
 # Create a virtual db for 'eev', run in a safe 04../db dir
 
-for i in ../*/*.mseed; do
+for i in ../*/{*.mseed,*GAKS_*}; do
   d=$(basename ${i})
   echo "Linking (soft): ${i} to ${d}.."
   ln -s ${i}
