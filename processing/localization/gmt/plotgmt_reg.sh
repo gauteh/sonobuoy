@@ -24,17 +24,8 @@ gmtset PAPER_MEDIA=Custom_${width}x${height}
 
 # IBCAO grid
 ibcaogrd=~/ymse/maps/IBCAO-3rd-Edition/IBCAO_Ver3_RR_2012-03-16.grd
+data=~/dev/gautebuoy/processing/localization/gmt
 
-# Create color palette
-if [ ! -f ibcao.cpt ]; then
-  grd2cpt ${ibcaogrd} -Chaxby > ibcao.cpt
-fi
-
-# Create grid gradient
-if [ ! -f gradient.grd ]; then
-  echo "Create gradient.."
-  grdgradient ${ibcaogrd} -Nt0.6 -A300 -Ggradient.grd -V
-fi
 
 # boundaries: read from cartesian.asc
 xmin=-300876.42094
@@ -51,16 +42,22 @@ rm $out
 
 # Create shaded relief
 echo "Create shaded relief.."
-grdimage ${ibcaogrd} -Igradient.grd -R${xmin}/${ymin}/${xmax}/${ymax}r -JX20/16.8 -Cibcao.cpt -P -K -V > $out
+grdimage ${ibcaogrd} -I${data}/gradient.grd -R${xmin}/${ymin}/${xmax}/${ymax}r -JX20/16.8 -C${data}/ibcao.cpt -P -K -V > $out
 
 
 # Add coast and map box
 export HDF5_DISABLE_VERSION_CHECK=1
-pscoast -R${xmind}/${ymind}/${xmaxd}/${ymaxd}r -JS0/90/20 -Ba5g5/a0g1WSNE -Df -W -O -K >> $out
+pscoast -R${xmind}/${ymind}/${xmaxd}/${ymaxd}r -JS0/90/20 -Ba5g5/a1g1WeSn -Df -W -O -K >> $out
 
+# stations
+psxy -J -R -O stations.d -St2p -Gyellow -K  >> $out
+pstext -J -R -O stations.t -Gblack -K >> $out
+
+# quakes
+psxy -J -R -O quakes.d -Sa3p -Gred -K >> $out
 
 # add color scale
-psscale -D600p/250p/500p/30p -O -Cibcao.cpt -I -E -B1000:Depth:/:m: -K >> $out
+psscale -D600p/250p/500p/30p -O -C${data}/ibcao.cpt -I -E -B1000:Depth:/:m: -K >> $out
 
 #misc="-O -K -Sa0.2 -W1p/0 -G0"
 #psxy $region $projection $misc << END >> ibcao.ps

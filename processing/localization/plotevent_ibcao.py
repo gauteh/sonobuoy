@@ -12,12 +12,7 @@ import os
 import os.path
 import sys
 import shutil
-
-# matplotlib and basemap
-from mpl_toolkits.basemap import Basemap
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.text as text
+import subprocess
 
 # local
 from utils import *
@@ -56,32 +51,19 @@ if len(jobs) < 1:
 
 # Setting up map
 print "Setting up map.."
-#m = Basemap (projection = 'npstere', boundinglat = 80, lon_0 = 0, resolution = 'l')
-#m = Basemap (projection = 'lcc', resolution = 'l',
-             #llcrnrlon  = -80,
-             #llcrnrlat  = 0,
-             #urcrnrlon   = 80,
-             #urcrnrlat   = 90,
-             #lat_0 = 84.,
-             #lon_0 = 4.
-            #)
-m = Basemap (width=2200000,height=1200000,
-             rsphere=(6378137.00,6356752.3142),\
-             resolution='l',area_thresh=1000.,projection='lcc',\
-             lat_1=-10.,lat_2=80,lat_0=84,lon_0=4)
-
-#m.drawcoastlines ()
-#m.fillcontinents (color = 'coral', lake_color = 'aqua')
-
-m.drawparallels (np.arange (80., 90., 2.0), labels = [False, True, True, False], color = 'white')
-m.drawmeridians (np.arange (-180.0, 180., 10), latmax = 90, labels = [True, False, False, True], color = 'white')
-
-plt.title ('Hypocenter solutions for event: %s' % event)
-
-plt.hold (True)
+datadir = os.path.join (os.path.dirname (sys.argv[0]), 'gmt')
+mapdir  = os.path.join (eventdir, 'map')
+if not os.path.exists (mapdir):
+  os.makedirs (mapdir)
 
 # stationcolors
 stationcolors = { 'GAK2' : 'w', 'GAK3' : 'g', 'GAK4' : 'r' }
+
+# quakes
+psf = open (os.path.join (mapdir, 'stations.d'), 'w')
+pstf = open (os.path.join (mapdir, 'stations.t'), 'w')
+pqf = open (os.path.join (mapdir, 'quakes.d'), 'w')
+
 
 # Plotting jobs
 stationsplotted = False
@@ -107,15 +89,13 @@ for j in jobs:
 
       print "--> %s: %4.2f, %4.2f" % (name, lat, lon)
 
-      #m.tissot (lon, lat, 0.01, 100, facecolor = 'green', zorder = 10, alpha = 1)
+      #if 'GAK2' in name:
+        #name = 'GAK2 (GAKS)'
 
-      x, y = m(lon, lat)
-      m.plot (x, y, 'o' + stationcolors[name], label = name, markersize = 10, alpha = 0.7)
+      # plot station
+      psf.write ("%4.2f %4.2f\n" % (lon, lat))
+      pstf.write ("%4.2f %4.2f 4 -30 20 BL %s\n" % (lon, lat, name))
 
-      if 'GAK2' in name:
-        name = 'GAK2 (GAKS)'
-
-      plt.text (x+250, y, name, rotation = -15, color = 'white')
 
     stationsplotted = True
     print "Plotting jobs.."
@@ -151,15 +131,23 @@ for j in jobs:
   vpvs  = float(res[51:56])
   rms   = float(res[107:112])
 
+  pqf.write ("%4.2f %4.2f\n" % (lon, lat))
+
   print "t0: %(t0)s, lat: %(lat)g, lon: %(lon)g, depth: %(depth)g, vpvs: %(vpvs)g, rms: %(rms)g" % { 't0' : t0, 'lat' : lat, 'lon' : lon, 'depth' : z, 'vpvs' : vpvs, 'rms' : rms}
 
-  # plot origin
-  x, y = m(lon, lat)
-  m.plot (x, y, '*y', label = event + '_' + j, markersize = 15)
 
+psf.close ()
+pstf.close ()
+pqf.close ()
 
-m.bluemarble ()
-plt.legend ()
-plt.show ()
+bigi = os.path.join (datadir, 'plotgmt_big.sh')
+regi = os.path.join (datadir, 'plotgmt_reg.sh')
+
+pr = subprocess.Popen ([regi], cwd = mapdir)
+pr.wait ()
+
+pb = subprocess.Popen ([bigi], cwd = mapdir)
+pb.wait ()
+
 
 
