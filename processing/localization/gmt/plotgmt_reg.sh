@@ -10,6 +10,13 @@
 #gmtset D_FORMAT=%3.0f
 #gmtset ANOT_FONT_SIZE 10p
 
+out=$1
+if [ $# -ne 1 ]; then
+  out=ibcao_reg.ps
+fi
+
+echo "Output: $out"
+
 width=800
 height=700
 gmtset PAGE_ORIENTATION=landscape
@@ -40,20 +47,20 @@ ymind=82
 xmaxd=40
 ymaxd=86
 
-rm ibcao_reg.ps
+rm $out
 
 # Create shaded relief
 echo "Create shaded relief.."
-grdimage ${ibcaogrd} -Igradient.grd -R${xmin}/${ymin}/${xmax}/${ymax}r -JX20/16.8 -Cibcao.cpt -P -K -V > ibcao_reg.ps
+grdimage ${ibcaogrd} -Igradient.grd -R${xmin}/${ymin}/${xmax}/${ymax}r -JX20/16.8 -Cibcao.cpt -P -K -V > $out
 
 
 # Add coast and map box
 export HDF5_DISABLE_VERSION_CHECK=1
-pscoast -R${xmind}/${ymind}/${xmaxd}/${ymaxd}r -JS0/90/20 -Ba5g5/a0g1WSNE -Df -W -O -K >> ibcao_reg.ps
+pscoast -R${xmind}/${ymind}/${xmaxd}/${ymaxd}r -JS0/90/20 -Ba5g5/a0g1WSNE -Df -W -O -K >> $out
 
 
 # add color scale
-psscale -D600p/250p/500p/30p -O -Cibcao.cpt -I -E -B1000:Depth:/:m: -K >> ibcao_reg.ps
+psscale -D600p/250p/500p/30p -O -Cibcao.cpt -I -E -B1000:Depth:/:m: -K >> $out
 
 #misc="-O -K -Sa0.2 -W1p/0 -G0"
 #psxy $region $projection $misc << END >> ibcao.ps

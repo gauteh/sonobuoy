@@ -10,6 +10,13 @@
 #gmtset D_FORMAT=%3.0f
 #gmtset ANOT_FONT_SIZE 10p
 
+out=$1
+if [ $# -ne 1 ]; then
+  out=ibcao_big.ps
+fi
+
+echo "Output: $out"
+
 # IBCAO grid
 ibcaogrd=~/ymse/maps/IBCAO-3rd-Edition/IBCAO_Ver3_RR_2012-03-16.grd
 
@@ -40,19 +47,19 @@ ymind=70
 xmaxd=135
 ymaxd=70
 
-rm ibcao_big.ps
+rm $out 
 
 # Create shaded relief
 echo "Create shaded relief.."
-grdimage ${ibcaogrd} -Igradient.grd -R${xmin}/${ymin}/${xmax}/${ymax}r -JX20/20 -Cibcao.cpt -P -K -V > ibcao_big.ps
+grdimage ${ibcaogrd} -Igradient.grd -R${xmin}/${ymin}/${xmax}/${ymax}r -JX20/20 -Cibcao.cpt -P -K -V > $out
 
 
 # Add coast and map box
 export HDF5_DISABLE_VERSION_CHECK=1
-pscoast -R${xmind}/${ymind}/${xmaxd}/${ymaxd}r -JS0/90/20 -Ba20g20/a5g5WeSn -Dh -W -O -K >> ibcao_big.ps
+pscoast -R${xmind}/${ymind}/${xmaxd}/${ymaxd}r -JS0/90/20 -Ba20g20/a5g5WeSn -Dh -W -O -K >> $out
 
 # add color scale
-psscale -D600p/250p/500p/30p -O -Cibcao.cpt -I -E -B1000:Depth:/:m: -K >> ibcao_big.ps
+psscale -D600p/250p/500p/30p -O -Cibcao.cpt -I -E -B1000:Depth:/:m: -K >> $out
 
 #misc="-O -K -Sa0.2 -W1p/0 -G0"
 #psxy $region $projection $misc << END >> ibcao.ps
