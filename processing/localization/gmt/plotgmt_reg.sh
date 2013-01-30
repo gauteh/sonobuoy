@@ -48,20 +48,12 @@ grdimage ${ibcaogrd} -Igradient.grd -R${xmin}/${ymin}/${xmax}/${ymax}r -JX20/16.
 
 
 # Add coast and map box
+export HDF5_DISABLE_VERSION_CHECK=1
 pscoast -R${xmind}/${ymind}/${xmaxd}/${ymaxd}r -JS0/90/20 -Ba5g5/a0g1WSNE -Df -W -O -K >> ibcao_reg.ps
 
 
 # add color scale
-
-psscale -D600p/250p/500p/30p -O -Cibcao.cpt -I -E -B1000:Depth:/:m: >> ibcao_reg.ps
-
-# Create basemap
-#psbasemap $region $projection $boundaries $misc > ibcao.ps
-
-# Add bathymetry
-#misc="-Cibcao.cpt -V -0"
-#grdimage ${ibcaogrd} $region $projection $boundaries $misc >> ibcao.ps
-#grdview -Iimage.grd $ibcaogrd -Qi100 $projection $region -Cibcao.cpt -V -K > ibcao.ps
+psscale -D600p/250p/500p/30p -O -Cibcao.cpt -I -E -B1000:Depth:/:m: -K >> ibcao_reg.ps
 
 #misc="-O -K -Sa0.2 -W1p/0 -G0"
 #psxy $region $projection $misc << END >> ibcao.ps

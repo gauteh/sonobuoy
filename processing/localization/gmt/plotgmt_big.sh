@@ -13,6 +13,11 @@
 # IBCAO grid
 ibcaogrd=~/ymse/maps/IBCAO-3rd-Edition/IBCAO_Ver3_RR_2012-03-16.grd
 
+width=800
+height=700
+gmtset PAGE_ORIENTATION=landscape
+gmtset PAPER_MEDIA=Custom_${width}x${height}
+
 # Create color palette
 if [ ! -f ibcao.cpt ]; then
   grd2cpt ${ibcaogrd} -Chaxby > ibcao.cpt
@@ -35,23 +40,19 @@ ymind=70
 xmaxd=135
 ymaxd=70
 
-rm ibcao.ps
+rm ibcao_big.ps
 
 # Create shaded relief
 echo "Create shaded relief.."
-grdimage ${ibcaogrd} -Igradient.grd -R${xmin}/${ymin}/${xmax}/${ymax}r -JX10/10 -Cibcao.cpt -P -K -V > ibcao.ps
+grdimage ${ibcaogrd} -Igradient.grd -R${xmin}/${ymin}/${xmax}/${ymax}r -JX20/20 -Cibcao.cpt -P -K -V > ibcao_big.ps
 
 
 # Add coast and map box
-pscoast -R${xmind}/${ymind}/${xmaxd}/${ymaxd}r -JS0/90/10 -Ba20g20/a5g5WeSn -Dh -W -O -K >> ibcao.ps
+export HDF5_DISABLE_VERSION_CHECK=1
+pscoast -R${xmind}/${ymind}/${xmaxd}/${ymaxd}r -JS0/90/20 -Ba20g20/a5g5WeSn -Dh -W -O -K >> ibcao_big.ps
 
-# Create basemap
-#psbasemap $region $projection $boundaries $misc > ibcao.ps
-
-# Add bathymetry
-#misc="-Cibcao.cpt -V -0"
-#grdimage ${ibcaogrd} $region $projection $boundaries $misc >> ibcao.ps
-#grdview -Iimage.grd $ibcaogrd -Qi100 $projection $region -Cibcao.cpt -V -K > ibcao.ps
+# add color scale
+psscale -D600p/250p/500p/30p -O -Cibcao.cpt -I -E -B1000:Depth:/:m: -K >> ibcao_big.ps
 
 #misc="-O -K -Sa0.2 -W1p/0 -G0"
 #psxy $region $projection $misc << END >> ibcao.ps
