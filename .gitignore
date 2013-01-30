@@ -45,7 +45,6 @@ filenr.lis
 mulplt.out
 *.mexa64
 processing/localization/data
-processing/localization/gmt/*.cpt
 processing/localization/gmt/.*
 processing/localization/gmt/*.ps
 processing/localization/gmt/*.grd
