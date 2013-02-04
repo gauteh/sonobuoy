@@ -33,6 +33,13 @@ ymin=-826651.17258
 xmax=282400.457416
 ymax=-336551.759676
 
+# calc height and width of image
+# ih = iw * yd/xd
+iw=20
+ih=$(echo \( ${ymax} - ${ymin} \) / \( ${xmax} - ${xmin} \) \* ${iw} | bc)
+ih=40
+echo ih=$ih
+
 xmind=-20
 ymind=82
 xmaxd=40
@@ -42,12 +49,14 @@ rm $out
 
 # Create shaded relief
 echo "Create shaded relief.."
-grdimage ${ibcaogrd} -I${data}/gradient.grd -R${xmin}/${ymin}/${xmax}/${ymax}r -JX20/16.8 -C${data}/ibcao.cpt -P -K -V > $out
+grdimage ${ibcaogrd} -I${data}/gradient.grd -R${xmin}/${ymin}/${xmax}/${ymax}r -JX${iw}/16.8 -C${data}/ibcao.cpt -P -K -V > $out
 
+# plot stations using meters
+./geo2cart.sh geo.reg.asc | psxy -M -J -R -O -W1 -K >> $out
+./geo2cart.sh stations.d | psxy -M -J -R -O -W1 -K >> $out
 
 # Add coast and map box
-export HDF5_DISABLE_VERSION_CHECK=1
-pscoast -R${xmind}/${ymind}/${xmaxd}/${ymaxd}r -JS0/90/20 -Ba5g5/a1g1WeSn -Df -W -O -K >> $out
+pscoast -R${xmind}/${ymind}/${xmaxd}/${ymaxd}r -JS0/90/${iw} -Ba5g5/a1g1WeSn -Df -W -O -K >> $out
 
 # stations
 psxy -J -R -O stations.d -St2p -Gyellow -K  >> $out

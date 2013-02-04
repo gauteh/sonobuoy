@@ -142,6 +142,10 @@ pqf.close ()
 
 bigi = os.path.join (datadir, 'plotgmt_big.sh')
 regi = os.path.join (datadir, 'plotgmt_reg.sh')
+deti = os.path.join (datadir, 'plotgmt_detail.sh')
+
+pr = subprocess.Popen ([deti], cwd = mapdir)
+pr.wait ()
 
 pr = subprocess.Popen ([regi], cwd = mapdir)
 pr.wait ()

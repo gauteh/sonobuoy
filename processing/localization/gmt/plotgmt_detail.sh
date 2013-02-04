@@ -22,6 +22,9 @@ height=700
 gmtset PAGE_ORIENTATION=landscape
 gmtset PAPER_MEDIA=Custom_${width}x${height}
 
+gmtset ELLIPSOID=WGS-84
+gmtset MAP_SCALE_FACTOR=1
+
 # IBCAO grid
 ibcaogrd=~/ymse/maps/IBCAO-3rd-Edition/IBCAO_Ver3_RR_2012-03-16.grd
 data=~/dev/gautebuoy/processing/localization/gmt
@@ -33,31 +36,48 @@ ymin=-637312.873449
 xmax=127935.668703
 ymax=-477462.415701
 
+# calc height and width of image
+# ih = iw * yd/xd
+iw=20
+ih=$(echo \( ${ymax} - ${ymin} \) / \( ${xmax} - ${xmin} \) \* ${iw} | bc)
+echo ih=$ih
+
 xmind=0
-ymind=84.2
+ymind="84:12"
 xmaxd=15
-ymaxd=85.2
+ymaxd="85:30"
 
 rm $out
 
+export HDF5_DISABLE_VERSION_CHECK=1
+
 # Create shaded relief
 echo "Create shaded relief.."
-grdimage ${ibcaogrd} -I${data}/gradient.grd -R${xmin}/${ymin}/${xmax}/${ymax}r -JX20/18.78 -C${data}/ibcao.cpt -P -K -V > $out
+
+grdimage ${ibcaogrd} -I${data}/gradient.grd -R${xmin}/${ymin}/${xmax}/${ymax}r -JX${iw}/25 -C${data}/ibcao.cpt  -K -V \
+  >> $out
+
+# plot stations using meters
+cat cartesian.asc | psxy -M -J -R -O -W1 -Gblack -K >> $out
+./geo2cart.sh stations.d | psxy -M -J -R -O -W1 -K >> $out
+
+
+
+psbasemap -Ba1g1/a0.1g0.1WeSn -R${xmind}/${ymind}/${xmaxd}/${ymaxd}r -JS0/90/$iw -K -O  >> $out
 
 
 # Add coast and map box
-export HDF5_DISABLE_VERSION_CHECK=1
-pscoast -R${xmind}/${ymind}/${xmaxd}/${ymaxd}r -JS0/90/20 -Ba5g5/a1g1WeSn -Df -W -O -K >> $out
+#pscoast -R${xmind}/${ymind}/${xmaxd}/${ymaxd}r -JS0/90/90/$iw -Ba1g1/a0.1g0.1WeSn -Df -W -O -K >> $out
 
 # stations
-psxy -J -R -O stations.d -St2p -Gyellow -K  >> $out
-pstext -J -R -O stations.t -Gblack -K >> $out
+#psxy -J -R -O stations.d -St2p -Gyellow -K  >> $out
+#pstext -J -R -O stations.t -Gblack -K >> $out
 
 # quakes
-psxy -J -R -O quakes.d -Sa3p -Gred -K >> $out
+#psxy -J -R -O quakes.d -Sa3p -Gred -K >> $out
 
 # add color scale
-psscale -D600p/250p/500p/30p -O -C${data}/ibcao.cpt -I -E -B1000:Depth:/:m: -K >> $out
+#psscale -D600p/250p/500p/30p -O -C${data}/ibcao.cpt -I -E -B1000:Depth:/:m: -K >> $out
 
 #misc="-O -K -Sa0.2 -W1p/0 -G0"
 #psxy $region $projection $misc << END >> ibcao.ps
