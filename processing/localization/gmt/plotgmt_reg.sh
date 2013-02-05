@@ -41,10 +41,10 @@ GRID="-Ba5g5/a2g2WeSn" # grid
 create_basemap
 
 # Plot stations
-plot_stations 3
+plot_stations 6
 
 # Plot quake
-plot_quakes 3
+plot_quakes 6
 
 # Add colorbar
 add_colorbar
