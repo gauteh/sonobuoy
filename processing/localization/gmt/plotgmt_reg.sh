@@ -32,14 +32,19 @@ ymaxd=86
 # Output image width
 iw=20
 
+
 # Setup region and projection
 setup_reg_proj
 
 # Create base map
+GRID="-Ba5g5/a2g2WeSn" # grid
 create_basemap
 
 # Plot stations
 plot_stations
+
+# Plot quake
+plot_quakes
 
 # Add colorbar
 add_colorbar

@@ -94,7 +94,7 @@ for j in jobs:
 
       # plot station
       psf.write ("%4.2f %4.2f\n" % (lon, lat))
-      pstf.write ("%4.2f %4.2f 4 -30 20 BL %s\n" % (lon, lat, name))
+      pstf.write ("%4.2f %4.2f 4 0 20 BL %s\n" % (lon, lat, name))
 
 
     stationsplotted = True
@@ -150,8 +150,8 @@ pr.wait ()
 pr = subprocess.Popen ([regi], cwd = mapdir)
 pr.wait ()
 
-pb = subprocess.Popen ([bigi], cwd = mapdir)
-pb.wait ()
+#pb = subprocess.Popen ([bigi], cwd = mapdir)
+#pb.wait ()
 
 
 

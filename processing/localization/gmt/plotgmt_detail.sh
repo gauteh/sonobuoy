@@ -37,10 +37,14 @@ iw=20
 setup_reg_proj
 
 # Create base map
+GRID="-Ba1g1/a0.1g0.1WeSn" # grid
 create_basemap
 
 # Plot stations
 plot_stations
+
+# Plot quake
+plot_quakes
 
 # Add colorbar
 add_colorbar

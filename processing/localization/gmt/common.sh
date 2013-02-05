@@ -50,13 +50,24 @@ function create_basemap() {
   grdimage ${ibcaogrd} -I${data}/gradient.grd ${REGc} ${PROJc} -C${data}/ibcao.cpt -P -K -V  >> $out
 
   echo "Create map boundary and grid lines.."
-  pscoast ${REGg} ${PROJg} -Ba1g1/a0.1g0.1WeSn -Df -W -O -K -P >> $out
+  pscoast ${REGg} ${PROJg} ${GRID} -Df -W -O -K -P >> $out
 }
 
 function plot_stations() {
   echo "Plotting stations.."
+
+  # Yellow triangles at station location
   psxy ${PROJg} ${REGg} -O stations.d -St2p -Gyellow -K -P >> $out
 
+  # Label stations
+  pstext ${PROJg} ${REGg} -O stations.t -Gwhite -K -P >> $out
+
+}
+
+function plot_quakes() {
+  echo "Plotting quake.."
+
+  psxy ${PROJg} ${REGg} -O quakes.d -Sa3p -Gred -K -P >> $out
 }
 
 function add_colorbar() {
