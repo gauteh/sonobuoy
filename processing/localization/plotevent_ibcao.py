@@ -64,6 +64,7 @@ stationcolors = { 'GAK2' : 'green', 'GAK3' : 'yellow', 'GAK4' : 'black' }
 psf = open (os.path.join (mapdir, 'stations.d'), 'w')
 pstf = open (os.path.join (mapdir, 'stations.t'), 'w')
 pqf = open (os.path.join (mapdir, 'quakes.d'), 'w')
+pqe = open (os.path.join (mapdir, 'quakes.e.d'), 'w')
 
 legf = open (os.path.join (mapdir, 'legend.txt'), 'w')
 
@@ -149,6 +150,7 @@ for j in jobs:
   rms   = float(res[107:112])
 
   pqf.write ("%4.2f %4.2f %d\n" % (lon, lat, jobno))
+  pqe.write ("%4.2f %4.2f %d 129.5 0.25 0.23 \n" % (lon, lat, jobno))
   # write to legend
   legf.write ("D 0.1c 0.1p\n")
   legf.write ("S 5p a 7p %s 0.1p 0.5c Epicenter (rms: %g, job: %s) \n" % (jobcolors[jobno], rms, j))
@@ -167,6 +169,7 @@ legf.write ("L 8 - C EXPERIMENTAL solution using HYPOSAT.\n");
 psf.close ()
 pstf.close ()
 pqf.close ()
+pqe.close ()
 legf.close ()
 
 bigi = os.path.join (datadir, 'plotgmt_big.sh')
