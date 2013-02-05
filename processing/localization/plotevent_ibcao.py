@@ -133,24 +133,32 @@ for j in jobs:
   for l in lines:
     if next:
       res = l
+      # Parse result line
+      t0    = res[0:23]
+      lat   = float(res[26:32])
+      lon   = float(res[36:41])
+      z     = float(res[43:49])
+      vpvs  = float(res[51:56])
+      rms   = float(res[107:112])
 
     elif l[:2] == 'T0':
       next = True
+
+    elif 'Major axes' in l:
+      maj_ax = float(l[11:20].strip())
+      min_ax = float(l[38:48].strip())
+
+    elif 'Azimuth' in l:
+      azi = float(l[10:20].strip())
+
 
   if not next:
     print "No solution line found."
     continue
 
-  # Parse result line
-  t0    = res[0:23]
-  lat   = float(res[26:32])
-  lon   = float(res[36:41])
-  z     = float(res[43:49])
-  vpvs  = float(res[51:56])
-  rms   = float(res[107:112])
 
   pqf.write ("%4.2f %4.2f %d\n" % (lon, lat, jobno))
-  pqe.write ("%4.2f %4.2f %d 129.5 0.25 0.23 \n" % (lon, lat, jobno))
+  pqe.write ("%4.2f %4.2f %d %g %g %g\n" % (lon, lat, jobno, azi, maj_ax, min_ax))
   # write to legend
   legf.write ("D 0.1c 0.1p\n")
   legf.write ("S 5p a 7p %s 0.1p 0.5c Epicenter (rms: %g, job: %s) \n" % (jobcolors[jobno], rms, j))

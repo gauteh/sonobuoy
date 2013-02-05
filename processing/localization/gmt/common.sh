@@ -57,7 +57,7 @@ function plot_stations() {
   echo "Plotting stations.."
 
   # Triangles: stations.cpt define color of station
-  psxy ${PROJg} ${REGg} -O stations.d -St2p -C${data}/stations.cpt -K -P >> $out
+  psxy ${PROJg} ${REGg} -O stations.d -St${1}p -C${data}/stations.cpt -K -P >> $out
 
   # Label stations
   #pstext ${PROJg} ${REGg} -O stations.t -Gwhite -K -P >> $out
@@ -67,7 +67,7 @@ function plot_stations() {
 function plot_quakes() {
   echo "Plotting quakes.."
 
-  psxy ${PROJg} ${REGg} -O quakes.d -Sa3p -C${data}/quakes.cpt -K -P >> $out
+  psxy ${PROJg} ${REGg} -O quakes.d -Sa${1}p -C${data}/quakes.cpt -K -P >> $out
 
   # plot error ellipsis
   psxy ${PROJg} ${REGg} -O quakes.e.d -W- -SE1p -C${data}/quakes.cpt -K -P >> $out
