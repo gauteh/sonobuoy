@@ -49,3 +49,7 @@ plot_quakes
 # Add colorbar
 add_colorbar
 
+# Add legend
+add_legend
+
+

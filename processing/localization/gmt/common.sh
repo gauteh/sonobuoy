@@ -56,22 +56,38 @@ function create_basemap() {
 function plot_stations() {
   echo "Plotting stations.."
 
-  # Yellow triangles at station location
-  psxy ${PROJg} ${REGg} -O stations.d -St2p -Gyellow -K -P >> $out
+  # Triangles: stations.cpt define color of station
+  psxy ${PROJg} ${REGg} -O stations.d -St2p -C${data}/stations.cpt -K -P >> $out
 
   # Label stations
-  pstext ${PROJg} ${REGg} -O stations.t -Gwhite -K -P >> $out
+  #pstext ${PROJg} ${REGg} -O stations.t -Gwhite -K -P >> $out
 
 }
 
 function plot_quakes() {
   echo "Plotting quake.."
 
-  psxy ${PROJg} ${REGg} -O quakes.d -Sa3p -Gred -K -P >> $out
+  psxy ${PROJg} ${REGg} -O quakes.d -Sa3p -C${data}/quakes.cpt -K -P >> $out
 }
 
 function add_colorbar() {
   echo "Adding colorbar.."
   psscale -D600p/250p/500p/30p -O -C${data}/ibcao.cpt -I -P -E -B1000:Depth:/:m: -K >> $out
+}
+
+function add_legend() {
+  echo "Adding legend.."
+
+  # figure out number of jobs
+  noj=$(wc -l quakes.d | tr -d ' quakes.d')
+  cmperj=1.5
+
+  gmtset ANNOT_FONT_SIZE_PRIMARY=9
+  h=$(echo "scale=10; 3 + $cmperj * $noj" | bc)
+  #y=$(echo "scale=10; ($ih - $h)" | bc)
+  y=0
+  w=6
+  x=$(echo "scale=10; ($iw - $w)" | bc)
+  pslegend -R-${iw}/-${ih}/${iw}/${ih}r -JX${iw}/${ih} -Gazure1 -C0.15c/0.15c -Dx$x/$y/$w/$h/BL -F -P -K -O < legend.txt >> $out
 }
 

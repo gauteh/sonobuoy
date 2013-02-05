@@ -56,17 +56,29 @@ mapdir  = os.path.join (eventdir, 'map')
 if not os.path.exists (mapdir):
   os.makedirs (mapdir)
 
-# stationcolors
-stationcolors = { 'GAK2' : 'w', 'GAK3' : 'g', 'GAK4' : 'r' }
+# stationcolors (defined in stations.cpt in gmt folder)
+stationcolorscode = { 'GAK2' : '0', 'GAK3' : '1', 'GAK4' : '2' }
+stationcolors = { 'GAK2' : 'green', 'GAK3' : 'yellow', 'GAK4' : 'black' }
 
 # quakes
 psf = open (os.path.join (mapdir, 'stations.d'), 'w')
 pstf = open (os.path.join (mapdir, 'stations.t'), 'w')
 pqf = open (os.path.join (mapdir, 'quakes.d'), 'w')
 
+legf = open (os.path.join (mapdir, 'legend.txt'), 'w')
+
+legf.write ("H 20 - Event\n")
+legf.write ("L 10 - C %s\n" % event)
+legf.write ("D 0.1c 0.1p\n")
+
+jobcolorcodes = [0, 1, 2, 3]
+jobcolors     = ['red', 'blue', 'cyan', 'black']
 
 # Plotting jobs
+jobno = 0
 stationsplotted = False
+jobs.sort ()
+
 for j in jobs:
   jd = os.path.join (eventdir, j)
 
@@ -89,12 +101,17 @@ for j in jobs:
 
       print "--> %s: %4.2f, %4.2f" % (name, lat, lon)
 
-      #if 'GAK2' in name:
-        #name = 'GAK2 (GAKS)'
+      if 'GAK2' in name:
+        rname = 'GAK2 (GAKS)'
+      else:
+        rname = name
 
       # plot station
-      psf.write ("%4.2f %4.2f\n" % (lon, lat))
+      psf.write ("%4.2f %4.2f %s\n" % (lon, lat, stationcolorscode[name]))
       pstf.write ("%4.2f %4.2f 4 0 20 BL %s\n" % (lon, lat, name))
+
+      # write to legend
+      legf.write ("S 5p t 7p %s 0.1p 0.5c %s\n" % (stationcolors[name], rname))
 
 
     stationsplotted = True
@@ -131,14 +148,26 @@ for j in jobs:
   vpvs  = float(res[51:56])
   rms   = float(res[107:112])
 
-  pqf.write ("%4.2f %4.2f\n" % (lon, lat))
+  pqf.write ("%4.2f %4.2f %d\n" % (lon, lat, jobno))
+  # write to legend
+  legf.write ("D 0.1c 0.1p\n")
+  legf.write ("S 5p a 7p %s 0.1p 0.5c Epicenter (rms: %g, job: %s) \n" % (jobcolors[jobno], rms, j))
+  legf.write ("L 8 8 L Epicenter: %gN, %gE\n" % (lat, lon))
+  legf.write ("L 8 8 L Depth:     %g [km] (fixed)\n" % z)
+  legf.write ("L 8 8 L Origin:    %s\n" % t0)
+  #legf.write ("L 8 8 L RMS:       %g (job: %s)\n" % (rms, j))
 
   print "t0: %(t0)s, lat: %(lat)g, lon: %(lon)g, depth: %(depth)g, vpvs: %(vpvs)g, rms: %(rms)g" % { 't0' : t0, 'lat' : lat, 'lon' : lon, 'depth' : z, 'vpvs' : vpvs, 'rms' : rms}
 
+  jobno += 1
+
+legf.write ("D 0.1c 0.1p\n")
+legf.write ("L 8 - C EXPERIMENTAL solution using HYPOSAT.\n");
 
 psf.close ()
 pstf.close ()
 pqf.close ()
+legf.close ()
 
 bigi = os.path.join (datadir, 'plotgmt_big.sh')
 regi = os.path.join (datadir, 'plotgmt_reg.sh')
