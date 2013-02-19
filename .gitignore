@@ -50,3 +50,4 @@ processing/localization/gmt/*.ps
 processing/localization/gmt/*.grd
 processing/localization/gmt/*.png
 processing/localization/gmt/*.ps
+.gmt*
