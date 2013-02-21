@@ -66,12 +66,19 @@ function plot_stations() {
 }
 
 function plot_quakes() {
-  echo "Plotting quakes.."
+  echo "Plotting hyposat quakes.."
 
   psxy ${PROJg} ${REGg} -O quakes.d -Sa${1}p -C${data}/quakes.cpt -K -P >> $out
 
   # plot error ellipsis
   psxy ${PROJg} ${REGg} -O quakes.e.d -W- -SE1p -C${data}/quakes.cpt -K -P >> $out
+}
+
+function plot_hs_quakes() {
+  echo "Plotting hyposearch quakes.."
+
+  psxy ${PROJc} ${REGc} -O quakes.hs.c -Sa${1}p -C${data}/quakes.cpt -K -P >> $out
+
 }
 
 function add_colorbar() {
@@ -83,16 +90,22 @@ function add_legend() {
   echo "Adding legend.."
 
   # figure out number of jobs
-  noj=$(wc -l quakes.d | tr -d ' quakes.d')
+  noj=$(wc -l quakes.d quakes.hs.c | grep total | tr -d ' total')
   cmperj=1.5
 
   gmtset ANNOT_FONT_SIZE_PRIMARY=9
-  h=$(echo "scale=10; 3 + $cmperj * $noj" | bc) # calculate height from number of jobs
+  h=$(echo "scale=10; 2.5 + $cmperj * $noj" | bc) # calculate height from number of jobs
   #y=$(echo "scale=10; ($ih - $h)" | bc) # align to the top
   y=0                                    # align to the bottom
   w=6
   x=$(echo "scale=10; ($iw - $w)" | bc)  # align to the right
 
   pslegend -R-${iw}/-${ih}/${iw}/${ih}r -JX${iw}/${ih} -Gazure1 -C0.15c/0.15c -Dx$x/$y/$w/$h/BL -F -P -K -O < legend.txt >> $out
+}
+
+function close_ps() {
+  echo "Closing Postscript file.."
+
+  psxy -J -R -T -O >> $out
 }
 

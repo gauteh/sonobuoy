@@ -10,5 +10,7 @@ matlab -nodisplay -r "addpath('${hyposearchdir}'); run_hyposearch; exit"
 
 # reset terminal
 stty echo
+stty icrnl
+stty icanon
 
 

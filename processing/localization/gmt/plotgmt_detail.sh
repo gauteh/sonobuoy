@@ -46,9 +46,15 @@ plot_stations 12
 # Plot quake
 plot_quakes 10
 
+# Plot HS quakes
+plot_hs_quakes 10
+
 # Add colorbar
 add_colorbar
 
 # Add legend
 add_legend
+
+# Close
+close_ps
 

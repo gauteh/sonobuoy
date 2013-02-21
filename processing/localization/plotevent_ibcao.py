@@ -66,14 +66,16 @@ pstf = open (os.path.join (mapdir, 'stations.t'), 'w')
 pqf = open (os.path.join (mapdir, 'quakes.d'), 'w')
 pqe = open (os.path.join (mapdir, 'quakes.e.d'), 'w')
 
+pqcf = open (os.path.join (mapdir, 'quakes.hs.c'), 'w')
+
 legf = open (os.path.join (mapdir, 'legend.txt'), 'w')
 
 legf.write ("H 20 - Event\n")
 legf.write ("L 10 - C %s\n" % event)
 legf.write ("D 0.1c 0.1p\n")
 
-jobcolorcodes = [0, 1, 2, 3]
-jobcolors     = ['red', 'blue', 'cyan', 'black']
+jobcolorcodes = [0, 1, 2, 3, 4]
+jobcolors     = ['red', 'blue', 'cyan', 'black', 'yellow']
 
 # Plotting jobs
 jobno = 0
@@ -121,64 +123,126 @@ for j in jobs:
   # Extract info from job
   print "--> %s:" % j,
   hypoout = os.path.join (jd, 'hyposat-out')
-  if not os.path.exists (hypoout):
-    print "No hyposat-out, skipping."
+  hsout   = os.path.join (jd, 'hs_out')
+  if os.path.exists (hypoout):
+    hf = open (hypoout, 'r')
+    lines = hf.readlines ()
+    hf.close ()
+
+    next = False
+    for l in lines:
+      if next:
+        res = l
+        # Parse result line
+        t0    = res[0:23]
+        lat   = float(res[26:32])
+        lon   = float(res[36:41])
+        z     = float(res[43:49])
+        vpvs  = float(res[51:56])
+        rms   = float(res[107:112])
+
+      elif l[:2] == 'T0':
+        next = True
+
+      elif 'Major axes' in l:
+        maj_ax = float(l[11:20].strip())
+        min_ax = float(l[38:48].strip())
+
+      elif 'Azimuth' in l:
+        azi = float(l[10:20].strip())
+
+
+    if not next:
+      print "No solution line found."
+      continue
+
+
+    pqf.write ("%4.2f %4.2f %d\n" % (lon, lat, jobno))
+    pqe.write ("%4.2f %4.2f %d %g %g %g\n" % (lon, lat, jobno, azi, maj_ax, min_ax))
+    # write to legend
+    legf.write ("D 0.1c 0.1p\n")
+    legf.write ("S 5p a 7p %s 0.1p 0.5c Epicenter (rms: %g, %s) \n" % (jobcolors[jobno], rms, j))
+    legf.write ("L 8 8 L Epicenter: %gN, %gE\n" % (lat, lon))
+    legf.write ("L 8 8 L Depth:     %g [km] (fixed)\n" % z)
+    legf.write ("L 8 8 L Origin:    %s\n" % t0)
+    #legf.write ("L 8 8 L RMS:       %g (job: %s)\n" % (rms, j))
+
+    print "t0: %(t0)s, lat: %(lat)g, lon: %(lon)g, depth: %(depth)g, vpvs: %(vpvs)g, rms: %(rms)g" % { 't0' : t0, 'lat' : lat, 'lon' : lon, 'depth' : z, 'vpvs' : vpvs, 'rms' : rms}
+
+    jobno += 1
+
+  elif os.path.exists (hsout):
+    hf = open (hsout, 'r')
+    lines = hf.readlines ()
+    hf.close ()
+
+    first = True
+
+    for l in lines:
+      if l[0] == '#':
+        continue # comment
+
+      c = l.find("#")
+      l = l[:c] # strip comments
+
+      # input is in UPS coordinates
+      s = l.split (' ')
+      for i in s:
+        if i == '':
+          s.remove (i)
+
+      t0  = '0'
+      lon = float(s[0])
+      lat = float(s[1])
+      depth = float(s[2])
+      rms = float(s[3])
+      phasesused = int(s[4])
+
+      phases = ''
+      if phasesused == 0:
+        phases = 'P,S'
+      elif phasesused == 1:
+        phases = 'P,S,M'
+      elif phasesused == 2:
+        phases = 'P,S,M,MM'
+
+      if first:
+        first = False 
+      else:
+        print "     ",
+        k = 0
+        while k < len(j):
+          print " ",
+          k += 2
+
+      print "t0: %(t0)s, lat: %(lat)g, lon: %(lon)g, depth: %(depth)g, rms: %(rms)g, phaseuse: %(phaseuse)d" % { 't0' : t0, 'lat' : lat, 'lon' : lon, 'depth' : depth,  'rms' : rms, 'phaseuse' : phasesused}
+
+      pqcf.write ('%f %f %d\n' %(lon, lat, jobno))
+
+      # write to legend
+      legf.write ("D 0.1c 0.1p\n")
+      legf.write ("S 5p a 7p %s 0.1p 0.5c Epicenter (rms: %4.3f, %s) \n" % (jobcolors[jobno], rms, j))
+      legf.write ("L 8 8 L Epicenter: %gN, %gE\n" % (lat, lon))
+      legf.write ("L 8 8 L Depth: %g [km], phases: %s\n" % ((depth / 1000), phases))
+      legf.write ("L 8 8 L Origin: %s\n" % t0)
+
+      jobno += 1
+
+
+
+  else:
+    print "No hyposat-out or hyposearch solution, skipping."
     continue
 
-  hf = open (hypoout, 'r')
-  lines = hf.readlines ()
-  hf.close ()
-
-  next = False
-  for l in lines:
-    if next:
-      res = l
-      # Parse result line
-      t0    = res[0:23]
-      lat   = float(res[26:32])
-      lon   = float(res[36:41])
-      z     = float(res[43:49])
-      vpvs  = float(res[51:56])
-      rms   = float(res[107:112])
-
-    elif l[:2] == 'T0':
-      next = True
-
-    elif 'Major axes' in l:
-      maj_ax = float(l[11:20].strip())
-      min_ax = float(l[38:48].strip())
-
-    elif 'Azimuth' in l:
-      azi = float(l[10:20].strip())
-
-
-  if not next:
-    print "No solution line found."
-    continue
-
-
-  pqf.write ("%4.2f %4.2f %d\n" % (lon, lat, jobno))
-  pqe.write ("%4.2f %4.2f %d %g %g %g\n" % (lon, lat, jobno, azi, maj_ax, min_ax))
-  # write to legend
-  legf.write ("D 0.1c 0.1p\n")
-  legf.write ("S 5p a 7p %s 0.1p 0.5c Epicenter (rms: %g, job: %s) \n" % (jobcolors[jobno], rms, j))
-  legf.write ("L 8 8 L Epicenter: %gN, %gE\n" % (lat, lon))
-  legf.write ("L 8 8 L Depth:     %g [km] (fixed)\n" % z)
-  legf.write ("L 8 8 L Origin:    %s\n" % t0)
-  #legf.write ("L 8 8 L RMS:       %g (job: %s)\n" % (rms, j))
-
-  print "t0: %(t0)s, lat: %(lat)g, lon: %(lon)g, depth: %(depth)g, vpvs: %(vpvs)g, rms: %(rms)g" % { 't0' : t0, 'lat' : lat, 'lon' : lon, 'depth' : z, 'vpvs' : vpvs, 'rms' : rms}
-
-  jobno += 1
-
-legf.write ("D 0.1c 0.1p\n")
-legf.write ("L 8 - C EXPERIMENTAL solution using HYPOSAT.\n");
+#legf.write ("D 0.1c 0.1p\n")
+#legf.write ("L 8 - C EXPERIMENTAL solution using HYPOSAT.\n");
 
 psf.close ()
 pstf.close ()
 pqf.close ()
 pqe.close ()
 legf.close ()
+pqcf.close ()
 
 bigi = os.path.join (datadir, 'plotgmt_big.sh')
 regi = os.path.join (datadir, 'plotgmt_reg.sh')
