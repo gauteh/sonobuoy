@@ -3,9 +3,9 @@
 #
 # Set up environment and run hyposearch
 
-hyposearchdir=~/dev/uib/hyposearch_3d_layered
+hyposearchdir="/home/gaute/dev/uib/hyposearch_3d_layered"
 
 # run matlab
-matlab -nodisplay -r "${hyposearchdir}/run_hyposearch.m"
+matlab -nodisplay -r "addpath('${hyposearchdir}'); run_hyposearch; exit"
 
 
