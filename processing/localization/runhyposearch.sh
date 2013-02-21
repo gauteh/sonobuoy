@@ -8,4 +8,7 @@ hyposearchdir="/home/gaute/dev/uib/hyposearch_3d_layered"
 # run matlab
 matlab -nodisplay -r "addpath('${hyposearchdir}'); run_hyposearch; exit"
 
+# reset terminal
+stty echo
+
 
