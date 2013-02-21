@@ -52,4 +52,6 @@ add_colorbar
 # Add legend
 add_legend
 
+# Close ps
+close_ps
 

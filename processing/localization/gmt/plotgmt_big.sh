@@ -45,3 +45,6 @@ plot_stations
 # Add colorbar
 add_colorbar
 
+# Close ps
+close_ps
+
