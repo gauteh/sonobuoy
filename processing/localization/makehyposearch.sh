@@ -12,6 +12,14 @@
 
 echo "mhs: make hyposearch job"
 
+event=$(basename ${PWD})
+if [ ! -e ${event} ]; then
+  echo "mhs: not run from event dir."
+  exit 1
+fi
+
+hyposearchdir=~/dev/uib/hyposearch_3d_layered
+
 # load common
 selfd=$(dirname $0)/gmt
 . "${selfd}/common.sh"
@@ -22,6 +30,9 @@ if [ $# -ne 1 ]; then
 fi
 
 mkdir -p $out
+
+jobtemplate=${out##job_}
+echo "mhs: template: ${jobtemplate}"
 
 echo "mhs: output: $out.."
 
@@ -63,6 +74,13 @@ cat map/quakes.d | ${selfd}/geo2cart.sh > ${out}/quakes.coor
 
 echo "mhs: load phases.."
 ${selfd}/../readphases.py > ${out}/phases.tt
+
+echo "mhs: create job file from template..: ${jobtemplate}"
+cp ${hyposearchdir}/hs_job_template_${jobtemplate}.m ${out}/hs_job.m
+
+# update event
+sed -e "s|@T_EVENT@|${event}|"  -i ${out}/hs_job.m
+sed -e "s|@T_JOB@|${out}|"      -i ${out}/hs_job.m
 
 echo "mhs: done"
 

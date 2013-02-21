@@ -69,7 +69,7 @@ for p in phases:
 correctedphases.sort ()  # IP/P must come before IS/S
 
 for p in correctedphases:
-  sys.stdout.write ('{station:<5s} {phasename:8s} {year:4d} {month:02d} {day:02d} {hour:02d} {minute:02d} {second:06.3f} {steering:6s}\n'.format (
+  sys.stdout.write ('{station:<5s} {phasename:8s} {year:4d} {month:02d} {day:02d} {hour:02d} {minute:02d} {second:06.3f}\n'.format (
 
         station       = p[0],
         phasename     = p[1],
@@ -78,8 +78,7 @@ for p in correctedphases:
         day           = int(date[7:]),
         hour          = int(p[2][:2]),
         minute        = int(p[2][2:]),
-        second        = float(p[3]),
-        steering      = 'T__D__'
+        second        = float(p[3])
 
       ))
 
