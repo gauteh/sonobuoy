@@ -77,7 +77,7 @@ function plot_quakes() {
 function plot_hs_quakes() {
   echo "Plotting hyposearch quakes.."
 
-  psxy ${PROJc} ${REGc} -O quakes.hs.c -Sa${1}p -C${data}/quakes.cpt -K -P >> $out
+  psxy ${PROJg} ${REGg} -O quakes.hs.d -Sa${1}p -C${data}/quakes.cpt -K -P >> $out
 
 }
 

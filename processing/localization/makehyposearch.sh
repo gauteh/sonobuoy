@@ -24,7 +24,7 @@ hyposearchdir=~/dev/uib/hyposearch_3d_layered
 selfd=$(dirname $0)/gmt
 . "${selfd}/common.sh"
 
-out=$1
+out=job_$1
 if [ $# -ne 1 ]; then
   out=job_hs01
 fi

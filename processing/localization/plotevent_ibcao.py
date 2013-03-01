@@ -66,7 +66,7 @@ pstf = open (os.path.join (mapdir, 'stations.t'), 'w')
 pqf = open (os.path.join (mapdir, 'quakes.d'), 'w')
 pqe = open (os.path.join (mapdir, 'quakes.e.d'), 'w')
 
-pqcf = open (os.path.join (mapdir, 'quakes.hs.c'), 'w')
+pqcf = open (os.path.join (mapdir, 'quakes.hs.d'), 'w')
 
 legf = open (os.path.join (mapdir, 'legend.txt'), 'w')
 
@@ -74,13 +74,16 @@ legf.write ("H 20 - Event\n")
 legf.write ("L 10 - C %s\n" % event)
 legf.write ("D 0.1c 0.1p\n")
 
-jobcolorcodes = [0, 1, 2, 3, 4]
-jobcolors     = ['red', 'blue', 'cyan', 'black', 'yellow']
+jobcolorcodes = [0, 1, 2, 3, 4, 5, 6, 7]
+jobcolors     = ['red', 'blue', 'cyan', 'black', 'yellow', 'cyan', 'black', 'yellow']
 
 # Plotting jobs
 jobno = 0
 stationsplotted = False
 jobs.sort ()
+
+# script for converting from cartesian to geographic coordinates
+cart2geo = os.path.join (datadir, 'cart2geo.sh')
 
 for j in jobs:
   jd = os.path.join (eventdir, j)
@@ -172,9 +175,10 @@ for j in jobs:
     jobno += 1
 
   elif os.path.exists (hsout):
-    hf = open (hsout, 'r')
-    lines = hf.readlines ()
-    hf.close ()
+    # convert to geographic coordinates
+    pr = subprocess.Popen (["bash", cart2geo, hsout], stdout = subprocess.PIPE)
+
+    lines = pr.stdout.readlines ()
 
     first = True
 
@@ -243,6 +247,7 @@ pqf.close ()
 pqe.close ()
 legf.close ()
 pqcf.close ()
+
 
 bigi = os.path.join (datadir, 'plotgmt_big.sh')
 regi = os.path.join (datadir, 'plotgmt_reg.sh')
