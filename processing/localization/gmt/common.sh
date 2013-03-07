@@ -90,7 +90,7 @@ function add_legend() {
   echo "Adding legend.."
 
   # figure out number of jobs
-  noj=$(wc -l quakes.d quakes.hs.c | grep total | tr -d ' total')
+  noj=$(wc -l quakes.d quakes.hs.d | grep total | tr -d ' total')
   cmperj=1.5
 
   gmtset ANNOT_FONT_SIZE_PRIMARY=9
