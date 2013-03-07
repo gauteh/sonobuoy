@@ -195,7 +195,7 @@ for j in jobs:
         if i == '':
           s.remove (i)
 
-      t0  = '0'
+      t0  = s[5] + ' ' + s[6]
       lon = float(s[0])
       lat = float(s[1])
       depth = float(s[2])
