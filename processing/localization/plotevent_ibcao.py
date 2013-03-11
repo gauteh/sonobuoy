@@ -42,7 +42,7 @@ jobs = []
 entries = os.listdir (eventdir)
 for e in entries:
   if os.path.isdir (os.path.join (eventdir, e)):
-    if 'job_' in e:
+    if e[0:4] == 'job_':
       jobs.append (e)
 
 if len(jobs) < 1:
@@ -160,8 +160,8 @@ for j in jobs:
       continue
 
 
-    pqf.write ("%4.2f %4.2f %d\n" % (lon, lat, jobno))
-    pqe.write ("%4.2f %4.2f %d %g %g %g\n" % (lon, lat, jobno, azi, maj_ax, min_ax))
+    pqf.write ("%f %f %d\n" % (lon, lat, jobno))
+    pqe.write ("%f %f %d %g %g %g\n" % (lon, lat, jobno, azi, maj_ax, min_ax))
     # write to legend
     legf.write ("D 0.1c 0.1p\n")
     legf.write ("S 5p a 7p %s 0.1p 0.5c Epicenter (rms: %g, %s) \n" % (jobcolors[jobno], rms, j))
