@@ -134,6 +134,8 @@ for j in jobs:
 
     next = False
     for l in lines:
+      azi = None
+
       if next:
         res = l
         # Parse result line
@@ -161,7 +163,8 @@ for j in jobs:
 
 
     pqf.write ("%f %f %d\n" % (lon, lat, jobno))
-    pqe.write ("%f %f %d %g %g %g\n" % (lon, lat, jobno, azi, maj_ax, min_ax))
+    if (azi is not None):
+      pqe.write ("%f %f %d %g %g %g\n" % (lon, lat, jobno, azi, maj_ax, min_ax))
     # write to legend
     legf.write ("D 0.1c 0.1p\n")
     legf.write ("S 5p a 7p %s 0.1p 0.5c Epicenter (rms: %g, %s) \n" % (jobcolors[jobno], rms, j))
