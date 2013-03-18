@@ -1,4 +1,4 @@
-v 20110115 2
+v 20121123 2
 C 37900 50100 1 0 0 terminal-1.sym
 {
 T 38210 50850 5 10 0 0 0 0 1
@@ -235,15 +235,11 @@ C 43200 43700 1 0 0 TL751LCP.sym
 {
 T 44800 45000 5 10 0 0 0 0 1
 device=TL751LCP
-T 44600 44700 5 10 1 1 0 6 1
-refdes=U?
 }
 C 43200 41300 1 0 0 LF60ABV.sym
 {
 T 44800 42600 5 10 0 0 0 0 1
 device=LF60ABV
-T 44600 42300 5 10 1 1 0 6 1
-refdes=U?
 }
 N 42300 41900 42300 50300 4
 N 43200 44300 42300 44300 4
@@ -256,7 +252,7 @@ C 42700 44300 1 270 0 capacitor-2.sym
 T 43400 44100 5 10 0 0 270 0 1
 device=POLARIZED_CAPACITOR
 T 43200 44100 5 10 1 1 270 0 1
-refdes=C?
+refdes=10 uF
 T 43600 44100 5 10 0 0 270 0 1
 symversion=0.1
 }
@@ -265,7 +261,7 @@ C 45000 44300 1 270 0 capacitor-2.sym
 T 45700 44100 5 10 0 0 270 0 1
 device=POLARIZED_CAPACITOR
 T 45500 44100 5 10 1 1 270 0 1
-refdes=C?
+refdes=10 uF
 T 45900 44100 5 10 0 0 270 0 1
 symversion=0.1
 }
@@ -276,7 +272,7 @@ C 42700 41900 1 270 0 capacitor-2.sym
 T 43400 41700 5 10 0 0 270 0 1
 device=POLARIZED_CAPACITOR
 T 43200 41700 5 10 1 1 270 0 1
-refdes=C?
+refdes=10 uF
 T 43600 41700 5 10 0 0 270 0 1
 symversion=0.1
 }
@@ -286,7 +282,7 @@ C 45000 41900 1 270 0 capacitor-2.sym
 T 45700 41700 5 10 0 0 270 0 1
 device=POLARIZED_CAPACITOR
 T 45500 41700 5 10 1 1 270 0 1
-refdes=C?
+refdes=10 uF
 T 45900 41700 5 10 0 0 270 0 1
 symversion=0.1
 }
@@ -305,15 +301,11 @@ C 43200 37400 1 0 0 LM2991.sym
 {
 T 44800 38700 5 10 0 0 0 0 1
 device=LM2991
-T 44600 38400 5 10 1 1 0 6 1
-refdes=U?
 }
 C 43200 34100 1 0 0 LM2991.sym
 {
 T 44800 35400 5 10 0 0 0 0 1
 device=LM2991
-T 44600 35100 5 10 1 1 0 6 1
-refdes=U?
 }
 N 41500 34600 41500 49100 4
 N 41500 37900 43200 37900 4
@@ -325,7 +317,7 @@ C 42500 38800 1 270 0 capacitor-2.sym
 T 43200 38600 5 10 0 0 270 0 1
 device=POLARIZED_CAPACITOR
 T 43000 38600 5 10 1 1 270 0 1
-refdes=C?
+refdes=10 uF
 T 43400 38600 5 10 0 0 270 0 1
 symversion=0.1
 }
@@ -334,7 +326,7 @@ C 42500 35500 1 270 0 capacitor-2.sym
 T 43200 35300 5 10 0 0 270 0 1
 device=POLARIZED_CAPACITOR
 T 43000 35300 5 10 1 1 270 0 1
-refdes=C?
+refdes=10 uF
 T 43400 35300 5 10 0 0 270 0 1
 symversion=0.1
 }
@@ -345,7 +337,7 @@ C 45900 38700 1 270 0 capacitor-2.sym
 T 46600 38500 5 10 0 0 270 0 1
 device=POLARIZED_CAPACITOR
 T 46400 38500 5 10 1 1 270 0 1
-refdes=C?
+refdes=10 uF
 T 46800 38500 5 10 0 0 270 0 1
 symversion=0.1
 }
@@ -354,7 +346,7 @@ C 45800 35400 1 270 0 capacitor-2.sym
 T 46500 35200 5 10 0 0 270 0 1
 device=POLARIZED_CAPACITOR
 T 46300 35200 5 10 1 1 270 0 1
-refdes=C?
+refdes=10 uF
 T 46700 35200 5 10 0 0 270 0 1
 symversion=0.1
 }
@@ -434,7 +426,7 @@ C 57100 36800 1 270 0 capacitor-1.sym
 T 57800 36600 5 10 0 0 270 0 1
 device=CAPACITOR
 T 57600 36300 5 10 1 1 0 0 1
-refdes=01.uF
+refdes=0.1 uF
 T 58000 36600 5 10 0 0 270 0 1
 symversion=0.1
 }
@@ -606,9 +598,9 @@ T 68000 30600 9 10 1 0 0 0 1
 1
 T 68000 30300 9 10 1 0 0 0 1
 Gaute Hope <eg@gaute.vetsj.com>
-C 46500 37800 1 0 0 generic-power.sym
+C 46700 37800 1 0 0 generic-power.sym
 {
-T 46700 38050 5 10 1 1 0 3 1
+T 46900 38050 5 10 1 1 0 3 1
 net=-6VA
 }
 C 46600 34500 1 0 0 generic-power.sym
@@ -678,3 +670,16 @@ C 45000 46700 1 0 0 5V-plus-1.sym
 N 42700 40100 42700 39600 4
 N 42700 36300 42700 36800 4
 N 57300 33500 57300 33600 4
+T 58200 36300 9 10 1 0 0 0 1
+(1)
+T 58100 34000 9 10 1 0 0 0 1
+(1)
+T 45700 41500 9 10 1 0 0 0 1
+(2)
+T 46600 38300 9 10 1 0 0 0 1
+(2)
+T 46500 35000 9 10 1 0 0 0 1
+(2)
+T 41400 33100 9 10 1 0 0 0 2
+1.) Must be placed very close to op-amp to avoid oscillations.
+2.) ESR of capacitor should be 1 - 10 Ohm (tantalums are ideal)
