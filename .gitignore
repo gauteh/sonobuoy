@@ -51,3 +51,4 @@ processing/localization/gmt/*.grd
 processing/localization/gmt/*.png
 processing/localization/gmt/*.ps
 .gmt*
+*.bcf
