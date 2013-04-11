@@ -17,7 +17,7 @@ files.sort()
 days = [] # list with days and event number pairs
 
 for f in files:
-  if '.S' in f:
+  if '.S' in f and not '.txt' in f:
     d  = f[:2]
     ym = f[-6:]
 
