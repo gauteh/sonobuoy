@@ -64,6 +64,18 @@ figure(3); clf('reset');
 bodeplot (C, P);
 title ('Bode Diagram (Complete analog response)');  
 
+% Stable
+if isstable(C)
+  disp ('System is stable.');
+else
+  disp ('System is unstable.');
+end
+figure(5);
+[p, z] = pzmap(C);
+pzmap(C);
+disp ('Poles:')
+disp(p)
+
 % attenuation at nyquist
 disp ('Attenuation at Nyquist:');
 a = abs(freqresp(C, 512e3*2*pi))
