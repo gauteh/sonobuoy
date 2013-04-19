@@ -50,6 +50,11 @@ ymind="84:12"
 xmaxd=15
 ymaxd="85:30"
 
+function die() {
+  echo "Error: $1"
+  exit 1
+}
+
 # check if plotevent_ibcao.py has been run to extract coordinates
 if [ ! -e "map/stations.d" ]; then
   echo "error: plotevent_ibcao.py must be run first to extract station and quake coordinates from previous jobs."
@@ -76,7 +81,7 @@ echo "mhs: load phases.."
 ${selfd}/../readphases.py > ${out}/phases.tt
 
 echo "mhs: create job file from template..: ${jobtemplate}"
-cp ${hyposearchdir}/hs_job_template_${jobtemplate}.m ${out}/hs_job.m
+cp ${hyposearchdir}/hs_job_template_${jobtemplate}.m ${out}/hs_job.m || die "Could not copy job template, does it exist?"
 
 # update event
 sed -e "s|@T_EVENT@|${event}|"  -i ${out}/hs_job.m
