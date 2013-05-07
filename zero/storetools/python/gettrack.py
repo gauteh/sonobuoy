@@ -100,8 +100,8 @@ class GetTrack:
 
       bd = d.bdata
       for b in bd.batches:
-        f.write ("%d,%d,%d,%d,%s,%s,%s,%s,%s,%d\n" % (bd.id, b.no, b.ref, b.status, b.latitude[:-2], b.latitude[-2:], b.longitude[:-2], b.longitude[-2:], b.checksum, 1 if b.checksum_pass else 0))
-        ft.write ('%s%s     %s%s\n' % ( b.longitude[:-2], b.longitude[-2:], b.latitude[:-2], b.latitude[-2:]))
+        f.write ("%d,%d,%d,%d,%s,%s,%s,%s,%s,%d\n" % (bd.id, b.no, b.ref, b.status, b.latitude[:-2], b.latitude[-2:-1], b.longitude[:-2], b.longitude[-2:-1], b.checksum, 1 if b.checksum_pass else 0))
+        ft.write ('%s%s     %s%s\n' % ( b.longitude[:-2], b.longitude[-2:-1], b.latitude[:-2], b.latitude[-2:-1]))
 
     f.close ()
     ft.close ()
