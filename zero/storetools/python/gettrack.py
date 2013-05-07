@@ -18,6 +18,9 @@
 import os
 import sys
 
+sys.path.append ('/home/gaute/dev/gautebuoy/processing/localization/')
+from utils import *
+
 from obspy            import read, Stream, Trace, UTCDateTime
 from obspy.core.trace import Stats
 
@@ -101,7 +104,15 @@ class GetTrack:
       bd = d.bdata
       for b in bd.batches:
         f.write ("%d,%d,%d,%d,%s,%s,%s,%s,%s,%d\n" % (bd.id, b.no, b.ref, b.status, b.latitude[:-2], b.latitude[-2:-1], b.longitude[:-2], b.longitude[-2:-1], b.checksum, 1 if b.checksum_pass else 0))
-        ft.write ('%s%s     %s%s\n' % ( b.longitude[:-2], b.longitude[-2:-1], b.latitude[:-2], b.latitude[-2:-1]))
+
+        try:
+          lon = ddmm_mm_decimaldegree (b.longitude[:-2], b.longitude[-2:-1])
+          lat = ddmm_mm_decimaldegree (b.latitude[:-2], b.latitude[-2:-1])
+        except:
+          lon = 0
+          lat = 0
+
+        ft.write ('%f     %f\n' % (lon, lat))
 
     f.close ()
     ft.close ()
