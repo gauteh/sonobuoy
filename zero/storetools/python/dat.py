@@ -35,7 +35,7 @@ class Dat:
     self.bdata.totalsamples,  = unpack ('I', indf.read (4))
     self.bdata.batchlength,   = unpack ('I', indf.read (4))
     self.bdata.nobatches,     = unpack ('I', indf.read (4))
-    if self.bdata.remoteversion > 6:
+    if self.bdata.remoteversion >= 9:
       self.bdata.e_sdlag,     = unpack ('?', indf.read (1))
     else:
       self.bdata.e_sdlag      = False
