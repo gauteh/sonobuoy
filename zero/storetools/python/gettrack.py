@@ -61,6 +61,18 @@ class GetTrack:
     self.outfile = '%(station)s_track.csv' % { 'station' : self.station }
     self.outfile_t = '%(station)s_track.tab' % { 'station' : self.station }
 
+    if self.station == 'B1':
+      self.no = 3
+    elif self.station == 'B2':
+      self.no = 0
+    elif self.station == 'B3':
+      self.no = 1
+    elif self.station == 'B4':
+      self.no = 2
+    else:
+      print "Unknown station"
+      sys.exit (1)
+
     print "gt: writing to file: " + self.outfile
     print "gt: writing to file: " + self.outfile_t
 
@@ -112,7 +124,8 @@ class GetTrack:
           lon = 0
           lat = 0
 
-        ft.write ('%f     %f\n' % (lon, lat))
+        
+        ft.write ('%f     %f   %d\n' % (lon, lat, self.no))
 
     f.close ()
     ft.close ()

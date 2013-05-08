@@ -1,5 +1,10 @@
 #z0 color z1 color
+# 0 = GAK2
+# 1 = GAK3
+# 2 = GAK4
+# 3 = GAK1
 0   green  1  green
 1   yellow 2  yellow
 2   black  3  black
+3   cyan   4  cyan
 
