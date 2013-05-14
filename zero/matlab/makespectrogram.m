@@ -38,14 +38,14 @@ for k=1:n
 
   Fs = 250; % Hz
   F  = 0:1:125;
-  win = 256; % samples
-  overlap = 150; % samples overlap
+  win = 100; % samples (one sec)
+  overlap = 75; % samples overlap
 
   % filter
   fprintf ('filtering..\n');
   fcut = 8;
   [b, a] = butter (6, fcut / (Fs/2), 'high');
-  %d = real(filter (b, a, d));
+  d = real(filter (b, a, d));
 
   fprintf ('creating and plotting spectrogram..\n');
   subplot (pm, pn, (k-1)*2 + 1);
