@@ -1,15 +1,19 @@
 
 %% Calculate PSD for segments
-h = spectrum.welch;
+%h = spectrum.welch ('Gaussian', 250, 50) ;
+h = spectrum.welch ('Rectangular', 512, 50);
+%h = spectrum.mtm;
+
 
 %% Load segments
 ff = dir ('*.mseed');
-%ff = ff(3:10);
+%ff = ff(4:20);
 
 nseg = size(ff,1);
-nfreq = 129;
+%nfreq = 129;
+nfreq = 257;
 
-split = 3; % split hourly segments
+split = 30; % split hourly segments
 
 fs = zeros(nfreq, nseg*split);
 
@@ -28,6 +32,7 @@ for k=1:nseg
     end
     
     kpsd = psd (h, td, 'Fs', 250);
+    
     fs(:,(k-1)*split + jj) = kpsd.Data;
     
     freq = kpsd.Frequencies;
@@ -36,7 +41,7 @@ end
 
 %% Bin and plot
 fprintf ('binning and plotting..\n');
-yres = 500; ymin = 1; ymax = 14;
+yres = 200; ymin = 1; ymax = 14;
 y = logspace (ymin, ymax, yres); % bin at these values
 %fsn = zeros(yres, nfreq);
 [fsn, xout] = hist(fs', y);
@@ -44,6 +49,8 @@ y = logspace (ymin, ymax, yres); % bin at these values
 ydb = 10*log10(y);
 
 fsn = fsn ./ (nseg*split);
+
+%fsn(fsn>0.03) = NaN;
 clf('reset');
 surface (freq, ydb, fsn, 'EdgeColor', 'none');
 shading interp;
@@ -54,7 +61,7 @@ set(gca,'TickDir','out');
 
 ylabel ('Power [mPa] [dB]');
 xlabel ('Frequency [Hz]');
-title (sprintf('PDF of #%d PSDs, hourly segments split into a total of #%d segments.', nseg, split*nseg));
+title (sprintf('%s - PDF of #%d PSDs, hourly segments split into a total of #%d segments.', m(1).ChannelFullName, nseg, split*nseg));
 
 hold on;
 
@@ -64,27 +71,24 @@ minpow = 10*log10(min(fs'));
 maxpow = 10*log10(max(fs'));
 
 z = max(fsn(:)) .* ones(length(minpow),1);
-
-hh(1) = line(freq, minpow, z, 'Color', 'black', 'LineWidth', 2);
-
-hh(2) = line(freq, maxpow, z, 'Color', 'black', 'LineWidth', 2);
-
-% avgpow = mean(fs,2);
-% avgpowdb = 10*log10(avgpow);
-% hh(3) = line (freq, avgpowdb, z, 'Color', 'blue', 'LineWidth', 2);
-
-% med = 10*log10(median (fs, 2));
-% hh(4) = line (freq, med, z, 'Color', 'blue', 'LineStyle', '--', 'LineWidth', 2);
-
-% trace surface along maximum
-[~, mmi] = max(fsn,[], 1);
-yy = ydb(mmi);
-hh(3) = line (freq, yy, z, 'Color', 'blue', 'LineStyle', '--', 'LineWidth', 2);
-
-% plot percentiles
-
-
-legend (hh, 'Minimum', 'Maximum', 'Mode');
+% 
+% hh(1) = line(freq, minpow, z, 'Color', 'blue', 'LineWidth', 2);
+% 
+% hh(2) = line(freq, maxpow, z, 'Color', 'red', 'LineWidth', 2);
+% 
+% % avgpow = mean(fs,2);
+% % avgpowdb = 10*log10(avgpow);
+% % hh(3) = line (freq, avgpowdb, z, 'Color', 'blue', 'LineWidth', 2);
+% 
+% % med = 10*log10(median (fs, 2));
+% % hh(4) = line (freq, med, z, 'Color', 'blue', 'LineStyle', '--', 'LineWidth', 2);
+% 
+% % trace surface along maximum
+% [~, mmi] = max(fsn,[], 1);
+% yy = ydb(mmi);
+% hh(3) = line (freq, yy, z, 'Color', 'black', 'LineStyle', '--', 'LineWidth', 2);
+% 
+% legend (hh, 'Minimum', 'Maximum', 'Mode');
 
 cmap = load('pdfpsd.cp');
 colormap(cmap);
@@ -92,3 +96,4 @@ colormap(cmap);
 axis tight;
 ya = ylim;
 ylim ([ya(1) 120]);
+colorbar;

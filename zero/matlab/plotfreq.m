@@ -19,11 +19,14 @@ N = 2^nextpow2 (n);
 Ft = fft (d, N)/n;
 
 freq = 250; % Sample rate
+F = freq * linspace (-.5, .5, N);
 
 X = 2*abs (fftshift (Ft));
 %X = X / max(X);          % Normalize
+% 
+% X = 10*log10(abs(X).^2./F');
 
-F = freq * linspace (-.5, .5, N);
+
 
 figure (fig);
 clf ('reset');
