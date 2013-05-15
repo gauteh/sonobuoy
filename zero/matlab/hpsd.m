@@ -4,7 +4,7 @@ h = spectrum.welch;
 
 %% Load segments
 ff = dir ('*.mseed');
-ff = ff(13:30);
+ff = ff(3:10);
 
 nseg = size(ff,1);
 nfreq = 129;
@@ -15,7 +15,7 @@ fs = zeros(nfreq, nseg*split);
 
 % load
 for k=1:nseg
-  fprintf ('reading: %s..\n', ff(k).name);
+  fprintf ('reading: [%d/%d] %s..\n', k, nseg, ff(k).name);
   m = rdmseed(ff(k).name);
   d = c2p(double(cat(1,m.d)));
   jl = length(d)/split;
@@ -34,8 +34,8 @@ for k=1:nseg
   end
 end
 
-fprintf ('plotting..\n');
-yres = 140; ymin = 1; ymax = 14;
+fprintf ('binning and plotting..\n');
+yres = 500; ymin = 1; ymax = 14;
 y = logspace (ymin, ymax, yres); % bin at these values
 %fsn = zeros(yres, nfreq);
 [fsn, xout] = hist(fs', y);
@@ -50,10 +50,10 @@ shading interp;
 box on;
 set(gca,'TickDir','out');
 
-ylim ([0 160]);
+
 ylabel ('Power [mPa] [dB]');
 xlabel ('Frequency [Hz]');
-title (sprintf('PDF of %d PSDs, hourly segments split into %d segments.', nseg, split));
+title (sprintf('PDF of #%d PSDs, hourly segments split into a total of #%d segments.', nseg, split*nseg));
 
 hold on;
 
@@ -70,10 +70,16 @@ hh(2) = line(freq, maxpow, z, 'Color', 'black', 'LineWidth', 2);
 
 avgpow = mean(fs,2);
 avgpowdb = 10*log10(avgpow);
-hh(3) = line (freq, avgpowdb, z, 'Color', 'blue');
-legend (hh, 'Minimum', 'Maximum', 'Avarage PSD', 'LineWidth', 2);
+hh(3) = line (freq, avgpowdb, z, 'Color', 'blue', 'LineWidth', 2);
+
+med = 10*log10(median (fs, 2));
+hh(4) = line (freq, med, z, 'Color', 'blue', 'LineStyle', '--', 'LineWidth', 2);
+
+legend (hh, 'Minimum', 'Maximum', 'Avarage PSD', 'Median PSD');
 
 cmap = load('pdfpsd.cp');
 colormap(cmap);
 
 axis tight;
+ya = ylim;
+ylim ([ya(1) 120]);
