@@ -4,7 +4,7 @@ h = spectrum.welch;
 
 %% Load segments
 ff = dir ('*.mseed');
-ff = ff(3:10);
+%ff = ff(3:10);
 
 nseg = size(ff,1);
 nfreq = 129;
