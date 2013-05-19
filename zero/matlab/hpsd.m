@@ -38,12 +38,14 @@ for k=1:nseg
     freq = kpsd.Frequencies;
   end
 end
+fs = fs ./ 1e6; % convert to pascal
 
 %% Bin and plot
 fprintf ('binning and plotting..\n');
-yres = 200; ymin = 1; ymax = 14;
+yres = 400; ymin = -4; ymax = 5;
 y = logspace (ymin, ymax, yres); % bin at these values
 %fsn = zeros(yres, nfreq);
+
 [fsn, xout] = hist(fs', y);
 
 ydb = 10*log10(y);
@@ -52,14 +54,15 @@ fsn = fsn ./ (nseg*split);
 
 %fsn(fsn>0.03) = NaN;
 clf('reset');
-surface (freq, ydb, fsn, 'EdgeColor', 'none');
+ax = surface (freq, ydb, fsn, 'EdgeColor', 'none');
+set(gca, 'XScale', 'log');
 shading interp;
 
 box on;
 set(gca,'TickDir','out');
 
 
-ylabel ('Power [mPa] [dB]');
+ylabel ('Power [Pa] [dB]');
 xlabel ('Frequency [Hz]');
 title (sprintf('%s - PDF of #%d PSDs, hourly segments split into a total of #%d segments.', m(1).ChannelFullName, nseg, split*nseg));
 
@@ -95,5 +98,5 @@ colormap(cmap);
 
 axis tight;
 ya = ylim;
-ylim ([ya(1) 120]);
+%ylim ([ya(1) 40]);
 colorbar;

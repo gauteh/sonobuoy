@@ -80,7 +80,7 @@ for k=1:n
   end
   
   if ~seismo
-    ylabel ('Amplitude [mPa]');
+    ylabel ('Amplitude [uPa]');
   else
     ylabel ('Amplitude [counts]');
   end
