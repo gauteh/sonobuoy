@@ -18,17 +18,30 @@ rm -f $out
 
 echo "Output: $out"
 
+
 # boundaries: Cartesian
 xmin=0
 ymin=-637312.873449
-xmax=127935.668703
-ymax=-477462.415701
+xmax=57416.6384555
+ymax=-546282.824002
 
 # boundaries: Geographic
 xmind=0
-ymind="84:12"
-xmaxd=15
-ymaxd="85:30"
+ymind="84.2"
+xmaxd=6
+ymaxd="85.00"
+
+## boundaries: Cartesian
+#xmin=0
+#ymin=-637312.873449
+#xmax=127935.668703
+#ymax=-477462.415701
+
+## boundaries: Geographic
+#xmind=0
+#ymind="84:12"
+#xmaxd=15
+#ymaxd="85:30"
 
 # Output image width
 iw=20
