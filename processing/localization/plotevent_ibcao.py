@@ -127,6 +127,7 @@ for j in jobs:
   print "--> %s:" % j,
   hypoout = os.path.join (jd, 'hyposat-out')
   hsout   = os.path.join (jd, 'hs_out')
+  hcout   = os.path.join (jd, 'hc-out')
   if os.path.exists (hypoout):
     hf = open (hypoout, 'r')
     lines = hf.readlines ()
@@ -236,6 +237,35 @@ for j in jobs:
       jobno += 1
 
 
+  elif os.path.exists (hcout):
+    f = open (hcout, 'r')
+    lines = f.readlines ()
+    f.close ()
+
+    l = lines[0]
+    l = l.split (' ')
+    t0 = l[0] + ' ' + l[1] + ' ' + l[2]
+    lat = l[3]
+    lon = l[4]
+    lat = ddmm_mm_decimaldegree (lat[:-1], lat[-1])
+    lon = ddmm_mm_decimaldegree (lon[:-1], lon[-1])
+    depth = float(l[5])
+    rms   = float(l[6])
+
+
+    print "t0: %(t0)s, lat: %(lat)g, lon: %(lon)g, depth: %(depth)g, rms: %(rms)g" % { 't0' : t0, 'lat' : lat, 'lon' : lon, 'depth' : depth,  'rms' : rms }
+
+    pqcf.write ('%f %f %d\n' %(lon, lat, jobno))
+
+    # write to legend
+    legf.write ("D 0.1c 0.1p\n")
+    legf.write ("S 5p a 7p %s 0.1p 0.5c Epicenter (rms: %4.3f, %s) \n" % (jobcolors[jobno], rms, j))
+    legf.write ("L 8 8 L Epicenter: %gN, %gE\n" % (lat, lon))
+    legf.write ("L 8 8 L Depth: %g [km]\n" % (depth))
+    legf.write ("L 8 8 L Origin: %s\n" % t0)
+
+
+    jobno += 1
 
   else:
     print "No hyposat-out or hyposearch solution, skipping."
