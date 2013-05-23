@@ -58,7 +58,7 @@ if not os.path.exists (mapdir):
 
 # stationcolors (defined in stations.cpt in gmt folder)
 stationcolorscode = { 'GAK2' : '0', 'GAK3' : '1', 'GAK4' : '2' }
-stationcolors = { 'GAK2' : 'green', 'GAK3' : 'yellow', 'GAK4' : 'black' }
+stationcolors = { 'GAK2' : 'green', 'GAK3' : 'yellow', 'GAK4' : 'red' }
 
 # quakes
 psf = open (os.path.join (mapdir, 'stations.d'), 'w')
