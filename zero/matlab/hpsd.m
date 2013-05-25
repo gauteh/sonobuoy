@@ -24,8 +24,8 @@ for k=1:nseg
   fprintf ('reading and psd-ing: [%d/%d] %s..\n', k, nseg, ff(k).name);
   m = rdmseed(ff(k).name);
   
-  %d = c2p(double(cat(1,m.d)));
-  d = abs(transfertrillium(d));
+  d = c2p(double(cat(1,m.d)));
+  %d = abs(transfertrillium(d));
   
   jl = floor(length(d)/split);
   for jj=1:split
@@ -45,7 +45,7 @@ for k=1:nseg
   end
 end
 
-% fs = fs ./ 1e6 ./ 1e6; % convert to pascal
+fs = fs ./ 1e6 ./ 1e6; % convert to pascal
 
 
 %% Bin and plot
