@@ -123,7 +123,7 @@ T 47100 47200 9 10 1 0 0 0 1
 T 52600 46900 9 10 1 0 0 0 1
 +/- 2.5V
 T 50100 40700 9 10 1 0 0 0 1
-Hydrophone decoupling and buffer (equivialent circuit)
+Hydrophone decoupling and buffer (equivalent circuit)
 T 54000 40400 9 10 1 0 0 0 1
 1
 T 53900 40100 9 10 1 0 0 0 1
