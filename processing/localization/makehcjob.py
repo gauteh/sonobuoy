@@ -67,7 +67,7 @@ print "Creating HYPOCENTER job %s for: %s in %s.. (date: %s)" % (jobid, event, j
 eventf = open (event, 'r')
 neweventf = open (os.path.join (jobd, event), 'w')
 for l in eventf.readlines ():
-  if (not 'EP' in l) and (not 'IPg' in l):
+  if (not 'EP' in l) and (not 'IPg' in l) and (not 'IPn' in l):
     neweventf.write (l)
 
 eventf.close ()

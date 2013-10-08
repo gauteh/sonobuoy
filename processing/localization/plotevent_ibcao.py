@@ -7,6 +7,10 @@
 # Run from event dir or with event as first argument,
 # all job_* with solutions will be plotted.
 #
+# options:
+#  event
+#  -n     don't do the actual plotting
+#
 
 import os
 import os.path
@@ -20,6 +24,11 @@ from utils import *
 eventdir = './'
 event    = os.path.basename (os.getcwd())
 
+doplot = True
+if '-n' in sys.argv:
+  doplot = False
+  sys.argv.remove ('-n')
+
 if len(sys.argv) > 1:
   eventdir  = os.path.join (eventdir, sys.argv[1])
   event     = sys.argv[1]
@@ -31,10 +40,6 @@ print "Plotting event: %s.." % event
 if not os.path.exists (eventuri):
   print "Could not open event: %s, exiting." % eventuri
   sys.exit (1)
-
-plotdir = os.path.join (eventdir, 'plot')
-if not os.path.exists (plotdir):
-  os.makedirs (plotdir)
 
 # Scan for jobs
 print "Scanning for jobs.."
@@ -84,6 +89,9 @@ jobs.sort ()
 
 # script for converting from cartesian to geographic coordinates
 cart2geo = os.path.join (datadir, 'cart2geo.sh')
+
+# report file of jobs
+reportf = open (os.path.join(eventdir, 'report.txt'), 'w')
 
 for j in jobs:
   jd = os.path.join (eventdir, j)
@@ -144,6 +152,7 @@ for j in jobs:
         lat   = float(res[26:32])
         lon   = float(res[36:41])
         z     = float(res[43:49])
+        depth = z * 1000
         vpvs  = float(res[51:56])
         rms   = float(res[107:112])
 
@@ -244,13 +253,17 @@ for j in jobs:
 
     l = lines[0]
     #l = l.split (' ')
-    t0 = l[1:5] + '-' + str(int(l[6:8])) + '-' + str(int(l[8:10])) + ' ' + l[11:13] + ':' + l[13:15] + ':' + l[16:20]
-    lat = float(l[24:30])
-    lon = float(l[31:38])
-    #lat = ddmm_mm_decimaldegree (lat[:-1], lat[-1])
-    #lon = ddmm_mm_decimaldegree (lon[:-1], lon[-1])
-    depth = float(l[39:43])
-    rms   = float(l[52:55])
+    try:
+      t0 = l[1:5] + '-' + str(int(l[6:8])) + '-' + str(int(l[8:10])) + ' ' + l[11:13] + ':' + l[13:15] + ':' + l[16:20]
+      lat = float(l[24:30])
+      lon = float(l[31:38])
+      #lat = ddmm_mm_decimaldegree (lat[:-1], lat[-1])
+      #lon = ddmm_mm_decimaldegree (lon[:-1], lon[-1])
+      depth = float(l[39:43]) * 1000
+      rms   = float(l[52:55])
+    except:
+      print "not successful."
+      continue
 
 
     print "t0: %(t0)s, lat: %(lat)g, lon: %(lon)g, depth: %(depth)g, rms: %(rms)g" % { 't0' : t0, 'lat' : lat, 'lon' : lon, 'depth' : depth,  'rms' : rms }
@@ -261,7 +274,7 @@ for j in jobs:
     legf.write ("D 0.1c 0.1p\n")
     legf.write ("S 5p a 7p %s 0.1p 0.5c Epicenter (rms: %4.3f, %s) \n" % (jobcolors[jobno], rms, j))
     legf.write ("L 8 8 L Epicenter: %gN, %gE\n" % (lat, lon))
-    legf.write ("L 8 8 L Depth: %g [km]\n" % (depth))
+    legf.write ("L 8 8 L Depth: %g [m]\n" % (depth))
     legf.write ("L 8 8 L Origin: %s\n" % t0)
 
 
@@ -271,6 +284,9 @@ for j in jobs:
     print "No hyposat-out or hyposearch solution, skipping."
     continue
 
+  # write report file
+  reportf.write ('%8s: lat: %4.3f, lon: %4.3f, depth: %2.1f, rms: %2.3f\n' % (j, float(lat), float(lon), float(depth), float(rms)))
+
 #legf.write ("D 0.1c 0.1p\n")
 #legf.write ("L 8 - C EXPERIMENTAL solution using HYPOSAT.\n");
 
@@ -279,6 +295,7 @@ pstf.close ()
 pqf.close ()
 pqe.close ()
 legf.close ()
+reportf.close ()
 pqcf.close ()
 
 
@@ -286,11 +303,12 @@ bigi = os.path.join (datadir, 'plotgmt_big.sh')
 regi = os.path.join (datadir, 'plotgmt_reg.sh')
 deti = os.path.join (datadir, 'plotgmt_detail.sh')
 
-pr = subprocess.Popen ([deti], cwd = mapdir)
-pr.wait ()
+if doplot:
+  pr = subprocess.Popen ([deti], cwd = mapdir)
+  pr.wait ()
 
-pr = subprocess.Popen ([regi], cwd = mapdir)
-pr.wait ()
+  pr = subprocess.Popen ([regi], cwd = mapdir)
+  pr.wait ()
 
 #pb = subprocess.Popen ([bigi], cwd = mapdir)
 #pb.wait ()
