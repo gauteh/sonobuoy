@@ -50,6 +50,9 @@ rawevents = os.path.join (root, rawevents)
 readyevents = os.path.join (root, readyevents)
 localizeevents = os.path.join (root, localizeevents)
 
+# copy all events here and create summary map
+mapfiles = os.path.join (localizeevents, 'map')
+mapfiles_events = os.path.join (localizeevents, 'map', 'events')
 
 # Search for events in 04
 localize = []
@@ -90,6 +93,9 @@ for event in localize:
     os.system ("cd " + edir + "; plotevent_ibcao.py > /dev/null 2>&1")
   else:
     os.system ("cd " + edir + "; plotevent_ibcao.py -n > /dev/null 2>&1")
+
+  # copy map
+  shutil.copy (os.path.join (edir, 'map', 'ibcao_det.ps'), os.path.join (mapfiles_events, event + '.det.ps'))
 
   # read explanation
   inf = os.path.join (edir, 'notes.txt')
