@@ -30,6 +30,18 @@ def decimaldegree_ddmmss (s):
 
   return r
 
+# outputs degrees with decimal minutes, without
+# decimal point and with three digits (suitable for hypocenter)
+def decimaldegree_ddmm_mmm (s):
+  deg   = math.floor (s)
+  mint  = (s - deg) * 60.0
+  min   = math.floor (mint)
+  mind  = (mint - min) * 1000
+
+  r = '%02d%02d%03d' % (deg, min, mind)
+
+  return r
+
 def ddmmss_decimaldegree (s):
   s = s.replace (' ', '0') # space -> 0
 

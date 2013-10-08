@@ -127,7 +127,7 @@ for j in jobs:
   print "--> %s:" % j,
   hypoout = os.path.join (jd, 'hyposat-out')
   hsout   = os.path.join (jd, 'hs_out')
-  hcout   = os.path.join (jd, 'hc-out')
+  hcout   = os.path.join (jd, 'hyp.out')
   if os.path.exists (hypoout):
     hf = open (hypoout, 'r')
     lines = hf.readlines ()
@@ -215,7 +215,7 @@ for j in jobs:
         phases = 'P,S,M,MM'
 
       if first:
-        first = False 
+        first = False
       else:
         print "     ",
         k = 0
@@ -243,14 +243,14 @@ for j in jobs:
     f.close ()
 
     l = lines[0]
-    l = l.split (' ')
-    t0 = l[0] + ' ' + l[1] + ' ' + l[2]
-    lat = l[3]
-    lon = l[4]
-    lat = ddmm_mm_decimaldegree (lat[:-1], lat[-1])
-    lon = ddmm_mm_decimaldegree (lon[:-1], lon[-1])
-    depth = float(l[5])
-    rms   = float(l[6])
+    #l = l.split (' ')
+    t0 = l[1:5] + '-' + str(int(l[6:8])) + '-' + str(int(l[8:10])) + ' ' + l[11:13] + ':' + l[13:15] + ':' + l[16:20]
+    lat = float(l[24:30])
+    lon = float(l[31:38])
+    #lat = ddmm_mm_decimaldegree (lat[:-1], lat[-1])
+    #lon = ddmm_mm_decimaldegree (lon[:-1], lon[-1])
+    depth = float(l[39:43])
+    rms   = float(l[52:55])
 
 
     print "t0: %(t0)s, lat: %(lat)g, lon: %(lon)g, depth: %(depth)g, rms: %(rms)g" % { 't0' : t0, 'lat' : lat, 'lon' : lon, 'depth' : depth,  'rms' : rms }
