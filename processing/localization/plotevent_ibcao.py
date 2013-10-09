@@ -92,6 +92,7 @@ cart2geo = os.path.join (datadir, 'cart2geo.sh')
 
 # report file of jobs
 reportf = open (os.path.join(eventdir, 'report.txt'), 'w')
+reportc = open (os.path.join(eventdir, 'report.csv'), 'w')
 
 for j in jobs:
   jd = os.path.join (eventdir, j)
@@ -286,6 +287,7 @@ for j in jobs:
 
   # write report file
   reportf.write ('%8s: lat: %4.3f, lon: %4.3f, depth: %2.1f, rms: %2.3f\n' % (j, float(lat), float(lon), float(depth), float(rms)))
+  reportc.write ('%s,%4.3f,%4.3f,%2.1f,%2.3f\n' % (j, float(lat), float(lon), float(depth), float(rms)))
 
 #legf.write ("D 0.1c 0.1p\n")
 #legf.write ("L 8 - C EXPERIMENTAL solution using HYPOSAT.\n");
@@ -296,6 +298,7 @@ pqf.close ()
 pqe.close ()
 legf.close ()
 reportf.close ()
+reportc.close ()
 pqcf.close ()
 
 

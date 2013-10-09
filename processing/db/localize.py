@@ -54,6 +54,8 @@ localizeevents = os.path.join (root, localizeevents)
 mapfiles = os.path.join (localizeevents, 'map')
 mapfiles_events = os.path.join (localizeevents, 'map', 'events')
 
+allquakes = open (os.path.join (mapfiles, 'all', 'quakes.hs.d'), 'w')
+
 # Search for events in 04
 localize = []
 files = os.listdir (localizeevents)
@@ -106,7 +108,7 @@ for event in localize:
     print explanation.strip ()
 
   # read report
-  repf = open(os.path.join (edir, 'report.txt'), 'r')
+  repf = open(os.path.join (edir, 'report.csv'), 'r')
   rep  = repf.readlines ()
   repf.close ()
   first = True
@@ -114,16 +116,32 @@ for event in localize:
     print "no jobs."
     continue
 
+  bestrms = None
+  bestjob = None
+
   for l in rep:
     if l.strip () == "":
       continue
 
-    if first:
-      print l.strip()
-      first = False
+    [j, lat, lon, depth, rms] = l.split(',')
+    if not first:
+      print "                            ",
     else:
-      print "                             " + l.strip()
+      first = False
+
+    print ('%8s: lat: %4.3f, lon: %4.3f, depth: %2.1f, rms: %2.3f' % (j, float(lat), float(lon), float(depth), float(rms)))
+
+    rms = float(rms)
+
+    if bestrms is None or rms < bestrms:
+      bestjob = [j, float(lat), float(lon), depth, rms]
+
+  # write best job
+  if bestjob is not None:
+    allquakes.write ('%f %f %f\n' %(bestjob[2], bestjob[1], bestjob[4]))
 
 
+
+allquakes.close ()
 
 
