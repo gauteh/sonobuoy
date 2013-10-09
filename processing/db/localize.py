@@ -144,4 +144,6 @@ for event in localize:
 
 allquakes.close ()
 
+# re-run plot all quakes
+os.system ("cd " + os.path.join(mapfiles, 'all') + "; ./plotgmt_detail.sh > /dev/null 2>&1")
 
