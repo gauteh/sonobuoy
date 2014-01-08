@@ -98,7 +98,12 @@ namespace Buoy {
 
   void GPS::sync_pulse () {
     /* If a PPS pulse is sent it must be for the second after the last
-     * received as a telegram */
+     * received as a telegram.
+     *
+     * According to RFC2783 (http://tools.ietf.org/html/rfc2783) the timestamp
+     * for a PPS will arrive _after_ the pulse.
+     *
+     */
     lastsecond++;
 
     /* New available reference */
@@ -647,7 +652,14 @@ namespace Buoy {
 # endif
 
   void GPS::enable_sync () {
-    attachInterrupt (GPS_SYNC_PIN, &(GPS::sync_pulse_int), FALLING);
+    /* Miller, S. et. al.: http://www.nmt.edu/~sfs/Students/ScottMiller/Papers/EMCW_paper.pdf
+     *
+     * says PPS should be timed from the rising edge, might be device
+     * dependant. we are currently measuring falling.
+     *
+     */
+
+    attachInterrupt (GPS_SYNC_PIN, &(GPS::sync_pulse_int), RISING);
   }
   void GPS::disable_sync () {
     detachInterrupt (GPS_SYNC_PIN);
