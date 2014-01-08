@@ -657,9 +657,13 @@ namespace Buoy {
      * says PPS should be timed from the rising edge, might be device
      * dependant. we are currently measuring falling.
      *
+     * RFC2783 documents for the Linux kernel to use a configurable edge
+     * detection, not mentioning a standard output format, it apparently
+     * can be either or both.
+     *
      */
 
-    attachInterrupt (GPS_SYNC_PIN, &(GPS::sync_pulse_int), RISING);
+    attachInterrupt (GPS_SYNC_PIN, &(GPS::sync_pulse_int), FALLING);
   }
   void GPS::disable_sync () {
     detachInterrupt (GPS_SYNC_PIN);
