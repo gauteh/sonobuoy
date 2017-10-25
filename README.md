@@ -4,7 +4,7 @@ This project was used for a [small seismic station network monitoring earthquake
 
 <img src="https://raw.githubusercontent.com/gauteh/sonobuoy-gautebuoy/master/doc/buoy.jpg">
 
-Five buoys were deployed. They operated using an internal network, communicating with a base-station which continuously monitored and recorded the incoming data. The data was also recorded on an internal SD-card.
+Five buoys were [deployed](https://github.com/gauteh/sonobuoy-gautebuoy/blob/master/doc/recovery.jpg). They operated using an internal network, communicating with a base-station which continuously monitored and recorded the incoming data. The data was also recorded on an internal SD-card.
 
 An [Olimexino-STM32](https://www.olimex.com/Products/Duino/STM32/OLIMEXINO-STM32/) (a [Maple-clone](http://www.leaflabs.com/about-maple/) ) was used for the main board.
 
